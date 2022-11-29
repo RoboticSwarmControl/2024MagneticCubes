@@ -1,0 +1,39 @@
+\chapter{Preliminaries}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.39\textwidth]{figures/example_boards/preliminary.pdf}
+\caption[Example instance of the Polyomino Assembly Problem]{Annotated example instance of the Polyomino Assembly Problem. The blocked positions on the board are shown as grey squares and the tiles as colored squares. The three connected tiles form a non-trivial polyomino.}
+\label{fig:example_instance}
+\end{figure}
+
+\paragraph{Board} A \emph{board} $B$ is a rectangular region of $\mathbb{Z}^2$ where each position is either marked as \emph{open} or \emph{blocked}. Blocked positions represent obstacles and cannot contain tiles. Furthermore, the induced grid graph $G_{B}$ is defined as the graph in which the open positions of $B$ are nodes and two nodes are connected if and only if their distance is 1. $B$ is called \emph{connected} if and only if $G_{B}$ is connected.
+
+\paragraph{Tiles and Glues} A tile $t= (p, g)$ is a unit square centered on $p$ with edge glues $g$, where $p$ is an open position on the board and $g$ is a quadruple $(g_{N}(t), g_{E}(t), g_{S}(t), g_{W}(t))$ of glues. $g_{d}(t)$ denotes the glue on the edge of $t$ facing in the cardinal direction $d \in \{N,E,S,W\}$. Each glue is an element of a finite alphabet $\Sigma$, which also contains a special \texttt{null} glue. A glue function $G \colon \Sigma \to \{0, 1\}$ defines which glues stick to each other. Two glues $g_{1}, g_{2} \in \Sigma$ stick to each other with respect to $G$ if and only if $G(g_{1}, g_{2}) = 1$. Furthermore, $G$ has the properties $G(g_{1}, g_{2}) = G(g_{2}, g_{1})$ and $G({g_{1}, \texttt{null}}) = 0$ for all $g_{1}, g_{2} \in \Sigma$. Tiles \emph{bond}, if and only if they are located on adjacent positions and the glues on the shared edge stick together. The bond is considered permanent, and the tiles hereafter move as a unit.
+
+\paragraph{Polyomino} A \emph{polyomino} $P$ is a finite set of tiles that forms a connected component in the graph in which bonded tiles are adjacent. A polyomino containing exactly one tile is called trivial. The position of $P$ is defined as the position of the top-leftmost tile in $P$.
+
+\paragraph{Configuration} A \emph{configuration} is a tuple $C = (B, T)$, consisting of a a board $B$ and a set of tiles $T$. The positions of tiles must be non-overlapping and open in $B$.
+
+\paragraph{Step} A \emph{step} is a transformation between two configurations that moves every tile by one unit distance in one of the cardinal directions unless that tile is part of a blocked polyomino.
+Formally, a polyomino is \emph{blocked} in the direction $d$ if and only if it is not contained in the maximal subset of polyominoes $P$ such that moving all tiles in $\bigcup P$ by one unit distance in the direction $d$ would neither cause tiles to overlap with each other nor with blocked positions. For simplicity, a step can be denoted by the direction $d \in \{N, E, S, W\}$ in which the polyominoes are moved. A \emph{step sequence} is a series of steps.
+
+\section{Problem Definitions}
+
+\paragraph{Polyomino Assembly Problem}
+Given a configuration $C= (B, T)$ and a set of open positions $X \subseteq B$ that is connected in $G_{B}$ the Polyomino Assembly Problem asks for either a step sequence $S$ such that consecutively applying the steps of $S$ to $C$, results in a configuration in which a polyomino $P$ exists that satisfies $X = \{p_{1}, p_{2},\ldots \}$, where $p_{1}, p_{2},\ldots$ are the positions of the tiles in $P$, or a proof that the configuration is unreachable.
+
+\paragraph{Fixed Seed Tile Polyomino Assembly Problem}
+Given a configuration $C= (B, T)$, a set of open positions $X \subseteq B$ that is connected in $G_{B}$ and a fixed tile $t_{\text{fixed}} \in T$ the Polyomino Fixed Seed Tile Polyomino Assembly Problem is defined analogously to the Polyomino Assembly Problem, except that $t_{\text{fixed}}$ does not move under step transformation and tiles can only bond if the resulting polyomino contains $t_{\text{fixed}}$.
+
+
+\section{Distance Definitions}
+As a basis for the definition of our heuristic functions, we use the following definitions of distance between positions, tiles and the target shape.
+Given an instance of the Polyomino Assembly Problem with a configuration $C= (B, T)$, and target shape $X$. Let $p = (p_1, p_2), q = (q_1, q_2)$ be open positions in B and $t=(p_t, g_t) \in T$.
+\begin{itemize}
+	\setlength\itemsep{0em}
+	\item $d(p, q)$ is the length of a shortest path from $p$ to $q$ in $G_{B}$.
+	\item $d(p)$ is the length of a shortest path in $G_{B}$ from $p \in B$ to the closest node in $X$.
+	\item $d_{1}(p, q) \coloneqq |p_1 - q_1| + |p_2 - q_2|$ is called the taxicab distance.
+\end{itemize}
+For the sake of brevity, we define $d(t) \coloneqq d(p_t)$ and analogously for the other distance definitions.
