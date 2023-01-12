@@ -58,7 +58,7 @@ class Configuration:
             self.__detectPoly__()         
         #place the pivot point to match the polyominoes
         self.__updatePivots__()
-        #Save the pygame positions in the cube.position
+        #Store the pygame positions in the cube.position
         for cube in self.cubes:
             cube.position = cube.shape.body.position
 

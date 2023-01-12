@@ -10,6 +10,8 @@ import pymunk.pygame_util
 import math
 import threading
 from configuration import Configuration
+from motioncontroller import MotionController
+from motion import *
 from cube import RAD, MRAD
 
 class Simulation:
@@ -36,6 +38,8 @@ class Simulation:
 
         self.running = False
         self.config = Configuration(0, 0, [])
+        self.controller = MotionController(fps)
+        
         
     def start(self):
         """
@@ -66,6 +70,24 @@ class Simulation:
         return oldConfig
   
 
+    def pivotWalk(self, direction) -> bool:
+        motion = PivotWalk(direction)
+        self.controller.add(motion)
+        #TODO wait on motion.executed
+        return False #return if config changed
+
+    def rotate(self, angle) -> bool:
+        motion = Rotation(angle)
+        self.controller.add(motion)
+        #TODO wait on motion.executed
+        return False #return if config changed
+
+    def pivotWalk_nowait(self, direction):
+        self.controller.add(PivotWalk(direction))
+
+    def rotate_nowait(self, angle):
+        self.controller.add(Rotation(angle))
+
     def __run__(self):
         #initialisation
         pygame.init()
@@ -89,8 +111,8 @@ class Simulation:
 
 
     def __update__(self):
-        #TODO apply controller hier
-        self.config.update(0, 0)
+        change = self.controller.nextStep()
+        self.config.update(self.config.magAngle + change[0], self.config.magElevation + change[1])
 
     def __draw__(self):
         RED = (255, 0, 0,100)
