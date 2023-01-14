@@ -14,7 +14,7 @@ from cube import Cube
 from motion import LEFT, RIGHT
 
 if __name__ == "__main__":
-    sim1 = Simulation(fps=240)
+    sim1 = Simulation()
     sim1.loadConfig(Configuration(0, 0, [Cube((100,100),0), Cube((300,300),1)]))
     sim1.start()
     sim1.rotate(math.radians(90))

@@ -83,28 +83,61 @@ class Simulation:
   
 
     def pivotWalk(self, direction) -> bool:
+        """
+        Notifies the simulation to do one pivot walking cycle and returns when the motion finished executing.
+
+        Parameters:
+            direction: direction of pivot walk. Either motion.LEFT (-1) or motion.RIGHT (1)
+
+        Returns: 
+            if a configuration change accured. Not implemented yet.
+        """
         motion = PivotWalk(direction)
         self.controller.add(motion)
-        print("Waiting on " + str(motion))
         motion.executed.wait()
-        print("Done waiting")
         return False #return if config changed
 
+    
     def rotate(self, angle) -> bool:
+        """
+        Notifies the simulation to do a rotation and returns when the motion finished executing.
+
+        Parameters:
+            angle: rotation angle in radians. Negativ values for rotation counterclockwise.
+
+        Returns: 
+            if a configuration change accured. Not implemented yet.
+        """
         motion = Rotation(angle)
         self.controller.add(motion)
-        print("Waiting on " + str(motion))
         motion.executed.wait()
-        print("Done waiting")
         return False #return if config changed
 
     def pivotWalk_nowait(self, direction):
+        """
+        Notifies the simulation to do one pivot walking cycle and returns immediately.
+
+        Parameters:
+            direction: direction of pivot walk. Either motion.LEFT (-1) or motion.RIGHT (1)
+        """
         self.controller.add(PivotWalk(direction))
 
     def rotate_nowait(self, angle):
+        """
+        Notifies the simulation to do a rotation and returns immediately.
+
+        Parameters:
+            angle: rotation angle in radians. Negativ values for rotation counterclockwise.
+        """
         self.controller.add(Rotation(angle))
     
     def addCube(self, cube):
+        """
+        Adds a cube to the current configuration
+
+        Parameters:
+            cube: cube to be added
+        """
         self.__createCube__(cube)
         self.config.cubes.append(cube)
 
