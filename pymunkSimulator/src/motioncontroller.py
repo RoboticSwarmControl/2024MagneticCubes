@@ -17,16 +17,15 @@ class MotionController:
     def nextStep(self):
         if self.steps.empty():
             if not self.currentMotion == None:
-                self.currentMotion.executed = True
+                self.currentMotion.executed.set()
                 self.motionsDone.append(self.currentMotion)
-                print("...Done")
             if self.motionsOpen.empty():
                 self.currentMotion = None
                 return (0,0)
             self.currentMotion = self.motionsOpen.get()
             for i in self.currentMotion.stepSequence(self.fps):
                 self.steps.put(i)
-            print("Executing " + self.currentMotion.__str__() + "...")
+            print("Executing " + self.currentMotion.__str__())
         return self.steps.get()
 
 

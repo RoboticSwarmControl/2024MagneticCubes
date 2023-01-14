@@ -1,15 +1,17 @@
-import math 
+import math
+from threading import Event 
 
 LEFT = -1
 RIGHT = 1
 
-ANG_VEL = math.pi / 8 #in radians/second
+ANG_VELOCITY = math.pi / 8 #in radians/second
 PIVOT_ANG = math.pi / 16 #in radians
 
 class Motion:
 
     def __init__(self):
-        self.executed = False
+        self.executed = Event()
+        self.executed.clear()
     
     def stepSequence(self, fps):
         return [(0,0)]
@@ -53,7 +55,8 @@ class Rotation(Motion):
 
     def stepSequence(self, fps):
         steps = []
-        k = math.floor((abs(self.angle) / ANG_VEL) * fps)
+        #TODO maybe make ANG_VOLOCITY in rad/update so fps acctualy effects simspeed
+        k = math.floor((abs(self.angle) / ANG_VELOCITY) * fps)
         angPerStep = self.angle / k
         for i in range(k):
             steps.append((angPerStep, 0))

@@ -12,14 +12,25 @@ import threading
 from configuration import Configuration
 from motioncontroller import MotionController
 from motion import *
-from cube import RAD, MRAD
+from cube import RAD, MRAD, Cube
+
+RED = (255, 0, 0,100)
+GREEN = (0, 255, 0,100)
+BLACK = (0, 0, 0,100)
+LIGHTBROWN = (196, 164, 132,100)
+#LIGHTGREEN = (205, 255, 205,100)
+#LIGHTRED   = (255, 205, 205,100)
+#YELLOW = (255,255,0,100)
+#https://sashamaps.net/docs/resources/20-colors/
+SASHACOLORS = ((230, 25, 75,100), (60, 180, 75,100), (255, 225, 25,100), (0, 130, 200,100), (245, 130, 48,100), (145, 30, 180,100), (70, 240, 240,100), (240, 50, 230,100), (210, 245, 60,100), (250, 190, 212,100), (0, 128, 128,100), 
+            (220, 190, 255,100), (170, 110, 40,100), (255, 250, 200,100), (128, 0, 0,100), (170, 255, 195,100), (128, 128, 0,100), (255, 215, 180,100), (0, 0, 128,100), (128, 128, 128,100), (255, 255, 255,100), (0, 0, 0,100))
 
 class Simulation:
     """
     Top-level class for interacting with the Simulation
     """
     
-    def __init__(self, width, height, fps):
+    def __init__(self, width=800, height=800, fps=60, drawing=True, userInputs=True):
         """
         creates a Simulation with empty configuration
 
@@ -31,10 +42,11 @@ class Simulation:
         self.width = width 
         self.height = height
         self.fps = fps
+        self.drawingActive = drawing
+        self.userInputsActive = userInputs
 
         self.space = None
         self.window = None
-        self.drawOptions = None
 
         self.running = False
         self.config = Configuration(0, 0, [])
@@ -49,7 +61,7 @@ class Simulation:
             print("Simulation already running.")
             return
         self.running = True
-        thread = threading.Thread(target=self.__run__, daemon=True)
+        thread = threading.Thread(target=self.__run__, daemon=False)
         thread.start()
 
     def stop(self):
@@ -73,13 +85,17 @@ class Simulation:
     def pivotWalk(self, direction) -> bool:
         motion = PivotWalk(direction)
         self.controller.add(motion)
-        #TODO wait on motion.executed
+        print("Waiting on " + str(motion))
+        motion.executed.wait()
+        print("Done waiting")
         return False #return if config changed
 
     def rotate(self, angle) -> bool:
         motion = Rotation(angle)
         self.controller.add(motion)
-        #TODO wait on motion.executed
+        print("Waiting on " + str(motion))
+        motion.executed.wait()
+        print("Done waiting")
         return False #return if config changed
 
     def pivotWalk_nowait(self, direction):
@@ -87,17 +103,22 @@ class Simulation:
 
     def rotate_nowait(self, angle):
         self.controller.add(Rotation(angle))
+    
+    def addCube(self, cube):
+        self.__createCube__(cube)
+        self.config.cubes.append(cube)
 
     def __run__(self):
         #initialisation
         pygame.init()
-        clock = pygame.time.Clock()
         self.space = pymunk.Space()
         self.space.gravity = (0,0)  # gravity doesn't exist
         self.space.damping = 0.2  #simulate top-down gravity with damping
         self.window = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("magnetic cube simulator")
-        self.drawOptions = pymunk.pygame_util.DrawOptions(self.window)
+        drawOptions = pymunk.pygame_util.DrawOptions(self.window)
+        clock = pygame.time.Clock()
+        
         self.__createBoundaries__()
         for cube in self.config.cubes:
             self.__createCube__(cube)
@@ -105,28 +126,21 @@ class Simulation:
         while self.running:
             self.__update__()
             self.space.step(1 / self.fps)
-            self.__draw__()
-            clock.tick(self.fps)
+            if self.drawingActive:
+                self.__draw__(drawOptions)
+                clock.tick(self.fps)   
         pygame.quit()
 
 
     def __update__(self):
+        if self.userInputsActive:
+            self.__userInputs__()
         change = self.controller.nextStep()
         self.config.update(self.config.magAngle + change[0], self.config.magElevation + change[1])
 
-    def __draw__(self):
-        RED = (255, 0, 0,100)
-        GREEN = (0, 255, 0,100)
-        BLACK = (0, 0, 0,100)
-        LIGHTBROWN = (196, 164, 132,100)
-        #YELLOW = (255,255,0,100)
-        #https://sashamaps.net/docs/resources/20-colors/
-        sashaColors = ((230, 25, 75,100), (60, 180, 75,100), (255, 225, 25,100), (0, 130, 200,100), (245, 130, 48,100), (145, 30, 180,100), (70, 240, 240,100), (240, 50, 230,100), (210, 245, 60,100), (250, 190, 212,100), (0, 128, 128,100), 
-                    (220, 190, 255,100), (170, 110, 40,100), (255, 250, 200,100), (128, 0, 0,100), (170, 255, 195,100), (128, 128, 0,100), (255, 215, 180,100), (0, 0, 128,100), (128, 128, 128,100), (255, 255, 255,100), (0, 0, 0,100))
-        self.window.fill("white" )
-
-        self.space.debug_draw(self.drawOptions)
-        
+    def __draw__(self, drawOptions):
+        self.window.fill("white")
+        self.space.debug_draw(drawOptions)
         # draw the magnets and CenterOfGravity-- for all cubes
         for cube in self.config.cubes: #COM
             pygame.draw.circle(self.window, BLACK,  cube.shape.body.local_to_world(cube.shape.body.center_of_gravity), 7)
@@ -143,7 +157,7 @@ class Simulation:
         #draw the connections
         for i,connects in enumerate(self.config.magConnect):
             for j in connects:
-                pygame.draw.line(self.window, sashaColors[self.config.poly[i]], self.config.cubes[i].shape.body.local_to_world((0,0)), self.config.cubes[j].shape.body.local_to_world((0,0)),3)
+                pygame.draw.line(self.window, SASHACOLORS[self.config.poly[i]], self.config.cubes[i].shape.body.local_to_world((0,0)), self.config.cubes[j].shape.body.local_to_world((0,0)),3)
                 #pygame.draw.line(window, "yellow", cubes[i].body.local_to_world((0,0)), cubes[j].body.local_to_world((0,0)),3)
                 #pygame.draw.circle(window, YELLOW,  cubes[i].body.local_to_world, 6)
         
@@ -151,9 +165,30 @@ class Simulation:
         pygame.draw.circle(self.window, LIGHTBROWN,  (10,10), 11)
         pygame.draw.line(self.window, "red",   (10,10), (10+10*math.cos(self.config.magAngle), 10+10*math.sin(self.config.magAngle)) ,3) 
         pygame.draw.line(self.window, "green", (10,10), (10-10*math.cos(self.config.magAngle), 10-10*math.sin(self.config.magAngle)) ,3) 
-        
+
         pygame.display.update() #draw to the screen
         return
+
+    def __userInputs__(self):
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == 119:  #'w' pivotwalk right
+                    self.pivotWalk_nowait(RIGHT)
+                elif event.key == 97: #'a' rotate ccw
+                    self.rotate_nowait(-math.radians(5))
+                elif event.key == 115: #'s' pivotwalk left
+                    self.pivotWalk_nowait(LEFT)
+                elif event.key == 100: #'d' rotate cw
+                    self.rotate_nowait(math.radians(5))
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1: #'left click' places cube type=0
+                    self.addCube(Cube(pygame.mouse.get_pos(), 0))
+                elif event.button == 3: #'right click' places cube type=1
+                    self.addCube(Cube(pygame.mouse.get_pos(), 1))
+            elif event.type == pygame.QUIT:
+                self.stop()
+                break
+
 
     def __createBoundaries__(self):
         rects = [
@@ -170,10 +205,7 @@ class Simulation:
             shape.friction = 0.5
             self.space.add(body,shape)
 
-    def __createCube__(self, cube):
-        LIGHTBROWN = (196, 164, 132,100)
-                #LIGHTGREEN = (205, 255, 205,100)
-        #LIGHTRED   = (255, 205, 205,100)
+    def __createCube__(self, cube):          
         body = pymunk.Body()
         body.position = cube.position
         shape = pymunk.Poly(body, [(-RAD,-RAD),(-RAD,RAD),(RAD,RAD),(RAD,-RAD)],radius = 1)
