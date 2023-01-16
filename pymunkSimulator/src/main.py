@@ -18,5 +18,10 @@ if __name__ == "__main__":
     sim1.loadConfig(Configuration(0, 0, [Cube((100,100),0), Cube((300,300),1)]))
     sim1.start()
     sim1.rotate(math.radians(90))
+    configSave = sim1.saveConfig()
+    sim1.rotate(math.radians(90))
+    sim1.stop()
+    sim1.loadConfig(configSave)
+    sim1.start()
 
     

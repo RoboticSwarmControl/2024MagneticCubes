@@ -8,7 +8,7 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 import math
-import threading
+from threading import Thread, Event, Lock
 from configuration import Configuration
 from motioncontroller import MotionController
 from motion import *
@@ -49,7 +49,10 @@ class Simulation:
         self.window = None
 
         self.running = False
+        self.stopped = Event()
+        self.updateLock = Lock()
         self.config = Configuration(0, 0, [])
+        self.config.loaded = True
         self.controller = MotionController(fps)
         
         
@@ -61,7 +64,8 @@ class Simulation:
             print("Simulation already running.")
             return
         self.running = True
-        thread = threading.Thread(target=self.__run__, daemon=False)
+        self.stopped.clear()
+        thread = Thread(target=self.__run__, daemon=False)
         thread.start()
 
     def stop(self):
@@ -69,18 +73,33 @@ class Simulation:
         Stops Simulation. pygame will also terminate
         """
         self.running = False
+        self.stopped.wait(1)
 
     def loadConfig(self, newConfig: Configuration) -> Configuration:
         """
-        Loads a new configuration and returns the old one. The simulation needs to be stopped befor calling this method. 
+        Loads a new configuration and returns the old one. The simulation needs to be stopped befor calling this method
+        and newConfig should not be loaded by any simulation. 
         """
+        if newConfig.loaded:
+            print("Configuration is already loaded by a simulation")
+            return
         if self.running:
             print("Simulation needs to be stopped befor loading new configuration.")
             return
         oldConfig = self.config
+        oldConfig.loaded = False
         self.config = newConfig
+        self.config.loaded = True
         return oldConfig
   
+    def saveConfig(self):
+        """
+        Returns a duplicate of the current state the configuration is in.
+        """
+        self.updateLock.acquire()
+        save = self.config.duplicate()
+        self.updateLock.release()
+        return save
 
     def pivotWalk(self, direction) -> bool:
         """
@@ -157,19 +176,22 @@ class Simulation:
             self.__createCube__(cube)
         #Simulation loop
         while self.running:
+            if self.userInputsActive:
+                self.__userInputs__()
             self.__update__()
             self.space.step(1 / self.fps)
             if self.drawingActive:
                 self.__draw__(drawOptions)
                 clock.tick(self.fps)   
         pygame.quit()
+        self.stopped.set()
 
 
     def __update__(self):
-        if self.userInputsActive:
-            self.__userInputs__()
         change = self.controller.nextStep()
-        self.config.update(self.config.magAngle + change[0], self.config.magElevation + change[1])
+        self.updateLock.acquire()
+        self.config._update_(self.config.magAngle + change[0], self.config.magElevation + change[1])
+        self.updateLock.release()
 
     def __draw__(self, drawOptions):
         self.window.fill("white")
@@ -219,7 +241,7 @@ class Simulation:
                 elif event.button == 3: #'right click' places cube type=1
                     self.addCube(Cube(pygame.mouse.get_pos(), 1))
             elif event.type == pygame.QUIT:
-                self.stop()
+                self.running = False
                 break
 
 
@@ -249,7 +271,7 @@ class Simulation:
         shape.color = LIGHTBROWN
 
         shape.magnetPos = [(MRAD,0),(0,MRAD),(-MRAD,0),(0,-MRAD)]
-        if cube.cubeType == 0:
+        if cube.type == 0:
             shape.magnetOri = [(1,0),(0,1),(1,0),(0,-1)]
         else:
             shape.magnetOri = [(1,0),(0,-1),(1,0),(0,1)]

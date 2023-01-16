@@ -16,7 +16,7 @@ class Cube:
     The shape will be used by the simulation to apply forces and draw the cube
     """
 
-    def __init__(self, pos, cType):
+    def __init__(self, pos, type):
         self.position = pos
-        self.cubeType = cType
+        self.type = type
         self.shape = None

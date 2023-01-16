@@ -4,12 +4,9 @@ Holds the Configuration class
 @author: Aaron T Becker, Kjell Keune
 """
 
-import pygame
-import pymunk
-import pymunk.pygame_util
 import math
 import util
-from cube import RAD, FMAG, MRAD
+from cube import RAD, FMAG, MRAD, Cube
 
 CONNECTION_FORCE_MIN = util.calculate_norm(util.magForce1on2( (0,0), (0,2*(RAD - MRAD)+5 ), (0,1), (0,1)))  #NS connection
 
@@ -18,7 +15,7 @@ class Configuration:
     A Configuration consits of cubes and the orientation of the magnetic field.
 
     Can be used to store configuration data or can be loaded into a Simulation
-    where it will be updated according to changes in the magnetic field. 
+    where it will be updated according to changes in the magnetic field.
 
     It also stores additional information about the magnetic connections and polyominoes present 
     if it was loaded and updated by a simulation
@@ -33,15 +30,26 @@ class Configuration:
             elev: elevation of magnetic field
             cubes: List of cubes
         """
+        self.loaded = False
         self.cubes = cubes
         self.magAngle = ang  #orientation of magnetic field (in radians)
         self.magElevation = elev
         self.magConnect = [ [] for _ in range(len(self.cubes)) ]
         self.poly = []
 
-    def update(self, ang, elev):
+    def duplicate(self):
+        newCubes = []
+        for cube in self.cubes:
+            newCubes.append(Cube(cube.position, cube.type))
+        newConfig = Configuration(self.magAngle, self.magElevation, newCubes)
+        newConfig.magConnect = self.magConnect
+        newConfig.poly = self.poly
+        return newConfig
+
+    def _update_(self, ang, elev):
         """
-        updates the configuration be changing the magnetic field to ang and elev
+        Updates the configuration by changing the magnetic field to ang and elev.
+        The update should always be handelt by a simulation not manually.
 
         Parameters:
             ang: new orientation of magnetic field (in radians)
