@@ -5,7 +5,6 @@ Holds the MotionControler class
 """
 
 from queue import *
-from motion import Motion
 
 class MotionController:
     """

@@ -10,13 +10,8 @@ RAD = 20 #half length of side of cube
 
 class Cube:
     """
-    Stores the position and the cubeType.
-
-    Also contains a pymunk.shape if it got simulated.
-    The shape will be used by the simulation to apply forces and draw the cube
+    A unique cube object storing the cube type
     """
 
-    def __init__(self, pos, type):
-        self.position = pos
+    def __init__(self, type):
         self.type = type
-        self.shape = None

@@ -5,7 +5,7 @@ Utility functions
 """
 
 import math
-from cube import RAD, MRAD
+from config.cube import RAD, MRAD
 
 def magForce1on2( p1, p2, m1,m2): #https://en.wikipedia.org/wiki/Magnetic_moment 
     #rhat = unitvector pointing from magnet 1 to magnet 2 and r is the distance

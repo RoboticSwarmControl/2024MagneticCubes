@@ -8,20 +8,33 @@ Runtime user interaction is also possible. Look in simulation.py method __userIn
 @author: Aaron T Becker, Kjell Keune
 """
 import math
-from simulation import Simulation
-from configuration import Configuration
-from cube import Cube
-from motion import LEFT, RIGHT
 
-if __name__ == "__main__":
-    sim1 = Simulation()
-    sim1.loadConfig(Configuration(0, 0, [Cube((100,100),0), Cube((300,300),1)]))
+from sim.simulation import Simulation
+from sim.motion import LEFT, RIGHT
+from config.configuration import Configuration
+from config.cube import Cube
+
+def test1():
+    sim1 = Simulation(drawing=True)
     sim1.start()
+    sim1.loadConfig(Configuration(0, 0, {Cube(0): (100,100), Cube(1): (300,300)}))
     sim1.rotate(math.radians(90))
     configSave = sim1.saveConfig()
     sim1.rotate(math.radians(90))
-    sim1.stop()
+    for i in range(5):
+        sim1.pivotWalk(LEFT)
     sim1.loadConfig(configSave)
+    sim1.stop()
     sim1.start()
+    for i in range(5):
+        sim1.pivotWalk(LEFT)
+    sim1.drawingActive = True
+
+def sandbox():
+    sim1 = Simulation()
+    sim1.start()
+
+if __name__ == "__main__":
+    sandbox()
 
     

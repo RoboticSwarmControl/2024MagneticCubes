@@ -85,4 +85,7 @@ class Rotation(Motion):
         for i in range(k):
             steps.append((angPerStep, 0))
         steps.append((self.angle - k * angPerStep, 0))
+        #adding zero updates so pymunk has time to level off, without pivot-walking becomes wierd
+        for i in range(10):
+            steps.append((0,0))
         return steps
