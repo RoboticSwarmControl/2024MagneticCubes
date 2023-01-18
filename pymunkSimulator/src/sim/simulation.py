@@ -154,6 +154,14 @@ class Simulation:
         self.stopped.wait(1)
         print("Simulation stopped.")
 
+    def disableDraw(self):
+        #Maybe do other stuff with the window thats why I have methodes
+        self.drawingActive = False
+
+    def enableDraw(self):
+        #Maybe do other stuff with the window thats why I have methodes
+        self.drawingActive = True
+
     def __run__(self):
         #initialisation
         pygame.init()
@@ -199,7 +207,7 @@ class Simulation:
         #draw the connections
         for i,connects in enumerate(self.configHandler.magConnect):
             for j in connects:
-                pygame.draw.line(self.window, SASHACOLORS[self.configHandler.poly[i]], self.configHandler.getShapes()[i].body.local_to_world((0,0)), self.configHandler.getShapes()[j].shape.body.local_to_world((0,0)),3)
+                pygame.draw.line(self.window, SASHACOLORS[self.configHandler.poly[i]], self.configHandler.getShapes()[i].body.local_to_world((0,0)), self.configHandler.getShapes()[j].body.local_to_world((0,0)),3)
                 #pygame.draw.line(window, "yellow", cubes[i].body.local_to_world((0,0)), cubes[j].body.local_to_world((0,0)),3)
                 #pygame.draw.circle(window, YELLOW,  cubes[i].body.local_to_world, 6)
         
