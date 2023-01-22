@@ -7,11 +7,14 @@ Holds the ConfigHandler class
 import pymunk
 import math
 from threading import Event, Lock
+from queue import Queue
 
 from util.func import *
 from util.color import LIGHTBROWN
 from config.cube import RAD, FMAG, MRAD
 from config.configuration import Configuration
+from config.polyomino import Polyomino
+from util.direction import Direction
 
 
 CONNECTION_FORCE_MIN = calculate_norm(magForce1on2( (0,0), (0,2*(RAD - MRAD)+5 ), (0,1), (0,1)))  #NS connection
@@ -22,8 +25,9 @@ class ConfigHandler:
         self.cubes = {}
         self.magAngle = 0  #orientation of magnetic field (in radians)
         self.magElevation = 0
-        self.magConnect = [ [] for _ in range(len(self.cubes)) ]
+        self.magConnect = {}
         self.poly = []
+        self.polyominoes = []
         self.configToLoad = None
         self.loaded = Event()
         self.updateLock = Lock()
@@ -41,13 +45,15 @@ class ConfigHandler:
         for cube, shape in self.cubes.items():
             cube_pos[cube] = shape.body.position
         config = Configuration(self.magAngle, self.magElevation, cube_pos)
-        config.poly = self.poly
-        config.magConnect = self.magConnect
+        config.polyominoes = self.polyominoes
         self.updateLock.release()
         return config
 
     def isRegistered(self, cube):
         return cube in self.cubes
+
+    def getShape(self, cube):
+        return self.cubes[cube]
 
     def getShapes(self):
         return list(self.cubes.values())
@@ -68,15 +74,15 @@ class ConfigHandler:
         self.updateLock.acquire()
         self.magAngle += angChange
         self.magElevation += elevChange
-        # zero out the connections
-        self.magConnect = [ [] for _ in range(len(self.cubes)) ]
-        # Apply forces from magnets
+        # Apply forces from magnets and determine magnetic connections
         self.__applyMagForce__()  
         #detect polyominos
         if len(self.cubes) > 0:
-            self.__detectPoly__()         
+            self.__detectPoly__() 
+        self.__detectPolyNew__()    
         #place the pivot point to match the polyominoes
         self.__updatePivots__()
+        #load new config if present
         if not self.configToLoad == None:
             self.__loadConfig__(space)
         self.updateLock.release()
@@ -124,43 +130,78 @@ class ConfigHandler:
 
 
     def __applyMagForce__(self):
-        shapes = self.getShapes()
-        for i,cubei in enumerate(shapes):
-            angi = cubei.body.angle
+        # zero out the connections
+        for cube in self.getCubes():
+            self.magConnect[cube] = [None] * 4
+        for i, (cubei, shapei) in enumerate(self.cubes.items()):
+            angi = shapei.body.angle
             # Apply forces from magnet field  (torques)
-            cubei.body.apply_force_at_local_point( (0,-math.sin(angi-self.magAngle)*FMAG)  , ( MRAD, 0)  )
-            cubei.body.apply_force_at_local_point( (0, math.sin(angi-self.magAngle)*FMAG)  , (-MRAD, 0)  )
+            shapei.body.apply_force_at_local_point( (0,-math.sin(angi-self.magAngle)*FMAG)  , ( MRAD, 0)  )
+            shapei.body.apply_force_at_local_point( (0, math.sin(angi-self.magAngle)*FMAG)  , (-MRAD, 0)  )
              # Apply forces from the magnets on other cubes
-            for j,cubej in enumerate(shapes):
+            for j, (cubej, shapej) in enumerate(self.cubes.items()):
                 if i<=j:
                     continue
-                angj = cubej.body.angle
-                if calculate_distance(cubei.body.position, cubej.body.position) <= 4*RAD:
-                    
-                     for k, pikL in enumerate(cubei.magnetPos):
-                         for n, pjnL  in enumerate(cubej.magnetPos):
-                             pik = cubei.body.local_to_world( pikL  )
-                             mik = rotateVecbyAng(cubei.magnetOri[k] , angi)
+                angj = shapej.body.angle
+                if calculate_distance(shapei.body.position, shapej.body.position) <= 4*RAD:    
+                     for k, pikL in enumerate(shapei.magnetPos):
+                         for n, pjnL  in enumerate(shapej.magnetPos):
+                             pik = shapei.body.local_to_world( pikL  )
+                             mik = rotateVecbyAng(shapei.magnetOri[k] , angi)
                              #(xk,yk) = cubei.magnetOri[k] (xk,yk) = cubei.magnetOri[k] 
                              #mik = ( math.cos(angi)*xk - math.sin(angi)*yk, math.sin(angi)*xk + math.cos(angi)*yk)
-                             pjn = cubej.body.local_to_world( pjnL  )
-                             mjn = rotateVecbyAng(cubej.magnetOri[n], angj)
+                             pjn = shapej.body.local_to_world( pjnL  )
+                             mjn = rotateVecbyAng(shapej.magnetOri[n], angj)
                              #(xn,yn) = cubej.magnetOri[n]
                              #mjn = ( math.cos(angj)*xn - math.sin(angj)*yn, math.sin(angj)*xn + math.cos(angj)*yn)
                              fionj = magForce1on2( pik, pjn, mik, mjn )  # magForce1on2( p1, p2, m1,m2)
-                             cubei.body.apply_force_at_world_point( (-fionj[0],-fionj[1]) , pik  )
-                             cubej.body.apply_force_at_world_point(  fionj ,                pjn  )
+                             shapei.body.apply_force_at_world_point( (-fionj[0],-fionj[1]) , pik  )
+                             shapej.body.apply_force_at_world_point(  fionj ,                pjn  )
+                             #Determine magnet connections
                              if calculate_norm(fionj) > CONNECTION_FORCE_MIN:
-                                 self.magConnect[i].append(j)
-                                 self.magConnect[j].append(i)
+                                if pikL[0] < 0:
+                                    self.magConnect[cubei][Direction.NORTH.value] = cubej
+                                    self.magConnect[cubej][Direction.SOUTH.value] = cubei
+                                elif pikL[0] > 0:
+                                    self.magConnect[cubei][Direction.SOUTH.value] = cubej
+                                    self.magConnect[cubej][Direction.NORTH.value] = cubei
+                                elif pikL[1] < 0:
+                                    self.magConnect[cubei][Direction.EAST.value] = cubej
+                                    self.magConnect[cubej][Direction.WEST.value] = cubei
+                                elif pikL[1] > 0:
+                                    self.magConnect[cubei][Direction.WEST.value] = cubej
+                                    self.magConnect[cubej][Direction.EAST.value] = cubei
+                                    
+    def __detectPolyNew__(self):
+        self.polyominoes = []
+        done = set()
+        next = Queue()
+        for cube in self.getCubes():
+            if cube in done:
+                continue
+            polyominmo = Polyomino(cube)
+            done.add(cube)
+            next.put(cube)
+            while not next.empty():
+                current = next.get()
+                for i, adj in enumerate(self.magConnect[current]):
+                    if (adj == None) or (adj in done):
+                        continue
+                    polyominmo.connect(adj, current, Direction(i))
+                    done.add(adj)
+                    next.put(adj)
+            self.polyominoes.append(polyominmo)
+                              
 
     def __detectPoly__(self):
-        shapes = self.getShapes()
-        self.poly = list(range(0, len(self.cubes)))  #the unique polygon each cube belongs to.
-        for i,cubei in enumerate(shapes):
-            for j,cubej in enumerate(shapes,i):   #for j,cubej in enumerate(cubes,i):
+        cubes = self.getCubes()
+        self.poly = list(range(0, len(cubes)))  #the unique polygon each cube belongs to.
+        for i,cubei in enumerate(cubes):
+            for j,cubej in enumerate(cubes):   #for j,cubej in enumerate(cubes,i):
+                if i<=j:
+                    continue
                 #check to see if they are magnetically connected
-                if self.magConnect[i].count(j)>0:
+                if cubej in self.magConnect[cubei]:
                     #if so, assign them to the same poly
                     piS = self.poly[i]
                     pjS = self.poly[j]

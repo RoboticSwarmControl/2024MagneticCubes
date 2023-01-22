@@ -8,47 +8,43 @@ Runtime user interaction is also possible. Look in simulation.py method __userIn
 @author: Aaron T Becker, Kjell Keune
 """
 import math
-
 import time
+
 from sim.simulation import Simulation
 from sim.motion import LEFT, RIGHT
 from config.configuration import Configuration
-from config.cube import Cube, RAD
+from config.cube import Cube
+from config.polyomino import Polyomino
+from util.direction import Direction
+from util.func import *
 
-def test1():
-    sim1 = Simulation(drawing=True)
-    sim1.start()
-    sim1.loadConfig(Configuration(0, 0, {Cube(0): (100,100), Cube(1): (300,300)}))
-    sim1.rotate(math.radians(90))
-    configSave = sim1.saveConfig()
-    sim1.rotate(math.radians(90))
-    for i in range(5):
-        sim1.pivotWalk(LEFT)
-    sim1.loadConfig(configSave)
-    sim1.stop()
-    sim1.start()
-    for i in range(5):
-        sim1.pivotWalk(LEFT)
-    sim1.drawingActive = True
+def polyTest():
+    cube0 = Cube(0)
+    cube1 = Cube(1)
+    cube2 = Cube(1)
+    poly = Polyomino(cube0)
+    poly.connect(cube1, cube0, Direction.EAST)
+    poly.connect(cube2, cube1, Direction.SOUTH)
+    print(poly.connectionMap)
 
 def sandbox():
     sim1 = Simulation()
     sim1.start()
 
 def demo1():
-    sim = Simulation(drawing=False)
+    sim = Simulation(drawing=True)
     cube1 = Cube(0)
     pos1 = (150,50)
     cube2 = Cube(1)
     pos2 = (200, 150)
     sim.start()
     sim.loadConfig(Configuration(math.radians(90),0,{cube1: pos1,cube2: pos2}))
-    d0 = dis(pos1, pos2)
+    d0 = calculate_distance(pos1, pos2)
     while True:
         sim.pivotWalk(LEFT)
         sim.pivotWalk(LEFT)
         config = sim.saveConfig()
-        d = dis(config.getPosition(cube1), config.getPosition(cube2))
+        d = calculate_distance(config.getPosition(cube1), config.getPosition(cube2))
         if not abs(d - d0) < 5:
             break
     savepoiont = sim.saveConfig()
@@ -62,12 +58,9 @@ def demo1():
         sim.pivotWalk(RIGHT)
     sim.enableDraw()
 
-    
-def dis(a, b):
-    return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)
-
 
 if __name__ == "__main__":
     sandbox()
+    
 
     

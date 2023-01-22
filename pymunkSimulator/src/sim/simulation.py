@@ -205,11 +205,12 @@ class Simulation:
                 pygame.draw.circle(self.window, magcolor,  cube.body.local_to_world(magP) , 5)
                 
         #draw the connections
-        for i,connects in enumerate(self.configHandler.magConnect):
-            for j in connects:
-                pygame.draw.line(self.window, SASHACOLORS[self.configHandler.poly[i]], self.configHandler.getShapes()[i].body.local_to_world((0,0)), self.configHandler.getShapes()[j].body.local_to_world((0,0)),3)
-                #pygame.draw.line(window, "yellow", cubes[i].body.local_to_world((0,0)), cubes[j].body.local_to_world((0,0)),3)
-                #pygame.draw.circle(window, YELLOW,  cubes[i].body.local_to_world, 6)
+        for i, poly in  enumerate(self.configHandler.polyominoes):
+            for cube, connects in poly.connectionMap.items():
+                for cubeCon in connects:
+                    if cubeCon == None:
+                        continue
+                    pygame.draw.line(self.window, SASHACOLORS[i], self.configHandler.getShape(cube).body.local_to_world((0,0)), self.configHandler.getShape(cubeCon).body.local_to_world((0,0)),3)
         
         # draw the compass  
         pygame.draw.circle(self.window, LIGHTBROWN,  (10,10), 11)

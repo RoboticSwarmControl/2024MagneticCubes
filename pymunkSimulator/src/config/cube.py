@@ -12,6 +12,16 @@ class Cube:
     """
     A unique cube object storing the cube type
     """
+    nextid = 0
 
     def __init__(self, type):
         self.type = type
+        self.id = Cube.nextid
+        Cube.nextid += 1
+
+    def __str__(self):
+        return "Cube:" + str(self.id)
+    
+    def __repr__(self):
+        return "Cube:" + str(self.id)
+        

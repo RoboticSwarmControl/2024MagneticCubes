@@ -27,8 +27,7 @@ class Configuration:
         self.cubes = cubes
         self.magAngle = ang  #orientation of magnetic field (in radians)
         self.magElevation = elev
-        self.magConnect = [ [] for _ in range(len(self.cubes)) ]
-        self.poly = []
+        self.polyominoes = []
 
     def addCube(self, cube, pos):
         self.cubes[cube] = pos
