@@ -1,0 +1,118 @@
+\documentclass[11pt,a4paper,twoside,titlepage]{scrbook}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman, english]{babel}
+\usepackage[pdfborder={0 0 0}]{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{tikz}
+\usepackage{amsthm}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{mathtools}
+\usepackage{float}
+\usepackage[section]{placeins}
+
+
+\clubpenalty=1000
+\widowpenalty=1000
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+
+
+
+
+\begin{document}
+	
+	\frontmatter
+
+	%----- TITLE PAGE -----
+	
+	\begin{titlepage}
+		%\noindent\makebox[\linewidth]{\rule{\paperwidth}{0.4pt}}
+	
+		\begin{tikzpicture}[remember picture, overlay]
+		\node [anchor=north east, inner sep=0pt]  at (17.9,2)%(current page.north east)
+			{\includegraphics[height=3.5cm]{figures/tu-bs_logo.jpg}};
+		\end{tikzpicture}
+		
+		\centering
+		\vspace{5cm}
+		{\scshape\huge Bachelor Thesis\par}
+		\vspace{1.5cm}
+		{\Huge\bfseries Titel \par}
+		\vspace{3cm}
+		{\huge Kjell Keune\par}
+		\vfill
+		Institut für Betriebssysteme und Rechnerverbund\\
+		\vfill
+		
+		Supervised by\par
+		Prof. Dr. Aaron Becker\par
+		
+		\vfill
+		
+		% Bottom of the page
+		{\large \today\par}
+	\end{titlepage}
+	
+	\cleardoublepage
+	
+	% statement of originality
+	\thispagestyle{plain} % no header
+	\vspace*{7cm}
+	\centerline{\bfseries Statement of Originality}
+	\vspace*{1em}
+	\noindent
+	This thesis has been performed independently with the support of my supervisor/s.
+	To the best of the author's knowledge, this thesis contains no material previously
+	published or written by another person except where due reference is made in the text.
+	
+	\par
+	\bigskip\noindent Braunschweig, \today \par
+	\vspace*{10mm}
+	\hfill\hrulefill
+	\cleardoublepage
+	
+	
+	\chapter*{Aufgabenstellung / Task Description}
+
+
+\paragraph{Deutsch:}
+\begin{otherlanguage}{ngerman}
+
+\end{otherlanguage}
+
+\medskip
+
+\paragraph{English:}
+
+	
+	
+	%---------------------
+	\include{./chapters/00-abstract}
+	
+	\tableofcontents
+	
+	%% Remove listoffigures or listoftables if not needed!
+	%\listoffigures
+	
+	%\listoftables
+	
+	\mainmatter
+	
+
+	
+	\bibliographystyle{abbrv}
+	\bibliography{bibliography.bib}
+
+\end{document}
