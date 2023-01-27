@@ -6,5 +6,8 @@ class Direction(Enum):
     SOUTH = 2
     WEST = 3
 
+    def __str__(self) -> str:
+        return self.name
+
     def inv(self):
         return Direction((self.value + 2) % 4)

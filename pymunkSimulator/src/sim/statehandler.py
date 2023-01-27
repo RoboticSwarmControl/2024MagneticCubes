@@ -9,7 +9,7 @@ import math
 from threading import Event, Lock
 from queue import Queue
 
-from util.func import *
+import util.func as util
 from util.color import LIGHTBROWN
 from config.cube import Cube
 from config.configuration import Configuration
@@ -17,7 +17,7 @@ from config.polyomino import Polyomino
 from util.direction import Direction
 
 
-CONNECTION_FORCE_MIN = calculate_norm(magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
+CONNECTION_FORCE_MIN = util.norm(util.magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
 
 class StateHandler:
 
@@ -93,8 +93,12 @@ class StateHandler:
             self.__remove__(cube, space)
         self.magAngle = self.configToLoad.magAngle
         self.magElevation = self.configToLoad.magElevation
-        for cube, pos in self.configToLoad.cubes.items():
+        self.polyominoes = self.configToLoad.polyominoes
+        for cube, pos in self.configToLoad.cubePosMap.items():
             self.__add__(cube, pos, space)
+        #print("Config size: " + str(len(self.cubes)))
+        self.magConnect = {}
+        self.poly = []
         self.configToLoad = None
         self.loaded.set()
         self.loaded.clear()
@@ -143,32 +147,32 @@ class StateHandler:
                 if i<=j:
                     continue
                 angj = shapej.body.angle
-                if calculate_distance(shapei.body.position, shapej.body.position) <= 4*Cube.RAD:    
+                if util.distance(shapei.body.position, shapej.body.position) <= 4*Cube.RAD:    
                      for k, pikL in enumerate(shapei.magnetPos):
                          for n, pjnL  in enumerate(shapej.magnetPos):
                              pik = shapei.body.local_to_world( pikL  )
-                             mik = rotateVecbyAng(shapei.magnetOri[k] , angi)
+                             mik = util.rotateVecbyAng(shapei.magnetOri[k] , angi)
                              #(xk,yk) = cubei.magnetOri[k] (xk,yk) = cubei.magnetOri[k] 
                              #mik = ( math.cos(angi)*xk - math.sin(angi)*yk, math.sin(angi)*xk + math.cos(angi)*yk)
                              pjn = shapej.body.local_to_world( pjnL  )
-                             mjn = rotateVecbyAng(shapej.magnetOri[n], angj)
+                             mjn = util.rotateVecbyAng(shapej.magnetOri[n], angj)
                              #(xn,yn) = cubej.magnetOri[n]
                              #mjn = ( math.cos(angj)*xn - math.sin(angj)*yn, math.sin(angj)*xn + math.cos(angj)*yn)
-                             fionj = magForce1on2( pik, pjn, mik, mjn )  # magForce1on2( p1, p2, m1,m2)
+                             fionj = util.magForce1on2( pik, pjn, mik, mjn )  # magForce1on2( p1, p2, m1,m2)
                              shapei.body.apply_force_at_world_point( (-fionj[0],-fionj[1]) , pik  )
                              shapej.body.apply_force_at_world_point(  fionj ,                pjn  )
                              #Determine magnet connections
-                             if calculate_norm(fionj) > CONNECTION_FORCE_MIN:
+                             if util.norm(fionj) > CONNECTION_FORCE_MIN:
                                 if pikL[0] < 0:
                                     self.magConnect[cubei][Direction.NORTH.value] = cubej
                                     self.magConnect[cubej][Direction.SOUTH.value] = cubei
                                 elif pikL[0] > 0:
                                     self.magConnect[cubei][Direction.SOUTH.value] = cubej
                                     self.magConnect[cubej][Direction.NORTH.value] = cubei
-                                elif pikL[1] < 0:
+                                elif pikL[1] < 0 and cubei.type != cubej.type:
                                     self.magConnect[cubei][Direction.EAST.value] = cubej
                                     self.magConnect[cubej][Direction.WEST.value] = cubei
-                                elif pikL[1] > 0:
+                                elif pikL[1] > 0 and cubei.type != cubej.type:
                                     self.magConnect[cubei][Direction.WEST.value] = cubej
                                     self.magConnect[cubej][Direction.EAST.value] = cubei
                                     

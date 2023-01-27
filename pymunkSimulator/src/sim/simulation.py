@@ -48,7 +48,7 @@ class Simulation:
         self.stopped = Event()
         self.started = Event()
 
-        self.configHandler = StateHandler()
+        self.stateHandler = StateHandler()
         self.controller = MotionController()
         
 
@@ -56,7 +56,8 @@ class Simulation:
         """
         Loads a new configuration. Returns when loading is done.
         """
-        self.configHandler.loadConfig(newConfig)
+        self.stateHandler.loadConfig(newConfig)
+        Simulation.debugFlag = True
         print("Configuration loaded.")
         
   
@@ -64,7 +65,7 @@ class Simulation:
         """
         Returns the configuration the simulation currently has.
         """
-        save = self.configHandler.saveConfig()
+        save = self.stateHandler.saveConfig()
         print("Configuration saved.")
         return save
 
@@ -76,9 +77,9 @@ class Simulation:
             cube: cube to be added
             pos: position of the cube
         """
-        config = self.configHandler.saveConfig()
+        config = self.stateHandler.saveConfig()
         config.addCube(cube, pos)
-        self.configHandler.loadConfig(config)
+        self.stateHandler.loadConfig(config)
         print("Added cube" + str(cube) + "to current configuration")
 
     def removeCube(self, cube):
@@ -88,9 +89,9 @@ class Simulation:
         Parameters:
             cube: cube to be removed
         """
-        config = self.configHandler.saveConfig()
+        config = self.stateHandler.saveConfig()
         config.removeCube(cube)
-        self.configHandler.loadConfig(config)
+        self.stateHandler.loadConfig(config)
         print("Removed cube" + str(cube) + "from current configuration")
 
     def pivotWalk(self, direction) -> bool:
@@ -187,16 +188,16 @@ class Simulation:
 
     def __update__(self):
         change = self.controller.nextStep()
-        self.configHandler.update(change[0], change[1], self.space)
+        self.stateHandler.update(change[0], change[1], self.space)
 
     def __draw__(self, drawOptions):
         self.window.fill("white")
         self.space.debug_draw(drawOptions)
         # draw the magnets and CenterOfGravity-- for all cubes
-        for cube in self.configHandler.getShapes(): #COM
+        for cube in self.stateHandler.getShapes(): #COM
             pygame.draw.circle(self.window, BLACK,  cube.body.local_to_world(cube.body.center_of_gravity), 7)
         
-        for cube in self.configHandler.getShapes():
+        for cube in self.stateHandler.getShapes():
             #magnets
             for i, magP in enumerate(cube.magnetPos):
                 if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
@@ -206,17 +207,17 @@ class Simulation:
                 pygame.draw.circle(self.window, magcolor,  cube.body.local_to_world(magP) , 5)
                 
         #draw the connections
-        for i, poly in  enumerate(self.configHandler.polyominoes):
+        for i, poly in  enumerate(self.stateHandler.polyominoes):
             for cube, connects in poly.connectionMap.items():
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue
-                    pygame.draw.line(self.window, SASHACOLORS[i], self.configHandler.getShape(cube).body.local_to_world((0,0)), self.configHandler.getShape(cubeCon).body.local_to_world((0,0)),3)
+                    pygame.draw.line(self.window, SASHACOLORS[i], self.stateHandler.getShape(cube).body.local_to_world((0,0)), self.stateHandler.getShape(cubeCon).body.local_to_world((0,0)),3)
         
         # draw the compass  
         pygame.draw.circle(self.window, LIGHTBROWN,  (10,10), 11)
-        pygame.draw.line(self.window, "red",   (10,10), (10+10*math.cos(self.configHandler.magAngle), 10+10*math.sin(self.configHandler.magAngle)) ,3) 
-        pygame.draw.line(self.window, "green", (10,10), (10-10*math.cos(self.configHandler.magAngle), 10-10*math.sin(self.configHandler.magAngle)) ,3) 
+        pygame.draw.line(self.window, "red",   (10,10), (10+10*math.cos(self.stateHandler.magAngle), 10+10*math.sin(self.stateHandler.magAngle)) ,3) 
+        pygame.draw.line(self.window, "green", (10,10), (10-10*math.cos(self.stateHandler.magAngle), 10-10*math.sin(self.stateHandler.magAngle)) ,3) 
 
         pygame.display.update() #draw to the screen
         return
@@ -235,13 +236,13 @@ class Simulation:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if event.button == 1: #'left click' places cube type=0
-                    config = self.configHandler.saveConfig()
+                    config = self.stateHandler.saveConfig()
                     config.addCube(Cube(0), mouse_pos)
-                    self.configHandler.loadConfig_nowait(config)
+                    self.stateHandler.loadConfig_nowait(config)
                 elif event.button == 3: #'right click' places cube type=1
-                    config = self.configHandler.saveConfig()
+                    config = self.stateHandler.saveConfig()
                     config.addCube(Cube(1), mouse_pos)
-                    self.configHandler.loadConfig_nowait(config)
+                    self.stateHandler.loadConfig_nowait(config)
             elif event.type == pygame.QUIT:
                 self.started.clear()
                 break

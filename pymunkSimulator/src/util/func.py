@@ -9,7 +9,7 @@ from config.cube import Cube
 
 def magForce1on2( p1, p2, m1,m2): #https://en.wikipedia.org/wiki/Magnetic_moment 
     #rhat = unitvector pointing from magnet 1 to magnet 2 and r is the distance
-    r = calculate_distance(p1,p2)
+    r = distance(p1,p2)
     if r < 2*(Cube.RAD-Cube.MRAD):
         r = 2*(Cube.RAD-Cube.MRAD)  #limits the amount of force applied
         
@@ -28,13 +28,13 @@ def magForce1on2( p1, p2, m1,m2): #https://en.wikipedia.org/wiki/Magnetic_moment
     #print(repr(f) )
     return f
 
-def calculate_distance(p1,p2):
+def distance(p1,p2):
     return math.sqrt( (p2[1]-p1[1])**2 + (p2[0]-p1[0])**2  )
 
-def calculate_norm(p):
+def norm(p):
     return math.sqrt( p[1]**2 + p[0]**2  )
 
-def calculate_angle(p1,p2):
+def angle(p1,p2):
     return math.atan2((p2[1]-p1[1]),     (p2[0]-p1[0])  )
 
 def rotateVecbyAng(vec, ang):  #rotate a vector in 2D by angle ang
