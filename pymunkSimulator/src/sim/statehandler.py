@@ -11,15 +11,15 @@ from queue import Queue
 
 from util.func import *
 from util.color import LIGHTBROWN
-from config.cube import RAD, FMAG, MRAD
+from config.cube import Cube
 from config.configuration import Configuration
 from config.polyomino import Polyomino
 from util.direction import Direction
 
 
-CONNECTION_FORCE_MIN = calculate_norm(magForce1on2( (0,0), (0,2*(RAD - MRAD)+5 ), (0,1), (0,1)))  #NS connection
+CONNECTION_FORCE_MIN = calculate_norm(magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
 
-class ConfigHandler:
+class StateHandler:
 
     def __init__(self):
         self.cubes = {}
@@ -113,13 +113,13 @@ class ConfigHandler:
             return          
         body = pymunk.Body()
         body.position = pos
-        shape = pymunk.Poly(body, [(-RAD,-RAD),(-RAD,RAD),(RAD,RAD),(RAD,-RAD)],radius = 1)
+        shape = pymunk.Poly(body, [(-Cube.RAD,-Cube.RAD),(-Cube.RAD,Cube.RAD),(Cube.RAD,Cube.RAD),(Cube.RAD,-Cube.RAD)],radius = 1)
         #shape = pymunk.Poly.create_box(body,(2*rad,2*rad), radius = 1)
         shape.mass = 10
         shape.elasticity = 0.4
         shape.friction = 0.4
         shape.color = LIGHTBROWN
-        shape.magnetPos = [(MRAD,0),(0,MRAD),(-MRAD,0),(0,-MRAD)]
+        shape.magnetPos = [(Cube.MRAD,0),(0,Cube.MRAD),(-Cube.MRAD,0),(0,-Cube.MRAD)]
         if cube.type == 0:
             shape.magnetOri = [(1,0),(0,1),(1,0),(0,-1)]
         else:
@@ -136,14 +136,14 @@ class ConfigHandler:
         for i, (cubei, shapei) in enumerate(self.cubes.items()):
             angi = shapei.body.angle
             # Apply forces from magnet field  (torques)
-            shapei.body.apply_force_at_local_point( (0,-math.sin(angi-self.magAngle)*FMAG)  , ( MRAD, 0)  )
-            shapei.body.apply_force_at_local_point( (0, math.sin(angi-self.magAngle)*FMAG)  , (-MRAD, 0)  )
+            shapei.body.apply_force_at_local_point( (0,-math.sin(angi-self.magAngle)*Cube.FMAG)  , ( Cube.MRAD, 0)  )
+            shapei.body.apply_force_at_local_point( (0, math.sin(angi-self.magAngle)*Cube.FMAG)  , (-Cube.MRAD, 0)  )
              # Apply forces from the magnets on other cubes
             for j, (cubej, shapej) in enumerate(self.cubes.items()):
                 if i<=j:
                     continue
                 angj = shapej.body.angle
-                if calculate_distance(shapei.body.position, shapej.body.position) <= 4*RAD:    
+                if calculate_distance(shapei.body.position, shapej.body.position) <= 4*Cube.RAD:    
                      for k, pikL in enumerate(shapei.magnetPos):
                          for n, pjnL  in enumerate(shapej.magnetPos):
                              pik = shapei.body.local_to_world( pikL  )
@@ -238,13 +238,13 @@ class ConfigHandler:
                 for i,cubei in enumerate(shapes):
                     polyi = self.poly[i]
                     #change everything into local coordinate frame of cube[0]
-                    (cx,cy) = shapes[0].body.world_to_local(cubei.body.local_to_world((-MRAD,0)) )
-                    if round(cx/RAD) < round(minXyLyR[polyi][0] / RAD):
+                    (cx,cy) = shapes[0].body.world_to_local(cubei.body.local_to_world((-Cube.MRAD,0)) )
+                    if round(cx/Cube.RAD) < round(minXyLyR[polyi][0] / Cube.RAD):
                         minXyLyR[polyi] = [cx,cy,cy] #this is the minimum row, so it is the pivot
-                    elif round(cx/RAD) == round(minXyLyR[polyi][0]/RAD):
-                        if round(cy/RAD) < round(minXyLyR[polyi][1]/RAD):
+                    elif round(cx/Cube.RAD) == round(minXyLyR[polyi][0]/Cube.RAD):
+                        if round(cy/Cube.RAD) < round(minXyLyR[polyi][1]/Cube.RAD):
                             minXyLyR[polyi][1] = cy
-                        elif round(cy/RAD) > round(minXyLyR[polyi][2]/RAD):
+                        elif round(cy/Cube.RAD) > round(minXyLyR[polyi][2]/Cube.RAD):
                             minXyLyR[polyi][2] = cy
                 myYxLxR = minXyLyR
             else:
@@ -252,13 +252,13 @@ class ConfigHandler:
                 for i,cubei in enumerate(shapes):
                     polyi = self.poly[i]
                     #change everything into local coordinate frame of cube[0]
-                    (cx,cy) = shapes[0].body.world_to_local(cubei.body.local_to_world((MRAD,0)) )
-                    if round(cx/RAD) > round(maxXyLyR[polyi][0]/RAD):
+                    (cx,cy) = shapes[0].body.world_to_local(cubei.body.local_to_world((Cube.MRAD,0)) )
+                    if round(cx/Cube.RAD) > round(maxXyLyR[polyi][0]/Cube.RAD):
                         maxXyLyR[polyi] = [cx,cy,cy]
-                    elif round(cx/RAD) == round(maxXyLyR[polyi][0]/RAD):
-                        if round(cy/RAD) < round(maxXyLyR[polyi][1]/RAD):
+                    elif round(cx/Cube.RAD) == round(maxXyLyR[polyi][0]/Cube.RAD):
+                        if round(cy/Cube.RAD) < round(maxXyLyR[polyi][1]/Cube.RAD):
                             maxXyLyR[polyi][1] = cy
-                        elif round(cy/RAD) > round(maxXyLyR[polyi][2]/RAD):
+                        elif round(cy/Cube.RAD) > round(maxXyLyR[polyi][2]/Cube.RAD):
                             maxXyLyR[polyi][2] = cy
                 myYxLxR = maxXyLyR    
             for i,myYxLxRi in enumerate(myYxLxR):  #calculate the centroids

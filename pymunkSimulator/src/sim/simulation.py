@@ -13,16 +13,18 @@ from threading import Thread, Event
 from util.color import *
 from config.configuration import Configuration
 from config.cube import Cube
-from sim.confighandler import ConfigHandler
-from sim.motioncontroller import MotionController
-from sim.motion import *
+from sim.statehandler import StateHandler
+from sim.motion import Motion, PivotWalk, Rotation, MotionController
 
 class Simulation:
     """
     Top-level class for interacting with the Simulation
     """
     
-    def __init__(self, width=800, height=800, fps=60, drawing=True, userInputs=True):
+    FPS = 60
+    STEP_TIME = 1 / 60
+
+    def __init__(self, width=800, height=800, drawing=True, userInputs=True):
         """
         creates a Simulation with empty configuration
 
@@ -35,7 +37,6 @@ class Simulation:
         """
         self.width = width 
         self.height = height
-        self.fps = fps
         self.drawingActive = drawing
         self.userInputsActive = userInputs
 
@@ -47,8 +48,8 @@ class Simulation:
         self.stopped = Event()
         self.started = Event()
 
-        self.configHandler = ConfigHandler()
-        self.controller = MotionController(fps)
+        self.configHandler = StateHandler()
+        self.controller = MotionController()
         
 
     def loadConfig(self, newConfig: Configuration) -> Configuration:
@@ -176,10 +177,10 @@ class Simulation:
             if self.userInputsActive:
                 self.__userInputs__()
             self.__update__()
-            self.space.step(1 / self.fps)
+            self.space.step(Simulation.STEP_TIME)
             if self.drawingActive:
                 self.__draw__(drawOptions)
-                clock.tick(self.fps)   
+                clock.tick(Simulation.FPS)   
         pygame.quit()
         self.stopped.set()
 
@@ -224,11 +225,11 @@ class Simulation:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == 119:  #'w' pivotwalk right
-                    self.pivotWalk_nowait(RIGHT)
+                    self.pivotWalk_nowait(PivotWalk.RIGHT)
                 elif event.key == 97: #'a' rotate ccw
                     self.rotate_nowait(-math.radians(10))
                 elif event.key == 115: #'s' pivotwalk left
-                    self.pivotWalk_nowait(LEFT)
+                    self.pivotWalk_nowait(PivotWalk.LEFT)
                 elif event.key == 100: #'d' rotate cw
                     self.rotate_nowait(math.radians(10))
             elif event.type == pygame.MOUSEBUTTONDOWN:
