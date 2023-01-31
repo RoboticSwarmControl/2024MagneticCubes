@@ -46,12 +46,31 @@ def forceSideConect():
     sim = Simulation(500,500)
     sim.start()
     sim.loadConfig(Configuration(0,0,{Cube(1): (20,20), Cube(1): (20,60)}))
-    print("Connects: \n" + str(sim.stateHandler.getCubes()))
+    print("Connects: \n" + str(sim.stateHandler.magConnect))
     print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
     time.sleep(0.25)
     print("Connects: \n" + str(sim.stateHandler.magConnect))
     print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
 
 
+def connectAndPoly():
+    sim = Simulation(1000,1000)
+    sim.start()
+    while True:
+        input("Press Enter for information:")
+        print("Connects: \n" + str(sim.stateHandler.magConnect))
+        print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
+
+def configurationHash():
+    c1 = Cube(0)
+    c2 = Cube(0)
+    c3 = Cube(0)
+    c4 = Cube(0)
+    con1 = Configuration(0,0,{c1:(100,100),c2:(200,100),c3:(300,100),c4:(400,100)})
+    con2 = Configuration(0,0,{c3:(300,100),c2:(200,100),c1:(100,100),c4:(400,100)})
+    print("Hash equality = " + str(hash(con1) == hash(con2)))
+
+
+
 if __name__ == "__main__":
-    forceSideConect()   
+    configurationHash()   

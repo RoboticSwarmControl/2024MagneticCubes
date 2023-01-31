@@ -42,6 +42,9 @@ class Configuration:
 
     def getCubes(self):
         return list(self.cubePosMap.keys())
+    
+    def getPolyominoes(self):
+        return self.polyominoes
 
     def getPosition(self, cube):
         if not cube in self.cubePosMap:
@@ -53,7 +56,17 @@ class Configuration:
             return
         pos = self.cubePosMap[cube]
         dis = [pos[1], abs(size[0] - pos[0]), abs(size[1] - pos[1]), pos[0]]
-        return Direction(dis.index(min(dis)))
+        return Direction(dis.index(min(dis)))#
+    
+    def __eq__(self, __o: object) -> bool:
+        return hash(self) == hash(__o)
+
+    def __hash__(self) -> int:
+        toHash = [(c, p) for c, p in self.cubePosMap.items()]
+        toHash.sort(key=lambda t: t[0].id)
+        toHash.append(self.magAngle)
+        return hash(tuple(toHash))
+
     
 def initRandomConfig(ncubes, size) -> Configuration:
         config = Configuration(0, 0, {})
@@ -73,6 +86,7 @@ def initRandomConfig(ncubes, size) -> Configuration:
                         break
             config.addCube(newCube, pos)
         return config
+
                 
             
 

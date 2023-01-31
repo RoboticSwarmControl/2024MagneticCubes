@@ -31,7 +31,6 @@ class Simulation:
         Parameters:
             width: screen width
             height: screen height
-            fps: frames or updates pre second (simulation speed)
             drawing: if the simulation should draw
             userInputs: if user inputs are enabled
         """
@@ -57,7 +56,6 @@ class Simulation:
         Loads a new configuration. Returns when loading is done.
         """
         self.stateHandler.loadConfig(newConfig)
-        Simulation.debugFlag = True
         print("Configuration loaded.")
         
   

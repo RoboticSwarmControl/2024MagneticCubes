@@ -188,13 +188,14 @@ class StateHandler:
             next.put(cube)
             while not next.empty():
                 current = next.get()
-                for i, adj in enumerate(self.magConnect[current]):
+                polyominmo.connectionMap[current] = self.magConnect[current]
+                for adj in self.magConnect[current]:
                     if (adj == None) or (adj in done):
                         continue
-                    polyominmo.connect(adj, current, Direction(i))
                     done.add(adj)
                     next.put(adj)
-            self.polyominoes.append(polyominmo)
+            if not polyominmo.isTrivial():
+                self.polyominoes.append(polyominmo)
                               
 
     def __detectPoly__(self):
