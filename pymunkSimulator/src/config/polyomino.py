@@ -5,67 +5,86 @@ from util.direction import Direction
 class Polyomino:
 
     def __init__(self, root: Cube):
-        self.connectionMap = {root: [None] * 4}
-        self.postionMap = {root: (0,0)}
+        self.posCube = {(0,0): root}
+        self.cubePos = {root: (0,0)}
         #The root should allways be the most left most bottom cube.
-        self.root = root
 
-    def connect(self, cubeA: Cube, cubeB: Cube, edgeB: Direction):
-        #determine if connection is possible
-        if not cubeB in self.connectionMap:
+    def connect(self, cubeA: Cube, cubeB: Cube, edgeB: Direction): 
+        #check if cubes exist and can be connected
+        if not cubeB in self.cubePos:
             print(str(cubeB) + " not in polyomino")
             return False
-        if cubeA in self.connectionMap:
+        if cubeA in self.cubePos:
             print(str(cubeA) + " already in polyomino")
-            return False
-        if self.connectionMap[cubeB][edgeB.value] != None:
-            print("Edge of " + str(cubeB) + "already has a connection")
             return False
         if (edgeB == Direction.EAST or edgeB == Direction.WEST) and (cubeA.type == cubeB.type):
             print(str(cubeA) + " and " + str(cubeB) + "are same type. Cant connect sideways.")
             return False
-        #Add new connections
-        self.connectionMap[cubeB][edgeB.value] = cubeA
-        self.connectionMap[cubeA] = [None] * 4
-        self.connectionMap[cubeA][edgeB.inv().value] = cubeB
         #determine postion of cubeA
-        posB = self.postionMap[cubeB]
+        posB = self.cubePos[cubeB]
         if edgeB == Direction.NORTH:
             posA = (posB[0], posB[1] + 1)
-        elif edgeB == Direction.WEST:
+        elif edgeB == Direction.EAST:
             posA = (posB[0] + 1, posB[1])
         elif edgeB == Direction.SOUTH:
             posA = (posB[0], posB[1] - 1)
-        elif edgeB == Direction.EAST:
+        elif edgeB == Direction.WEST:
             posA = (posB[0] - 1, posB[1])
-        self.postionMap[cubeA] = posA
+        #check if conection is possible
+        if posA in self.posCube:
+            print("Edge of " + str(cubeB) + "already has a connection")
+            return False
+        #add cubeA
+        self.cubePos[cubeA] = posA
+        self.posCube[posA] = cubeA
         #update the root 
         if posA[0] < 0 or (posA[0] == 0 and posA[1] < 0):
             self.__updateRoot__(cubeA)
         return True
     
     def getConnections(self, cube: Cube):
-        return self.connectionMap[cube]
+        pos = self.cubePos[cube]
+        try:
+            north = self.posCube[(pos[0], pos[1] + 1)]
+        except KeyError:
+            north = None
+        try:
+            east = self.posCube[(pos[0] + 1, pos[1])]
+        except KeyError:
+            east = None
+        try:
+            south = self.posCube[(pos[0], pos[1] - 1)]
+        except KeyError:
+            south = None
+        try:
+            west = self.posCube[(pos[0] - 1, pos[1])]
+        except KeyError:
+            west = None
+        return [north, east, south, west]
     
     def getCubes(self):
-        return list(self.connectionMap.keys())
+        return list(self.cubePos.keys())
     
     def isTrivial(self):
-        return len(self.connectionMap) == 1
+        return len(self.cubePos) == 1
     
     def contains(self, cube):
-        return cube in self.connectionMap
+        return cube in self.cubePos
     
     def __updateRoot__(self, newRoot):
-        posUpdate = self.postionMap[newRoot]
+        self.posCube.clear()
+        posUpdate = self.cubePos[newRoot]
         for cube in self.getCubes():
-            posOld = self.postionMap[cube]
+            posOld = self.cubePos[cube]
             posNew = (posOld[0] - posUpdate[0], posOld[1] - posUpdate[1])
-            self.postionMap[cube] = posNew
-        self.root = newRoot
+            self.posCube[posNew] = cube
+            self.cubePos[cube] = posNew
+
+    def __getRoot__(self):
+        return self.posCube[(0, 0)]
 
     def __str__(self) -> str:
-        return "Polyomino: " + str(self.connectionMap)
+        return "Polyomino: " + str(self.cubePos)
     
     def __repr__(self) -> str:
-        return "Polyomino: " + str(self.connectionMap)
+        return "Polyomino: " + str(self.cubePos)

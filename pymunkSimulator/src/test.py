@@ -11,10 +11,24 @@ def polyTest():
     cube0 = Cube(0)
     cube1 = Cube(1)
     cube2 = Cube(1)
+    cube3 = Cube(1)
+    cube4 = Cube(1)
+    cube5 = Cube(1)
     poly = Polyomino(cube0)
     poly.connect(cube1, cube0, Direction.EAST)
     poly.connect(cube2, cube1, Direction.SOUTH)
-    print(poly.connectionMap)
+    print(poly)
+    poly.connect(cube3, cube0, Direction.NORTH)
+    print(poly)
+    poly.connect(cube4, cube0, Direction.SOUTH)
+    print(poly)
+    poly.connect(cube5, cube0, Direction.WEST)
+    print(poly)
+    print(poly.getConnections(cube0))
+    print(poly.getConnections(cube4))
+    print(poly.getConnections(cube3))
+
+    
 
 def nearestWall():
     size = (500,500)
@@ -73,4 +87,4 @@ def configurationHash():
 
 
 if __name__ == "__main__":
-    configurationHash()   
+    polyTest()   

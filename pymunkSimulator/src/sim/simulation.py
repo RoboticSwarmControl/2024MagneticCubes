@@ -206,7 +206,8 @@ class Simulation:
                 
         #draw the connections
         for i, poly in  enumerate(self.stateHandler.polyominoes):
-            for cube, connects in poly.connectionMap.items():
+            for cube in poly.getCubes():
+                connects = poly.getConnections(cube)
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue
