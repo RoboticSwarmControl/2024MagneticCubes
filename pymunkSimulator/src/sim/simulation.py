@@ -14,15 +14,14 @@ from util.color import *
 from config.configuration import Configuration
 from config.cube import Cube
 from sim.statehandler import StateHandler
-from sim.motion import Motion, PivotWalk, Rotation, MotionController
+from sim.motion import PivotWalk, Rotation, MotionController
 
 class Simulation:
     """
     Top-level class for interacting with the Simulation
     """
-    
-    FPS = 60
-    STEP_TIME = 1 / 60
+    FPS = 120 # Determines the visual speed of the simulation has no effect when drawing is disabled
+    STEP_TIME = 0.02 # bigger steps make sim faster but unprecise/unstable 0.02 seems reasonable
 
     def __init__(self, width=800, height=800, drawing=True, userInputs=True):
         """

@@ -103,4 +103,4 @@ def configurationHash():
 
 
 if __name__ == "__main__":
-    polyEqualTest()   
+    connectAndPoly()   

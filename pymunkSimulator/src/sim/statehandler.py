@@ -11,13 +11,13 @@ from queue import Queue
 
 import util.func as util
 from util.color import LIGHTBROWN
-from config.cube import Cube
+from config.cube import *
 from config.configuration import Configuration
 from config.polyomino import Polyomino
 from util.direction import Direction
 
-
-CONNECTION_FORCE_MIN = util.norm(util.magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
+MAG_FORCE_FIELD = 1000 #magnetic force of the magnetic-field
+CONNECTION_FORCE_MIN = util.norm(magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
 
 class StateHandler:
 
@@ -74,109 +74,72 @@ class StateHandler:
         self.updateLock.acquire()
         self.magAngle += angChange
         self.magElevation += elevChange
-        # Apply forces from magnets and determine magnetic connections
-        self.__applyMagForce__()  
+        # zero out the connections
+        for cube in self.getCubes():
+            self.magConnect[cube] = [None] * 4
+        # apply forces
+        for i, cubei in enumerate(self.getCubes()):
+            # Apply Force from magnetic-field
+            self.__applyForceField__(cubei)
+            # Apply forces from the magnets on other cubes
+            for j, cubej in enumerate(self.getCubes()):
+                if i <= j:
+                    continue
+                self.__applyForceMagnets__(cubei, cubej) 
         #detect polyominos
+        self.__detectPoly__()
+        #is determining poly list and updates pivots remove when fiction is fixed 
         if len(self.cubes) > 0:
-            self.__detectPoly__() 
-        self.__detectPolyNew__()    
-        #place the pivot point to match the polyominoes
+            self.__detectPolyOld__()     
         self.__updatePivots__()
         #load new config if present
         if not self.configToLoad == None:
             self.__loadConfig__(space)
-        self.updateLock.release()
-        
+        self.updateLock.release()         
 
-    def __loadConfig__(self, space):
-        for cube in self.getCubes():
-            self.__remove__(cube, space)
-        self.magAngle = self.configToLoad.magAngle
-        self.magElevation = self.configToLoad.magElevation
-        self.polyominoes = self.configToLoad.polyominoes
-        for cube, pos in self.configToLoad.cubePosMap.items():
-            self.__add__(cube, pos, space)
-        #print("Config size: " + str(len(self.cubes)))
-        self.magConnect = {}
-        self.poly = []
-        self.configToLoad = None
-        self.loaded.set()
-        self.loaded.clear()
-
-    def __remove__(self, cube, space):
-        if not self.isRegistered(cube):
-            print("Removing failed. " + str(cube) + " is not registered.")
-            return
+    def __applyForceField__(self, cube):
         shape = self.cubes[cube]
-        space.remove(shape.body, shape)
-        del self.cubes[cube]
+        ang = shape.body.angle
+        shape.body.apply_force_at_local_point( (0,-math.sin(ang-self.magAngle) * MAG_FORCE_FIELD)  , ( Cube.MRAD, 0)  )
+        shape.body.apply_force_at_local_point( (0, math.sin(ang-self.magAngle) * MAG_FORCE_FIELD)  , (-Cube.MRAD, 0)  )
 
-    def __add__(self, cube, pos, space):
-        if self.isRegistered(cube):
-            print("Adding failed. " + str(cube) + " is already registered.")
-            return          
-        body = pymunk.Body()
-        body.position = pos
-        shape = pymunk.Poly(body, [(-Cube.RAD,-Cube.RAD),(-Cube.RAD,Cube.RAD),(Cube.RAD,Cube.RAD),(Cube.RAD,-Cube.RAD)],radius = 1)
-        #shape = pymunk.Poly.create_box(body,(2*rad,2*rad), radius = 1)
-        shape.mass = 10
-        shape.elasticity = 0.4
-        shape.friction = 0.4
-        shape.color = LIGHTBROWN
-        shape.magnetPos = [(Cube.MRAD,0),(0,Cube.MRAD),(-Cube.MRAD,0),(0,-Cube.MRAD)]
-        if cube.type == 0:
-            shape.magnetOri = [(1,0),(0,1),(1,0),(0,-1)]
-        else:
-            shape.magnetOri = [(1,0),(0,-1),(1,0),(0,1)]
-        body.angle = self.magAngle
-        space.add(body,shape)
-        self.cubes[cube] = shape
-
-
-    def __applyMagForce__(self):
-        # zero out the connections
-        for cube in self.getCubes():
-            self.magConnect[cube] = [None] * 4
-        for i, (cubei, shapei) in enumerate(self.cubes.items()):
-            angi = shapei.body.angle
-            # Apply forces from magnet field  (torques)
-            shapei.body.apply_force_at_local_point( (0,-math.sin(angi-self.magAngle)*Cube.FMAG)  , ( Cube.MRAD, 0)  )
-            shapei.body.apply_force_at_local_point( (0, math.sin(angi-self.magAngle)*Cube.FMAG)  , (-Cube.MRAD, 0)  )
-             # Apply forces from the magnets on other cubes
-            for j, (cubej, shapej) in enumerate(self.cubes.items()):
-                if i<=j:
+    def __applyForceMagnets__(self, cubei, cubej):
+        shapei = self.cubes[cubei]
+        shapej = self.cubes[cubej]
+        angi = shapei.body.angle
+        angj = shapej.body.angle
+        if util.distance(shapei.body.position, shapej.body.position) > 4*Cube.RAD:
+            return
+        for k, pikL in enumerate(shapei.magnetPos):
+            for n, pjnL  in enumerate(shapej.magnetPos):
+                pik = shapei.body.local_to_world( pikL  )
+                mik = util.rotateVecbyAng(shapei.magnetOri[k] , angi)
+                #(xk,yk) = cubei.magnetOri[k] (xk,yk) = cubei.magnetOri[k] 
+                #mik = ( math.cos(angi)*xk - math.sin(angi)*yk, math.sin(angi)*xk + math.cos(angi)*yk)
+                pjn = shapej.body.local_to_world( pjnL  )
+                mjn = util.rotateVecbyAng(shapej.magnetOri[n], angj)
+                #(xn,yn) = cubej.magnetOri[n]
+                #mjn = ( math.cos(angj)*xn - math.sin(angj)*yn, math.sin(angj)*xn + math.cos(angj)*yn)
+                fionj = magForce1on2( pik, pjn, mik, mjn )  # magForce1on2( p1, p2, m1,m2)
+                shapei.body.apply_force_at_world_point( (-fionj[0],-fionj[1]) , pik  )
+                shapej.body.apply_force_at_world_point(  fionj ,                pjn  )
+                #Determine magnet connections
+                if util.norm(fionj) < CONNECTION_FORCE_MIN:
                     continue
-                angj = shapej.body.angle
-                if util.distance(shapei.body.position, shapej.body.position) <= 4*Cube.RAD:    
-                     for k, pikL in enumerate(shapei.magnetPos):
-                         for n, pjnL  in enumerate(shapej.magnetPos):
-                             pik = shapei.body.local_to_world( pikL  )
-                             mik = util.rotateVecbyAng(shapei.magnetOri[k] , angi)
-                             #(xk,yk) = cubei.magnetOri[k] (xk,yk) = cubei.magnetOri[k] 
-                             #mik = ( math.cos(angi)*xk - math.sin(angi)*yk, math.sin(angi)*xk + math.cos(angi)*yk)
-                             pjn = shapej.body.local_to_world( pjnL  )
-                             mjn = util.rotateVecbyAng(shapej.magnetOri[n], angj)
-                             #(xn,yn) = cubej.magnetOri[n]
-                             #mjn = ( math.cos(angj)*xn - math.sin(angj)*yn, math.sin(angj)*xn + math.cos(angj)*yn)
-                             fionj = util.magForce1on2( pik, pjn, mik, mjn )  # magForce1on2( p1, p2, m1,m2)
-                             shapei.body.apply_force_at_world_point( (-fionj[0],-fionj[1]) , pik  )
-                             shapej.body.apply_force_at_world_point(  fionj ,                pjn  )
-                             #Determine magnet connections
-                             if util.norm(fionj) > CONNECTION_FORCE_MIN:
-                                if pikL[0] < 0:
-                                    self.magConnect[cubei][Direction.NORTH.value] = cubej
-                                    self.magConnect[cubej][Direction.SOUTH.value] = cubei
-                                elif pikL[0] > 0:
-                                    self.magConnect[cubei][Direction.SOUTH.value] = cubej
-                                    self.magConnect[cubej][Direction.NORTH.value] = cubei
-                                elif pikL[1] < 0 and cubei.type != cubej.type:
-                                    self.magConnect[cubei][Direction.EAST.value] = cubej
-                                    self.magConnect[cubej][Direction.WEST.value] = cubei
-                                elif pikL[1] > 0 and cubei.type != cubej.type:
-                                    self.magConnect[cubei][Direction.WEST.value] = cubej
-                                    self.magConnect[cubej][Direction.EAST.value] = cubei
-                                    
-    def __detectPolyNew__(self):
+                if pikL[0] < 0:
+                    self.magConnect[cubei][Direction.NORTH.value] = cubej
+                    self.magConnect[cubej][Direction.SOUTH.value] = cubei
+                elif pikL[0] > 0:
+                    self.magConnect[cubei][Direction.SOUTH.value] = cubej
+                    self.magConnect[cubej][Direction.NORTH.value] = cubei
+                elif pikL[1] < 0 and cubei.type != cubej.type:
+                    self.magConnect[cubei][Direction.EAST.value] = cubej
+                    self.magConnect[cubej][Direction.WEST.value] = cubei
+                elif pikL[1] > 0 and cubei.type != cubej.type:
+                    self.magConnect[cubei][Direction.WEST.value] = cubej
+                    self.magConnect[cubej][Direction.EAST.value] = cubei 
+
+    def __detectPoly__(self):
         self.polyominoes = []
         done = set()
         next = Queue()
@@ -197,8 +160,7 @@ class StateHandler:
             if not polyominmo.isTrivial():
                 self.polyominoes.append(polyominmo)
                               
-
-    def __detectPoly__(self):
+    def __detectPolyOld__(self):
         cubes = self.getCubes()
         self.poly = list(range(0, len(cubes)))  #the unique polygon each cube belongs to.
         for i,cubei in enumerate(cubes):
@@ -272,6 +234,49 @@ class StateHandler:
                 cubei.body.center_of_gravity = cubei.body.world_to_local( centroids[self.poly[i]]  )
                 pos = cubei.body.position
                 cubei.body.position = (pos[0],pos[1]) #for some reason you need to assign this new position or it will jump when the COG is moved.
+
+    def __loadConfig__(self, space):
+        for cube in self.getCubes():
+            self.__remove__(cube, space)
+        self.magAngle = self.configToLoad.magAngle
+        self.magElevation = self.configToLoad.magElevation
+        self.polyominoes = self.configToLoad.polyominoes
+        for cube, pos in self.configToLoad.cubePosMap.items():
+            self.__add__(cube, pos, space)
+        self.magConnect = {}
+        self.poly = []
+        self.configToLoad = None
+        self.loaded.set()
+        self.loaded.clear()
+
+    def __remove__(self, cube, space):
+        if not self.isRegistered(cube):
+            print("Removing failed. " + str(cube) + " is not registered.")
+            return
+        shape = self.cubes[cube]
+        space.remove(shape.body, shape)
+        del self.cubes[cube]
+
+    def __add__(self, cube, pos, space):
+        if self.isRegistered(cube):
+            print("Adding failed. " + str(cube) + " is already registered.")
+            return          
+        body = pymunk.Body()
+        body.position = pos
+        shape = pymunk.Poly(body, [(-Cube.RAD,-Cube.RAD),(-Cube.RAD,Cube.RAD),(Cube.RAD,Cube.RAD),(Cube.RAD,-Cube.RAD)],radius = 1)
+        #shape = pymunk.Poly.create_box(body,(2*rad,2*rad), radius = 1)
+        shape.mass = 10
+        shape.elasticity = 0.4
+        shape.friction = 0.4
+        shape.color = LIGHTBROWN
+        shape.magnetPos = [(Cube.MRAD,0),(0,Cube.MRAD),(-Cube.MRAD,0),(0,-Cube.MRAD)]
+        if cube.type == 0:
+            shape.magnetOri = [(1,0),(0,1),(1,0),(0,-1)]
+        else:
+            shape.magnetOri = [(1,0),(0,-1),(1,0),(0,1)]
+        body.angle = self.magAngle
+        space.add(body,shape)
+        self.cubes[cube] = shape  
             
 
 

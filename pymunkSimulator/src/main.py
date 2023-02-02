@@ -23,6 +23,7 @@ def sandbox():
     sim1.start()
 
 def demo1():
+    startTime = time.time()
     sim = Simulation(drawing=True)
     cube1 = Cube(0)
     pos1 = (150,50)
@@ -42,12 +43,13 @@ def demo1():
     sim.rotate(math.radians(-90))
     for i in range(4):
         sim.pivotWalk(PivotWalk.LEFT)
-    time.sleep(1)
     sim.loadConfig(savepoiont)
     sim.rotate(math.radians(-90))
     for i in range(6):
-        sim.pivotWalk(PivotWalk.RIGHT)
+        sim.pivotWalk(PivotWalk.RIGHT)      
+    elapsedTime = time.time() - startTime
     sim.enableDraw()
+    print("Execution time: ", elapsedTime, "s")
 
 
 if __name__ == "__main__":
