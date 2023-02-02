@@ -42,6 +42,12 @@ class Polyomino:
             self.__updateRoot__(cubeA)
         return True
     
+    def remove(self, cube: Cube):
+        pos = self.cubePos[cube]
+        #remove if polyomino doesnt break
+        return
+    
+
     def getConnections(self, cube: Cube):
         pos = self.cubePos[cube]
         try:
@@ -65,9 +71,12 @@ class Polyomino:
     def getCubes(self):
         return list(self.cubePos.keys())
     
-    def isTrivial(self):
+    def isTrivial(self) -> bool:
         return len(self.cubePos) == 1
     
+    def size(self) -> int:
+        return len(self.cubePos)
+
     def contains(self, cube):
         return cube in self.cubePos
     
@@ -79,6 +88,21 @@ class Polyomino:
             posNew = (posOld[0] - posUpdate[0], posOld[1] - posUpdate[1])
             self.posCube[posNew] = cube
             self.cubePos[cube] = posNew
+
+    def __eq__(self, __o: object) -> bool:
+        if not type(__o) is Polyomino:
+            return False
+        if self.size() != __o.size():
+            return False
+        for cubeT in self.getCubes():
+            posT = self.cubePos[cubeT]
+            try:
+                if cubeT.type != __o.posCube[posT].type:
+                    return False
+            except KeyError:
+                return False
+        return True
+    
 
     def __getRoot__(self):
         return self.posCube[(0, 0)]

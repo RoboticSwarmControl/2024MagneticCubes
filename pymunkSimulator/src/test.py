@@ -15,6 +15,7 @@ def polyTest():
     cube4 = Cube(1)
     cube5 = Cube(1)
     poly = Polyomino(cube0)
+    print(poly == poly)
     poly.connect(cube1, cube0, Direction.EAST)
     poly.connect(cube2, cube1, Direction.SOUTH)
     print(poly)
@@ -28,7 +29,22 @@ def polyTest():
     print(poly.getConnections(cube4))
     print(poly.getConnections(cube3))
 
-    
+def polyEqualTest():
+    c0 = Cube(0)
+    c1 = Cube(1)
+    c2 = Cube(1)
+    c3 = Cube(0)
+    c4 = Cube(1)
+    c5 = Cube(1)
+    p1 = Polyomino(c0)
+    p1.connect(c1, c0, Direction.EAST)
+    p1.connect(c2, c1, Direction.NORTH)
+    p2 = Polyomino(c5)
+    p2.connect(c4, c5, Direction.SOUTH)
+    p2.connect(c3, c4, Direction.SOUTH)
+    print("p1: " + str(p1))
+    print("p2: " + str(p2))
+    print("equal = " + str(p1 == p2))
 
 def nearestWall():
     size = (500,500)
@@ -87,4 +103,4 @@ def configurationHash():
 
 
 if __name__ == "__main__":
-    polyTest()   
+    polyEqualTest()   
