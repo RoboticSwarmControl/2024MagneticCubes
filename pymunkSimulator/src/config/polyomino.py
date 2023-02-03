@@ -7,18 +7,14 @@ class Polyomino:
     def __init__(self, root: Cube):
         self.posCube = {(0,0): root}
         self.cubePos = {root: (0,0)}
+        self.valid = True
         #The root should allways be the most left most bottom cube.
 
     def connect(self, cubeA: Cube, cubeB: Cube, edgeB: Direction): 
-        #check if cubes exist and can be connected
+        #check if cubes exist
         if not cubeB in self.cubePos:
-            print(str(cubeB) + " not in polyomino")
             return False
         if cubeA in self.cubePos:
-            print(str(cubeA) + " already in polyomino")
-            return False
-        if (edgeB == Direction.EAST or edgeB == Direction.WEST) and (cubeA.type == cubeB.type):
-            print(str(cubeA) + " and " + str(cubeB) + "are same type. Cant connect sideways.")
             return False
         #determine postion of cubeA
         posB = self.cubePos[cubeB]
@@ -32,7 +28,6 @@ class Polyomino:
             posA = (posB[0] - 1, posB[1])
         #check if conection is possible
         if posA in self.posCube:
-            print("Edge of " + str(cubeB) + "already has a connection")
             return False
         #add cubeA
         self.cubePos[cubeA] = posA
@@ -40,40 +35,47 @@ class Polyomino:
         #update the root 
         if posA[0] < 0 or (posA[0] == 0 and posA[1] < 0):
             self.__updateRoot__(cubeA)
+        #check for illegal side connection
+        neighborW = self.getConnection(cubeA, Direction.WEST)
+        neighborE = self.getConnection(cubeA, Direction.EAST)
+        if (neighborW != None and neighborW.type == cubeA.type) or (neighborE != None and neighborE.type == cubeA.type):
+            self.valid == False
         return True
     
     def remove(self, cube: Cube):
         pos = self.cubePos[cube]
         #remove if polyomino doesnt break
         return
-    
 
     def getConnections(self, cube: Cube):
-        pos = self.cubePos[cube]
-        try:
-            north = self.posCube[(pos[0], pos[1] + 1)]
-        except KeyError:
-            north = None
-        try:
-            east = self.posCube[(pos[0] + 1, pos[1])]
-        except KeyError:
-            east = None
-        try:
-            south = self.posCube[(pos[0], pos[1] - 1)]
-        except KeyError:
-            south = None
-        try:
-            west = self.posCube[(pos[0] - 1, pos[1])]
-        except KeyError:
-            west = None
-        return [north, east, south, west]
+        connects = []
+        for i in range(4):
+            connects.append(self.getConnection(cube, Direction(i)))
+        return connects
     
+    def getConnection(self, cube: Cube, edge: Direction) -> Cube:
+        pos = self.cubePos[cube]
+        if edge.value % 2 == 0:
+            dx = 0
+            dy = edge.value - 1
+        else:
+            dx = edge.value - 2
+            dy = 0
+        try:
+            adj = self.posCube[(pos[0] - dx, pos[1] - dy)]
+        except KeyError:
+            adj = None
+        return adj
+
     def getCubes(self):
         return list(self.cubePos.keys())
     
     def isTrivial(self) -> bool:
         return len(self.cubePos) == 1
     
+    def isIllegal(self):
+        return not self.valid
+
     def size(self) -> int:
         return len(self.cubePos)
 
