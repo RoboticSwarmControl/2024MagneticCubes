@@ -24,7 +24,7 @@ def sandbox():
 
 def demo1():
     startTime = time.time()
-    sim = Simulation(drawing=True)
+    sim = Simulation(drawing=False)
     cube1 = Cube(0)
     pos1 = (150,50)
     cube2 = Cube(1)

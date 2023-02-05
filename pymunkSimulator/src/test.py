@@ -68,8 +68,8 @@ def randomConfig():
         config = initRandomConfig(ncubes, (width, height))
         sim.loadConfig(config)
         time.sleep(1)
-        #print("Registerd Cubes: \n" + str(sim.stateHandler.getCubes()))
-        #print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
+        print("Registerd Cubes: \n" + str(sim.stateHandler.getCubes()))
+        print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
         input()
         
 def forceSideConect():
@@ -103,4 +103,4 @@ def configurationHash():
 
 
 if __name__ == "__main__":
-    connectAndPoly()   
+    randomConfig()   

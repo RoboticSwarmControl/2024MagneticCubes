@@ -10,19 +10,30 @@ from threading import Event, Lock
 from queue import Queue
 
 import util.func as util
-from util.color import LIGHTBROWN
+from util.color import LIGHTBROWN, LIGHT_GREY
 from config.cube import *
 from config.configuration import Configuration
 from config.polyomino import Polyomino
 from util.direction import Direction
 
-MAG_FORCE_FIELD = 1000 #magnetic force of the magnetic-field
-CONNECTION_FORCE_MIN = util.norm(magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
 
 class StateHandler:
 
-    def __init__(self):
-        self.cubes = {}
+    MAG_FORCE_FIELD = 1000 #magnetic force of the magnetic-field
+    CONNECTION_FORCE_MIN = util.norm(magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
+    MAG_SENSOR_CTYPE = 1
+
+    def __init__(self, space: pymunk.Space):
+        cHandler = space.add_collision_handler(StateHandler.MAG_SENSOR_CTYPE, StateHandler.MAG_SENSOR_CTYPE)
+        def sensorCollision(arbiter: pymunk.Arbiter, space, data):
+            cubei = self.magSensorCube[arbiter.shapes[0]]
+            cubej = self.magSensorCube[arbiter.shapes[1]]
+            self.__applyForceMagnets__(cubei, cubej)
+            return False
+        cHandler.pre_solve = sensorCollision
+        self.space = space
+        self.cubeShapes = {}
+        self.magSensorCube = {}
         self.magAngle = 0  #orientation of magnetic field (in radians)
         self.magElevation = 0
         self.magConnect = {}
@@ -42,26 +53,29 @@ class StateHandler:
     def saveConfig(self) -> Configuration:
         self.updateLock.acquire()
         cube_pos = {}
-        for cube, shape in self.cubes.items():
-            cube_pos[cube] = shape.body.position
+        for cube, shapes in self.cubeShapes.items():
+            cube_pos[cube] = shapes[0].body.position
         config = Configuration(self.magAngle, self.magElevation, cube_pos)
         config.polyominoes = self.polyominoes
         self.updateLock.release()
         return config
 
-    def isRegistered(self, cube):
-        return cube in self.cubes
+    def isRegistered(self, cube: Cube):
+        return cube in self.cubeShapes
 
-    def getShape(self, cube):
-        return self.cubes[cube]
+    def getShape(self, cube: Cube):
+        return self.cubeShapes[cube][0]
+
+    def getSensor(self, cube: Cube):
+        return self.cubeShapes[cube][1]
 
     def getShapes(self):
-        return list(self.cubes.values())
+        return list(shapes[0] for shapes in self.cubeShapes.values())
 
     def getCubes(self):
-        return list(self.cubes.keys())
+        return list(self.cubeShapes.keys())
 
-    def update(self, angChange, elevChange, space):
+    def update(self, angChange, elevChange):
         """
         Updates the configuration by adding angChange and elevChange to the current magnetic field orientation.
         Also loads a new configuration if loadConfig got called.
@@ -69,47 +83,37 @@ class StateHandler:
         Parameters:
             angChange: angular change (in radians)
             elevChange: elevation change
-            space: pymunk space in with the changes occure
         """
         self.updateLock.acquire()
         self.magAngle += angChange
         self.magElevation += elevChange
-        # zero out the connections
-        for cube in self.getCubes():
-            self.magConnect[cube] = [None] * 4
-        # apply forces
-        for i, cubei in enumerate(self.getCubes()):
-            # Apply Force from magnetic-field
-            self.__applyForceField__(cubei)
-            # Apply forces from the magnets on other cubes
-            for j, cubej in enumerate(self.getCubes()):
-                if i <= j:
-                    continue
-                self.__applyForceMagnets__(cubei, cubej) 
+        #load new config if present
+        if not self.configToLoad == None:
+            self.__loadConfig__()
         #detect polyominos
         self.__detectPoly__()
         #is determining poly list and updates pivots remove when fiction is fixed 
-        if len(self.cubes) > 0:
+        if len(self.cubeShapes) > 0:
             self.__detectPolyOld__()     
         self.__updatePivots__()
-        #load new config if present
-        if not self.configToLoad == None:
-            self.__loadConfig__(space)
+        for cube in self.getCubes():
+            # Apply Force from magnetic-field
+            self.__applyForceField__(cube)
+            # zero out the connections
+            self.magConnect[cube] = [None] * 4 
         self.updateLock.release()         
 
-    def __applyForceField__(self, cube):
-        shape = self.cubes[cube]
+    def __applyForceField__(self, cube: Cube):
+        shape = self.getShape(cube)
         ang = shape.body.angle
-        shape.body.apply_force_at_local_point( (0,-math.sin(ang-self.magAngle) * MAG_FORCE_FIELD)  , ( Cube.MRAD, 0)  )
-        shape.body.apply_force_at_local_point( (0, math.sin(ang-self.magAngle) * MAG_FORCE_FIELD)  , (-Cube.MRAD, 0)  )
+        shape.body.apply_force_at_local_point( (0,-math.sin(ang-self.magAngle) * StateHandler.MAG_FORCE_FIELD)  , ( Cube.MRAD, 0)  )
+        shape.body.apply_force_at_local_point( (0, math.sin(ang-self.magAngle) * StateHandler.MAG_FORCE_FIELD)  , (-Cube.MRAD, 0)  )
 
-    def __applyForceMagnets__(self, cubei, cubej):
-        shapei = self.cubes[cubei]
-        shapej = self.cubes[cubej]
+    def __applyForceMagnets__(self, cubei: Cube, cubej: Cube):
+        shapei = self.getShape(cubei)
+        shapej = self.getShape(cubej)
         angi = shapei.body.angle
         angj = shapej.body.angle
-        if util.distance(shapei.body.position, shapej.body.position) > 4*Cube.RAD:
-            return
         for k, pikL in enumerate(shapei.magnetPos):
             for n, pjnL  in enumerate(shapej.magnetPos):
                 pik = shapei.body.local_to_world( pikL  )
@@ -124,7 +128,7 @@ class StateHandler:
                 shapei.body.apply_force_at_world_point( (-fionj[0],-fionj[1]) , pik  )
                 shapej.body.apply_force_at_world_point(  fionj ,                pjn  )
                 #Determine magnet connections
-                if util.norm(fionj) < CONNECTION_FORCE_MIN:
+                if util.norm(fionj) < StateHandler.CONNECTION_FORCE_MIN:
                     continue
                 if pikL[0] < 0:
                     self.magConnect[cubei][Direction.NORTH.value] = cubej
@@ -177,7 +181,7 @@ class StateHandler:
                     self.poly[i] = minP
                     if piS != pjS:
                         maxP = max(piS,pjS)
-                        for k in range(len(self.cubes)):  # never gets called!
+                        for k in range(len(self.cubeShapes)):  # never gets called!
                             if self.poly[k] == maxP:
                                 #print("Found equiv")
                                 self.poly[k] = minP #assign all polys that have pjS or piS to be the minimum value
@@ -235,34 +239,36 @@ class StateHandler:
                 pos = cubei.body.position
                 cubei.body.position = (pos[0],pos[1]) #for some reason you need to assign this new position or it will jump when the COG is moved.
 
-    def __loadConfig__(self, space):
+    def __loadConfig__(self):
         for cube in self.getCubes():
-            self.__remove__(cube, space)
+            self.__remove__(cube)
         self.magAngle = self.configToLoad.magAngle
         self.magElevation = self.configToLoad.magElevation
         self.polyominoes = self.configToLoad.polyominoes
         for cube, pos in self.configToLoad.cubePosMap.items():
-            self.__add__(cube, pos, space)
-        self.magConnect = {}
-        self.poly = []
+            self.__add__(cube, pos)
         self.configToLoad = None
         self.loaded.set()
         self.loaded.clear()
 
-    def __remove__(self, cube, space):
+    def __remove__(self, cube: Cube):
         if not self.isRegistered(cube):
             print("Removing failed. " + str(cube) + " is not registered.")
             return
-        shape = self.cubes[cube]
-        space.remove(shape.body, shape)
-        del self.cubes[cube]
+        shapes = self.cubeShapes[cube]
+        self.space.remove(shapes[0].body, shapes[0], shapes[1])
+        del self.cubeShapes[cube]
+        del self.magConnect[cube]
+        del self.magSensorCube[shapes[1]]
 
-    def __add__(self, cube, pos, space):
+    def __add__(self, cube: Cube, pos):
         if self.isRegistered(cube):
             print("Adding failed. " + str(cube) + " is already registered.")
             return          
         body = pymunk.Body()
         body.position = pos
+        body.angle = self.magAngle
+        # create the cube shape
         shape = pymunk.Poly(body, [(-Cube.RAD,-Cube.RAD),(-Cube.RAD,Cube.RAD),(Cube.RAD,Cube.RAD),(Cube.RAD,-Cube.RAD)],radius = 1)
         #shape = pymunk.Poly.create_box(body,(2*rad,2*rad), radius = 1)
         shape.mass = 10
@@ -274,9 +280,16 @@ class StateHandler:
             shape.magnetOri = [(1,0),(0,1),(1,0),(0,-1)]
         else:
             shape.magnetOri = [(1,0),(0,-1),(1,0),(0,1)]
-        body.angle = self.magAngle
-        space.add(body,shape)
-        self.cubes[cube] = shape  
+        # create sensor-shape that identifies a magnet attraction
+        magSensor = pymunk.Circle(body, 3 * Cube.RAD)
+        magSensor.collision_type = StateHandler.MAG_SENSOR_CTYPE
+        magSensor.sensor = True
+        magSensor.color = LIGHT_GREY
+        # add to space and dictionarys
+        self.space.add(body, magSensor, shape)
+        self.cubeShapes[cube] = (shape, magSensor)
+        self.magConnect[cube] = [None] * 4
+        self.magSensorCube[magSensor] = cube
             
 
 

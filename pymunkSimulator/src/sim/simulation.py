@@ -47,7 +47,7 @@ class Simulation:
         self.stopped = Event()
         self.started = Event()
 
-        self.stateHandler = StateHandler()
+        self.stateHandler = StateHandler(self.space)
         self.controller = MotionController()
 
     def loadConfig(self, newConfig: Configuration) -> Configuration:
@@ -65,7 +65,7 @@ class Simulation:
         print("Configuration saved.")
         return save
 
-    def addCube(self, cube, pos):
+    def addCube(self, cube: Cube, pos):
         """
         Adds a cube to the current configuration
 
@@ -78,7 +78,7 @@ class Simulation:
         self.stateHandler.loadConfig(config)
         print("Added cube" + str(cube) + "to current configuration")
 
-    def removeCube(self, cube):
+    def removeCube(self, cube: Cube):
         """
         Removes a cube from the current configuration
 
@@ -117,7 +117,7 @@ class Simulation:
         Notifies the simulation to do one pivot walking cycle and returns immediately.
 
         Parameters:
-            direction: direction of pivot walk. Either motion.LEFT (-1) or motion.RIGHT (1)
+            direction: direction of pivot walk. Either PivotWalk.LEFT (-1) or PivotWalk.RIGHT (1)
         """
         self.controller.add(PivotWalk(direction))
 
@@ -182,7 +182,7 @@ class Simulation:
 
     def __update__(self):
         change = self.controller.nextStep()
-        self.stateHandler.update(change[0], change[1], self.space)
+        self.stateHandler.update(change[0], change[1])
 
     def __draw__(self, drawOptions):
         self.window.fill("white")
