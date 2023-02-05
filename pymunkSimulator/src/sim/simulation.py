@@ -23,6 +23,7 @@ class Simulation:
     """
     FPS = 120  # Determines the visual speed of the simulation has no effect when drawing is disabled
     STEP_TIME = 0.02  # bigger steps make sim faster but unprecise/unstable 0.02 seems reasonable
+    DEBUG = True
 
     def __init__(self, width=800, height=800, drawing=True, userInputs=True):
         """
@@ -55,14 +56,14 @@ class Simulation:
         Loads a new configuration. Returns when loading is done.
         """
         self.stateHandler.loadConfig(newConfig)
-        print("Configuration loaded.")
+        if Simulation.DEBUG: print("Configuration loaded.")
 
     def saveConfig(self):
         """
         Returns the configuration the simulation currently has.
         """
         save = self.stateHandler.saveConfig()
-        print("Configuration saved.")
+        if Simulation.DEBUG: print("Configuration saved.")
         return save
 
     def addCube(self, cube: Cube, pos):
@@ -76,7 +77,7 @@ class Simulation:
         config = self.stateHandler.saveConfig()
         config.addCube(cube, pos)
         self.stateHandler.loadConfig(config)
-        print("Added cube" + str(cube) + "to current configuration")
+        if Simulation.DEBUG: print("Added cube" + str(cube) + "to current configuration")
 
     def removeCube(self, cube: Cube):
         """
@@ -88,7 +89,7 @@ class Simulation:
         config = self.stateHandler.saveConfig()
         config.removeCube(cube)
         self.stateHandler.loadConfig(config)
-        print("Removed cube" + str(cube) + "from current configuration")
+        if Simulation.DEBUG: print("Removed cube" + str(cube) + "from current configuration")
 
     def pivotWalk(self, direction) -> bool:
         """
@@ -141,7 +142,7 @@ class Simulation:
         thread.start()
         self.stopped.clear()
         self.started.wait(1)
-        print("Simulation started.")
+        if Simulation.DEBUG: print("Simulation started.")
 
     def stop(self):
         """
@@ -149,7 +150,7 @@ class Simulation:
         """
         self.started.clear()
         self.stopped.wait(1)
-        print("Simulation stopped.")
+        if Simulation.DEBUG: print("Simulation stopped.")
 
     def disableDraw(self):
         # Maybe do other stuff with the window thats why I have methodes
@@ -248,16 +249,14 @@ class Simulation:
                 break
 
     def __createBoundaries__(self):
-        rects = [
-            [(self.width / 2, self.height - 5), (self.width, 10)],
-            [(self.width / 2, 5), (self.width, 10)],
-            [(5,  self.height / 2), (10, self.height)],
-            [(self.width - 5,  self.height / 2), (10, self.height)]
+        walls = [
+            pymunk.Segment(self.space.static_body, (0,0), (self.width,0), 5),
+            pymunk.Segment(self.space.static_body, (self.width,0), (self.width, self.height), 5),
+            pymunk.Segment(self.space.static_body, (self.width, self.height), (0, self.height), 5),
+            pymunk.Segment(self.space.static_body, (0, self.height), (0,0), 5)
         ]
-        for pos, size in rects:
-            body = pymunk.Body(body_type=pymunk.Body.STATIC)
-            body.position = pos
-            shape = pymunk.Poly.create_box(body, size)
-            shape.elasticity = 0.4
-            shape.friction = 0.5
-            self.space.add(body, shape)
+        for wall in walls:
+            wall.elasticity = 0.4
+            wall.friction = 0.5
+            self.space.add(wall)
+        

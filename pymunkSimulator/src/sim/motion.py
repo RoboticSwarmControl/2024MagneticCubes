@@ -47,7 +47,7 @@ class MotionController:
             if not self.currentMotion == None:
                 self.currentMotion.executed.set()
                 self.motionsDone.append(self.currentMotion)
-                print("Executed: " + str(self.currentMotion))
+                if sim.Simulation.DEBUG: print("Executed: " + str(self.currentMotion))
             if self.motionsOpen.empty():
                 self.currentMotion = None
                 return (0,0)

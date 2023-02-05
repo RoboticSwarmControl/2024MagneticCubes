@@ -10,12 +10,12 @@ from threading import Event, Lock
 from queue import Queue
 
 import util.func as util
+from util.direction import Direction
 from util.color import LIGHTBROWN, LIGHT_GREY
 from config.cube import *
 from config.configuration import Configuration
 from config.polyomino import Polyomino
-from util.direction import Direction
-
+import sim.simulation as sim
 
 class StateHandler:
 
@@ -253,7 +253,7 @@ class StateHandler:
 
     def __remove__(self, cube: Cube):
         if not self.isRegistered(cube):
-            print("Removing failed. " + str(cube) + " is not registered.")
+            if sim.Simulation.DEBUG: print("Removing failed. " + str(cube) + " is not registered.")
             return
         shapes = self.cubeShapes[cube]
         self.space.remove(shapes[0].body, shapes[0], shapes[1])
@@ -263,7 +263,7 @@ class StateHandler:
 
     def __add__(self, cube: Cube, pos):
         if self.isRegistered(cube):
-            print("Adding failed. " + str(cube) + " is already registered.")
+            if sim.Simulation.DEBUG: print("Adding failed. " + str(cube) + " is already registered.")
             return          
         body = pymunk.Body()
         body.position = pos
