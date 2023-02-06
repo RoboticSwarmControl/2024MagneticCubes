@@ -9,18 +9,14 @@ import math
 from threading import Event, Lock
 from queue import Queue
 
-import util.func as util
-from util.direction import Direction
-from util.color import LIGHTBROWN, LIGHT_GREY
-from config.cube import *
-from config.configuration import Configuration
-from config.polyomino import Polyomino
+from util import *
+from state import Configuration, Polyomino, Cube
 import sim.simulation as sim
 
 class StateHandler:
 
     MAG_FORCE_FIELD = 1000 #magnetic force of the magnetic-field
-    CONNECTION_FORCE_MIN = util.norm(magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
+    CONNECTION_FORCE_MIN = norm(Cube.magForce1on2( (0,0), (0,2*(Cube.RAD - Cube.MRAD)+5 ), (0,1), (0,1)))  #NS connection
     MAG_SENSOR_CTYPE = 1
 
     def __init__(self, space: pymunk.Space):
@@ -117,18 +113,18 @@ class StateHandler:
         for k, pikL in enumerate(shapei.magnetPos):
             for n, pjnL  in enumerate(shapej.magnetPos):
                 pik = shapei.body.local_to_world( pikL  )
-                mik = util.rotateVecbyAng(shapei.magnetOri[k] , angi)
+                mik = rotateVecbyAng(shapei.magnetOri[k] , angi)
                 #(xk,yk) = cubei.magnetOri[k] (xk,yk) = cubei.magnetOri[k] 
                 #mik = ( math.cos(angi)*xk - math.sin(angi)*yk, math.sin(angi)*xk + math.cos(angi)*yk)
                 pjn = shapej.body.local_to_world( pjnL  )
-                mjn = util.rotateVecbyAng(shapej.magnetOri[n], angj)
+                mjn = rotateVecbyAng(shapej.magnetOri[n], angj)
                 #(xn,yn) = cubej.magnetOri[n]
                 #mjn = ( math.cos(angj)*xn - math.sin(angj)*yn, math.sin(angj)*xn + math.cos(angj)*yn)
-                fionj = magForce1on2( pik, pjn, mik, mjn )  # magForce1on2( p1, p2, m1,m2)
+                fionj = Cube.magForce1on2( pik, pjn, mik, mjn )  # magForce1on2( p1, p2, m1,m2)
                 shapei.body.apply_force_at_world_point( (-fionj[0],-fionj[1]) , pik  )
                 shapej.body.apply_force_at_world_point(  fionj ,                pjn  )
                 #Determine magnet connections
-                if util.norm(fionj) < StateHandler.CONNECTION_FORCE_MIN:
+                if norm(fionj) < StateHandler.CONNECTION_FORCE_MIN:
                     continue
                 if pikL[0] < 0:
                     self.magConnect[cubei][Direction.NORTH.value] = cubej
@@ -274,7 +270,7 @@ class StateHandler:
         shape.mass = 10
         shape.elasticity = 0.4
         shape.friction = 0.4
-        shape.color = LIGHTBROWN
+        shape.color = Color.LIGHTBROWN
         shape.magnetPos = [(Cube.MRAD,0),(0,Cube.MRAD),(-Cube.MRAD,0),(0,-Cube.MRAD)]
         if cube.type == 0:
             shape.magnetOri = [(1,0),(0,1),(1,0),(0,-1)]
@@ -284,7 +280,7 @@ class StateHandler:
         magSensor = pymunk.Circle(body, 3 * Cube.RAD)
         magSensor.collision_type = StateHandler.MAG_SENSOR_CTYPE
         magSensor.sensor = True
-        magSensor.color = LIGHT_GREY
+        magSensor.color = Color.LIGHT_GREY
         # add to space and dictionarys
         self.space.add(body, magSensor, shape)
         self.cubeShapes[cube] = (shape, magSensor)

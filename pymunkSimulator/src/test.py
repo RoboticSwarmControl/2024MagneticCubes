@@ -1,9 +1,7 @@
 
 
-from config.cube import Cube
-from config.polyomino import Polyomino
-from config.configuration import *
-from util.direction import Direction
+from state import Cube, Polyomino, Configuration
+from util import *
 from sim.simulation import Simulation
 import time
 
@@ -65,7 +63,7 @@ def randomConfig():
     sim = Simulation(width, height)
     sim.start()
     while True:
-        config = initRandomConfig(ncubes, (width, height))
+        config = Configuration.initRandomConfig(ncubes, (width, height))
         sim.loadConfig(config)
         time.sleep(1)
         print("Registerd Cubes: \n" + str(sim.stateHandler.getCubes()))

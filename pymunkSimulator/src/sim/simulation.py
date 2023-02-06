@@ -9,10 +9,8 @@ import pymunk
 import pymunk.pygame_util
 import math
 from threading import Thread, Event
-
-from util.color import *
-from config.configuration import Configuration
-from config.cube import Cube
+from util import Color
+from state import Configuration, Cube
 from sim.statehandler import StateHandler
 from sim.motion import PivotWalk, Rotation, MotionController
 
@@ -190,16 +188,16 @@ class Simulation:
         self.space.debug_draw(drawOptions)
         # draw the magnets and CenterOfGravity-- for all cubes
         for cube in self.stateHandler.getShapes():  # COM
-            pygame.draw.circle(self.window, BLACK,  cube.body.local_to_world(
+            pygame.draw.circle(self.window, Color.BLACK,  cube.body.local_to_world(
                 cube.body.center_of_gravity), 7)
 
         for cube in self.stateHandler.getShapes():
             # magnets
             for i, magP in enumerate(cube.magnetPos):
                 if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
-                    magcolor = GREEN
+                    magcolor = Color.GREEN
                 else:
-                    magcolor = RED
+                    magcolor = Color.RED
                 pygame.draw.circle(self.window, magcolor,
                                    cube.body.local_to_world(magP), 5)
 
@@ -210,11 +208,11 @@ class Simulation:
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue
-                    pygame.draw.line(self.window, SASHACOLORS[i], self.stateHandler.getShape(cube).body.local_to_world(
+                    pygame.draw.line(self.window, Color.SASHACOLORS[i], self.stateHandler.getShape(cube).body.local_to_world(
                         (0, 0)), self.stateHandler.getShape(cubeCon).body.local_to_world((0, 0)), 3)
 
         # draw the compass
-        pygame.draw.circle(self.window, LIGHTBROWN,  (10, 10), 11)
+        pygame.draw.circle(self.window, Color.LIGHTBROWN,  (10, 10), 11)
         pygame.draw.line(self.window, "red",   (10, 10), (10+10*math.cos(
             self.stateHandler.magAngle), 10+10*math.sin(self.stateHandler.magAngle)), 3)
         pygame.draw.line(self.window, "green", (10, 10), (10-10*math.cos(

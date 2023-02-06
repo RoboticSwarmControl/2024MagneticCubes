@@ -10,13 +10,10 @@ Runtime user interaction is also possible. Look in simulation.py method __userIn
 import math
 import time
 
+from util import *
 from sim.simulation import Simulation
 from sim.motion import *
-from config.configuration import Configuration
-from config.cube import Cube
-from config.polyomino import Polyomino
-from util.direction import Direction
-from util.func import *
+from state import Configuration, Cube
 
 def sandbox():
     sim1 = Simulation()
