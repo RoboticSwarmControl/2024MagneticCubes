@@ -52,7 +52,7 @@ class Simulation:
 
     def loadConfig(self, newConfig: Configuration) -> Configuration:
         """
-        Loads a new configuration. Returns when loading is done.
+        Notifies the simulation to load a new configuration on the next update.
         """
         self.stateHandler.loadConfig(newConfig)
         if Simulation.DEBUG: print("Configuration loaded.")
@@ -147,36 +147,51 @@ class Simulation:
         """
         Stops Simulation. pygame will also terminate. Retruns when terminated.
         """
+        if (self.stopped.isSet()):
+            print("Simulation is not running.")
+            return
         self.started.clear()
         self.stopped.wait(1)
         if Simulation.DEBUG: print("Simulation stopped.")
 
     def disableDraw(self):
-        # Maybe do other stuff with the window thats why I have methodes
+        """
+        Disables the drawing. For that simulation will be restarted.
+        """
+        wasRunning = self.started.is_set()
+        if wasRunning: self.stop()
         self.drawingActive = False
+        if wasRunning: self.start()
 
     def enableDraw(self):
-        # Maybe do other stuff with the window thats why I have methodes
+        """
+        Enables the drawing. For that simulation will be restarted.
+        """
+        wasRunning = self.started.is_set()
+        if wasRunning: self.stop()
         self.drawingActive = True
+        if wasRunning: self.start()
 
     def __run__(self):
         # initialisation
-        pygame.init()
-        self.window = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("magnetic cube simulator")
-        drawOptions = pymunk.pygame_util.DrawOptions(self.window)
-        clock = pygame.time.Clock()
+        if self.drawingActive:
+            pygame.init()
+            self.window = pygame.display.set_mode((self.width, self.height))
+            pygame.display.set_caption("magnetic cube simulator")
+            drawOptions = pymunk.pygame_util.DrawOptions(self.window)
+            clock = pygame.time.Clock()
         self.started.set()
         # Simulation loop
         while self.started.isSet():
-            if self.userInputsActive:
+            if (self.userInputsActive and self.drawingActive):
                 self.__userInputs__()
             self.__update__()
             self.space.step(Simulation.STEP_TIME)
             if self.drawingActive:
                 self.__draw__(drawOptions)
                 clock.tick(Simulation.FPS)
-        pygame.quit()
+        if self.drawingActive:
+            pygame.quit()
         self.stopped.set()
 
     def __update__(self):
@@ -237,11 +252,11 @@ class Simulation:
                 if event.button == 1:  # 'left click' places cube type=0
                     config = self.stateHandler.saveConfig()
                     config.addCube(Cube(0), mouse_pos)
-                    self.stateHandler.loadConfig_nowait(config)
+                    self.stateHandler.loadConfig(config)
                 elif event.button == 3:  # 'right click' places cube type=1
                     config = self.stateHandler.saveConfig()
                     config.addCube(Cube(1), mouse_pos)
-                    self.stateHandler.loadConfig_nowait(config)
+                    self.stateHandler.loadConfig(config)
             elif event.type == pygame.QUIT:
                 self.started.clear()
                 break

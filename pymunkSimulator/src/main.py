@@ -25,7 +25,7 @@ def demo1():
     cube2 = Cube(1)
     pos2 = (200, 150)
     t0 = time.time()
-    sim = Simulation(drawing=False)
+    sim = Simulation(drawing=True)
     sim.start()
     t1 = time.time()
     sim.loadConfig(Configuration(math.radians(90),0,{cube1: pos1,cube2: pos2}))
@@ -49,7 +49,6 @@ def demo1():
     sim.enableDraw()
     print("Init time: ", (t1 - t0), "s")
     print("Execution time: ", (t2 - t1), "s")
-
 
 
 if __name__ == "__main__":

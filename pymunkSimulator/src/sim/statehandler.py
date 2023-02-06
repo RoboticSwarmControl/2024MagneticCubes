@@ -1,6 +1,6 @@
 
 """
-Holds the ConfigHandler class
+Holds the StateHandler class
 
 @author: Aaron T Becker, Kjell Keune
 """
@@ -40,10 +40,6 @@ class StateHandler:
         self.updateLock = Lock()
 
     def loadConfig(self, newConfig: Configuration):
-        self.configToLoad = newConfig
-        self.loaded.wait(2)
-
-    def loadConfig_nowait(self, newConfig: Configuration):
         self.configToLoad = newConfig
 
     def saveConfig(self) -> Configuration:
@@ -146,7 +142,7 @@ class StateHandler:
         for cube in self.getCubes():
             if cube in done:
                 continue
-            polyominmo = Polyomino(cube)
+            polyomino = Polyomino(cube)
             done.add(cube)
             next.put(cube)
             while not next.empty():
@@ -154,11 +150,11 @@ class StateHandler:
                 for i, adj in enumerate(self.magConnect[current]):
                     if (adj == None) or (adj in done):
                         continue
-                    polyominmo.connect(adj, current, Direction(i))
+                    polyomino.connect(adj, current, Direction(i))
                     done.add(adj)
                     next.put(adj)
-            if not polyominmo.isTrivial():
-                self.polyominoes.append(polyominmo)
+            if not polyomino.isTrivial():
+                self.polyominoes.append(polyomino)
                               
     def __detectPolyOld__(self):
         cubes = self.getCubes()

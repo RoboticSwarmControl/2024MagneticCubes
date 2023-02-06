@@ -3,6 +3,7 @@
 from state import Cube, Polyomino, Configuration
 from util import *
 from sim.simulation import Simulation
+from sim.motion import PivotWalk
 import time
 
 def polyTest():
@@ -99,6 +100,27 @@ def configurationHash():
     print("Hash equality = " + str(hash(con1) == hash(con2)))
 
 
+def multiSim():
+    t0 = time.time()
+    sim1 = Simulation(drawing=False)
+    sim2 = Simulation(drawing=False)
+    sim1.loadConfig(Configuration(0,0,{Cube(0):(100,100),Cube(0):(200,100),Cube(0):(300,100)}))
+    sim2.loadConfig(Configuration(0,0,{Cube(0):(100,100),Cube(0):(100,200),Cube(0):(100,300)}))
+    sim1.start()
+    sim2.start()
+    for i in range(10):
+        sim1.pivotWalk(PivotWalk.LEFT)
+        sim2.pivotWalk(PivotWalk.RIGHT)
+    t1 = time.time()
+    print("Execution time: ",(t1 - t0))
+    sim1.enableDraw()
+    time.sleep(2)
+    sim1.disableDraw()
+    sim2.enableDraw()
+    time.sleep(2)
+    sim1.stop()
+    sim2.stop()
+
 
 if __name__ == "__main__":
-    randomConfig()   
+    multiSim()   
