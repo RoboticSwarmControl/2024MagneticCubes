@@ -43,6 +43,7 @@ class Simulation:
         self.space = pymunk.Space()
         self.space.gravity = (0, 0)  # gravity doesn't exist
         self.space.damping = 0.2  # simulate top-down gravity with damping
+        self.__createBoundaries__()
         self.window = None
 
         self.stopped = Event()
@@ -167,7 +168,6 @@ class Simulation:
         pygame.display.set_caption("magnetic cube simulator")
         drawOptions = pymunk.pygame_util.DrawOptions(self.window)
         clock = pygame.time.Clock()
-        self.__createBoundaries__()
         self.started.set()
         # Simulation loop
         while self.started.isSet():
