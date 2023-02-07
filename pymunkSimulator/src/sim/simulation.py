@@ -20,7 +20,7 @@ class Simulation:
     Top-level class for interacting with the Simulation
     """
     FPS = 120  # Determines the visual speed of the simulation has no effect when drawing is disabled
-    STEP_TIME = 0.02  # bigger steps make sim faster but unprecise/unstable 0.02 seems reasonable
+    STEP_TIME = 0.02  #(in seconds) bigger steps make sim faster but unprecise/unstable 0.02 seems reasonable
     DEBUG = True
 
     def __init__(self, width=800, height=800, drawing=True, userInputs=True):
@@ -95,7 +95,7 @@ class Simulation:
         Notifies the simulation to do one pivot walking cycle and returns when the motion finished executing.
 
         Parameters:
-            direction: direction of pivot walk. Either motion.LEFT (-1) or motion.RIGHT (1)
+            direction: direction of pivot walk. Either PivotWalk.LEFT (-1) or PivotWalk.RIGHT (1)
         """
         motion = PivotWalk(direction)
         self.controller.add(motion)
@@ -143,6 +143,26 @@ class Simulation:
         self.started.wait(1)
         if Simulation.DEBUG: print("Simulation started.")
 
+    def start_onMac(self, callable=None):
+        """
+        Starts the simulation on this thread and executes the callable on a new thread.
+        Only use this function when using macOS, because macOS only allows pygame to run on the main thread.
+        Once you started you can only stop but not restart, because of this disable/enableDrawing wont work.
+        You can set the drawing option when initializing the Simulation.
+
+        Parameters:
+            callable: this function gets called on a new thread this simulation gets passed as parameter
+        """
+        if (self.started.isSet()):
+            print("Simulation already running.")
+            return
+        if not callable == None:
+            controllThread = Thread(target=callable, args=[self], daemon=True)
+            controllThread.start()
+        self.stopped.clear()
+        if Simulation.DEBUG: print("Simulation started.")
+        self.__run__()
+
     def stop(self):
         """
         Stops Simulation. pygame will also terminate. Retruns when terminated.
@@ -156,7 +176,7 @@ class Simulation:
 
     def disableDraw(self):
         """
-        Disables the drawing. For that simulation will be restarted.
+        Disables drawing. If the simulation is running it will be restarted.
         """
         wasRunning = self.started.is_set()
         if wasRunning: self.stop()
@@ -165,7 +185,7 @@ class Simulation:
 
     def enableDraw(self):
         """
-        Enables the drawing. For that simulation will be restarted.
+        Enables drawing. If the simulation is running it will be restarted.
         """
         wasRunning = self.started.is_set()
         if wasRunning: self.stop()
