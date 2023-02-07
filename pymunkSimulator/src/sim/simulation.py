@@ -6,10 +6,9 @@ Holds the Simulation class
 
 import pygame
 import pymunk
-import pymunk.pygame_util
 import math
 from threading import Thread, Event
-from util import Color
+from util import Color, DEBUG
 from state import Configuration, Cube
 from sim.statehandler import StateHandler
 from sim.motion import PivotWalk, Rotation, MotionController
@@ -20,8 +19,6 @@ class Simulation:
     Top-level class for interacting with the Simulation
     """
     FPS = 120  # Determines the visual speed of the simulation has no effect when drawing is disabled
-    STEP_TIME = 0.02  #(in seconds) bigger steps make sim faster but unprecise/unstable 0.02 seems reasonable
-    DEBUG = True
 
     def __init__(self, width=800, height=800, drawing=True, userInputs=True):
         """
@@ -38,16 +35,10 @@ class Simulation:
         self.drawingActive = drawing
         self.userInputsActive = userInputs
 
-        self.space = pymunk.Space()
-        self.space.gravity = (0, 0)  # gravity doesn't exist
-        self.space.damping = 0.2  # simulate top-down gravity with damping
-        self.__createBoundaries__()
-        self.window = None
-
         self.stopped = Event()
         self.started = Event()
 
-        self.stateHandler = StateHandler(self.space)
+        self.stateHandler = StateHandler(width, height)
         self.controller = MotionController()
 
     def loadConfig(self, newConfig: Configuration) -> Configuration:
@@ -55,14 +46,16 @@ class Simulation:
         Notifies the simulation to load a new configuration on the next update.
         """
         self.stateHandler.loadConfig(newConfig)
-        if Simulation.DEBUG: print("Configuration loaded.")
+        if DEBUG:
+            print("Configuration loaded.")
 
     def saveConfig(self):
         """
         Returns the configuration the simulation currently has.
         """
         save = self.stateHandler.saveConfig()
-        if Simulation.DEBUG: print("Configuration saved.")
+        if DEBUG:
+            print("Configuration saved.")
         return save
 
     def addCube(self, cube: Cube, pos):
@@ -76,7 +69,8 @@ class Simulation:
         config = self.stateHandler.saveConfig()
         config.addCube(cube, pos)
         self.stateHandler.loadConfig(config)
-        if Simulation.DEBUG: print("Added cube" + str(cube) + "to current configuration")
+        if DEBUG:
+            print("Added cube" + str(cube) + "to current configuration")
 
     def removeCube(self, cube: Cube):
         """
@@ -88,7 +82,8 @@ class Simulation:
         config = self.stateHandler.saveConfig()
         config.removeCube(cube)
         self.stateHandler.loadConfig(config)
-        if Simulation.DEBUG: print("Removed cube" + str(cube) + "from current configuration")
+        if DEBUG:
+            print("Removed cube" + str(cube) + "from current configuration")
 
     def pivotWalk(self, direction) -> bool:
         """
@@ -141,7 +136,8 @@ class Simulation:
         thread.start()
         self.stopped.clear()
         self.started.wait(1)
-        if Simulation.DEBUG: print("Simulation started.")
+        if DEBUG:
+            print("Simulation started.")
 
     def start_onMac(self, callable=None):
         """
@@ -160,7 +156,8 @@ class Simulation:
             controllThread = Thread(target=callable, args=[self], daemon=True)
             controllThread.start()
         self.stopped.clear()
-        if Simulation.DEBUG: print("Simulation started.")
+        if DEBUG:
+            print("Simulation started.")
         self.__run__()
 
     def stop(self):
@@ -172,88 +169,90 @@ class Simulation:
             return
         self.started.clear()
         self.stopped.wait(1)
-        if Simulation.DEBUG: print("Simulation stopped.")
+        if DEBUG:
+            print("Simulation stopped.")
 
     def disableDraw(self):
         """
         Disables drawing. If the simulation is running it will be restarted.
         """
         wasRunning = self.started.is_set()
-        if wasRunning: self.stop()
+        if wasRunning:
+            self.stop()
         self.drawingActive = False
-        if wasRunning: self.start()
+        if wasRunning:
+            self.start()
 
     def enableDraw(self):
         """
         Enables drawing. If the simulation is running it will be restarted.
         """
         wasRunning = self.started.is_set()
-        if wasRunning: self.stop()
+        if wasRunning:
+            self.stop()
         self.drawingActive = True
-        if wasRunning: self.start()
+        if wasRunning:
+            self.start()
 
     def __run__(self):
         # initialisation
         if self.drawingActive:
             pygame.init()
-            self.window = pygame.display.set_mode((self.width, self.height))
+            window = pygame.display.set_mode((self.width, self.height))
             pygame.display.set_caption("magnetic cube simulator")
-            drawOptions = pymunk.pygame_util.DrawOptions(self.window)
             clock = pygame.time.Clock()
         self.started.set()
         # Simulation loop
         while self.started.isSet():
             if (self.userInputsActive and self.drawingActive):
                 self.__userInputs__()
-            self.__update__()
-            self.space.step(Simulation.STEP_TIME)
+            change = self.controller.nextStep()
+            self.stateHandler.update(change[0], change[1])
             if self.drawingActive:
-                self.__draw__(drawOptions)
+                self.__draw__(window)
                 clock.tick(Simulation.FPS)
         if self.drawingActive:
             pygame.quit()
         self.stopped.set()
 
-    def __update__(self):
-        change = self.controller.nextStep()
-        self.stateHandler.update(change[0], change[1])
-
-    def __draw__(self, drawOptions):
-        self.window.fill("white")
-        self.space.debug_draw(drawOptions)
-        # draw the magnets and CenterOfGravity-- for all cubes
-        for cube in self.stateHandler.getShapes():  # COM
-            pygame.draw.circle(self.window, Color.BLACK,  cube.body.local_to_world(
-                cube.body.center_of_gravity), 7)
-
-        for cube in self.stateHandler.getShapes():
-            # magnets
-            for i, magP in enumerate(cube.magnetPos):
-                if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
+    def __draw__(self, window: pygame.Surface):
+        window.fill(Color.WHITE)
+        # draw the walls
+        for shape in self.stateHandler.getBoundaries():
+            pygame.draw.line(window, Color.DARKGREY, shape.body.local_to_world(
+                shape.a), shape.body.local_to_world(shape.b), StateHandler.BOUNDARIE_RAD)
+        # draw the cubes with magnets and CenterOfGravity
+        for shape in self.stateHandler.getShapes():
+            verts = [shape.body.local_to_world(lv) for lv in shape.get_vertices()]
+            pygame.draw.polygon(window, Color.LIGHTBROWN, verts)
+            pygame.draw.lines(window, Color.DARKGREY, True, verts, 2)
+            pygame.draw.circle(window, Color.BLACK, shape.body.local_to_world(
+                shape.body.center_of_gravity), 6)
+            for i, magP in enumerate(shape.magnetPos):
+                if 0 < magP[0]*shape.magnetOri[i][0]+magP[1]*shape.magnetOri[i][1]:
                     magcolor = Color.GREEN
                 else:
                     magcolor = Color.RED
-                pygame.draw.circle(self.window, magcolor,
-                                   cube.body.local_to_world(magP), 5)
-
+                pygame.draw.circle(
+                    window, magcolor, shape.body.local_to_world(magP), 5)
         # draw the connections
-        for i, poly in enumerate(self.stateHandler.polyominoes):
+        for i, poly in enumerate(self.stateHandler.getPolyominoes()):
             for cube in poly.getCubes():
                 connects = poly.getConnections(cube)
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue
-                    pygame.draw.line(self.window, Color.SASHACOLORS[i], self.stateHandler.getShape(cube).body.local_to_world(
+                    pygame.draw.line(window, Color.SASHACOLORS[i], self.stateHandler.getShape(cube).body.local_to_world(
                         (0, 0)), self.stateHandler.getShape(cubeCon).body.local_to_world((0, 0)), 3)
-
         # draw the compass
-        pygame.draw.circle(self.window, Color.LIGHTBROWN,  (10, 10), 11)
-        pygame.draw.line(self.window, "red",   (10, 10), (10+10*math.cos(
-            self.stateHandler.magAngle), 10+10*math.sin(self.stateHandler.magAngle)), 3)
-        pygame.draw.line(self.window, "green", (10, 10), (10-10*math.cos(
-            self.stateHandler.magAngle), 10-10*math.sin(self.stateHandler.magAngle)), 3)
-
-        pygame.display.update()  # draw to the screen
+        pygame.draw.circle(window, Color.LIGHTGRAY,  (12, 12), 12)
+        pygame.draw.circle(window, Color.LIGHTBROWN,  (12, 12), 10)
+        pygame.draw.line(window, Color.GREEN,   (12, 12), (12+12*math.cos(
+            self.stateHandler.magAngle), 12+12*math.sin(self.stateHandler.magAngle)), 3)
+        pygame.draw.line(window, Color.RED, (12, 12), (12-12*math.cos(
+            self.stateHandler.magAngle), 12-12*math.sin(self.stateHandler.magAngle)), 3)
+        # update the screen
+        pygame.display.update()
         return
 
     def __userInputs__(self):
@@ -280,16 +279,3 @@ class Simulation:
             elif event.type == pygame.QUIT:
                 self.started.clear()
                 break
-
-    def __createBoundaries__(self):
-        walls = [
-            pymunk.Segment(self.space.static_body, (0,0), (self.width,0), 5),
-            pymunk.Segment(self.space.static_body, (self.width,0), (self.width, self.height), 5),
-            pymunk.Segment(self.space.static_body, (self.width, self.height), (0, self.height), 5),
-            pymunk.Segment(self.space.static_body, (0, self.height), (0,0), 5)
-        ]
-        for wall in walls:
-            wall.elasticity = 0.4
-            wall.friction = 0.5
-            self.space.add(wall)
-        

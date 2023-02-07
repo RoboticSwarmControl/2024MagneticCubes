@@ -10,7 +10,8 @@ import math
 from threading import Event 
 from queue import Queue
 
-import sim.simulation as sim
+from util import DEBUG
+from sim.statehandler import StateHandler
 
 class MotionController:
     """
@@ -47,7 +48,7 @@ class MotionController:
             if not self.currentMotion == None:
                 self.currentMotion.executed.set()
                 self.motionsDone.append(self.currentMotion)
-                if sim.Simulation.DEBUG: print("Executed: " + str(self.currentMotion))
+                if DEBUG: print("Executed: " + str(self.currentMotion))
             if self.motionsOpen.empty():
                 self.currentMotion = None
                 return (0,0)
@@ -100,7 +101,7 @@ class PivotWalk(Motion):
         steps = []
         pivotRotationSeq = Rotation(self.direction * PivotWalk.PIVOT_ANG).stepSequence()
         pivotRotationSeqInv = Rotation(-2 * self.direction * PivotWalk.PIVOT_ANG).stepSequence()
-        zeros = [(0,0) * math.floor(PivotWalk.PIVOT_STALLS / sim.Simulation.STEP_TIME)]
+        zeros = [(0,0) * math.floor(PivotWalk.PIVOT_STALLS / StateHandler.STEP_TIME)]
         #Assamble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
         steps.append((0,-1))
         steps.extend(pivotRotationSeq)
@@ -134,7 +135,7 @@ class Rotation(Motion):
             The steps per updates necessary to execute this motion
         """
         steps = []
-        k = math.floor(abs(self.angle) / (Rotation.ANG_VELOCITY * sim.Simulation.STEP_TIME))
+        k = math.floor(abs(self.angle) / (Rotation.ANG_VELOCITY * StateHandler.STEP_TIME))
         angPerStep = self.angle / k
         for i in range(k):
             steps.append((angPerStep, 0))
