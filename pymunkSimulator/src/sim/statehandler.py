@@ -55,8 +55,7 @@ class StateHandler:
         for cube, shapes in self.cube_shapes.items():
             cube_pos[cube] = shapes[0].body.position
             cube_meta[cube] = (shapes[0].body.angle, shapes[0].body.velocity)
-        config = Configuration(self.magAngle, self.magElevation, cube_pos, cube_meta)
-        config.polyominoes = self.polyominoes
+        config = Configuration(self.magAngle, self.magElevation, cube_pos, self.polyominoes, cube_meta)
         self.updateLock.release()
         return config
 
