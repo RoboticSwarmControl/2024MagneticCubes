@@ -51,9 +51,11 @@ class StateHandler:
     def saveConfig(self) -> Configuration:
         self.updateLock.acquire()
         cube_pos = {}
+        cube_meta = {}
         for cube, shapes in self.cube_shapes.items():
             cube_pos[cube] = shapes[0].body.position
-        config = Configuration(self.magAngle, self.magElevation, cube_pos)
+            cube_meta[cube] = (shapes[0].body.angle, shapes[0].body.velocity)
+        config = Configuration(self.magAngle, self.magElevation, cube_pos, cube_meta)
         config.polyominoes = self.polyominoes
         self.updateLock.release()
         return config
@@ -246,9 +248,12 @@ class StateHandler:
             self.__remove__(cube)
         self.magAngle = self.configToLoad.magAngle
         self.magElevation = self.configToLoad.magElevation
-        self.polyominoes = self.configToLoad.polyominoes
-        for cube, pos in self.configToLoad.cubePosMap.items():
-            self.__add__(cube, pos)
+        self.polyominoes = self.configToLoad.getPolyominoes()
+        for cube in self.configToLoad.getCubes():
+            pos = self.configToLoad.getPosition(cube)
+            ang = self.configToLoad.getAngle(cube)
+            vel = self.configToLoad.getVelocity(cube)
+            self.__add__(cube, pos, ang, vel)
         self.configToLoad = None
 
     def __remove__(self, cube: Cube):
@@ -261,16 +266,17 @@ class StateHandler:
         del self.magConnect[cube]
         del self.sensor_cube[shapes[1]]
 
-    def __add__(self, cube: Cube, pos):
+    def __add__(self, cube: Cube, pos, ang, vel):
         if self.isRegistered(cube):
             if DEBUG: print("Adding failed. " + str(cube) + " is already registered.")
-            return          
+            return
+        # create the cube body      
         body = pymunk.Body()
         body.position = pos
-        body.angle = self.magAngle
+        body.angle = ang
+        body.velocity = vel
         # create the cube shape
         shape = pymunk.Poly(body, [(-Cube.RAD,-Cube.RAD),(-Cube.RAD,Cube.RAD),(Cube.RAD,Cube.RAD),(Cube.RAD,-Cube.RAD)],radius = 1)
-        #shape = pymunk.Poly.create_box(body,(2*rad,2*rad), radius = 1)
         shape.mass = 10
         shape.elasticity = 0.4
         shape.friction = 0.4

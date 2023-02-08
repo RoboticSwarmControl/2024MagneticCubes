@@ -177,7 +177,7 @@ class Configuration:
     if it was loaded and updated by a simulation
     """
 
-    def __init__(self, ang, elev, cube_pos):
+    def __init__(self, ang, elev, cube_pos, cube_meta=None):
         """
         creates configuration
 
@@ -186,32 +186,36 @@ class Configuration:
             elev: elevation of magnetic field
             cube_pos: dictionary with key=cube value=postion (x,y)
         """
-        self.cubePosMap = cube_pos
+        self.cube_data = {}
+        for cube, pos in cube_pos.items():
+            if cube_meta == None:
+                meta = (ang, (0,0))
+            else:
+                meta = cube_meta[cube]
+            self.cube_data[cube] = (pos, meta[0], meta[1])
         self.magAngle = ang  #orientation of magnetic field (in radians)
         self.magElevation = elev
         self.polyominoes = []
 
-    def addCube(self, cube, pos):
-        self.cubePosMap[cube] = pos
-
-    def removeCube(self, cube):
-        del self.cubePosMap[cube]
-
     def getCubes(self):
-        return list(self.cubePosMap.keys())
+        return list(self.cube_data.keys())
     
     def getPolyominoes(self):
         return self.polyominoes
 
     def getPosition(self, cube):
-        if not cube in self.cubePosMap:
-            return
-        return self.cubePosMap[cube] 
+        return self.cube_data[cube][0]
     
+    def getAngle(self, cube):
+        return self.cube_data[cube][1]
+
+    def getVelocity(self, cube):
+        return self.cube_data[cube][2]
+
     def nearestWall(self, cube, size) -> Direction:
-        if not cube in self.cubePosMap:
+        if not cube in self.cube_data:
             return
-        pos = self.cubePosMap[cube]
+        pos = self.cube_data[cube]
         dis = [pos[1], abs(size[0] - pos[0]), abs(size[1] - pos[1]), pos[0]]
         return Direction(dis.index(min(dis)))#
     
@@ -219,7 +223,7 @@ class Configuration:
         return hash(self) == hash(__o)
 
     def __hash__(self) -> int:
-        toHash = [(c, p) for c, p in self.cubePosMap.items()]
+        toHash = [(c, p) for c, p in self.cube_data.items()]
         toHash.sort(key=lambda t: t[0].id)
         toHash.append(self.magAngle)
         return hash(tuple(toHash))
