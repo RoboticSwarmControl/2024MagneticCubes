@@ -3,6 +3,7 @@ Holds the Configuration class
 
 @author: Aaron T Becker, Kjell Keune
 """
+from queue import Queue
 import random
 
 from util import *
@@ -24,10 +25,13 @@ class Cube:
         Cube.nextid += 1
 
     def __str__(self):
-        return "Cube:" + str(self.id)
+        return f"Cube{self.id}[{self.type}]"
 
     def __repr__(self):
-        return "Cube:" + str(self.id)
+        return f"Cube{self.id}[{self.type}]"
+
+    def __hash__(self) -> int:
+        return hash(self.id)
 
     @staticmethod
     def magForce1on2(p1, p2, m1, m2):  # https://en.wikipedia.org/wiki/Magnetic_moment
@@ -50,20 +54,21 @@ class Cube:
 
 class Polyomino:
 
+    nextId = 0
+
     def __init__(self, root: Cube):
-        self.posCube = {(0, 0): root}
-        self.cubePos = {root: (0, 0)}
+        self.__pos_cube = {(0, 0): root}
+        self.__cube_pos = {root: (0, 0)}
         self.valid = True
+        self.id = Polyomino.nextId
+        Polyomino.nextId += 1
         # The root should allways be the most left most bottom cube.
 
     def connect(self, cubeA: Cube, cubeB: Cube, edgeB: Direction):
-        # check if cubes exist
-        if not cubeB in self.cubePos:
-            return False
-        if cubeA in self.cubePos:
+        if not self.contains(cubeB):
             return False
         # determine postion of cubeA
-        posB = self.cubePos[cubeB]
+        posB = self.__cube_pos[cubeB]
         if edgeB == Direction.NORTH:
             posA = (posB[0], posB[1] + 1)
         elif edgeB == Direction.EAST:
@@ -73,11 +78,11 @@ class Polyomino:
         elif edgeB == Direction.WEST:
             posA = (posB[0] - 1, posB[1])
         # check if conection is possible
-        if posA in self.posCube:
+        if posA in self.__pos_cube:
             return False
         # add cubeA
-        self.cubePos[cubeA] = posA
-        self.posCube[posA] = cubeA
+        self.__cube_pos[cubeA] = posA
+        self.__pos_cube[posA] = cubeA
         # update the root
         if posA[0] < 0 or (posA[0] == 0 and posA[1] < 0):
             self.__updateRoot__(cubeA)
@@ -85,11 +90,11 @@ class Polyomino:
         neighborW = self.getConnection(cubeA, Direction.WEST)
         neighborE = self.getConnection(cubeA, Direction.EAST)
         if (neighborW != None and neighborW.type == cubeA.type) or (neighborE != None and neighborE.type == cubeA.type):
-            self.valid == False
+            self.valid = False
         return True
 
     def remove(self, cube: Cube):
-        pos = self.cubePos[cube]
+        pos = self.__cube_pos[cube]
         # remove if polyomino doesnt break
         return
 
@@ -100,7 +105,7 @@ class Polyomino:
         return connects
 
     def getConnection(self, cube: Cube, edge: Direction) -> Cube:
-        pos = self.cubePos[cube]
+        pos = self.__cube_pos[cube]
         if edge.value % 2 == 0:
             dx = 0
             dy = edge.value - 1
@@ -108,34 +113,42 @@ class Polyomino:
             dx = edge.value - 2
             dy = 0
         try:
-            adj = self.posCube[(pos[0] - dx, pos[1] - dy)]
+            adj = self.__pos_cube[(pos[0] - dx, pos[1] - dy)]
         except KeyError:
             adj = None
         return adj
 
     def getCubes(self):
-        return list(self.cubePos.keys())
+        return list(self.__cube_pos.keys())
 
     def isTrivial(self) -> bool:
-        return len(self.cubePos) == 1
-
-    def isIllegal(self):
-        return not self.valid
+        return len(self.__cube_pos) == 1
 
     def size(self) -> int:
-        return len(self.cubePos)
+        return len(self.__cube_pos)
 
     def contains(self, cube):
-        return cube in self.cubePos
+        return cube in self.__cube_pos
+
+    def clone(self):
+        clone = Polyomino(self.__getRoot__())
+        for cube, pos in self.__cube_pos.items():
+            clone.__cube_pos[cube] = pos
+            clone.__pos_cube[pos] = cube
+        clone.valid = self.valid
+        return clone
 
     def __updateRoot__(self, newRoot):
-        self.posCube.clear()
-        posUpdate = self.cubePos[newRoot]
+        self.__pos_cube.clear()
+        posUpdate = self.__cube_pos[newRoot]
         for cube in self.getCubes():
-            posOld = self.cubePos[cube]
+            posOld = self.__cube_pos[cube]
             posNew = (posOld[0] - posUpdate[0], posOld[1] - posUpdate[1])
-            self.posCube[posNew] = cube
-            self.cubePos[cube] = posNew
+            self.__pos_cube[posNew] = cube
+            self.__cube_pos[cube] = posNew
+
+    def __getRoot__(self):
+        return self.__pos_cube[(0, 0)]
 
     def __eq__(self, __o: object) -> bool:
         if not type(__o) is Polyomino:
@@ -143,27 +156,49 @@ class Polyomino:
         if self.size() != __o.size():
             return False
         for cubeT in self.getCubes():
-            posT = self.cubePos[cubeT]
+            posT = self.__cube_pos[cubeT]
             try:
-                if cubeT.type != __o.posCube[posT].type:
+                if cubeT.type != __o.__pos_cube[posT].type:
                     return False
             except KeyError:
                 return False
         return True
 
     def __hash__(self) -> int:
-        toHash = [(p, c.type) for p, c in self.posCube.items()]
+        toHash = [(p, c.type) for p, c in self.__pos_cube.items()]
         toHash.sort(key=lambda t: t[0])
         return hash(tuple(toHash))
 
-    def __getRoot__(self):
-        return self.posCube[(0, 0)]
-
     def __str__(self) -> str:
-        return "Polyomino: " + str(self.cubePos)
+        return f"Polyomino{self.id}\n{self.__pos_cube}"
 
     def __repr__(self) -> str:
-        return "Polyomino: " + str(self.cubePos)
+        return f"Polyomino{self.id}\n{self.__pos_cube}"
+    
+    @staticmethod
+    def connectPoly(polyA, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction):
+        if ((not polyA.contains(cubeA)) or (not polyB.contains(cubeB))):
+            return
+        poly = polyB.clone()
+        if not poly.connect(cubeA, cubeB, edgeB):
+            return None
+        done = set()
+        next = Queue()
+        done.add(cubeA)
+        next.put(cubeA)
+        while not next.empty():
+            current = next.get()
+            for i, adj in enumerate(polyA.getConnections(current)):
+                if (adj == None) or (adj in done):
+                    continue
+                if not poly.connect(adj, current, Direction(i)):
+                    return None
+                done.add(adj)
+                next.put(adj)
+        return poly
+            
+
+
 
 
 class Configuration:

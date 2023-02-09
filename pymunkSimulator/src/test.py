@@ -81,6 +81,22 @@ def forceSideConect():
     print("Connects: \n" + str(sim.stateHandler.magConnect))
     print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
 
+def polyToPolyConnect():
+    c0 = Cube(0)
+    c1 = Cube(1)
+    c2 = Cube(1)
+    c3 = Cube(0)
+    c4 = Cube(1)
+    c5 = Cube(1)
+    p1 = Polyomino(c0)
+    p1.connect(c1, c0, Direction.EAST)
+    p1.connect(c2, c1, Direction.NORTH)
+    p2 = Polyomino(c5)
+    p2.connect(c4, c5, Direction.SOUTH)
+    p2.connect(c3, c4, Direction.WEST)
+    print(p1)
+    print(p2)
+    print(Polyomino.connectPoly(p2, c5, p1, c0, Direction.WEST))
 
 def connectAndPoly():
     sim = Simulation(1000,1000)
@@ -117,4 +133,4 @@ def configPoly():
     print("contain p2:", con1.contains(p2))
 
 if __name__ == "__main__":
-    configPoly()   
+    polyToPolyConnect()   
