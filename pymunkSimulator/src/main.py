@@ -60,7 +60,7 @@ def demo1():
     cube2 = Cube(1)
     pos2 = (200, 150)
     t0 = time.time()
-    sim = Simulation(drawing=True)
+    sim = Simulation(drawing=False)
     sim.start()
     t1 = time.time()
     sim.loadConfig(Configuration(math.radians(90), 0,{cube1: pos1,cube2: pos2}))

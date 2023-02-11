@@ -53,27 +53,24 @@ class MotionController:
                 self.currentMotion = None
                 return (0,0)
             self.currentMotion = self.motionsOpen.get()
-            for i in self.currentMotion.stepSequence():
+            for i in self.currentMotion.stepSequence:
                 self.steps.put(i)
             
         return self.steps.get()
 
 class Motion:
     """
-    Abstract super class. All motions have an executed event.
+    Abstract super class. All motions have an executed event and a stepSequence.
     """
 
     def __init__(self):
         self.executed = Event()
-        self.executed.clear()
-    
-    def stepSequence(self):
-        return [(0,0)]
+        self.stepSequence = [(0,0)]
 
 
 class PivotWalk(Motion):
     """
-    A pivot walking step either left or right.
+    A pivot walking step either left or right with a pivot-angle.
     """
     LEFT = -1
     RIGHT = 1
@@ -85,6 +82,13 @@ class PivotWalk(Motion):
         super().__init__()
         self.direction = direction
         self.pivotAng = pivotAng
+        if pivotAng == PivotWalk.DEFAULT_PIVOT_ANG:
+            if direction == PivotWalk.LEFT:
+                self.stepSequence = DEFAULT_PIVOT_STEPSEQ_LEFT
+            else:
+                self.stepSequence =  DEFAULT_PIVOT_STEPSEQ_RIGHT
+        else:
+            self.stepSequence = PivotWalk.__stepSequence__(self.direction, self.pivotAng)
 
     def __str__(self):
         str = "PivotWalk("
@@ -92,26 +96,13 @@ class PivotWalk(Motion):
             str += "LEFT"
         else:
             str += "RIGHT"
-        return str + ")"
-
-    def stepSequence(self):
-        if self.pivotAng == PivotWalk.DEFAULT_PIVOT_ANG:
-            if self.direction == PivotWalk.LEFT:
-                return DEFAULT_STEPSEQ_LEFT
-            else:
-                return DEFAULT_STEPSEQ_RIGHT
-        else:
-            return PivotWalk.__stepSequence__(self.direction, self.pivotAng)
+        return str + ")"     
 
     @staticmethod
     def __stepSequence__(direction, pivotAng):
-        """
-        Returns:
-            The steps per updates necessary to execute this motion
-        """
         steps = []
-        pivotRotationSeq = Rotation(direction * pivotAng).stepSequence()
-        pivotRotationSeqInv = Rotation(-2 * direction * pivotAng).stepSequence()
+        pivotRotationSeq = Rotation(direction * pivotAng).stepSequence
+        pivotRotationSeqInv = Rotation(-2 * direction * pivotAng).stepSequence
         zeros = [(0,0) * math.floor(PivotWalk.PIVOT_STALLS / StateHandler.STEP_TIME)]
         #Assamble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
         steps.append((0,-1))
@@ -136,22 +127,20 @@ class Rotation(Motion):
     def __init__(self, angle):
         super().__init__()
         self.angle = angle
+        self.stepSequence = Rotation.__stepSequence__(angle)
 
     def __str__(self):
         return "Rotation(" + str(math.degrees(self.angle)) + "°)"
 
-    def stepSequence(self):
-        """
-        Returns:
-            The steps per updates necessary to execute this motion
-        """
+    @staticmethod
+    def __stepSequence__(angle):
         steps = []
-        k = math.floor(abs(self.angle) / (Rotation.ANG_VELOCITY * StateHandler.STEP_TIME))
-        angPerStep = self.angle / k
+        k = math.floor(abs(angle) / (Rotation.ANG_VELOCITY * StateHandler.STEP_TIME))
+        angPerStep = angle / k
         for i in range(k):
             steps.append((angPerStep, 0))
-        steps.append((self.angle - k * angPerStep, 0))
+        steps.append((angle - k * angPerStep, 0))
         return steps
     
-DEFAULT_STEPSEQ_LEFT = PivotWalk.__stepSequence__(PivotWalk.LEFT, PivotWalk.DEFAULT_PIVOT_ANG)
-DEFAULT_STEPSEQ_RIGHT = PivotWalk.__stepSequence__(PivotWalk.RIGHT, PivotWalk.DEFAULT_PIVOT_ANG)
+DEFAULT_PIVOT_STEPSEQ_LEFT = PivotWalk.__stepSequence__(PivotWalk.LEFT, PivotWalk.DEFAULT_PIVOT_ANG)
+DEFAULT_PIVOT_STEPSEQ_RIGHT = PivotWalk.__stepSequence__(PivotWalk.RIGHT, PivotWalk.DEFAULT_PIVOT_ANG)
