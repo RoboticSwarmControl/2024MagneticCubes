@@ -40,7 +40,7 @@ class MotionController:
         """
         Returns:
             The next step to execute the current motion as a tupel (angle update, elevation update)
-            Returns (0,0) if all the motions have been executed
+            Returns (0,0) if all motions have been executed
         
         Note that the return values are not absolute they need to be added to the current orientation of the magneticfield
         """
@@ -78,12 +78,13 @@ class PivotWalk(Motion):
     LEFT = -1
     RIGHT = 1
 
-    PIVOT_ANG = math.radians(12) #in radians
+    DEFAULT_PIVOT_ANG = math.radians(12) #in radians
     PIVOT_STALLS = 0.2 #zerochanges/update when pivotwalking
 
-    def __init__(self, direction):
+    def __init__(self, direction, pivotAng=DEFAULT_PIVOT_ANG):
         super().__init__()
         self.direction = direction
+        self.pivotAng = pivotAng
 
     def __str__(self):
         str = "PivotWalk("
@@ -94,13 +95,23 @@ class PivotWalk(Motion):
         return str + ")"
 
     def stepSequence(self):
+        if self.pivotAng == PivotWalk.DEFAULT_PIVOT_ANG:
+            if self.direction == PivotWalk.LEFT:
+                return DEFAULT_STEPSEQ_LEFT
+            else:
+                return DEFAULT_STEPSEQ_RIGHT
+        else:
+            return PivotWalk.__stepSequence__(self.direction, self.pivotAng)
+
+    @staticmethod
+    def __stepSequence__(direction, pivotAng):
         """
         Returns:
             The steps per updates necessary to execute this motion
         """
         steps = []
-        pivotRotationSeq = Rotation(self.direction * PivotWalk.PIVOT_ANG).stepSequence()
-        pivotRotationSeqInv = Rotation(-2 * self.direction * PivotWalk.PIVOT_ANG).stepSequence()
+        pivotRotationSeq = Rotation(direction * pivotAng).stepSequence()
+        pivotRotationSeqInv = Rotation(-2 * direction * pivotAng).stepSequence()
         zeros = [(0,0) * math.floor(PivotWalk.PIVOT_STALLS / StateHandler.STEP_TIME)]
         #Assamble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
         steps.append((0,-1))
@@ -141,3 +152,6 @@ class Rotation(Motion):
             steps.append((angPerStep, 0))
         steps.append((self.angle - k * angPerStep, 0))
         return steps
+    
+DEFAULT_STEPSEQ_LEFT = PivotWalk.__stepSequence__(PivotWalk.LEFT, PivotWalk.DEFAULT_PIVOT_ANG)
+DEFAULT_STEPSEQ_RIGHT = PivotWalk.__stepSequence__(PivotWalk.RIGHT, PivotWalk.DEFAULT_PIVOT_ANG)

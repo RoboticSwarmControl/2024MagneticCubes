@@ -63,7 +63,7 @@ def demo1():
     sim = Simulation(drawing=True)
     sim.start()
     t1 = time.time()
-    sim.loadConfig(Configuration(math.radians(90),0,{cube1: pos1,cube2: pos2}))
+    sim.loadConfig(Configuration(math.radians(90), 0,{cube1: pos1,cube2: pos2}))
     d0 = distance(pos1, pos2)
     while True:
         sim.pivotWalk(PivotWalk.LEFT)
@@ -72,11 +72,11 @@ def demo1():
         d = distance(config.getPosition(cube1), config.getPosition(cube2))
         if not abs(d - d0) < 5:
             break
-    savepoiont = sim.saveConfig()
+    savepoint = sim.saveConfig()
     sim.rotate(math.radians(-90))
     for i in range(4):
         sim.pivotWalk(PivotWalk.LEFT)
-    sim.loadConfig(savepoiont)
+    sim.loadConfig(savepoint)
     sim.rotate(math.radians(-90))
     for i in range(6):
         sim.pivotWalk(PivotWalk.RIGHT)      

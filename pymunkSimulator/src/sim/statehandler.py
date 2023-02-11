@@ -6,7 +6,7 @@ Holds the StateHandler class
 """
 import pymunk
 import math
-from threading import Lock
+from threading import Lock, Event
 from queue import Queue
 
 from util import *
@@ -44,8 +44,13 @@ class StateHandler:
 
         self.configToLoad = None
         self.updateLock = Lock()
+        self.loaded = Event()
 
     def loadConfig(self, newConfig: Configuration):
+        self.configToLoad = newConfig
+        self.loaded.wait(1)
+
+    def loadConfig_nowait(self, newConfig: Configuration):
         self.configToLoad = newConfig
 
     def saveConfig(self) -> Configuration:
@@ -254,6 +259,8 @@ class StateHandler:
             vel = self.configToLoad.getVelocity(cube)
             self.__add__(cube, pos, ang, vel)
         self.configToLoad = None
+        self.loaded.set()
+        self.loaded.clear()
 
     def __remove__(self, cube: Cube):
         if not self.isRegistered(cube):

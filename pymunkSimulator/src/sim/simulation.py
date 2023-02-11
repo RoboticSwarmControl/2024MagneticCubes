@@ -227,7 +227,7 @@ class Simulation:
             pygame.draw.polygon(window, Color.LIGHTBROWN, verts)
             pygame.draw.lines(window, Color.DARKGREY, True, verts, 2)
             pygame.draw.circle(window, Color.BLACK, shape.body.local_to_world(
-                shape.body.center_of_gravity), 6)
+                shape.body.center_of_gravity), 8)
             for i, magP in enumerate(shape.magnetPos):
                 if 0 < magP[0]*shape.magnetOri[i][0]+magP[1]*shape.magnetOri[i][1]:
                     magcolor = Color.GREEN
@@ -271,11 +271,11 @@ class Simulation:
                 if event.button == 1:  # 'left click' places cube type=0
                     config = self.stateHandler.saveConfig()
                     config.addCube(Cube(0), mouse_pos)
-                    self.stateHandler.loadConfig(config)
+                    self.stateHandler.loadConfig_nowait(config)
                 elif event.button == 3:  # 'right click' places cube type=1
                     config = self.stateHandler.saveConfig()
                     config.addCube(Cube(1), mouse_pos)
-                    self.stateHandler.loadConfig(config)
+                    self.stateHandler.loadConfig_nowait(config)
             elif event.type == pygame.QUIT:
                 self.started.clear()
                 break
