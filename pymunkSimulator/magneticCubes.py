@@ -29,7 +29,7 @@ import pygame
 import pymunk
 import pymunk.pygame_util
 import math
-
+# values were
 
 pygame.init()
 
@@ -38,6 +38,12 @@ window = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("magnetic cube simulator")
 MRAD =15  #distance of magnet from center of cube
 rad = 20 #half length of side of cube
+sc = 20000000  # was 20000000
+fmag = 1000  #was 1000  #Global magnetic force
+shapeFriction = 0.4
+spaceDamping = 1.0  #simulate top-down gravity with damping  was 0.2.  0 makes things not move.  1.0 they bounce forever.
+# A value of 0.9 means that each body will lose 10% of its velocity per second. Defaults to 1. Like gravity, it can be overridden on a per body basis.
+
 
 def draw(space, window, draw_options,cubes,magAngle,magConnect,poly):
     RED = (255, 0, 0,100)
@@ -90,7 +96,7 @@ def create_cube(space, pos, magAngle, cubetype):
     #shape = pymunk.Poly.create_box(body,(2*rad,2*rad), radius = 1)
     shape.mass = 10
     shape.elasticity = 0.4
-    shape.friction = 0.4
+    shape.friction = shapeFriction
     shape.color = LIGHTBROWN
 
     shape.magnetPos = [(MRAD,0),(0,MRAD),(-MRAD,0),(0,-MRAD)]
@@ -145,7 +151,7 @@ def magForce1on2( p1, p2, m1,m2): #https://en.wikipedia.org/wiki/Magnetic_moment
     m1m2  = m1[0]*m2[0]   + m1[1]*m2[1]     #m1 dot m2
     
     #print(repr([r,rhat,m1r,m2r,m1m2]))
-    sc = 20000000
+   
     
     f = (sc*1/r**4 * (m2[0]*m1r + m1[0]*m2r + rhat[0]*m1m2 - 5*rhat[0]*m1r*m2r),   
          sc*1/r**4 * (m2[1]*m1r + m1[1]*m2r + rhat[1]*m1m2 - 5*rhat[1]*m1r*m2r))
@@ -299,6 +305,52 @@ def updatePivots(cubes, poly, magElevation):
             pos = cubei.body.position
             cubei.body.position = (pos[0],pos[1]) #for some reason you need to assign this new position or it will jump when the COG is moved.
 
+def detectPivots(cubes, poly, magElevation):
+    # detects the pivots   frictionPoint, polyNumFrictionPoints, polyNumCubes = 4
+    if cubes == []:
+        return (0,0,0)
+    
+    polyNumFrictionPoints = [1 for _ in range(max(poly)+1)]
+    cubeFrictionPoint = [False for _ in range(len(cubes))]
+    
+    if magElevation == 0:
+        polyfrictionPoints = [[[ 0, 0, 0]] for _ in range(max(poly)+1)] 
+    else:
+        myInf = 100000
+        
+        if magElevation > 0:
+            polyfrictionPoints = [[[ myInf, 0, 0]] for _ in range(max(poly)+1)]  #data is xCoord, yCoord, index
+            for i,cubei in enumerate(cubes):
+                polyi = poly[i]
+                #change everything into local coordinate frame of cube[0]
+                (cx,cy) = cubes[0].body.world_to_local(cubei.body.local_to_world((-MRAD,0)) )
+                if round(cx/rad) < round(polyfrictionPoints[polyi][0][0]/rad):
+                    polyfrictionPoints[polyi] = [[cx,cy,i]] #this is the minimum row, so it is the pivot
+                    polyNumFrictionPoints[polyi] = 1
+                elif round(cx/rad) == round(polyfrictionPoints[polyi][0][0]/rad):
+                    polyfrictionPoints[polyi].append([cx,cy,i])
+                    polyNumFrictionPoints[polyi] = polyNumFrictionPoints[polyi]+1
+        else:
+            polyfrictionPoints = [[[-myInf, 0, 0]] for _ in range(max(poly)+1)]  #data is xCoord, yCoord, index
+            for i,cubei in enumerate(cubes):
+                polyi = poly[i]
+                #change everything into local coordinate frame of cube[0]
+                (cx,cy) = cubes[0].body.world_to_local(cubei.body.local_to_world((-MRAD,0)) )
+                if round(cx/rad) > round(polyfrictionPoints[polyi][0][0]/rad):
+                    polyfrictionPoints[polyi] = [[cx,cy,i]] #this is the minimum row, so it is the pivot
+                    polyNumFrictionPoints[polyi] = 1
+                elif round(cx/rad) == round(polyfrictionPoints[polyi][0][0]/rad):
+                    polyfrictionPoints[polyi].append([cx,cy,i])
+                    polyNumFrictionPoints[polyi] = polyNumFrictionPoints[polyi]+1
+                    
+        for pPs in polyfrictionPoints:
+            for cxyi in pPs:
+                [x,y,index] = cxyi
+                cubeFrictionPoint[ index  ] = True
+                    
+        #identify each sube   
+        return (cubeFrictionPoint,polyfrictionPoints,polyNumFrictionPoints)
+
 
 def run(window, width, height):
     run = True
@@ -308,10 +360,9 @@ def run(window, width, height):
     
     space = pymunk.Space()
     space.gravity = (0,0)  # gravity doesn't exist
-    space.damping = 0.2  #simulate top-down gravity with damping
+    space.damping = spaceDamping  #simulate top-down gravity with damping
     magAngle = 0  #orientation of magnetic field (in radians)
     magElevation = 0 
-    fmag = 1000
     create_boundaries(space, width, height)
     cubes = []  #our magnetic cubes
 
@@ -374,7 +425,48 @@ def run(window, width, height):
         if len(cubes)>0:
             poly = detectPoly(cubes, magConnect)         #detect polyominos
         #place the pivot point to match the polyominoes
-        updatePivots(cubes, poly, magElevation)
+        #updatePivots(cubes, poly, magElevation)
+        (cubeFrictionPoint,polyfrictionPoints,polyNumFrictionPoints) = detectPivots(cubes, poly, magElevation)
+        
+        
+        #### ADD FRICTION
+        for i,cubei in enumerate(cubes):
+            
+            fricDamping = 0.9
+            force = -1*fricDamping*cubei.mass*cubei.body.velocity
+            #print("body velocity is "+str(cubei.body.velocity)+" so force is "+str(force))
+            #cubei.body.apply_force_at_world_point( force , cubei.body.position ) 
+            
+            if magElevation == 0:
+                cubei.body.apply_force_at_world_point( force , cubei.body.position )   # some crazy spinning when two bodies disconnect.
+                #cubei.body.apply_force_at_local_point( force , (0,0) )  # local points is terrible -- they become space ships.
+                # no friction seems to be happening.
+                # surface_velocity is only for a conveyor belt...
+            else:
+                nominalFriction = 0.2
+                #every cube gets some friction:
+                cubei.body.apply_force_at_world_point( nominalFriction*force , cubei.body.position )  
+                # if this cube is a friction point, then it needs more friction
+                if cubeFrictionPoint[i]:
+                    polyi = poly[i]
+                    polyNumCubes = polyNumFrictionPoints[polyi]
+                    if magElevation >0 :
+                        frictionPoint = cubei.body.local_to_world((-MRAD,0))
+                    else:
+                        frictionPoint = cubei.body.local_to_world((+MRAD,0))
+                    
+                    cubei.body.apply_force_at_world_point( (1-nominalFriction)*polyNumCubes*force/polyNumFrictionPoints , frictionPoint )  
+                 
+                
+        
+            cubei.body.angular_velocity = 0.95*cubei.body.angular_velocity  # is this too harsh?
+            #av = cubei.body.angular_velocity
+            #angdamp = 0.9
+            #cubei.body.apply_force_at_local_point( (0,-angdamp*av* cubei.mass) , ( MRAD, 0)  )
+            #cubei.body.apply_force_at_local_point( (0,+angdamp*av* cubei.mass) , (-MRAD, 0)  )
+       
+        
+        
 
         #print(magConnect)
         for event in pygame.event.get():
@@ -420,4 +512,7 @@ def run(window, width, height):
     pygame.quit()
         
 if __name__ == "__main__":
+
+
+
     run(window,WIDTH, HEIGHT)
