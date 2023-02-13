@@ -14,7 +14,6 @@ def polyTest():
     cube4 = Cube(1)
     cube5 = Cube(1)
     poly = Polyomino(cube0)
-    print(poly == poly)
     poly.connect(cube1, cube0, Direction.EAST)
     poly.connect(cube2, cube1, Direction.SOUTH)
     print(poly)
@@ -24,9 +23,8 @@ def polyTest():
     print(poly)
     poly.connect(cube5, cube0, Direction.WEST)
     print(poly)
-    print(poly.getConnections(cube0))
-    print(poly.getConnections(cube4))
-    print(poly.getConnections(cube3))
+    print(poly.getTopRow())
+    print(poly.getBottomRow())
 
 def polyEqualTest():
     c0 = Cube(0)
@@ -133,4 +131,4 @@ def configPoly():
     print("contain p2:", con1.contains(p2))
 
 if __name__ == "__main__":
-    polyToPolyConnect()   
+    polyTest()

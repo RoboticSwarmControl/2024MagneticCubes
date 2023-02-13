@@ -59,6 +59,10 @@ class Polyomino:
     def __init__(self, root: Cube):
         self.__pos_cube = {(0, 0): root}
         self.__cube_pos = {root: (0, 0)}
+        self.__xmin = 0
+        self.__xmax = 0
+        self.__ymin = 0
+        self.__ymax = 0
         self.valid = True
         self.id = Polyomino.nextId
         Polyomino.nextId += 1
@@ -83,9 +87,14 @@ class Polyomino:
         # add cubeA
         self.__cube_pos[cubeA] = posA
         self.__pos_cube[posA] = cubeA
-        # update the root
+        # update the bounds
+        self.__xmin = min(posA[0], self.__xmin)
+        self.__xmax = max(posA[0], self.__xmax)
+        self.__ymin = min(posA[1], self.__ymin)
+        self.__ymax = max(posA[1], self.__ymax)
+        # update coordinate-system if root changed
         if posA[0] < 0 or (posA[0] == 0 and posA[1] < 0):
-            self.__updateRoot__(cubeA)
+            self.__updateCoordinates__(cubeA)
         # check for illegal side connection
         neighborW = self.getConnection(cubeA, Direction.WEST)
         neighborE = self.getConnection(cubeA, Direction.EAST)
@@ -121,6 +130,21 @@ class Polyomino:
     def getCubes(self):
         return list(self.__cube_pos.keys())
 
+    def getBottomRow(self):
+        return self.__getRow__(self.__ymin)
+
+    def getTopRow(self):
+        return self.__getRow__(self.__ymax)
+
+    def __getRow__(self, y):
+        cubes = []
+        for x in range(self.__xmin, self.__xmax + 1):
+            try:
+                cubes.append(self.__pos_cube[(x, y)])
+            except KeyError:
+                continue
+        return cubes
+
     def isTrivial(self) -> bool:
         return len(self.__cube_pos) == 1
 
@@ -138,9 +162,13 @@ class Polyomino:
         clone.valid = self.valid
         return clone
 
-    def __updateRoot__(self, newRoot):
+    def __updateCoordinates__(self, newRoot):
         self.__pos_cube.clear()
         posUpdate = self.__cube_pos[newRoot]
+        self.__xmin -= posUpdate[0]
+        self.__xmax -= posUpdate[0]
+        self.__ymin -= posUpdate[1]
+        self.__ymax -= posUpdate[1]
         for cube in self.getCubes():
             posOld = self.__cube_pos[cube]
             posNew = (posOld[0] - posUpdate[0], posOld[1] - posUpdate[1])
@@ -170,10 +198,18 @@ class Polyomino:
         return hash(tuple(toHash))
 
     def __str__(self) -> str:
-        return f"Polyomino{self.id}\n{self.__pos_cube}"
+        string = f"Polyomino{self.id}:\n"
+        for y in range(self.__ymax, self.__ymin - 1, -1):
+            for x in range(self.__xmin, self.__xmax + 1):
+                try:
+                    string += str(self.__pos_cube[(x,y)].type)
+                except KeyError:
+                    string += " "
+            string += "\n"
+        return string
 
     def __repr__(self) -> str:
-        return f"Polyomino{self.id}\n{self.__pos_cube}"
+        return f"Polyomino{self.id}"
     
     @staticmethod
     def connectPoly(polyA, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction):
