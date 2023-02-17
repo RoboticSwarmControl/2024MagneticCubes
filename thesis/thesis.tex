@@ -90,23 +90,23 @@
 
 \paragraph{Deutsch:}
 \begin{otherlanguage}{ngerman}
-Um spezifische Aufgaben besser zu bewältigen, lassen sich modulare rekonfigurierbare Roboter zu größeren Strukturen zusammensetzen und wieder auseinandernehmen.
-Magnetic-modular-cubes sind skalierbare Einheiten, bei welchen Permanentmagneten in einen würfelförmigen Körper eingebettet sind.
-Diese Einheiten zählen als rekonfigurierbare Roboter, obwohl sie selber keine Logik oder Stromversorgung beinhalten.
-Stattdessen lassen sich diese durch ein externes, gleichmäßiges und sich zeitlich änderndes Magnetfeld steuern.
-Durch diese Steuerung können die magnetic-cubes auf der Stelle gedreht oder durch pivot-walking nach rechts und links bewegt werden.
-Obwohl sich das Magnetfeld auf alle Einheiten gleichermaßen auswirkt, kann durch Kollision mit der Arbeitsflächenbegrenzung eine Änderung der Anordnung bewirkt werden.
-Befinden sich zwei magnetic-cubes nah genug beieinander können sich diese durch die Permanentmagneten miteinander verbinden und so Polyominos als größere Strukturen aufbauen,
-welche auf die gleiche Weise wie einzelne cubes gesteuert werden können.
-Frühere Arbeiten betrachteten das "tilt-model", bei welchem sich Strukturen jeder Größe mit gleicher Geschwindigkeit in ganzzahligen Schritten und mit ausschließen 90° Drehungen bewegen lassen.
-
-Herr Keunes Aufgabe in dieser Bachelorarbeit ist es einen motion-planner für die beschriebenen magnetic-cubes zu entwerfen, welcher mit beliebigen Positionen und Rotationen umgehen kann.
-Dabei ist es erforderlich eine Simulationsumgebung zu schaffen, welche die kinetischen und dynamischen Eigenschaften der magnetic-cubes repliziert.
-Es soll ein lokaler motion-planner entwickelt werden, um zwei Polyominos an gewünschten Kanten zu verbinden.
-Dieser local-planner soll Heuristiken und optimale Bewegungsabläufe mit möglichst wenig Schritten realisieren.
-Ebenfalls soll dieser global eingesetzt werden, um Bewegungsabläufe zu finden, die Ziel-Polyominos aus einer zufällig gegebenen Startkonfiguration erzeugen.
-Ein interessantes Ergebnis wird es sein, zu sehen wie gut Probleminstanzen dieser Art in der Realität gelöst werden können und welche Parameter die gravierendsten Auswirkungen auf die Schwierigkeit von motion-planning Problemen haben. 
-
+	Um spezifische Aufgaben besser zu bewältigen, lassen sich modulare, rekonfigurierbare Roboter zu größeren Strukturen zusammensetzen und wieder auseinandernehmen.
+	Magnetic-modular-cubes sind skalierbare Einheiten, bei welchen Permanentmagneten in einen würfelförmigen Körper eingebettet sind.
+	Diese Einheiten zählen als rekonfigurierbare Roboter, obwohl sie selber keine Logik oder Stromversorgung beinhalten.
+	Stattdessen lassen sich diese durch ein externes, gleichmäßiges und sich zeitlich änderndes Magnetfeld steuern.
+	Durch diese Steuerung können die magnetic-cubes auf der Stelle gedreht oder durch pivot-walking nach rechts und links bewegt werden.
+	Obwohl sich das Magnetfeld auf alle Einheiten gleichermaßen auswirkt, kann durch Kollision mit der Arbeitsflächenbegrenzung eine Änderung der Anordnung bewirkt werden.
+	Befinden sich zwei magnetic-cubes nah genug beieinander können sich diese durch die Permanentmagneten miteinander verbinden und so Polyominos als größere Strukturen aufbauen,
+	welche auf die gleiche Weise wie einzelne cubes gesteuert werden können.
+	Frühere Arbeiten betrachteten das "tilt-model", bei welchem sich Strukturen jeder Größe mit gleicher Geschwindigkeit in ganzzahligen Schritten und mit ausschließen 90° Drehungen bewegen lassen.
+	
+	Herr Keunes Aufgabe in dieser Bachelorarbeit ist es, einen motion-planner für die beschriebenen magnetic-cubes zu entwerfen, welcher mit beliebigen Positionen und Rotationen umgehen kann.
+	Dabei ist es erforderlich, eine Simulationsumgebung zu schaffen, welche die kinetischen und dynamischen Eigenschaften der magnetic-cubes repliziert.
+	Es soll ein lokaler motion-planner entwickelt werden, um zwei Polyominos an gewünschten Kanten zu verbinden.
+	Dieser local-planner soll Heuristiken und optimale Bewegungsabläufe mit möglichst wenig Schritten realisieren.
+	Ebenfalls soll dieser global eingesetzt werden, um Bewegungsabläufe zu finden, die Ziel-Polyominos aus einer zufällig gegebenen Startkonfiguration erzeugen.
+	Ein interessantes Ergebnis wird es sein, zu sehen, wie gut Probleminstanzen dieser Art in der Realität gelöst werden können und welche Parameter die gravierendsten Auswirkungen auf die Schwierigkeit von motion-planning Problemen haben. 
+	
 \end{otherlanguage}
 
 \medskip
@@ -120,7 +120,7 @@ This control allows the cubes to spin in place or let them pivot walk to the lef
 %Rotating the magnetic field can make the cubes spin in place.
 %The cubes can pivot walk by first lifting their magnetic north (or south) end up, then rotating the cubes about the end touching the workspace, and then then lowering the cube back onto the workspace.   
 Although the applied magnetic field is the same for each magnetic modular cube, collisions with workspace boundaries can be used to rearrange the cubes.
-Moreover, the cubes magnetically self-assemble when brought in close proximity of another cube, and form polominoes, which can be controlled the same way as single cubes.  
+Moreover, the cubes magnetically self-assemble when brought in close proximity of another cube, and form polyominoes, which can be controlled the same way as single cubes.  
 %These polyominoes can also pivot walk and rotate in place.
 Related work has considered the “tilt model,” where similar cubes and polyominoes move between integer positions, all move at the same speed, and only rotate by 90 degree steps.
 
@@ -128,7 +128,7 @@ In his thesis, Mr. Keune's task is to design a motion planner for magnetic cubes
 This requires designing a simulation environment that replicates the kinematics and dynamics of magnetic cubes.
 He will design local planners for moving two polyominoes to assemble at desired faces.
 Designing the local planner includes heuristics and computing optimal motion plans that minimize the number of steps.
-The local planner will be used to search for global planning sequences to generate desired polyomonioes from a given starting configuration.
+The local planner will be used to search for global planning sequences to generate desired polyominoes from a given starting configuration.
 One exciting outcome will be studying how good instances can be solved in practice and analyzing which parameters have the most significant effect on the difficulty of the motion planning problem. 
 	
 	%---------------------
