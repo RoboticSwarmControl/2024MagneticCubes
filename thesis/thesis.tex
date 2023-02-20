@@ -50,7 +50,7 @@
 		\vspace{5cm}
 		{\scshape\huge Bachelor Thesis\par}
 		\vspace{1.5cm}
-		{\Huge\bfseries Titel \par}
+		{\Huge\bfseries Motion Planning for Reconfigurable Magnetic Modular Cubes in the 2-Dimensional Special Euclidean Group \par}
 		\vspace{3cm}
 		{\huge Kjell Keune\par}
 		\vfill
@@ -58,7 +58,7 @@
 		\vfill
 		
 		Supervised by\par
-		Prof. Dr. Aaron Becker\par
+		Prof. Dr. Aaron T. Becker\par
 		
 		\vfill
 		
@@ -104,7 +104,7 @@
 	Dabei ist es erforderlich, eine Simulationsumgebung zu schaffen, welche die kinetischen und dynamischen Eigenschaften der magnetic-cubes repliziert.
 	Es soll ein lokaler motion-planner entwickelt werden, um zwei Polyominos an gewünschten Kanten zu verbinden.
 	Dieser local-planner soll Heuristiken und optimale Bewegungsabläufe mit möglichst wenig Schritten realisieren.
-	Ebenfalls soll dieser global eingesetzt werden, um Bewegungsabläufe zu finden, die Ziel-Polyominos aus einer zufällig gegebenen Startkonfiguration erzeugen.
+	Ebenfalls soll dieser global eingesetzt werden, um Bewegungsabläufe zu finden, die gewünschte Polyominos aus einer zufällig gegebenen Startkonfiguration erzeugen.
 	Ein interessantes Ergebnis wird es sein, zu sehen, wie gut Probleminstanzen dieser Art in der Realität gelöst werden können und welche Parameter die gravierendsten Auswirkungen auf die Schwierigkeit von motion-planning Problemen haben. 
 	
 \end{otherlanguage}
@@ -114,9 +114,9 @@
 \paragraph{English:}
 Reconfigurable modular robots can dynamically assemble/disassemble to better accomplish a desired task.
 Magnetic modular cubes are scalable modular subunits with embedded permanent magnets in a 3D-printed cubic body.
-These cubes can act as reconfigurable modular robots, even though they contain no computation, power, or actuation.
-Instead, these cubes can be wirelessly controlled by an external uniform, time-varying magnetic field.
-This control allows the cubes to spin in place or let them pivot walk to the left or right direction.
+These cubes can act as reconfigurable modular robots, even though they contain no power, actuation or computing.
+Instead, these cubes can be wirelessly controlled by an external, uniform, time-varying magnetic field.
+This control allows the cubes to spin in place or pivot walk to the left or right direction.
 %Rotating the magnetic field can make the cubes spin in place.
 %The cubes can pivot walk by first lifting their magnetic north (or south) end up, then rotating the cubes about the end touching the workspace, and then then lowering the cube back onto the workspace.   
 Although the applied magnetic field is the same for each magnetic modular cube, collisions with workspace boundaries can be used to rearrange the cubes.
@@ -129,7 +129,7 @@ This requires designing a simulation environment that replicates the kinematics 
 He will design local planners for moving two polyominoes to assemble at desired faces.
 Designing the local planner includes heuristics and computing optimal motion plans that minimize the number of steps.
 The local planner will be used to search for global planning sequences to generate desired polyominoes from a given starting configuration.
-One exciting outcome will be studying how good instances can be solved in practice and analyzing which parameters have the most significant effect on the difficulty of the motion planning problem. 
+One exciting outcome will be studying how well instances can be solved in practice and analyzing which parameters have the most significant effect on the difficulty of the motion planning problem. 
 	
 	%---------------------
 	\include{./chapters/00-abstract}
