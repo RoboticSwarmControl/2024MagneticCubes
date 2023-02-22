@@ -40,7 +40,6 @@ class StateHandler:
         self.magElevation = 0
         self.magConnect = {}
         self.polyominoes = []
-        self.poly = []
 
         self.configToLoad = None
         self.updateLock = Lock()
@@ -92,24 +91,23 @@ class StateHandler:
             elevChange: elevation change
         """
         self.updateLock.acquire()
-        self.magAngle += angChange
-        self.magElevation += elevChange
         #load new config if present
         if not self.configToLoad == None:
             self.__loadConfig__()
-        #detect polyominos
+        #let pymunk update the space this also creates the magnetic connections
+        self.space.step(StateHandler.STEP_TIME)
+        #apply the change
+        self.magAngle += angChange
+        self.magElevation += elevChange
+        #detect polyominos based on the magnetic connections
         self.__detectPoly__()
-        #is determining poly list and updates pivots remove when fiction is fixed 
-        if len(self.cube_shapes) > 0:
-            self.__detectPolyOld__()     
-        self.__updatePivots__()
-        for cube in self.getCubes():
-            # Apply Force from magnetic-field
-            self.__applyForceField__(cube)
-            # zero out the connections
-            self.magConnect[cube] = [None] * 4 
-        self.updateLock.release()
-        self.space.step(StateHandler.STEP_TIME)        
+        #Apply forces to the polyominoes
+        for poly in self.polyominoes:
+            self.__updatePivotPiont__(poly)
+            for cube in poly.getCubes():
+                self.__applyForceField__(cube)
+                self.magConnect[cube] = [None] * 4   
+        self.updateLock.release()     
 
     def __applyForceField__(self, cube: Cube):
         shape = self.getShape(cube)
@@ -169,90 +167,38 @@ class StateHandler:
                     polyomino.connect(adj, current, Direction(i))
                     done.add(adj)
                     next.put(adj)
-            if not polyomino.isTrivial():
-                self.polyominoes.append(polyomino)
-                              
-    def __detectPolyOld__(self):
-        cubes = self.getCubes()
-        self.poly = list(range(0, len(cubes)))  #the unique polygon each cube belongs to.
-        for i,cubei in enumerate(cubes):
-            for j,cubej in enumerate(cubes):   #for j,cubej in enumerate(cubes,i):
-                if i<=j:
-                    continue
-                #check to see if they are magnetically connected
-                if cubej in self.magConnect[cubei]:
-                    #if so, assign them to the same poly
-                    piS = self.poly[i]
-                    pjS = self.poly[j]
-                    minP = min(piS,pjS)
-                    self.poly[j] = minP
-                    self.poly[i] = minP
-                    if piS != pjS:
-                        maxP = max(piS,pjS)
-                        for k in range(len(self.cube_shapes)):  # never gets called!
-                            if self.poly[k] == maxP:
-                                #print("Found equiv")
-                                self.poly[k] = minP #assign all polys that have pjS or piS to be the minimum value
-        polyset = list(set(self.poly))  # unique ID numbers
-        #print("poly = " + repr(poly))
-        #print("polyset = " + repr(polyset))
-        newIndices = list(range(len(polyset))) #how many IDs there are
-        for i in newIndices:     # renumber the polys poly = [0,0,1,3,3,8,8,8] --> [0,0,1,2,2,3,3,3] 
-            self.poly = [i if item == polyset[i] else item for item in self.poly]                        
-        #print("poly = " + repr(poly))
+            self.polyominoes.append(polyomino)
 
-    def __updatePivots__(self):
-        shapes = self.getShapes()
-        #updates the COM
+    def __updatePivotPiont__(self, poly: Polyomino):
         if self.magElevation == 0:
-            for cube in shapes:
-                cube.body.center_of_gravity = ( 0, 0)
-                pos = cube.body.position
-                cube.body.position = (pos[0],pos[1]) #for some reason you need to assign this new position or it will jump when the COG is moved.
+            for cube in poly.getCubes():
+                shape = self.getShape(cube)
+                shape.body.center_of_gravity = (0,0)
+                pos = shape.body.position
+                shape.body.position = (pos[0],pos[1])
         else:
-            myInf = 100000
-            centroids = [[0,0] for _ in range(max(self.poly)+1)]
-            if self.magElevation > 0:
-                minXyLyR = [[ myInf, 0, 0] for _ in range(max(self.poly)+1)]
-                for i,cubei in enumerate(shapes):
-                    polyi = self.poly[i]
-                    #change everything into local coordinate frame of cube[0]
-                    (cx,cy) = shapes[0].body.world_to_local(cubei.body.local_to_world((-Cube.MRAD,0)) )
-                    if round(cx/Cube.RAD) < round(minXyLyR[polyi][0] / Cube.RAD):
-                        minXyLyR[polyi] = [cx,cy,cy] #this is the minimum row, so it is the pivot
-                    elif round(cx/Cube.RAD) == round(minXyLyR[polyi][0]/Cube.RAD):
-                        if round(cy/Cube.RAD) < round(minXyLyR[polyi][1]/Cube.RAD):
-                            minXyLyR[polyi][1] = cy
-                        elif round(cy/Cube.RAD) > round(minXyLyR[polyi][2]/Cube.RAD):
-                            minXyLyR[polyi][2] = cy
-                myYxLxR = minXyLyR
+            if self.magElevation < 0:
+                edgeCubes = poly.getTopRow()
+                edgePointL = (-Cube.MRAD,0)
             else:
-                maxXyLyR = [[-myInf, 0, 0] for _ in range(max(self.poly)+1)]
-                for i,cubei in enumerate(shapes):
-                    polyi = self.poly[i]
-                    #change everything into local coordinate frame of cube[0]
-                    (cx,cy) = shapes[0].body.world_to_local(cubei.body.local_to_world((Cube.MRAD,0)) )
-                    if round(cx/Cube.RAD) > round(maxXyLyR[polyi][0]/Cube.RAD):
-                        maxXyLyR[polyi] = [cx,cy,cy]
-                    elif round(cx/Cube.RAD) == round(maxXyLyR[polyi][0]/Cube.RAD):
-                        if round(cy/Cube.RAD) < round(maxXyLyR[polyi][1]/Cube.RAD):
-                            maxXyLyR[polyi][1] = cy
-                        elif round(cy/Cube.RAD) > round(maxXyLyR[polyi][2]/Cube.RAD):
-                            maxXyLyR[polyi][2] = cy
-                myYxLxR = maxXyLyR    
-            for i,myYxLxRi in enumerate(myYxLxR):  #calculate the centroids
-                    centroids[i] = shapes[0].body.local_to_world( (myYxLxRi[0],(myYxLxRi[1]+myYxLxRi[2])/2)  )    
-            for i,cubei in enumerate(shapes):  #apply the centroids            
-                cubei.body.center_of_gravity = cubei.body.world_to_local( centroids[self.poly[i]]  )
-                pos = cubei.body.position
-                cubei.body.position = (pos[0],pos[1]) #for some reason you need to assign this new position or it will jump when the COG is moved.
+                edgeCubes = poly.getBottomRow()
+                edgePointL = (Cube.MRAD,0)
+            pivotPoint = (0,0)
+            for cube in edgeCubes:
+                shape = self.getShape(cube)
+                pivotPoint += shape.body.local_to_world(edgePointL)
+            pivotPoint /= len(edgeCubes)
+            for cube in poly.getCubes(): 
+                shape = self.getShape(cube)
+                shape.body.center_of_gravity = shape.body.world_to_local(pivotPoint)
+                pos = shape.body.position
+                shape.body.position = (pos[0],pos[1])
 
     def __loadConfig__(self):
         for cube in self.getCubes():
             self.__remove__(cube)
         self.magAngle = self.configToLoad.magAngle
         self.magElevation = self.configToLoad.magElevation
-        self.polyominoes = self.configToLoad.getPolyominoes()
         for cube in self.configToLoad.getCubes():
             pos = self.configToLoad.getPosition(cube)
             ang = self.configToLoad.getAngle(cube)

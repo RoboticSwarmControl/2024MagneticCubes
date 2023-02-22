@@ -105,16 +105,16 @@ class PivotWalk(Motion):
         pivotRotationSeqInv = Rotation(-2 * direction * pivotAng).stepSequence
         zeros = [(0,0) * math.floor(PivotWalk.PIVOT_STALLS / StateHandler.STEP_TIME)]
         #Assamble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
-        steps.append((0,-1))
+        steps.append((0, 1))
         steps.extend(pivotRotationSeq)
         steps.extend(zeros)
-        steps.append((0, 2))
+        steps.append((0, -2))
         steps.extend(pivotRotationSeqInv)
         steps.extend(zeros)
-        steps.append((0,-2))
+        steps.append((0, 2))
         steps.extend(pivotRotationSeq)
         steps.extend(zeros)
-        steps.append((0, 1))
+        steps.append((0, -1))
         return steps
 
 class Rotation(Motion):
