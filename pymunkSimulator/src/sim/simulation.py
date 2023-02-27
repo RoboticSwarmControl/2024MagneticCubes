@@ -5,6 +5,7 @@ Holds the Simulation class
 """
 
 import pygame
+import pymunk.pygame_util
 import pymunk
 import math
 from threading import Thread, Event
@@ -18,7 +19,7 @@ class Simulation:
     """
     Top-level class for interacting with the Simulation
     """
-    FPS = 120  # Determines the visual speed of the simulation has no effect when drawing is disabled
+    FPS = 1000  # Determines the visual speed of the simulation has no effect when drawing is disabled
 
     def __init__(self, width=800, height=800, drawing=True, userInputs=True):
         """
@@ -200,6 +201,8 @@ class Simulation:
             pygame.init()
             window = pygame.display.set_mode((self.width, self.height))
             pygame.display.set_caption("magnetic cube simulator")
+            drawOpt = pymunk.pygame_util.DrawOptions(window)
+            drawOpt.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS
             clock = pygame.time.Clock()
         self.started.set()
         # Simulation loop
@@ -209,13 +212,13 @@ class Simulation:
             change = self.controller.nextStep()
             self.stateHandler.update(change[0], change[1])
             if self.drawingActive:
-                self.__draw__(window)
+                self.__draw__(window, drawOpt)
                 clock.tick(Simulation.FPS)
         if self.drawingActive:
             pygame.quit()
         self.stopped.set()
 
-    def __draw__(self, window: pygame.Surface):
+    def __draw__(self, window: pygame.Surface, drawOpt):
         window.fill(Color.WHITE)
         # draw the walls
         for shape in self.stateHandler.getBoundaries():
@@ -251,6 +254,8 @@ class Simulation:
             self.stateHandler.magAngle), 12+12*math.sin(self.stateHandler.magAngle)), 3)
         pygame.draw.line(window, Color.RED, (12, 12), (12-12*math.cos(
             self.stateHandler.magAngle), 12-12*math.sin(self.stateHandler.magAngle)), 3)
+        #debug draw
+        self.stateHandler.space.debug_draw(drawOpt)
         # update the screen
         pygame.display.update()
         return
@@ -266,6 +271,9 @@ class Simulation:
                     self.pivotWalk_nowait(PivotWalk.LEFT)
                 elif event.key == 100:  # 'd' rotate cw
                     self.rotate_nowait(math.radians(10))
+                elif event.key == 105:  # 'i' info
+                    #print(len(self.stateHandler.connectJoints))
+                    pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if event.button == 1:  # 'left click' places cube type=0

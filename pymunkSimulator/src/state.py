@@ -333,5 +333,5 @@ class Configuration:
                     if distance(pos, config.getPosition(cube)) <= Cube.RAD * 1.5:
                         overlap = True
                         break
-            config.addCube(cube, pos)
+            config.addCube(newCube, pos)
         return config
