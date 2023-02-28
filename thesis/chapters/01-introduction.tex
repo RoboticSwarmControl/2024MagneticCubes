@@ -4,9 +4,48 @@ Motivation, applications...
 
 \section{Related Work}
 
-Motion planning is a crucial subject in the field of robotics. The goal is to change the initial state of a robot to a desired goal state, by performing actions which the robot is capable of. The state of the system is also called a configuration and all possible configurations a robot can be in is defined as the configuration-space.
-The dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and static obstacles. It becomes necessary to avoid collision between those.
-It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a sequence of actions to perform to reach the goal configuration or report failure, if the configuration is not reachable. A lot of research was done on motion planning for a great overview and detailed description of concepts you can see \cite{LaValle2006} and \cite{Mueller2019}.
+Motion planning is a crucial subject in the field of robotics.
+The goal is to change the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
+The state of the system is also called a configuration and all possible configurations a robot can be in is defined as the configuration-space.
+The dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and static obstacles.
+It becomes necessary to avoid collision between those.
+It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a sequence of actions to perform to reach the goal configuration or report failure, if the configuration is not reachable.
+A lot of research was done on motion planning and the textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
+
+One of these concepts is sample-based motion planing.
+When working with configuration spaces that are uncountable infinite, like the special euclidean group, it is not only impossible to cover the howl space, it is also unclear how to traverse it.
+By taking samples, you can reduce the configuration space to a finite object, but you might lose possible solutions.
+Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point, and therefore these algorithms can be called resolution complete.
+Ways of sampling include random sampling or using a grid with a resolution that is dynamically adjustable.
+After sampling, conventional discrete planning algorithms can be applied \cite{LaValle2006}.
+
+One state of the art sample-based approach are algorithms that use rapidly-exploring random trees (RRT).
+This method tries to move into the direction of a randomly chosen sample from the nearest already explored configuration, that way the space gets explored uniformly without being too fixated on the goal configuration \cite{lavalle1998,lavalle2001}.
+
+When working with multiple robots, the question of how these interact with each other comes to mind.
+One interesting idea is that single robots can connect to form bigger structures.
+This is referred to as self-assembly and E. Winfree \cite{winfree1998} proposed the abstract Tile Assembly Model (aTAM) in the context of assembling DNA.
+In this model, particles can have different sets of glues and connect according to certain rules regarding the glue type.
+However, he considers this process as nondeterministic, so there is no exact instruction on how to assemble a desired structure.
+
+One model more related to the here used magnetic modular cubes is the Tilt model from Becker et al. \cite{Becker2014_SP}.
+In the Tilt model, all tiles move either one step or the maximum amount, until hitting an obstacle, into one of the cardinal directions.
+It offers a solution when robots are controlled uniformly by external global control inputs.
+In this paper it is shown, that transforming one configuration into another, known as the configuration-problem, is NP-hard.
+Following work \cite{Becker2014} also proves, that finding an optimal control sequence, minimizing the number of actions, for the configuration-problem is PSPACE-complete.
+Furthermore, research is done on designing environments in which the Tilt model can be used to accomplish certain tasks.
+In particular, Becker et al. create logic gates that can be connected and evaluate logical expressions.
+
+More on the side of self-assembly, in \cite{Fekete2020} the construction of desired shapes using the tilt model is researched.
+It presents a method that can determine a building sequence for a polyomino by adding one tile at a time, considering the rules of Tilt.
+Ways of modifying the environment to create factories, that are able to construct shapes in a pipeline by repeating the same global control sequence, are also examined.
+Shapes can not only be constructed by adding one tile at a time.
+Two multi-tiled shapes can connect to an even bigger structure.
+One article considering the construction with so called sub-assemblies is proposed by A. Schmidt \cite{Schmidt2018}.
+
+
+
+  
 
 \begin{comment}
 Different methods for motion planning:
@@ -14,9 +53,6 @@ Different methods for motion planning:
 simple discrete planning
 
 sample-based planning
-
-combinatorial planning
-
 
 Tilt assembly 
 
