@@ -140,12 +140,12 @@ class StateHandler:
         shapej = self.getShape(cubej)
         angi = shapei.body.angle
         angj = shapej.body.angle
-        for i, magPosLi in enumerate(shapei.magnetPos):
-            for j, magPosLj in enumerate(shapej.magnetPos):
+        for i, magPosLi in enumerate(cubei.magnetPos):
+            for j, magPosLj in enumerate(cubej.magnetPos):
                 magPosi = shapei.body.local_to_world(magPosLi)
-                mi = rotateVecbyAng(shapei.magnetOri[i], angi)
+                mi = rotateVecbyAng(cubei.magnetOri[i], angi)
                 magPosj = shapej.body.local_to_world(magPosLj)
-                mj = rotateVecbyAng(shapej.magnetOri[j], angj)
+                mj = rotateVecbyAng(cubej.magnetOri[j], angj)
                 # magForce1on2( p1, p2, m1,m2)
                 fionj = Cube.magForce1on2(magPosi, magPosj, mi, mj)
                 shapei.body.apply_force_at_world_point(
@@ -269,12 +269,10 @@ class StateHandler:
         shape.mass = 10
         shape.elasticity = 0.4
         shape.friction = 0.4
-        shape.magnetPos = [(-Cube.MRAD, 0), (0, -Cube.MRAD),
-                           (Cube.MRAD, 0), (0, Cube.MRAD)]
-        if cube.type == 0:
-            shape.magnetOri = [(1, 0), (0, -1), (1, 0), (0, 1)]
+        if cube.type == Cube.TYPE_RED:
+            shape.color = Color.LIGHTRED
         else:
-            shape.magnetOri = [(1, 0), (0, 1), (1, 0), (0, -1)]
+            shape.color = Color.LIGHTBLUE
         # create sensor-shape that identifies a magnet attraction
         magSensor = pymunk.Circle(body, 3 * Cube.RAD)
         magSensor.collision_type = StateHandler.SENSOR_CTYPE
@@ -334,7 +332,7 @@ class StateHandler:
         shapei = self.getShape(cubei)
         shapej = self.getShape(cubej)
         pinJoint = pymunk.SlideJoint(
-            shapei.body, shapej.body, shapei.magnetPos[edgei.value], shapej.magnetPos[edgej.value], StateHandler.CONNECTION_DISTANCE - 2, StateHandler.CONNECTION_DISTANCE)
+            shapei.body, shapej.body, cubei.magnetPos[edgei.value], cubej.magnetPos[edgej.value], StateHandler.CONNECTION_DISTANCE - 2, StateHandler.CONNECTION_DISTANCE)
         self.connectJoints.append(pinJoint)
         self.space.add(pinJoint)
 

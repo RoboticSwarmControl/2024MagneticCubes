@@ -14,6 +14,9 @@ class Cube:
     A unique cube object storing the cube type
     """
     nextid = 0
+    
+    TYPE_RED = 0
+    TYPE_BLUE = 1
 
     MAG_FORCE = 20000000  # force of the magnets
     MRAD = 15  # distance of magnet from center of cube
@@ -21,6 +24,11 @@ class Cube:
 
     def __init__(self, type):
         self.type = type
+        self.magnetPos = [(-Cube.MRAD, 0), (0, -Cube.MRAD), (Cube.MRAD, 0), (0, Cube.MRAD)]
+        if type == Cube.TYPE_RED:
+            self.magnetOri = [(1, 0), (0, 1), (1, 0), (0, -1)]
+        elif type == Cube.TYPE_BLUE:
+            self.magnetOri = [(1, 0), (0, -1), (1, 0), (0, 1)]
         self.id = Cube.nextid
         Cube.nextid += 1
 
@@ -34,19 +42,19 @@ class Cube:
         return hash(self.id)
 
     @staticmethod
-    def magForce1on2(p1, p2, m1, m2):  # https://en.wikipedia.org/wiki/Magnetic_moment
+    def magForce1on2(pos1, pos2, ori1, ori2):  # https://en.wikipedia.org/wiki/Magnetic_moment
         # rhat = unitvector pointing from magnet 1 to magnet 2 and r is the distance
-        r = distance(p1, p2)
+        r = distance(pos1, pos2)
         if r < 2*(Cube.RAD-Cube.MRAD):
             r = 2*(Cube.RAD-Cube.MRAD)  # limits the amount of force applied
         # r̂ is the unit vector pointing from magnet 1 to magnet 2
-        rhat = ((p2[0]-p1[0])/r, (p2[1]-p1[1])/r)
-        m1r = m1[0]*rhat[0] + m1[1]*rhat[1]  # m1 dot rhat
-        m2r = m2[0]*rhat[0] + m2[1]*rhat[1]  # m2 dot rhat
-        m1m2 = m1[0]*m2[0] + m1[1]*m2[1]  # m1 dot m2
+        rhat = ((pos2[0]-pos1[0])/r, (pos2[1]-pos1[1])/r)
+        m1r = ori1[0]*rhat[0] + ori1[1]*rhat[1]  # m1 dot rhat
+        m2r = ori2[0]*rhat[0] + ori2[1]*rhat[1]  # m2 dot rhat
+        m1m2 = ori1[0]*ori2[0] + ori1[1]*ori2[1]  # m1 dot m2
         # print(repr([r,rhat,m1r,m2r,m1m2]))
-        f = (Cube.MAG_FORCE*1/r**4 * (m2[0]*m1r + m1[0]*m2r + rhat[0]*m1m2 - 5*rhat[0]*m1r*m2r),
-             Cube.MAG_FORCE*1/r**4 * (m2[1]*m1r + m1[1]*m2r + rhat[1]*m1m2 - 5*rhat[1]*m1r*m2r))
+        f = (Cube.MAG_FORCE*1/r**4 * (ori2[0]*m1r + ori1[0]*m2r + rhat[0]*m1m2 - 5*rhat[0]*m1r*m2r),
+             Cube.MAG_FORCE*1/r**4 * (ori2[1]*m1r + ori1[1]*m2r + rhat[1]*m1m2 - 5*rhat[1]*m1r*m2r))
         # print( "force is " + repr(f) )
         # print(repr(f) )
         return f

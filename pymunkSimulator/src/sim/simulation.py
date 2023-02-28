@@ -19,7 +19,7 @@ class Simulation:
     """
     Top-level class for interacting with the Simulation
     """
-    FPS = 1000  # Determines the visual speed of the simulation has no effect when drawing is disabled
+    FPS = 144  # Determines the visual speed of the simulation has no effect when drawing is disabled
 
     def __init__(self, width=800, height=800, drawing=True, userInputs=True):
         """
@@ -225,19 +225,20 @@ class Simulation:
             pygame.draw.line(window, Color.DARKGREY, shape.body.local_to_world(
                 shape.a), shape.body.local_to_world(shape.b), StateHandler.BOUNDARIE_RAD)
         # draw the cubes with magnets and CenterOfGravity
-        for shape in self.stateHandler.getShapes():
+        for cube in self.stateHandler.getCubes():
+            shape = self.stateHandler.getShape(cube)
             verts = [shape.body.local_to_world(lv) for lv in shape.get_vertices()]
-            pygame.draw.polygon(window, Color.LIGHTBROWN, verts)
+            pygame.draw.polygon(window, shape.color, verts)
             pygame.draw.lines(window, Color.DARKGREY, True, verts, 2)
             pygame.draw.circle(window, Color.BLACK, shape.body.local_to_world(
-                shape.body.center_of_gravity), 8)
-            for i, magP in enumerate(shape.magnetPos):
-                if 0 < magP[0]*shape.magnetOri[i][0]+magP[1]*shape.magnetOri[i][1]:
-                    magcolor = Color.GREEN
+                shape.body.center_of_gravity), 6)
+            for i, magP in enumerate(cube.magnetPos):
+                if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
+                    magcolor = Color.BLUE
                 else:
                     magcolor = Color.RED
                 pygame.draw.circle(
-                    window, magcolor, shape.body.local_to_world(magP), 5)
+                    window, magcolor, shape.body.local_to_world(magP), 4)
         # draw the connections
         for i, poly in enumerate(self.stateHandler.getPolyominoes()):
             for cube in poly.getCubes():
@@ -245,16 +246,16 @@ class Simulation:
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue
-                    pygame.draw.line(window, Color.SASHACOLORS[i], self.stateHandler.getShape(cube).body.local_to_world(
-                        (0, 0)), self.stateHandler.getShape(cubeCon).body.local_to_world((0, 0)), 3)
+                    pygame.draw.line(window, Color.PURPLE, self.stateHandler.getShape(cube).body.local_to_world(
+                        (0, 0)), self.stateHandler.getShape(cubeCon).body.local_to_world((0, 0)), 4)
         # draw the compass
         pygame.draw.circle(window, Color.LIGHTGRAY,  (12, 12), 12)
         pygame.draw.circle(window, Color.LIGHTBROWN,  (12, 12), 10)
-        pygame.draw.line(window, Color.GREEN,   (12, 12), (12+12*math.cos(
+        pygame.draw.line(window, Color.BLUE,   (12, 12), (12+12*math.cos(
             self.stateHandler.magAngle), 12+12*math.sin(self.stateHandler.magAngle)), 3)
         pygame.draw.line(window, Color.RED, (12, 12), (12-12*math.cos(
             self.stateHandler.magAngle), 12-12*math.sin(self.stateHandler.magAngle)), 3)
-        #debug draw
+        # debug draw
         self.stateHandler.space.debug_draw(drawOpt)
         # update the screen
         pygame.display.update()
@@ -276,13 +277,13 @@ class Simulation:
                     pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                if event.button == 1:  # 'left click' places cube type=0
+                if event.button == 1:  # 'left click' places cube TYPE_RED
                     config = self.stateHandler.saveConfig()
-                    config.addCube(Cube(0), mouse_pos)
+                    config.addCube(Cube(Cube.TYPE_RED), mouse_pos)
                     self.stateHandler.loadConfig_nowait(config)
-                elif event.button == 3:  # 'right click' places cube type=1
+                elif event.button == 3:  # 'right click' places cube TYPE_BLUE
                     config = self.stateHandler.saveConfig()
-                    config.addCube(Cube(1), mouse_pos)
+                    config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
                     self.stateHandler.loadConfig_nowait(config)
             elif event.type == pygame.QUIT:
                 self.started.clear()
