@@ -233,8 +233,8 @@ class Simulation:
         while self.started.isSet():
             if (self.userInputsActive and self.drawingActive):
                 self.__userInputs__()
-            change = self.controller.nextStep()
-            self.stateHandler.update(change[0], change[1])
+            step = self.controller.nextStep()
+            self.stateHandler.update(step.angChange, step.elevChange)
             if self.drawingActive:
                 self.__draw__()
                 self.clock.tick(Simulation.FPS)
@@ -308,6 +308,6 @@ class Simulation:
                     config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
                     self.stateHandler.loadConfig_nowait(config)
             elif event.type == pygame.QUIT:
-                thread = Thread(target=self.terminate, daemon=True)
+                thread = Thread(target=self.terminate, daemon=False)
                 thread.start()
                 break
