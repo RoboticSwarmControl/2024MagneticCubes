@@ -162,6 +162,9 @@ class Polyomino:
     def contains(self, cube):
         return cube in self.__cube_pos
 
+    def bounds(self):
+        return (self.__xmax - self.__xmin + 1, self.__ymax - self.__ymin + 1)
+
     def clone(self):
         clone = Polyomino(self.__getRoot__())
         for cube, pos in self.__cube_pos.items():

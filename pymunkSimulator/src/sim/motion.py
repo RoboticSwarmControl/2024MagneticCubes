@@ -26,7 +26,10 @@ class Motion:
 
     def __init__(self):
         self.executed = Event()
-        self.stepSequence = [Step()]
+
+    def stepSquence(self):
+        return [Step()]
+
 
 class PivotWalk(Motion):
     """
@@ -35,21 +38,13 @@ class PivotWalk(Motion):
     LEFT = -1
     RIGHT = 1
 
-    DEFAULT_PIVOT_ANG = math.radians(12) #in radians
-    PIVOT_STALLS = 0.05 #zerochanges/update when pivotwalking
+    DEFAULT_PIVOT_ANG = math.radians(20) #in radians
 
     def __init__(self, direction, pivotAng=DEFAULT_PIVOT_ANG):
         super().__init__()
         self.direction = direction
         self.pivotAng = pivotAng
-        if pivotAng == PivotWalk.DEFAULT_PIVOT_ANG:
-            if direction == PivotWalk.LEFT:
-                self.stepSequence = DEFAULT_PIVOT_STEPSEQ_LEFT
-            else:
-                self.stepSequence =  DEFAULT_PIVOT_STEPSEQ_RIGHT
-        else:
-            self.stepSequence = PivotWalk.__stepSequence__(self.direction, self.pivotAng)
-
+        
     def __str__(self):
         str = "PivotWalk("
         if self.direction == PivotWalk.LEFT:
@@ -58,22 +53,17 @@ class PivotWalk(Motion):
             str += "RIGHT"
         return str + ")"     
 
-    @staticmethod
-    def __stepSequence__(direction, pivotAng):
+    def stepSequence(self):
         steps = []
-        pivotRotationSeq = Rotation(direction * pivotAng).stepSequence
-        pivotRotationSeqInv = Rotation(-2 * direction * pivotAng).stepSequence
-        zeros = [Step() for _ in range(math.floor(PivotWalk.PIVOT_STALLS / StateHandler.STEP_TIME))]
+        pivotRotationSeq = Rotation(self.direction * self.pivotAng).stepSequence()
+        pivotRotationSeqInv = Rotation(-2 * self.direction * self.pivotAng).stepSequence()
         #Assamble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
         steps.append(Step(0, 1))
         steps.extend(pivotRotationSeq)
-        steps.extend(zeros)
         steps.append(Step(0, -2))
         steps.extend(pivotRotationSeqInv)
-        steps.extend(zeros)
         steps.append(Step(0, 2))
         steps.extend(pivotRotationSeq)
-        steps.extend(zeros)
         steps.append(Step(0, -1))
         return steps
 
@@ -83,27 +73,25 @@ class Rotation(Motion):
     """
 
     ANG_VELOCITY = math.radians(22.5)  #in radians/seconds
+    ROTATION_STALLS = 0.25 #zerochanges/update when rotating
 
     def __init__(self, angle):
         super().__init__()
         self.angle = angle
-        self.stepSequence = Rotation.__stepSequence__(angle)
 
     def __str__(self):
         return "Rotation(" + str(math.degrees(self.angle)) + "°)"
 
-    @staticmethod
-    def __stepSequence__(angle):
+    def stepSequence(self):
         steps = []
-        k = math.floor(abs(angle) / (Rotation.ANG_VELOCITY * StateHandler.STEP_TIME))
-        angPerStep = angle / k
+        k = math.floor(abs(self.angle) / (Rotation.ANG_VELOCITY * StateHandler.STEP_TIME))
+        angPerStep = self.angle / k
         for i in range(k):
             steps.append(Step(angPerStep, 0))
-        steps.append(Step(angle - k * angPerStep, 0))
+        steps.append(Step(self.angle - k * angPerStep, 0))
+        zeros = [Step() for _ in range(StateHandler.max_poly_length * math.floor(Rotation.ROTATION_STALLS / StateHandler.STEP_TIME))]
+        steps.extend(zeros)
         return steps
-    
-DEFAULT_PIVOT_STEPSEQ_LEFT = PivotWalk.__stepSequence__(PivotWalk.LEFT, PivotWalk.DEFAULT_PIVOT_ANG)
-DEFAULT_PIVOT_STEPSEQ_RIGHT = PivotWalk.__stepSequence__(PivotWalk.RIGHT, PivotWalk.DEFAULT_PIVOT_ANG)
 
 class MotionController:
     """
@@ -118,7 +106,6 @@ class MotionController:
         self.motionsDone = []
         self.steps = Queue()
         
-
     def add(self, motion: Motion):
         """
         Adds motion to be executed.
@@ -145,7 +132,7 @@ class MotionController:
                 self.currentMotion = None
                 return Step()
             self.currentMotion = self.motionsOpen.get()
-            for i in self.currentMotion.stepSequence:
+            for i in self.currentMotion.stepSequence():
                 self.steps.put(i)
             
         return self.steps.get()

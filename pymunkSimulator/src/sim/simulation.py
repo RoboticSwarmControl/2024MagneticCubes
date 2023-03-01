@@ -252,8 +252,8 @@ class Simulation:
             verts = [shape.body.local_to_world(lv) for lv in shape.get_vertices()]
             pygame.draw.polygon(self.window, shape.color, verts)
             pygame.draw.lines(self.window, Color.DARKGREY, True, verts, 2)
-            pygame.draw.circle(self.window, Color.BLACK, shape.body.local_to_world(
-                shape.body.center_of_gravity), 6)
+            if shape in self.stateHandler.frictionpoints:
+                pygame.draw.circle(self.window, Color.BLACK, self.stateHandler.frictionpoints[shape], 8)
             for i, magP in enumerate(cube.magnetPos):
                 if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
                     magcolor = Color.BLUE

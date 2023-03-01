@@ -23,11 +23,18 @@ class StateHandler:
         (0, 0), (0, CONNECTION_DISTANCE), (0, 1), (0, 1)))  # NS connection
     SENSOR_CTYPE = 1
     BOUNDARIE_RAD = 8
+    NOMINAL_FRICTION = 0.2
+    FRICTION_DAMPING = 0.9
+    ANG_VEL_DAMP = 0.95
+
+    max_poly_length = 0
 
     def __init__(self, width, height):
         self.space = pymunk.Space()
         self.space.gravity = (0, 0)  # gravity doesn't exist
-        self.space.damping = 0.2  # simulate top-down gravity with damping
+        self.space.damping = 1.0
+        # simulate top-down gravity with damping  was 0.2.  0 makes things not move.  1.0 they bounce forever.
+        # A value of 0.9 means that each body will lose 10% of its velocity per second. Defaults to 1. Like gravity, it can be overridden on a per body basis.
         cHandler = self.space.add_collision_handler(
             StateHandler.SENSOR_CTYPE, StateHandler.SENSOR_CTYPE)
 
@@ -47,13 +54,14 @@ class StateHandler:
         self.magConnect = {}
         self.polyominoes = []
 
-        #JOINTS
-        self.connectJoints = []
-        self.pivotJoints = []
-
         self.configToLoad = None
         self.updateLock = Lock()
         self.connectionChange = Event()
+
+        self.frictionpoints = {}
+        #JOINTS
+        self.connectJoints = []
+        self.pivotJoints = []
 
     def loadConfig(self, newConfig: Configuration):
         self.configToLoad = newConfig
@@ -114,16 +122,15 @@ class StateHandler:
         if self.connectionChange.isSet():
             self.__detectPoly__()
             self.connectionChange.clear()
-        # update the pivot point for polyominoes
         #JOINTS
         #self.__removePivotJoints__()
+        self.frictionpoints.clear()
         for poly in self.polyominoes:
-            self.__updatePivotPiont__(poly)
-            #JOINTS
+            #self.__updatePivotPiont__(poly)
             #self.__addPivotJoints__(poly)
-        # Apply forces to the cubes
-        for cube in self.getCubes():
-            self.__applyForceField__(cube)
+            for cube in poly.getCubes():
+                self.__applyForceField__(cube)
+                self.__applyForceFriction__(cube, poly)
         self.updateLock.release()
 
     def __applyForceField__(self, cube: Cube):
@@ -170,8 +177,35 @@ class StateHandler:
         self.magConnect[cubei][edgei.value] = cubej
         self.magConnect[cubej][edgej.value] = cubei
         #JOINTS
-        self.__addConnectionJoint__(cubei, edgei, cubej, edgej)
+        #self.__addConnectionJoint__(cubei, edgei, cubej, edgej)
         self.connectionChange.set()
+
+    def __applyForceFriction__(self, cube: Cube, poly: Polyomino):
+        shape = self.getShape(cube)
+        #calculate friction force without velocity yet
+        force = -1 * StateHandler.FRICTION_DAMPING * shape.mass
+        if self.magElevation == 0:
+            #Apply full friction to cube, at COG
+            force *= shape.body.velocity
+            shape.body.apply_force_at_world_point(force, shape.body.position)
+            self.frictionpoints[shape] = shape.body.position #just for drawing
+        else:
+            # define the cubes in poly the have the most friction and the frictionpoint
+            if self.magElevation < 0:
+                frictionCubes = set(poly.getTopRow())
+                fricPoint = shape.body.local_to_world((-Cube.MRAD,0))
+            elif self.magElevation > 0:
+                frictionCubes = set(poly.getBottomRow())
+                fricPoint = shape.body.local_to_world((Cube.MRAD,0))     
+            # apply partial friction to cube at the frictionpoint
+            force *= shape.body.velocity_at_world_point(fricPoint)
+            shape.body.apply_force_at_world_point(StateHandler.NOMINAL_FRICTION * force, fricPoint)
+            if cube in frictionCubes:
+                # apply the rest if it is a friction cube
+                shape.body.apply_force_at_world_point((1 - StateHandler.NOMINAL_FRICTION) * force * poly.size() / len(frictionCubes), fricPoint)
+                self.frictionpoints[shape] = fricPoint #just for drawing
+        # damp the angular velocity
+        shape.body.angular_velocity *= StateHandler.ANG_VEL_DAMP
 
     def __detectPoly__(self):
         self.polyominoes = []
@@ -192,37 +226,14 @@ class StateHandler:
                     done.add(adj)
                     next.put(adj)
             self.polyominoes.append(polyomino)
-
-    def __updatePivotPiont__(self, poly: Polyomino):
-        if self.magElevation == 0:
-            for cube in poly.getCubes():
-                shape = self.getShape(cube)
-                shape.body.center_of_gravity = (0,0)
-                pos = shape.body.position
-                shape.body.position = (pos[0],pos[1])
-        else:
-            if self.magElevation < 0:
-                edgeCubes = poly.getTopRow()
-                edgePointL = (-Cube.MRAD,0)
-            else:
-                edgeCubes = poly.getBottomRow()
-                edgePointL = (Cube.MRAD,0)
-            pivotPoint = (0,0)
-            for cube in edgeCubes:
-                shape = self.getShape(cube)
-                pivotPoint += shape.body.local_to_world(edgePointL)
-            pivotPoint /= len(edgeCubes)
-            for cube in poly.getCubes(): 
-                shape = self.getShape(cube)
-                shape.body.center_of_gravity = shape.body.world_to_local(pivotPoint)
-                pos = shape.body.position
-                shape.body.position = (pos[0],pos[1])
+            size = polyomino.bounds()
+            StateHandler.max_poly_length = max(StateHandler.max_poly_length, max(size))     
 
     def __loadConfig__(self):
         # clear space
         #JOINTS
         #self.__removePivotJoints__()
-        self.__removeConnectJoints__()
+        #self.__removeConnectJoints__()
         for cube in self.getCubes():
             self.__remove__(cube)
         # grab values from configToLoad
@@ -295,7 +306,34 @@ class StateHandler:
             wall.friction = 0.5
             self.space.add(wall)
         return bounds
-    
+
+#------------------------------------DEPRECATED----------------------------------------------
+
+    def __updatePivotPiont__(self, poly: Polyomino):
+        if self.magElevation == 0:
+            for cube in poly.getCubes():
+                shape = self.getShape(cube)
+                shape.body.center_of_gravity = (0,0)
+                pos = shape.body.position
+                shape.body.position = (pos[0],pos[1])
+        else:
+            if self.magElevation < 0:
+                edgeCubes = poly.getTopRow()
+                edgePointL = (-Cube.MRAD,0)
+            else:
+                edgeCubes = poly.getBottomRow()
+                edgePointL = (Cube.MRAD,0)
+            pivotPoint = (0,0)
+            for cube in edgeCubes:
+                shape = self.getShape(cube)
+                pivotPoint += shape.body.local_to_world(edgePointL)
+            pivotPoint /= len(edgeCubes)
+            for cube in poly.getCubes(): 
+                shape = self.getShape(cube)
+                shape.body.center_of_gravity = shape.body.world_to_local(pivotPoint)
+                pos = shape.body.position
+                shape.body.position = (pos[0],pos[1])
+
     def __addPivotJoints__(self, poly: Polyomino):
         if self.magElevation == 0:
             return
