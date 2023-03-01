@@ -31,19 +31,31 @@ However, he considers this process as nondeterministic, so there is no exact ins
 One model more related to the here used magnetic modular cubes is the Tilt model from Becker et al. \cite{Becker2014_SP}.
 In the Tilt model, all tiles move either one step or the maximum amount, until hitting an obstacle, into one of the cardinal directions.
 It offers a solution when robots are controlled uniformly by external global control inputs.
-In this paper it is shown, that transforming one configuration into another, known as the configuration-problem, is NP-hard.
+In this paper it is shown, that transforming one configuration into another, known as the reconfiguration-problem, is NP-hard.
 Following work \cite{Becker2014} also proves, that finding an optimal control sequence, minimizing the number of actions, for the configuration-problem is PSPACE-complete.
 Furthermore, research is done on designing environments in which the Tilt model can be used to accomplish certain tasks.
-In particular, Becker et al. create logic gates that can be connected and evaluate logical expressions.
+In particular, Becker et al. \cite{Becker2014} create connected logic gates that can evaluate logical expressions.
 
 More on the side of self-assembly, in \cite{Fekete2020} the construction of desired shapes using the tilt model is researched.
 It presents a method that can determine a building sequence for a polyomino by adding one tile at a time, considering the rules of Tilt.
-Ways of modifying the environment to create factories, that are able to construct shapes in a pipeline by repeating the same global control sequence, are also examined.
+Ways of modifying the environment to create factories constructing shapes in a pipeline by repeating the same global control sequence, are also examined.
 Shapes can not only be constructed by adding one tile at a time.
 Two multi-tiled shapes can connect to an even bigger structure.
 One article considering the construction with so called sub-assemblies is proposed by A. Schmidt \cite{Schmidt2018}.
 
+Most recently, Becker et al. \cite{Becker2022} developed the magnetic modular cubes.
+These robots contain embedded permanent magnets and have no computation or power supply.
+Therefore, they are all controlled uniformly by an external time-varying magnetic field and are able to perform various actions.
+Most importantly, they can rotate in place or use a technique called pivot walking to move either left or right.
+The magnets also act as glues and allow the cubes to perform self-assembly.
+Although it is theoretically possible to assemble 3-dimensional structures, most research was done by only connecting cubes in two dimensions.
+Since all cubes are the same size, the assembled shapes can be viewed as polyominoes.
+An enumeration was done on the amount of possible polyominoes, that can be created by cubes with different magnet configurations \cite{Becker2021}.
 
+By limiting the controls to only 90 degree turns and assuming a uniform pivot walking distance for all structures per step, magnetic modular cubes follow rules similar to the Tilt model.
+Following these limitations, a simple discrete motion planer was developed, that explores the finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Becker2022}.
+One interesting bachelor-thesis from P. Blumenberg \cite{Blumenberg2022} explores the assembly of polyominoes in arbitrary environments, considering the tilt model.
+He provides different algorithmic approaches using various distance heuristics and even a solution making use of RRTs. 
 
   
 
