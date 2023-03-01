@@ -53,12 +53,11 @@ class StateHandler:
 
         self.configToLoad = None
         self.updateLock = Lock()
-        self.loaded = Event()
         self.connectionChange = Event()
 
     def loadConfig(self, newConfig: Configuration):
         self.configToLoad = newConfig
-        self.loaded.wait(1)
+        #self.loaded.wait(1)
 
     def loadConfig_nowait(self, newConfig: Configuration):
         self.configToLoad = newConfig
@@ -239,8 +238,6 @@ class StateHandler:
         self.connectionChange.set()
         # reset the loading flags
         self.configToLoad = None
-        self.loaded.set()
-        self.loaded.clear()
 
     def __remove__(self, cube: Cube):
         if not self.isRegistered(cube):

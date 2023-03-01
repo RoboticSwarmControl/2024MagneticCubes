@@ -59,20 +59,21 @@ def demo1():
     pos1 = (150,50)
     cube2 = Cube(1)
     pos2 = (200, 150)
-    t0 = time.time()
-    sim = Simulation(drawing=False)
-    sim.start()
-    t1 = time.time()
-    sim.loadConfig(Configuration(math.radians(90), 0,{cube1: pos1,cube2: pos2}))
     d0 = distance(pos1, pos2)
+    sim = Simulation(drawing=False)
+    sim.loadConfig(Configuration(math.radians(90), 0,{cube1: pos1,cube2: pos2}))
+    t0 = time.time()
     while True:
+        sim.start()
         sim.pivotWalk(PivotWalk.LEFT)
         sim.pivotWalk(PivotWalk.LEFT)
+        sim.stop()
         config = sim.saveConfig()
         d = distance(config.getPosition(cube1), config.getPosition(cube2))
         if not abs(d - d0) < 5:
             break
     savepoint = sim.saveConfig()
+    sim.start()
     sim.rotate(math.radians(-90))
     for i in range(4):
         sim.pivotWalk(PivotWalk.LEFT)
@@ -80,11 +81,10 @@ def demo1():
     sim.rotate(math.radians(-90))
     for i in range(6):
         sim.pivotWalk(PivotWalk.RIGHT)      
-    t2 = time.time()
+    t1 = time.time()
+    print("Execution time: ", (t1 - t0), "s")
     sim.enableDraw()
-    print("Init time: ", (t1 - t0), "s")
-    print("Execution time: ", (t2 - t1), "s")
-
+    
 
 if __name__ == "__main__":
     sandbox()

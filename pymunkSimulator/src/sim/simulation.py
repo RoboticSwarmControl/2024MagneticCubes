@@ -42,6 +42,11 @@ class Simulation:
         self.stateHandler = StateHandler(width, height)
         self.controller = MotionController()
 
+        self.pygameInit = False
+        self.window = None
+        self.clock = None
+        self.drawOpt = None
+
     def loadConfig(self, newConfig: Configuration) -> Configuration:
         """
         Notifies the simulation to load a new configuration on the next update.
@@ -128,7 +133,7 @@ class Simulation:
 
     def start(self):
         """
-        Starts the simulation on a new thread. The new thread initializes pygame. Returns when initialization is done.
+        Starts the simulation on a new thread. The new thread initializes pygame if drawing is activ. Returns when initialization is done.
         """
         if (self.started.isSet()):
             print("Simulation already running.")
@@ -163,7 +168,7 @@ class Simulation:
 
     def stop(self):
         """
-        Stops Simulation. pygame will also terminate. Retruns when terminated.
+        Stops the Simulation. Returns when simulation is stopped.
         """
         if (self.stopped.isSet()):
             print("Simulation is not running.")
@@ -172,6 +177,21 @@ class Simulation:
         self.stopped.wait(1)
         if DEBUG:
             print("Simulation stopped.")
+
+    def terminate(self) -> Configuration:
+        """
+        Terminates the simulation. Also terminates pygame when drawing was activated once during runtime.
+        This simulation wont be callable anymore after this method,
+        so one last configuration of the system is returned.
+        """
+        self.stop()
+        config = self.saveConfig()
+        if self.pygameInit:
+            pygame.quit()
+        del self
+        if DEBUG:
+            print("Simulation terminated.")
+        return config
 
     def disableDraw(self):
         """
@@ -195,15 +215,19 @@ class Simulation:
         if wasRunning:
             self.start()
 
+    def __pygameInit__(self):
+        pygame.init()
+        self.window = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("magnetic cube simulator")
+        self.drawOpt = pymunk.pygame_util.DrawOptions(self.window)
+        self.drawOpt.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS
+        self.clock = pygame.time.Clock()
+        self.pygameInit = True
+
     def __run__(self):
         # initialisation
-        if self.drawingActive:
-            pygame.init()
-            window = pygame.display.set_mode((self.width, self.height))
-            pygame.display.set_caption("magnetic cube simulator")
-            drawOpt = pymunk.pygame_util.DrawOptions(window)
-            drawOpt.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS
-            clock = pygame.time.Clock()
+        if self.drawingActive and not self.pygameInit:
+            self.__pygameInit__()
         self.started.set()
         # Simulation loop
         while self.started.isSet():
@@ -212,25 +236,23 @@ class Simulation:
             change = self.controller.nextStep()
             self.stateHandler.update(change[0], change[1])
             if self.drawingActive:
-                self.__draw__(window, drawOpt)
-                clock.tick(Simulation.FPS)
-        if self.drawingActive:
-            pygame.quit()
+                self.__draw__()
+                self.clock.tick(Simulation.FPS)
         self.stopped.set()
 
-    def __draw__(self, window: pygame.Surface, drawOpt):
-        window.fill(Color.WHITE)
+    def __draw__(self):
+        self.window.fill(Color.WHITE)
         # draw the walls
         for shape in self.stateHandler.getBoundaries():
-            pygame.draw.line(window, Color.DARKGREY, shape.body.local_to_world(
+            pygame.draw.line(self.window, Color.DARKGREY, shape.body.local_to_world(
                 shape.a), shape.body.local_to_world(shape.b), StateHandler.BOUNDARIE_RAD)
         # draw the cubes with magnets and CenterOfGravity
         for cube in self.stateHandler.getCubes():
             shape = self.stateHandler.getShape(cube)
             verts = [shape.body.local_to_world(lv) for lv in shape.get_vertices()]
-            pygame.draw.polygon(window, shape.color, verts)
-            pygame.draw.lines(window, Color.DARKGREY, True, verts, 2)
-            pygame.draw.circle(window, Color.BLACK, shape.body.local_to_world(
+            pygame.draw.polygon(self.window, shape.color, verts)
+            pygame.draw.lines(self.window, Color.DARKGREY, True, verts, 2)
+            pygame.draw.circle(self.window, Color.BLACK, shape.body.local_to_world(
                 shape.body.center_of_gravity), 6)
             for i, magP in enumerate(cube.magnetPos):
                 if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
@@ -238,7 +260,7 @@ class Simulation:
                 else:
                     magcolor = Color.RED
                 pygame.draw.circle(
-                    window, magcolor, shape.body.local_to_world(magP), 4)
+                    self.window, magcolor, shape.body.local_to_world(magP), 4)
         # draw the connections
         for i, poly in enumerate(self.stateHandler.getPolyominoes()):
             for cube in poly.getCubes():
@@ -246,17 +268,17 @@ class Simulation:
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue
-                    pygame.draw.line(window, Color.PURPLE, self.stateHandler.getShape(cube).body.local_to_world(
+                    pygame.draw.line(self.window, Color.PURPLE, self.stateHandler.getShape(cube).body.local_to_world(
                         (0, 0)), self.stateHandler.getShape(cubeCon).body.local_to_world((0, 0)), 4)
         # draw the compass
-        pygame.draw.circle(window, Color.LIGHTGRAY,  (12, 12), 12)
-        pygame.draw.circle(window, Color.LIGHTBROWN,  (12, 12), 10)
-        pygame.draw.line(window, Color.BLUE,   (12, 12), (12+12*math.cos(
+        pygame.draw.circle(self.window, Color.LIGHTGRAY,  (12, 12), 12)
+        pygame.draw.circle(self.window, Color.LIGHTBROWN,  (12, 12), 10)
+        pygame.draw.line(self.window, Color.BLUE,   (12, 12), (12+12*math.cos(
             self.stateHandler.magAngle), 12+12*math.sin(self.stateHandler.magAngle)), 3)
-        pygame.draw.line(window, Color.RED, (12, 12), (12-12*math.cos(
+        pygame.draw.line(self.window, Color.RED, (12, 12), (12-12*math.cos(
             self.stateHandler.magAngle), 12-12*math.sin(self.stateHandler.magAngle)), 3)
         # debug draw
-        self.stateHandler.space.debug_draw(drawOpt)
+        self.stateHandler.space.debug_draw(self.drawOpt)
         # update the screen
         pygame.display.update()
         return
@@ -286,5 +308,6 @@ class Simulation:
                     config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
                     self.stateHandler.loadConfig_nowait(config)
             elif event.type == pygame.QUIT:
-                self.started.clear()
+                thread = Thread(target=self.terminate, daemon=True)
+                thread.start()
                 break
