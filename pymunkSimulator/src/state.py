@@ -245,6 +245,49 @@ class Polyomino:
         return poly
             
 
+class PolyManager:
+
+    def __init__(self):
+        self.__polyominoes = []
+        self.maxPolyWidth = 0
+        self.maxPolyHeight = 0
+
+    def detectPolyominoes(self, connects: dict):
+        self.__polyominoes = []
+        self.maxPolyWidth = 0
+        self.maxPolyHeight = 0
+        done = set()
+        next = Queue()
+        for cube in connects.keys():
+            if cube in done:
+                continue
+            polyomino = Polyomino(cube)
+            done.add(cube)
+            next.put(cube)
+            while not next.empty():
+                current = next.get()
+                for i, adj in enumerate(connects[current]):
+                    if (adj == None) or (adj in done):
+                        continue
+                    polyomino.connect(adj, current, Direction(i))
+                    done.add(adj)
+                    next.put(adj)
+            self.__polyominoes.append(polyomino)
+            size = polyomino.bounds()
+            self.maxPolyWidth = max(self.maxPolyHeight, size[0]) 
+            self.maxPolyHeight = max(self.maxPolyHeight, size[1])
+
+    def setPolyominoes(self, polys):
+        self.__polyominoes = polys
+        self.maxPolyWidth = 0
+        self.maxPolyHeight = 0
+        for poly in polys:
+            size = poly.bounds()
+            self.maxPolyWidth = max(self.maxPolyHeight, size[0]) 
+            self.maxPolyHeight = max(self.maxPolyHeight, size[1])
+
+    def getPolyominoes(self):
+        return list(self.__polyominoes)
 
 
 

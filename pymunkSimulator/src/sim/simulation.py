@@ -10,9 +10,9 @@ import pymunk
 import math
 from threading import Thread, Event
 from util import Color, DEBUG
-from state import Configuration, Cube
-from sim.statehandler import StateHandler
-from sim.motion import PivotWalk, Rotation, MotionController
+from state import *
+from sim.handling import *
+from motion import PivotWalk, Rotation 
 
 
 class Simulation:
@@ -39,8 +39,9 @@ class Simulation:
         self.stopped = Event()
         self.started = Event()
 
-        self.stateHandler = StateHandler(width, height)
-        self.controller = MotionController()
+        self.polyManager = PolyManager()
+        self.stateHandler = StateHandler(width, height, self.polyManager)
+        self.motionController = MotionController(self.polyManager)
 
         self.pygameInit = False
         self.window = None
@@ -99,7 +100,7 @@ class Simulation:
             direction: direction of pivot walk. Either PivotWalk.LEFT (-1) or PivotWalk.RIGHT (1)
         """
         motion = PivotWalk(direction)
-        self.controller.add(motion)
+        self.motionController.add(motion)
         motion.executed.wait()
 
     def rotate(self, angle) -> bool:
@@ -110,7 +111,7 @@ class Simulation:
             angle: rotation angle in radians. Negativ values for rotation counterclockwise.
         """
         motion = Rotation(angle)
-        self.controller.add(motion)
+        self.motionController.add(motion)
         motion.executed.wait()
 
     def pivotWalk_nowait(self, direction):
@@ -120,7 +121,7 @@ class Simulation:
         Parameters:
             direction: direction of pivot walk. Either PivotWalk.LEFT (-1) or PivotWalk.RIGHT (1)
         """
-        self.controller.add(PivotWalk(direction))
+        self.motionController.add(PivotWalk(direction))
 
     def rotate_nowait(self, angle):
         """
@@ -129,7 +130,7 @@ class Simulation:
         Parameters:
             angle: rotation angle in radians. Negativ values for rotation counterclockwise.
         """
-        self.controller.add(Rotation(angle))
+        self.motionController.add(Rotation(angle))
 
     def start(self):
         """
@@ -233,7 +234,7 @@ class Simulation:
         while self.started.isSet():
             if (self.userInputsActive and self.drawingActive):
                 self.__userInputs__()
-            step = self.controller.nextStep()
+            step = self.motionController.nextStep()
             self.stateHandler.update(step.angChange, step.elevChange)
             if self.drawingActive:
                 self.__draw__()
@@ -253,7 +254,7 @@ class Simulation:
             pygame.draw.polygon(self.window, shape.color, verts)
             pygame.draw.lines(self.window, Color.DARKGREY, True, verts, 2)
             if shape in self.stateHandler.frictionpoints:
-                pygame.draw.circle(self.window, Color.BLACK, self.stateHandler.frictionpoints[shape], 8)
+                pygame.draw.circle(self.window, Color.BLACK, self.stateHandler.frictionpoints[shape], 6)
             for i, magP in enumerate(cube.magnetPos):
                 if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
                     magcolor = Color.BLUE
@@ -262,7 +263,7 @@ class Simulation:
                 pygame.draw.circle(
                     self.window, magcolor, shape.body.local_to_world(magP), 4)
         # draw the connections
-        for i, poly in enumerate(self.stateHandler.getPolyominoes()):
+        for i, poly in enumerate(self.polyManager.getPolyominoes()):
             for cube in poly.getCubes():
                 connects = poly.getConnections(cube)
                 for cubeCon in connects:
@@ -302,11 +303,11 @@ class Simulation:
                 if event.button == 1:  # 'left click' places cube TYPE_RED
                     config = self.stateHandler.saveConfig()
                     config.addCube(Cube(Cube.TYPE_RED), mouse_pos)
-                    self.stateHandler.loadConfig_nowait(config)
+                    self.stateHandler.loadConfig(config)
                 elif event.button == 3:  # 'right click' places cube TYPE_BLUE
                     config = self.stateHandler.saveConfig()
                     config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
-                    self.stateHandler.loadConfig_nowait(config)
+                    self.stateHandler.loadConfig(config)
             elif event.type == pygame.QUIT:
                 thread = Thread(target=self.terminate, daemon=False)
                 thread.start()

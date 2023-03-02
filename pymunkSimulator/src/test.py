@@ -3,7 +3,6 @@
 from state import Cube, Polyomino, Configuration
 from util import *
 from sim.simulation import Simulation
-from sim.motion import PivotWalk
 import time
 
 def polyTest():

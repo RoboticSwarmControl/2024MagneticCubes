@@ -12,7 +12,7 @@ import time
 
 from util import *
 from sim.simulation import Simulation
-from sim.motion import *
+from motion import *
 from state import Configuration, Cube
 
 def sandbox_onMac():

@@ -7,11 +7,9 @@ and ANG_VELOCITY for all rotations.
 """
 
 import math
-from threading import Event 
-from queue import Queue
+from threading import Event
 
 from util import DEBUG
-from sim.statehandler import StateHandler
 
 class Step:
 
@@ -27,7 +25,7 @@ class Motion:
     def __init__(self):
         self.executed = Event()
 
-    def stepSquence(self):
+    def stepSquence(self, stepTime, longestChain):
         return [Step()]
 
 
@@ -53,10 +51,10 @@ class PivotWalk(Motion):
             str += "RIGHT"
         return str + ")"     
 
-    def stepSequence(self):
+    def stepSequence(self, stepTime, longestChain):
         steps = []
-        pivotRotationSeq = Rotation(self.direction * self.pivotAng).stepSequence()
-        pivotRotationSeqInv = Rotation(-2 * self.direction * self.pivotAng).stepSequence()
+        pivotRotationSeq = Rotation(self.direction * self.pivotAng).stepSequence(stepTime, longestChain)
+        pivotRotationSeqInv = Rotation(-2 * self.direction * self.pivotAng).stepSequence(stepTime, longestChain)
         #Assamble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
         steps.append(Step(0, 1))
         steps.extend(pivotRotationSeq)
@@ -82,57 +80,13 @@ class Rotation(Motion):
     def __str__(self):
         return "Rotation(" + str(math.degrees(self.angle)) + "°)"
 
-    def stepSequence(self):
+    def stepSequence(self, stepTime, longestChain):
         steps = []
-        k = math.floor(abs(self.angle) / (Rotation.ANG_VELOCITY * StateHandler.STEP_TIME))
+        k = math.floor(abs(self.angle) / (Rotation.ANG_VELOCITY * stepTime))
         angPerStep = self.angle / k
         for i in range(k):
             steps.append(Step(angPerStep, 0))
         steps.append(Step(self.angle - k * angPerStep, 0))
-        zeros = [Step() for _ in range(StateHandler.max_poly_length * math.floor(Rotation.ROTATION_STALLS / StateHandler.STEP_TIME))]
+        zeros = [Step() for _ in range(longestChain * math.floor(Rotation.ROTATION_STALLS / stepTime))]
         steps.extend(zeros)
         return steps
-
-class MotionController:
-    """
-    Handles all the motions that have been and will be simulated.
-    It also creates the step sequennces of changes
-    that need to be applied to the magnetic field per update.
-    """
-
-    def __init__(self):
-        self.motionsOpen = Queue()
-        self.currentMotion = None
-        self.motionsDone = []
-        self.steps = Queue()
-        
-    def add(self, motion: Motion):
-        """
-        Adds motion to be executed.
-
-        Parameters:
-            motion
-        """
-        self.motionsOpen.put(motion)
-
-    def nextStep(self) -> Step:
-        """
-        Returns:
-            The next step to execute the current motion as a tupel (angle update, elevation update)
-            Returns (0,0) if all motions have been executed
-        
-        Note that the return values are not absolute they need to be added to the current orientation of the magneticfield
-        """
-        if self.steps.empty():
-            if not self.currentMotion == None:
-                self.currentMotion.executed.set()
-                self.motionsDone.append(self.currentMotion)
-                if DEBUG: print("Executed: " + str(self.currentMotion))
-            if self.motionsOpen.empty():
-                self.currentMotion = None
-                return Step()
-            self.currentMotion = self.motionsOpen.get()
-            for i in self.currentMotion.stepSequence():
-                self.steps.put(i)
-            
-        return self.steps.get()

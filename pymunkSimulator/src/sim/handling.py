@@ -9,8 +9,57 @@ import math
 from threading import Lock, Event
 from queue import Queue
 
+from motion import Motion, Step
 from util import *
-from state import Configuration, Polyomino, Cube
+from state import *
+
+class MotionController:
+    """
+    Handles all the motions that have been and will be simulated.
+    It also creates the step sequennces of changes
+    that need to be applied to the magnetic field per update.
+    """
+
+    def __init__(self, polyManager: PolyManager):
+        self.polyManager = polyManager
+        self.motionsOpen = Queue()
+        self.currentMotion = None
+        self.motionsDone = []
+        self.steps = Queue()
+        
+    def add(self, motion: Motion):
+        """
+        Adds motion to be executed.
+
+        Parameters:
+            motion
+        """
+        self.motionsOpen.put(motion)
+
+    def nextStep(self) -> Step:
+        """
+        Returns:
+            The next step to execute the current motion as a tupel (angle update, elevation update)
+            Returns (0,0) if all motions have been executed
+        
+        Note that the return values are not absolute they need to be added to the current orientation of the magneticfield
+        """
+        if self.steps.empty():
+            if not self.currentMotion == None:
+                self.currentMotion.executed.set()
+                self.motionsDone.append(self.currentMotion)
+                if DEBUG: print("Executed: " + str(self.currentMotion))
+            if self.motionsOpen.empty():
+                self.currentMotion = None
+                return Step()
+            self.currentMotion = self.motionsOpen.get()
+            longestChain = max(self.polyManager.maxPolyWidth, self.polyManager.maxPolyHeight)
+            steps = self.currentMotion.stepSequence(StateHandler.STEP_TIME, longestChain)
+            for i in steps:
+                self.steps.put(i)
+            
+        return self.steps.get()
+
 
 
 class StateHandler:
@@ -27,9 +76,7 @@ class StateHandler:
     FRICTION_DAMPING = 0.9
     ANG_VEL_DAMP = 0.95
 
-    max_poly_length = 0
-
-    def __init__(self, width, height):
+    def __init__(self, width, height, polyManager: PolyManager):
         self.space = pymunk.Space()
         self.space.gravity = (0, 0)  # gravity doesn't exist
         self.space.damping = 1.0
@@ -51,23 +98,21 @@ class StateHandler:
         
         self.magAngle = 0  # orientation of magnetic field (in radians)
         self.magElevation = 0
+
         self.magConnect = {}
-        self.polyominoes = []
+        self.magConnect_pre = {}
+        self.polyManager = polyManager
 
         self.configToLoad = None
         self.updateLock = Lock()
-        self.connectionChange = Event()
+        self.connectChange = Event()
 
         self.frictionpoints = {}
         #JOINTS
-        self.connectJoints = []
-        self.pivotJoints = []
+        #self.connectJoints = []
+        #self.pivotJoints = []
 
     def loadConfig(self, newConfig: Configuration):
-        self.configToLoad = newConfig
-        #self.loaded.wait(1)
-
-    def loadConfig_nowait(self, newConfig: Configuration):
         self.configToLoad = newConfig
 
     def saveConfig(self) -> Configuration:
@@ -78,7 +123,7 @@ class StateHandler:
             cube_pos[cube] = shapes[0].body.position
             cube_meta[cube] = (shapes[0].body.angle, shapes[0].body.velocity)
         config = Configuration(
-            self.magAngle, self.magElevation, cube_pos, self.polyominoes, cube_meta)
+            self.magAngle, self.magElevation, cube_pos, self.polyManager.getPolyominoes(), cube_meta)
         self.updateLock.release()
         return config
 
@@ -96,9 +141,6 @@ class StateHandler:
 
     def getBoundaries(self):
         return self.bounds
-
-    def getPolyominoes(self):
-        return self.polyominoes
 
     def update(self, angChange, elevChange):
         """
@@ -119,18 +161,22 @@ class StateHandler:
         self.magAngle += angChange
         self.magElevation += elevChange
         # detect polyominos based on the magnetic connections
-        if self.connectionChange.isSet():
-            self.__detectPoly__()
-            self.connectionChange.clear()
+        if not self.magConnect == self.magConnect_pre:
+            self.polyManager.detectPolyominoes(self.magConnect)
+            self.connectChange.set()
+            self.connectChange.clear()
+        self.magConnect_pre = self.magConnect
+        self.magConnect = {}
         #JOINTS
         #self.__removePivotJoints__()
         self.frictionpoints.clear()
-        for poly in self.polyominoes:
+        for poly in self.polyManager.getPolyominoes():
             #self.__updatePivotPiont__(poly)
             #self.__addPivotJoints__(poly)
             for cube in poly.getCubes():
                 self.__applyForceField__(cube)
                 self.__applyForceFriction__(cube, poly)
+                self.magConnect[cube] = [None] * 4
         self.updateLock.release()
 
     def __applyForceField__(self, cube: Cube):
@@ -178,7 +224,6 @@ class StateHandler:
         self.magConnect[cubej][edgej.value] = cubei
         #JOINTS
         #self.__addConnectionJoint__(cubei, edgei, cubej, edgej)
-        self.connectionChange.set()
 
     def __applyForceFriction__(self, cube: Cube, poly: Polyomino):
         shape = self.getShape(cube)
@@ -205,29 +250,7 @@ class StateHandler:
                 shape.body.apply_force_at_world_point((1 - StateHandler.NOMINAL_FRICTION) * force * poly.size() / len(frictionCubes), fricPoint)
                 self.frictionpoints[shape] = fricPoint #just for drawing
         # damp the angular velocity
-        shape.body.angular_velocity *= StateHandler.ANG_VEL_DAMP
-
-    def __detectPoly__(self):
-        self.polyominoes = []
-        done = set()
-        next = Queue()
-        for cube in self.getCubes():
-            if cube in done:
-                continue
-            polyomino = Polyomino(cube)
-            done.add(cube)
-            next.put(cube)
-            while not next.empty():
-                current = next.get()
-                for i, adj in enumerate(self.magConnect[current]):
-                    if (adj == None) or (adj in done):
-                        continue
-                    polyomino.connect(adj, current, Direction(i))
-                    done.add(adj)
-                    next.put(adj)
-            self.polyominoes.append(polyomino)
-            size = polyomino.bounds()
-            StateHandler.max_poly_length = max(StateHandler.max_poly_length, max(size))     
+        shape.body.angular_velocity *= StateHandler.ANG_VEL_DAMP   
 
     def __loadConfig__(self):
         # clear space
@@ -246,7 +269,7 @@ class StateHandler:
             vel = self.configToLoad.getVelocity(cube)
             self.__add__(cube, pos, ang, vel)
         # force connection change so that polyominoes get evaluated
-        self.connectionChange.set()
+        self.connectChange.set()
         # reset the loading flags
         self.configToLoad = None
 
@@ -306,6 +329,8 @@ class StateHandler:
             wall.friction = 0.5
             self.space.add(wall)
         return bounds
+
+
 
 #------------------------------------DEPRECATED----------------------------------------------
 
