@@ -8,7 +8,6 @@ import random
 
 from util import *
 
-
 class Cube:
     """
     A unique cube object storing the cube type
@@ -58,6 +57,7 @@ class Cube:
         # print( "force is " + repr(f) )
         # print(repr(f) )
         return f
+
 
 
 class Polyomino:
@@ -159,7 +159,7 @@ class Polyomino:
     def size(self) -> int:
         return len(self.__cube_pos)
 
-    def contains(self, cube):
+    def contains(self, cube: Cube):
         return cube in self.__cube_pos
 
     def bounds(self):
@@ -171,6 +171,10 @@ class Polyomino:
             clone.__cube_pos[cube] = pos
             clone.__pos_cube[pos] = cube
         clone.valid = self.valid
+        clone.__xmax = self.__xmax
+        clone.__xmin = self.__xmin
+        clone.__ymax = self.__ymax
+        clone.__ymin = self.__ymin
         return clone
 
     def __updateCoordinates__(self, newRoot):
@@ -209,7 +213,7 @@ class Polyomino:
         return hash(tuple(toHash))
 
     def __str__(self) -> str:
-        string = f"Polyomino{self.id}:\n"
+        string = f""
         for y in range(self.__ymax, self.__ymin - 1, -1):
             for x in range(self.__xmin, self.__xmax + 1):
                 try:
@@ -245,17 +249,18 @@ class Polyomino:
         return poly
             
 
-class PolyManager:
+
+class PolyCollection:
 
     def __init__(self):
-        self.__polyominoes = []
+        self.__nonTrivial = []
+        self.__trivial = []
         self.maxPolyWidth = 0
         self.maxPolyHeight = 0
+        self.__poly_count = {}
 
     def detectPolyominoes(self, connects: dict):
-        self.__polyominoes = []
-        self.maxPolyWidth = 0
-        self.maxPolyHeight = 0
+        self.__clear__()
         done = set()
         next = Queue()
         for cube in connects.keys():
@@ -272,22 +277,69 @@ class PolyManager:
                     polyomino.connect(adj, current, Direction(i))
                     done.add(adj)
                     next.put(adj)
-            self.__polyominoes.append(polyomino)
-            size = polyomino.bounds()
-            self.maxPolyWidth = max(self.maxPolyHeight, size[0]) 
-            self.maxPolyHeight = max(self.maxPolyHeight, size[1])
-
+            self.__add__(polyomino)
+            
     def setPolyominoes(self, polys):
-        self.__polyominoes = polys
+        self.__clear__()
+        for poly in polys:
+            self.__add__(poly)
+        
+    def getAll(self):
+        return self.getTrivial() + self.getNonTrivial()
+    
+    def getTrivial(self):
+        return list(self.__trivial)
+
+    def getNonTrivial(self):
+        return list(self.__nonTrivial)
+
+    def clone(self):
+        clone = PolyCollection()
+        for poly in self.getAll():
+            clone.__add__(poly.clone())
+        return clone
+
+    def __add__(self, poly: Polyomino):
+        if poly.isTrivial():
+            self.__trivial.append(poly)
+        else:
+            self.__nonTrivial.append(poly)
+        size = poly.bounds()
+        self.maxPolyWidth = max(self.maxPolyWidth, size[0]) 
+        self.maxPolyHeight = max(self.maxPolyHeight, size[1])
+        if poly in self.__poly_count:
+            self.__poly_count[poly] += 1
+        else:
+            self.__poly_count[poly] = 1
+
+    def __clear__(self):
+        self.__nonTrivial.clear()
+        self.__trivial.clear()
         self.maxPolyWidth = 0
         self.maxPolyHeight = 0
-        for poly in polys:
-            size = poly.bounds()
-            self.maxPolyWidth = max(self.maxPolyHeight, size[0]) 
-            self.maxPolyHeight = max(self.maxPolyHeight, size[1])
+        self.__poly_count.clear()
 
-    def getPolyominoes(self):
-        return list(self.__polyominoes)
+    def __contains__(self, key):
+        return key in self.__poly_count
+    
+    def __eq__(self, __o: object) -> bool:
+        if not type(__o) is PolyCollection:
+            return False
+        return __o.__poly_count == self.__poly_count
+    
+    def __str__(self) -> str: 
+        line = ""
+        for i in range(self.maxPolyWidth):
+            line += "-"
+        line += "\n"
+        string = line
+        for poly, count in self.__poly_count.items():
+            string += str(count) + " x:\n\n" + str(poly) + line
+        return string
+    
+    def __repr__(self) -> str:
+        return repr(self.__nonTrivial)
+
 
 
 
@@ -302,7 +354,7 @@ class Configuration:
     if it was loaded and updated by a simulation
     """
 
-    def __init__(self, ang, elev, cube_pos, polyominoes=None, cube_meta=None):
+    def __init__(self, ang, elev, cube_pos, polyominoes: PolyCollection = None, cube_meta=None):
         """
         creates configuration
 
@@ -320,22 +372,13 @@ class Configuration:
             self.__cube_data[cube] = (pos, meta[0], meta[1])
         self.magAngle = ang  # orientation of magnetic field (in radians)
         self.magElevation = elev
-        self.__poly_count = {}
         if polyominoes == None:
-            self.__polyominoes = []
+            self.polyominoes = PolyCollection()
         else:
-            self.__polyominoes = polyominoes
-            for poly in polyominoes:
-                if poly in self.__poly_count:
-                    self.__poly_count[poly] += 1
-                else:
-                    self.__poly_count[poly] = 1
+            self.polyominoes = polyominoes
 
     def getCubes(self):
         return list(self.__cube_data.keys())
-
-    def getPolyominoes(self):
-        return self.__polyominoes
 
     def getPosition(self, cube: Cube):
         return self.__cube_data[cube][0]
@@ -345,9 +388,6 @@ class Configuration:
 
     def getVelocity(self, cube: Cube):
         return self.__cube_data[cube][2]
-
-    def contains(self, polyomino: Polyomino):
-        return polyomino in self.__poly_count
 
     def nearestWall(self, cube, size) -> Direction:
         if not cube in self.__cube_data:
@@ -365,8 +405,8 @@ class Configuration:
         return hash(self) == hash(__o)
 
     def __hash__(self) -> int:
-        toHash = [(c, d[0]) for c, d in self.__cube_data.items()]
-        toHash.sort(key=lambda t: t[0].id)
+        toHash = [(d[0], c.type) for c, d in self.__cube_data.items()]
+        toHash.sort()
         toHash.append(self.magAngle)
         return hash(tuple(toHash))
 

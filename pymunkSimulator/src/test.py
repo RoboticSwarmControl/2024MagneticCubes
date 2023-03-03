@@ -105,11 +105,13 @@ def connectAndPoly():
 
 def configurationHash():
     c1 = Cube(0)
-    c2 = Cube(0)
+    c2 = Cube(1)
     c3 = Cube(0)
     c4 = Cube(0)
-    con1 = Configuration(0,0,{c1:(100,100),c2:(200,100),c3:(300,100),c4:(400,100)})
-    con2 = Configuration(0,0,{c3:(300,100),c2:(200,100),c1:(100,100),c4:(400,100)})
+    c5 = Cube(1)
+    c6 = Cube(0)
+    con1 = Configuration(0,0,{c1:(100,100), c2:(200,200), c3:(300,300)})
+    con2 = Configuration(0,0,{c5:(200,200), c6:(300,300), c4:(100,100)})
     print("Hash equality = " + str(hash(con1) == hash(con2)))
 
 def configPoly():
@@ -130,4 +132,4 @@ def configPoly():
     print("contain p2:", con1.contains(p2))
 
 if __name__ == "__main__":
-    polyTest()
+    configurationHash()

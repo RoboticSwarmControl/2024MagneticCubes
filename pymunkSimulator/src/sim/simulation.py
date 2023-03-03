@@ -39,9 +39,9 @@ class Simulation:
         self.stopped = Event()
         self.started = Event()
 
-        self.polyManager = PolyManager()
-        self.stateHandler = StateHandler(width, height, self.polyManager)
-        self.motionController = MotionController(self.polyManager)
+        self.polyominoes = PolyCollection()
+        self.stateHandler = StateHandler(width, height, self.polyominoes)
+        self.motionController = MotionController(self.polyominoes)
 
         self.pygameInit = False
         self.window = None
@@ -263,7 +263,7 @@ class Simulation:
                 pygame.draw.circle(
                     self.window, magcolor, shape.body.local_to_world(magP), 4)
         # draw the connections
-        for i, poly in enumerate(self.polyManager.getPolyominoes()):
+        for i, poly in enumerate(self.polyominoes.getAll()):
             for cube in poly.getCubes():
                 connects = poly.getConnections(cube)
                 for cubeCon in connects:
@@ -296,7 +296,8 @@ class Simulation:
                 elif event.key == 100:  # 'd' rotate cw
                     self.rotate_nowait(math.radians(10))
                 elif event.key == 105:  # 'i' info
-                    #print(len(self.stateHandler.connectJoints))
+                    config = self.stateHandler.saveConfig()
+                    print(config.polyominoes)
                     pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()

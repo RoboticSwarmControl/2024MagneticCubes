@@ -20,8 +20,8 @@ class MotionController:
     that need to be applied to the magnetic field per update.
     """
 
-    def __init__(self, polyManager: PolyManager):
-        self.polyManager = polyManager
+    def __init__(self, polyominoes: PolyCollection):
+        self.polyominoes = polyominoes
         self.motionsOpen = Queue()
         self.currentMotion = None
         self.motionsDone = []
@@ -53,7 +53,7 @@ class MotionController:
                 self.currentMotion = None
                 return Step()
             self.currentMotion = self.motionsOpen.get()
-            longestChain = max(self.polyManager.maxPolyWidth, self.polyManager.maxPolyHeight)
+            longestChain = max(self.polyominoes.maxPolyWidth, self.polyominoes.maxPolyHeight)
             steps = self.currentMotion.stepSequence(StateHandler.STEP_TIME, longestChain)
             for i in steps:
                 self.steps.put(i)
@@ -76,7 +76,7 @@ class StateHandler:
     FRICTION_DAMPING = 0.9
     ANG_VEL_DAMP = 0.95
 
-    def __init__(self, width, height, polyManager: PolyManager):
+    def __init__(self, width, height, polyominoes: PolyCollection):
         self.space = pymunk.Space()
         self.space.gravity = (0, 0)  # gravity doesn't exist
         self.space.damping = 1.0
@@ -101,7 +101,7 @@ class StateHandler:
 
         self.magConnect = {}
         self.magConnect_pre = {}
-        self.polyManager = polyManager
+        self.polyominoes = polyominoes
 
         self.configToLoad = None
         self.updateLock = Lock()
@@ -123,7 +123,7 @@ class StateHandler:
             cube_pos[cube] = shapes[0].body.position
             cube_meta[cube] = (shapes[0].body.angle, shapes[0].body.velocity)
         config = Configuration(
-            self.magAngle, self.magElevation, cube_pos, self.polyManager.getPolyominoes(), cube_meta)
+            self.magAngle, self.magElevation, cube_pos, self.polyominoes.clone(), cube_meta)
         self.updateLock.release()
         return config
 
@@ -162,7 +162,7 @@ class StateHandler:
         self.magElevation += elevChange
         # detect polyominos based on the magnetic connections
         if not self.magConnect == self.magConnect_pre:
-            self.polyManager.detectPolyominoes(self.magConnect)
+            self.polyominoes.detectPolyominoes(self.magConnect)
             self.connectChange.set()
             self.connectChange.clear()
         self.magConnect_pre = self.magConnect
@@ -170,7 +170,7 @@ class StateHandler:
         #JOINTS
         #self.__removePivotJoints__()
         self.frictionpoints.clear()
-        for poly in self.polyManager.getPolyominoes():
+        for poly in self.polyominoes.getAll():
             #self.__updatePivotPiont__(poly)
             #self.__addPivotJoints__(poly)
             for cube in poly.getCubes():
