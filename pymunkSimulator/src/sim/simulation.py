@@ -3,23 +3,19 @@ Holds the Simulation class
 
 @author: Aaron T Becker, Kjell Keune
 """
-
 import pygame
-import pymunk.pygame_util
-import pymunk
 import math
 from threading import Thread, Event
-from util import Color, DEBUG
-from state import *
-from sim.handling import *
-from motion import PivotWalk, Rotation 
 
+from util import DEBUG
+from state import Configuration, Cube
+from motion import *
+from sim.handling import *
 
 class Simulation:
     """
     Top-level class for interacting with the Simulation
     """
-    FPS = 144  # Determines the visual speed of the simulation has no effect when drawing is disabled
 
     def __init__(self, width=800, height=800, drawing=True, userInputs=True):
         """
@@ -31,24 +27,20 @@ class Simulation:
             drawing: if the simulation should draw
             userInputs: if user inputs are enabled
         """
-        self.width = width
-        self.height = height
         self.drawingActive = drawing
         self.userInputsActive = userInputs
 
         self.stopped = Event()
         self.started = Event()
 
-        self.polyominoes = PolyCollection()
-        self.stateHandler = StateHandler(width, height, self.polyominoes)
-        self.motionController = MotionController(self.polyominoes)
+        self.stateHandler = StateHandler(width, height)
+        self.renderer = Renderer(self.stateHandler)
 
-        self.pygameInit = False
-        self.window = None
-        self.clock = None
-        self.drawOpt = None
+        self.motionsToExecute = Queue()
+        self.currentMotion = None
+        self.motionSteps = Queue()
 
-    def loadConfig(self, newConfig: Configuration) -> Configuration:
+    def loadConfig(self, newConfig: Configuration):
         """
         Notifies the simulation to load a new configuration on the next update.
         """
@@ -56,7 +48,7 @@ class Simulation:
         if DEBUG:
             print("Configuration loaded.")
 
-    def saveConfig(self):
+    def saveConfig(self) -> Configuration:
         """
         Returns the configuration the simulation currently has.
         """
@@ -65,72 +57,26 @@ class Simulation:
             print("Configuration saved.")
         return save
 
-    def addCube(self, cube: Cube, pos):
+    def executeMotion(self, motion: Motion):
         """
-        Adds a cube to the current configuration
+        Notifies the simulation to execute a motion returns when the motion is finished executing.
 
         Parameters:
-            cube: cube to be added
-            pos: position of the cube
+            motion: motion to execute
         """
-        config = self.stateHandler.saveConfig()
-        config.addCube(cube, pos)
-        self.stateHandler.loadConfig(config)
-        if DEBUG:
-            print("Added cube" + str(cube) + "to current configuration")
-
-    def removeCube(self, cube: Cube):
-        """
-        Removes a cube from the current configuration
-
-        Parameters:
-            cube: cube to be removed
-        """
-        config = self.stateHandler.saveConfig()
-        config.removeCube(cube)
-        self.stateHandler.loadConfig(config)
-        if DEBUG:
-            print("Removed cube" + str(cube) + "from current configuration")
-
-    def pivotWalk(self, direction) -> bool:
-        """
-        Notifies the simulation to do one pivot walking cycle and returns when the motion finished executing.
-
-        Parameters:
-            direction: direction of pivot walk. Either PivotWalk.LEFT (-1) or PivotWalk.RIGHT (1)
-        """
-        motion = PivotWalk(direction)
-        self.motionController.add(motion)
+        motion.executed.clear()
+        self.motionsToExecute.put(motion)
         motion.executed.wait()
 
-    def rotate(self, angle) -> bool:
+    def executeMotion_nowait(self, motion: Motion):
         """
-        Notifies the simulation to do a rotation and returns when the motion finished executing.
+        Notifies the simulation to execute a motion returns immediately.
 
         Parameters:
-            angle: rotation angle in radians. Negativ values for rotation counterclockwise.
+            motion: motion to execute
         """
-        motion = Rotation(angle)
-        self.motionController.add(motion)
-        motion.executed.wait()
-
-    def pivotWalk_nowait(self, direction):
-        """
-        Notifies the simulation to do one pivot walking cycle and returns immediately.
-
-        Parameters:
-            direction: direction of pivot walk. Either PivotWalk.LEFT (-1) or PivotWalk.RIGHT (1)
-        """
-        self.motionController.add(PivotWalk(direction))
-
-    def rotate_nowait(self, angle):
-        """
-        Notifies the simulation to do a rotation and returns immediately.
-
-        Parameters:
-            angle: rotation angle in radians. Negativ values for rotation counterclockwise.
-        """
-        self.motionController.add(Rotation(angle))
+        motion.executed.clear()
+        self.motionsToExecute.put(motion)
 
     def start(self):
         """
@@ -187,8 +133,8 @@ class Simulation:
         """
         self.stop()
         config = self.saveConfig()
-        if self.pygameInit:
-            pygame.quit()
+        if self.renderer.inizialized:
+            self.renderer.pygameQuit()
         del self
         if DEBUG:
             print("Simulation terminated.")
@@ -216,85 +162,53 @@ class Simulation:
         if wasRunning:
             self.start()
 
-    def __pygameInit__(self):
-        pygame.init()
-        self.window = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("magnetic cube simulator")
-        self.drawOpt = pymunk.pygame_util.DrawOptions(self.window)
-        self.drawOpt.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS
-        self.clock = pygame.time.Clock()
-        self.pygameInit = True
-
     def __run__(self):
         # initialisation
-        if self.drawingActive and not self.pygameInit:
-            self.__pygameInit__()
+        if self.drawingActive and not self.renderer.inizialized:
+            self.renderer.pygameInit()
         self.started.set()
         # Simulation loop
         while self.started.isSet():
             if (self.userInputsActive and self.drawingActive):
                 self.__userInputs__()
-            step = self.motionController.nextStep()
+            step = self.__nextStep__()
             self.stateHandler.update(step.angChange, step.elevChange)
             if self.drawingActive:
-                self.__draw__()
-                self.clock.tick(Simulation.FPS)
+                self.renderer.draw()
         self.stopped.set()
 
-    def __draw__(self):
-        self.window.fill(Color.WHITE)
-        # draw the walls
-        for shape in self.stateHandler.getBoundaries():
-            pygame.draw.line(self.window, Color.DARKGREY, shape.body.local_to_world(
-                shape.a), shape.body.local_to_world(shape.b), StateHandler.BOUNDARIE_RAD)
-        # draw the cubes with magnets and CenterOfGravity
-        for cube in self.stateHandler.getCubes():
-            shape = self.stateHandler.getShape(cube)
-            verts = [shape.body.local_to_world(lv) for lv in shape.get_vertices()]
-            pygame.draw.polygon(self.window, shape.color, verts)
-            pygame.draw.lines(self.window, Color.DARKGREY, True, verts, 2)
-            if shape in self.stateHandler.frictionpoints:
-                pygame.draw.circle(self.window, Color.BLACK, self.stateHandler.frictionpoints[shape], 6)
-            for i, magP in enumerate(cube.magnetPos):
-                if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
-                    magcolor = Color.BLUE
-                else:
-                    magcolor = Color.RED
-                pygame.draw.circle(
-                    self.window, magcolor, shape.body.local_to_world(magP), 4)
-        # draw the connections
-        for i, poly in enumerate(self.polyominoes.getAll()):
-            for cube in poly.getCubes():
-                connects = poly.getConnections(cube)
-                for cubeCon in connects:
-                    if cubeCon == None:
-                        continue
-                    pygame.draw.line(self.window, Color.PURPLE, self.stateHandler.getShape(cube).body.local_to_world(
-                        (0, 0)), self.stateHandler.getShape(cubeCon).body.local_to_world((0, 0)), 4)
-        # draw the compass
-        pygame.draw.circle(self.window, Color.LIGHTGRAY,  (12, 12), 12)
-        pygame.draw.circle(self.window, Color.LIGHTBROWN,  (12, 12), 10)
-        pygame.draw.line(self.window, Color.BLUE,   (12, 12), (12+12*math.cos(
-            self.stateHandler.magAngle), 12+12*math.sin(self.stateHandler.magAngle)), 3)
-        pygame.draw.line(self.window, Color.RED, (12, 12), (12-12*math.cos(
-            self.stateHandler.magAngle), 12-12*math.sin(self.stateHandler.magAngle)), 3)
-        # debug draw
-        self.stateHandler.space.debug_draw(self.drawOpt)
-        # update the screen
-        pygame.display.update()
-        return
+    def __nextStep__(self) -> Step:
+        """
+        Returns:
+            The next step to execute the current motion.
+            Returns Step with zero updates if all motions have been executed.
+        """
+        if self.motionSteps.empty():
+            if not self.currentMotion == None:
+                self.currentMotion.executed.set()
+                if DEBUG:
+                    print(f"{self.currentMotion} executed.")
+            if self.motionsToExecute.empty():
+                self.currentMotion = None
+                return Step()
+            self.currentMotion = self.motionsToExecute.get()
+            longestChain = max(self.stateHandler.polyominoes.maxPolyWidth, self.stateHandler.polyominoes.maxPolyHeight)
+            steps = self.currentMotion.stepSequence(StateHandler.STEP_TIME, longestChain)
+            for i in steps:
+                self.motionSteps.put(i) 
+        return self.motionSteps.get()
 
     def __userInputs__(self):
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == 119:  # 'w' pivotwalk right
-                    self.pivotWalk_nowait(PivotWalk.RIGHT)
+                    self.executeMotion_nowait(PivotWalk(PivotWalk.RIGHT))
                 elif event.key == 97:  # 'a' rotate ccw
-                    self.rotate_nowait(-math.radians(10))
+                    self.executeMotion_nowait(Rotation(math.radians(-10)))
                 elif event.key == 115:  # 's' pivotwalk left
-                    self.pivotWalk_nowait(PivotWalk.LEFT)
+                    self.executeMotion_nowait(PivotWalk(PivotWalk.LEFT))
                 elif event.key == 100:  # 'd' rotate cw
-                    self.rotate_nowait(math.radians(10))
+                    self.executeMotion_nowait(Rotation(math.radians(10)))
                 elif event.key == 105:  # 'i' info
                     config = self.stateHandler.saveConfig()
                     print(config.polyominoes)
