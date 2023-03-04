@@ -3,13 +3,19 @@
 Self-assembling modular parts forming bigger structures, is a well known concept in nature and most functionalities of living organisms follow this principle \cite{bishop2005}.
 Structures can be assembled and disassembled depending on the task they should accomplish during a given point in time. 
 Resembling this concept, with self-reconfiguring robot swarms, has promising applications in the Future.
-Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or it could be useful for milliscale and microscale manufacturing \cite{pelrine2016}.
+Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or it could be used in milliscale and microscale manufacturing \cite{pelrine2016}.
 
 Designing robots at these small scales faces serious problems.
 Equipping each robot with its own sensors, actuation-system, connection-system and power supply seem very infeasible, in terms of the sheer size and power-limitations \cite{white2007}.
 Therefore, the use of external global control and power supply, effecting every robot uniformly, seem like a promising solution \cite{white2007}.
 Using robots, with no other system than embedded magnets, has all the desired effects.
 Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply \cite{saab2019}.
+
+One example for magnetically controlled robots are the magnetic modular cubes by Becker et al. \cite{Becker2022}, which are the subjects of this thesis.
+We will develop a simulation, that simulates the behavior of magnetic modular cubes, without assuming discrete movement or limiting the degree of freedom for rotations.
+The simulation will be used for developing closed loop planing algorithms, which provide a control sequence to assemble desired target shapes.
+For that it is necessary to develop a local planner that is able to connect structures at desired faces.
+We will look at the difficulties and problems that occur, when working with magnetic modular cubes in the 2-dimensional special euclidean group.
 
 
 \section{Related Work}
@@ -64,37 +70,9 @@ An enumeration was done on the amount of possible polyominoes, that can be creat
 
 By limiting the controls to only 90 degree turns and assuming a uniform pivot walking distance for all structures per step, magnetic modular cubes follow rules similar to the Tilt model.
 Following these limitations, a simple discrete motion planer was developed, that explores the finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Becker2022}.
-One interesting bachelor-thesis from P. Blumenberg \cite{Blumenberg2022} explores the assembly of polyominoes in arbitrary environments, considering the tilt model.
-He provides different algorithmic approaches using various distance heuristics and even a solution making use of RRTs. 
-
-  
-
-\begin{comment}
-Different methods for motion planning:
-
-simple discrete planning
-
-sample-based planning
-
-Tilt assembly 
-
-- global control ...
-- Applications	
-- reconfiguration problem PSPACE Complete
-
-Construction of shapes
-
-- what can be done with complex enviroment
-- on tile at a time
-- sub-assemblies
-
-Magnetic cubes
-
-- explain cubes with magnets, pivotwalking
-- discrete planner
-- enumeration of polyominoes, consider fixed polys
-\end{comment}
-
+One interesting bachelor-thesis from Blumenberg \cite{Blumenberg2022} explores the assembly of polyominoes in arbitrary environments, considering the tilt model.
+He provides different algorithmic approaches using various distance heuristics and even a solution making use of RRTs.
+For that he follows the rules of Tilt in a discrete setting.
 
 
 \section{Contribution}
