@@ -17,7 +17,7 @@ class Simulation:
     Top-level class for interacting with the Simulation
     """
 
-    def __init__(self, boardSize=(800, 800), drawing=True, userInputs=True):
+    def __init__(self, drawing=True, userInputs=True):
         """
         creates a Simulation with empty configuration
 
@@ -33,7 +33,7 @@ class Simulation:
         self.stopped = Event()
         self.started = Event()
 
-        self.stateHandler = StateHandler(boardSize)
+        self.stateHandler = StateHandler()
         self.renderer = Renderer(self.stateHandler)
 
         self.motionsToExecute = Queue()
@@ -44,7 +44,15 @@ class Simulation:
         """
         Notifies the simulation to load a new configuration on the next update.
         """
+        wasRunning = self.started.is_set()
+        resize = (not self.stateHandler.boardSize == newConfig.boardSize) and self.drawingActive
+        if resize:
+            if wasRunning:
+                self.stop()
+            self.renderer.pygameQuit()
         self.stateHandler.loadConfig(newConfig)
+        if wasRunning and resize:
+            self.start()
         if DEBUG:
             print("Configuration loaded.")
 
@@ -133,8 +141,7 @@ class Simulation:
         """
         self.stop()
         config = self.saveConfig()
-        if self.renderer.initialized:
-            self.renderer.pygameQuit()
+        self.renderer.pygameQuit()
         del self
         if DEBUG:
             print("Simulation terminated.")
@@ -142,19 +149,24 @@ class Simulation:
 
     def disableDraw(self):
         """
-        Disables drawing. If the simulation is running it will be restarted.
+        Disables drawing. Restartes to quit pygame.
         """
+        if not self.drawingActive:
+            return
         wasRunning = self.started.is_set()
         if wasRunning:
             self.stop()
+        self.renderer.pygameQuit()
         self.drawingActive = False
         if wasRunning:
             self.start()
 
     def enableDraw(self):
         """
-        Enables drawing. If the simulation is running it will be restarted.
+        Enables drawing. Restarts to initialize pygame.
         """
+        if self.drawingActive:
+            return
         wasRunning = self.started.is_set()
         if wasRunning:
             self.stop()
@@ -162,14 +174,19 @@ class Simulation:
         if wasRunning:
             self.start()
 
+    def setDrawingSpeed(self, fps):
+        if fps < 8:
+            fps = 8
+        self.renderer.fps = fps
+
     def __run__(self):
         # initialisation
-        if self.drawingActive and not self.renderer.initialized:
+        if self.drawingActive:
             self.renderer.pygameInit()
         self.started.set()
         # Simulation loop
         while self.started.isSet():
-            if self.renderer.initialized:
+            if self.drawingActive:
                 self.__userInputs__()
             step = self.__nextStep__()
             self.stateHandler.update(step.angChange, step.elevChange)
@@ -214,6 +231,12 @@ class Simulation:
                         self.executeMotion_nowait(PivotWalk(PivotWalk.LEFT))
                     elif event.key == 100:  # 'd' rotate cw
                         self.executeMotion_nowait(Rotation(math.radians(10)))
+                    elif event.key == 121:  # 'y' decrease speed
+                        self.setDrawingSpeed(self.renderer.fps / 2)
+                    elif event.key == 120:  # 'x' increase speed
+                        self.setDrawingSpeed(self.renderer.fps * 2)
+                    elif event.key == 99:  # 'c' clear space
+                        self.stateHandler.loadConfig(StateHandler.DEFAULT_CONFIG)
                     elif event.key == 105:  # 'i' info
                         config = self.stateHandler.saveConfig()
                         print(config.polyominoes)

@@ -28,8 +28,11 @@ class StateHandler:
 
     SENSOR_CTYPE = 1
     BOUNDARIE_RAD = 8
+    
+    DEFAULT_BOARDSIZE = (800,800)
+    DEFAULT_CONFIG = Configuration(DEFAULT_BOARDSIZE, math.radians(90), 0, {})
 
-    def __init__(self, boardSize):
+    def __init__(self):
         self.space = pymunk.Space()
         self.space.gravity = (0, 0)  # gravity doesn't exist
         self.space.damping = 1.0
@@ -45,7 +48,7 @@ class StateHandler:
             return False
         cHandler.pre_solve = sensorCollision
 
-        self.boardSize = boardSize
+        self.boardSize = StateHandler.DEFAULT_BOARDSIZE
         self.bounds = []
         self.cube_shapes = {}
         self.sensor_cube = {}
@@ -57,7 +60,7 @@ class StateHandler:
         self.magConnect_pre = {}
         self.polyominoes = PolyCollection()
 
-        self.configToLoad = Configuration(boardSize, math.radians(90), 0, {})
+        self.configToLoad = StateHandler.DEFAULT_CONFIG
         self.updateLock = Lock()
 
         self.frictionpoints = {}
@@ -78,6 +81,7 @@ class StateHandler:
         return self.bounds
 
     def loadConfig(self, newConfig: Configuration):
+        self.boardSize = newConfig.boardSize
         self.configToLoad = newConfig
 
     def saveConfig(self) -> Configuration:
@@ -211,7 +215,6 @@ class StateHandler:
         for cube in self.getCubes():
             self.__removeCube__(cube)
         # grab values from configToLoad
-        self.boardSize = self.configToLoad.boardSize
         self.magAngle = self.configToLoad.magAngle
         self.magElevation = self.configToLoad.magElevation
         # add new objects to space
@@ -358,16 +361,17 @@ class StateHandler:
 
 class Renderer:
 
-    FPS = 144  # Determines the visual speed of the simulation has no effect when drawing is disabled
-
-    def __init__(self, stateHandler: StateHandler):
+    def __init__(self, stateHandler: StateHandler, fps=128):
         self.stateHandler = stateHandler
-        self.initialized = False
+        self.fps = fps
         self.window = None
         self.clock = None
         self.drawOpt = None
+        self.initialized = False
 
     def pygameInit(self):
+        if self.initialized:
+            return
         pygame.init()
         self.window = pygame.display.set_mode(self.stateHandler.boardSize)
         pygame.display.set_caption("Magnetic Cube Simulator")
@@ -377,6 +381,8 @@ class Renderer:
         self.initialized = True
 
     def pygameQuit(self):
+        if not self.initialized:
+            return
         pygame.quit()
         self.window = None
         self.clock = None
@@ -428,4 +434,4 @@ class Renderer:
         self.stateHandler.space.debug_draw(self.drawOpt)
         # update the screen
         pygame.display.update()
-        self.clock.tick(Renderer.FPS)
+        self.clock.tick(self.fps)

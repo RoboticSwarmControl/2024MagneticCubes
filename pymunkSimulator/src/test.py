@@ -131,5 +131,18 @@ def configPoly():
     print("contain p1:", con1.contains(p1))
     print("contain p2:", con1.contains(p2))
 
+def simControlTest():
+    sim = Simulation()
+    sim.start()
+    time.sleep(1)
+    sim.loadConfig(Configuration((800,800), 0, 0, {Cube(0): (100,100)}))
+    time.sleep(1)
+    sim.loadConfig(Configuration((1000,400), 0, 0, {Cube(0): (500,100)}))
+    time.sleep(1)
+    sim.disableDraw()
+    sim.loadConfig(Configuration((400,400), 0, 0, {Cube(0): (200,200)}))
+    sim.enableDraw()
+
+
 if __name__ == "__main__":
-    configurationHash()
+    simControlTest()
