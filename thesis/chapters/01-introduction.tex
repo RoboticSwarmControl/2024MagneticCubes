@@ -11,8 +11,8 @@ Therefore, the use of external global control, effecting every robot uniformly, 
 Using robots, with no other system than embedded permanent magnets, has all the desired effects.
 Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply \cite{saab2019}.
 
-One example for magnetically controlled robots are the magnetic modular cubes by Becker et al. \cite{Becker2022}, which are the subjects of this thesis.
-We will develop a simulation, that simulates the behavior of magnetic modular cubes, without assuming discrete movement or limiting the degree of freedom for rotations.
+One example for magnetically controlled robots are the magnetic modular cubes by Bhattacharjee et al. \cite{Bhattacharjee2022}, which are the subjects of this thesis.
+We will develop a simulation, that simulates the behavior of magnetic modular cubes, without assuming discrete movement or limiting rotations to a certain amount.
 The simulation will be used for developing closed loop planing algorithms, which provide a control sequence to assemble desired target shapes.
 For that it is necessary to develop a local planner that is able to connect structures at desired faces.
 We will look at the difficulties and problems that occur, when working with magnetic modular cubes in the 2-dimensional special euclidean group.
@@ -21,8 +21,9 @@ We will look at the difficulties and problems that occur, when working with magn
 \section{Related Work}
 
 Motion planning is a crucial subject in the field of robotics.
-The goal is to change the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
-The state of the system is also called a configuration and all possible configurations a robot can be in is defined as the configuration-space.
+The goal is to find a continues path from the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
+For that it is necessary to avoid collision with static obstacles and with other robots.
+The state of the system is also called a configuration and all possible configurations one or multiple robots can be in, is defined as the configuration-space.
 The dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and possible actions.
 It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a sequence of actions that lead to the goal configuration, or report failure, if the goal is not reachable.
 A lot of research was done on motion planning and the textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
@@ -51,24 +52,24 @@ Following work \cite{Becker2014} also proves, that finding an optimal control se
 Furthermore, research is done on designing environments in which the Tilt model can be used to accomplish certain tasks.
 In particular, Becker et al. \cite{Becker2014} create connected logic gates that can evaluate logical expressions.
 
-More on the side of self-assembly, in \cite{Fekete2020} the construction of desired shapes using the tilt model is researched.
+More on the side of self-assembly, in \cite{Becker2020} the construction of desired shapes using the tilt model is researched.
 It presents a method that can determine a building sequence for a polyomino by adding one tile at a time, considering the rules of Tilt.
 Ways of modifying the environment to create factories constructing shapes in a pipeline by repeating the same global control inputs, are also examined.
 Shapes can not only be constructed by adding one tile at a time.
 Two multi-tiled shapes can connect to an even bigger structure.
 One article considering the construction with so called sub-assemblies is proposed by A. Schmidt \cite{Schmidt2018}.
 
-Most recently, Becker et al. \cite{Becker2022} developed the magnetic modular cubes.
+Most recently, Bhattacharjee et al. \cite{Bhattacharjee2022} developed the magnetic modular cubes.
 These robots contain embedded permanent magnets and have no computation or power supply.
 Therefore, they are all controlled uniformly by an external time-varying magnetic field and are able to perform various actions.
 Most importantly, they can rotate in place or use a technique called pivot walking to move either left or right.
 The magnets also act as glues and allow the cubes to perform self-assembly.
 Although it is theoretically possible to assemble 3-dimensional structures, most research was done by only connecting cubes in two dimensions.
 Since all cubes are the same size, the assembled shapes can be viewed as polyominoes.
-An enumeration was done on the amount of possible polyominoes, that can be created by cubes with different magnet configurations \cite{Becker2021}.
+An enumeration was done on the amount of possible polyominoes, that can be created by cubes with different magnet configurations \cite{Lu2021}.
 
 By limiting the controls to only 90 degree turns and assuming a uniform pivot walking distance for all structures per step, magnetic modular cubes follow rules similar to the Tilt model.
-Following these limitations, a simple discrete motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Becker2022}.
+Following these limitations, a simple discrete motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Bhattacharjee2022}.
 One interesting bachelor-thesis from Blumenberg \cite{Blumenberg2022} explores the assembly of polyominoes in arbitrary environments, considering the tilt model.
 He provides different algorithmic approaches using various distance heuristics and even a solution making use of RRTs.
 For that he follows the rules of Tilt in a discrete setting.
