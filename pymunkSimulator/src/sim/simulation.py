@@ -17,7 +17,7 @@ class Simulation:
     Top-level class for interacting with the Simulation
     """
 
-    def __init__(self, drawing=True, userInputs=True):
+    def __init__(self, boardSize=(800, 800), drawing=True, userInputs=True):
         """
         creates a Simulation with empty configuration
 
@@ -33,7 +33,7 @@ class Simulation:
         self.stopped = Event()
         self.started = Event()
 
-        self.stateHandler = StateHandler()
+        self.stateHandler = StateHandler(boardSize)
         self.renderer = Renderer(self.stateHandler)
 
         self.motionsToExecute = Queue()

@@ -29,7 +29,7 @@ class StateHandler:
     SENSOR_CTYPE = 1
     BOUNDARIE_RAD = 8
 
-    def __init__(self, boardSize=(800, 800)):
+    def __init__(self, boardSize):
         self.space = pymunk.Space()
         self.space.gravity = (0, 0)  # gravity doesn't exist
         self.space.damping = 1.0
@@ -369,8 +369,7 @@ class Renderer:
 
     def pygameInit(self):
         pygame.init()
-        self.window = pygame.display.set_mode(
-            (self.stateHandler.boardSize[0], self.stateHandler.boardSize[1]))
+        self.window = pygame.display.set_mode(self.stateHandler.boardSize)
         pygame.display.set_caption("Magnetic Cube Simulator")
         self.drawOpt = pymunk.pygame_util.DrawOptions(self.window)
         self.drawOpt.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS

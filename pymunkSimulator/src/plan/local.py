@@ -33,10 +33,11 @@ class Plan:
 
 class PlanExecutor:
 
-    def __init__(self, width, height):
-        self.__sim = Simulation(width, height, True, False)
+    def __init__(self):
+        self.__sim = None
 
     def execute(self, plan: Plan):
+        self.__sim = Simulation(plan.initial.boardSize, True, False)
         self.__sim.loadConfig(plan.initial)
         self.__sim.start()
         for motion in plan.actions:
@@ -47,8 +48,8 @@ class PlanExecutor:
 
 class LocalPlanner:
 
-    def __init__(self, width, height):
-        self.__sim = Simulation(width, height, False, False)
+    def __init__(self):
+        self.__sim = Simulation(drawing=False, userInputs=False)
 
     def singleUpdate(self, config: Configuration) -> Configuration:
         self.__sim.loadConfig(config)
