@@ -3,12 +3,12 @@
 Self-assembling modular parts forming bigger structures, is a well known concept in nature and most functionalities of living organisms follow this principle \cite{bishop2005}.
 Structures can be assembled and disassembled depending on the task they should accomplish during a given point in time. 
 Resembling this concept, with self-reconfiguring robot swarms, has promising applications in the Future.
-Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or it could be used in milliscale and microscale manufacturing \cite{pelrine2016}.
+Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or it could be used for milliscale and microscale manufacturing \cite{pelrine2016}.
 
 Designing robots at these small scales faces serious problems.
 Equipping each robot with its own sensors, actuation-system, connection-system and power supply seem very infeasible, in terms of the sheer size and power-limitations \cite{white2007}.
-Therefore, the use of external global control and power supply, effecting every robot uniformly, seem like a promising solution \cite{white2007}.
-Using robots, with no other system than embedded magnets, has all the desired effects.
+Therefore, the use of external global control, effecting every robot uniformly, seem like a promising solution \cite{white2007}.
+Using robots, with no other system than embedded permanent magnets, has all the desired effects.
 Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply \cite{saab2019}.
 
 One example for magnetically controlled robots are the magnetic modular cubes by Becker et al. \cite{Becker2022}, which are the subjects of this thesis.
@@ -23,13 +23,12 @@ We will look at the difficulties and problems that occur, when working with magn
 Motion planning is a crucial subject in the field of robotics.
 The goal is to change the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
 The state of the system is also called a configuration and all possible configurations a robot can be in is defined as the configuration-space.
-The dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and static obstacles.
-It becomes necessary to avoid collision between those.
-It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a sequence of actions to perform to reach the goal configuration or report failure, if the configuration is not reachable.
+The dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and possible actions.
+It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a sequence of actions that lead to the goal configuration, or report failure, if the goal is not reachable.
 A lot of research was done on motion planning and the textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
 
-One of these concepts is sample-based motion planing.
-When working with configuration spaces that are uncountable infinite, like the special euclidean group, it is not only impossible to cover the howl space, it is also unclear how to traverse it.
+When working with configuration-spaces that are uncountable infinite, like the special euclidean group, one of these concepts is sample-based motion planing.
+%it is not only impossible to cover the howl space, it is also unclear how to traverse it.
 By taking samples, you can reduce the configuration space to a finite object, but you might lose possible solutions.
 Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point, and therefore these algorithms can be called resolution complete.
 Ways of sampling include random sampling or using a grid with a resolution that is dynamically adjustable.
@@ -54,7 +53,7 @@ In particular, Becker et al. \cite{Becker2014} create connected logic gates that
 
 More on the side of self-assembly, in \cite{Fekete2020} the construction of desired shapes using the tilt model is researched.
 It presents a method that can determine a building sequence for a polyomino by adding one tile at a time, considering the rules of Tilt.
-Ways of modifying the environment to create factories constructing shapes in a pipeline by repeating the same global control sequence, are also examined.
+Ways of modifying the environment to create factories constructing shapes in a pipeline by repeating the same global control inputs, are also examined.
 Shapes can not only be constructed by adding one tile at a time.
 Two multi-tiled shapes can connect to an even bigger structure.
 One article considering the construction with so called sub-assemblies is proposed by A. Schmidt \cite{Schmidt2018}.
@@ -69,7 +68,7 @@ Since all cubes are the same size, the assembled shapes can be viewed as polyomi
 An enumeration was done on the amount of possible polyominoes, that can be created by cubes with different magnet configurations \cite{Becker2021}.
 
 By limiting the controls to only 90 degree turns and assuming a uniform pivot walking distance for all structures per step, magnetic modular cubes follow rules similar to the Tilt model.
-Following these limitations, a simple discrete motion planer was developed, that explores the finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Becker2022}.
+Following these limitations, a simple discrete motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Becker2022}.
 One interesting bachelor-thesis from Blumenberg \cite{Blumenberg2022} explores the assembly of polyominoes in arbitrary environments, considering the tilt model.
 He provides different algorithmic approaches using various distance heuristics and even a solution making use of RRTs.
 For that he follows the rules of Tilt in a discrete setting.
