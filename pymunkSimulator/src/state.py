@@ -354,7 +354,7 @@ class Configuration:
     if it was loaded and updated by a simulation
     """
 
-    def __init__(self, ang, elev, cube_pos, polyominoes: PolyCollection = None, cube_meta=None):
+    def __init__(self, boardSize, magAng, magElev, cube_pos, polyominoes: PolyCollection = None, cube_meta=None):
         """
         creates configuration
 
@@ -366,12 +366,13 @@ class Configuration:
         self.__cube_data = {}
         for cube, pos in cube_pos.items():
             if cube_meta == None:
-                meta = (ang, (0, 0))
+                meta = (magAng, (0, 0))
             else:
                 meta = cube_meta[cube]
             self.__cube_data[cube] = (pos, meta[0], meta[1])
-        self.magAngle = ang  # orientation of magnetic field (in radians)
-        self.magElevation = elev
+        self.magAngle = magAng  # orientation of magnetic field (in radians)
+        self.magElevation = magElev
+        self.boardSize = boardSize
         if polyominoes == None:
             self.polyominoes = PolyCollection()
         else:
@@ -389,11 +390,11 @@ class Configuration:
     def getVelocity(self, cube: Cube):
         return self.__cube_data[cube][2]
 
-    def nearestWall(self, cube, size) -> Direction:
+    def nearestWall(self, cube) -> Direction:
         if not cube in self.__cube_data:
             return
         pos = self.__cube_data[cube]
-        dis = [pos[1], abs(size[0] - pos[0]), abs(size[1] - pos[1]), pos[0]]
+        dis = [pos[1], abs(self.boardSize[0] - pos[0]), abs(self.boardSize[1] - pos[1]), pos[0]]
         return Direction(dis.index(min(dis)))
 
     def addCube(self, cube, pos, ang=None, vel=(0,0)):

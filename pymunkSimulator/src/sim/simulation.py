@@ -17,7 +17,7 @@ class Simulation:
     Top-level class for interacting with the Simulation
     """
 
-    def __init__(self, width=800, height=800, drawing=True, userInputs=True):
+    def __init__(self, drawing=True, userInputs=True):
         """
         creates a Simulation with empty configuration
 
@@ -33,7 +33,7 @@ class Simulation:
         self.stopped = Event()
         self.started = Event()
 
-        self.stateHandler = StateHandler(width, height)
+        self.stateHandler = StateHandler()
         self.renderer = Renderer(self.stateHandler)
 
         self.motionsToExecute = Queue()
@@ -133,7 +133,7 @@ class Simulation:
         """
         self.stop()
         config = self.saveConfig()
-        if self.renderer.inizialized:
+        if self.renderer.initialized:
             self.renderer.pygameQuit()
         del self
         if DEBUG:
@@ -164,12 +164,12 @@ class Simulation:
 
     def __run__(self):
         # initialisation
-        if self.drawingActive and not self.renderer.inizialized:
+        if self.drawingActive and not self.renderer.initialized:
             self.renderer.pygameInit()
         self.started.set()
         # Simulation loop
         while self.started.isSet():
-            if (self.userInputsActive and self.drawingActive):
+            if self.renderer.initialized:
                 self.__userInputs__()
             step = self.__nextStep__()
             self.stateHandler.update(step.angChange, step.elevChange)
@@ -200,30 +200,32 @@ class Simulation:
 
     def __userInputs__(self):
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == 119:  # 'w' pivotwalk right
-                    self.executeMotion_nowait(PivotWalk(PivotWalk.RIGHT))
-                elif event.key == 97:  # 'a' rotate ccw
-                    self.executeMotion_nowait(Rotation(math.radians(-10)))
-                elif event.key == 115:  # 's' pivotwalk left
-                    self.executeMotion_nowait(PivotWalk(PivotWalk.LEFT))
-                elif event.key == 100:  # 'd' rotate cw
-                    self.executeMotion_nowait(Rotation(math.radians(10)))
-                elif event.key == 105:  # 'i' info
-                    config = self.stateHandler.saveConfig()
-                    print(config.polyominoes)
-                    pass
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if event.button == 1:  # 'left click' places cube TYPE_RED
-                    config = self.stateHandler.saveConfig()
-                    config.addCube(Cube(Cube.TYPE_RED), mouse_pos)
-                    self.stateHandler.loadConfig(config)
-                elif event.button == 3:  # 'right click' places cube TYPE_BLUE
-                    config = self.stateHandler.saveConfig()
-                    config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
-                    self.stateHandler.loadConfig(config)
-            elif event.type == pygame.QUIT:
+            if event.type == pygame.QUIT:
                 thread = Thread(target=self.terminate, daemon=False)
                 thread.start()
                 break
+            if self.userInputsActive:   
+                if event.type == pygame.KEYDOWN:
+                    if event.key == 119:  # 'w' pivotwalk right
+                        self.executeMotion_nowait(PivotWalk(PivotWalk.RIGHT))
+                    elif event.key == 97:  # 'a' rotate ccw
+                        self.executeMotion_nowait(Rotation(math.radians(-10)))
+                    elif event.key == 115:  # 's' pivotwalk left
+                        self.executeMotion_nowait(PivotWalk(PivotWalk.LEFT))
+                    elif event.key == 100:  # 'd' rotate cw
+                        self.executeMotion_nowait(Rotation(math.radians(10)))
+                    elif event.key == 105:  # 'i' info
+                        config = self.stateHandler.saveConfig()
+                        print(config.polyominoes)
+                        pass
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if event.button == 1:  # 'left click' places cube TYPE_RED
+                        config = self.stateHandler.saveConfig()
+                        config.addCube(Cube(Cube.TYPE_RED), mouse_pos)
+                        self.stateHandler.loadConfig(config)
+                    elif event.button == 3:  # 'right click' places cube TYPE_BLUE
+                        config = self.stateHandler.saveConfig()
+                        config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
+                        self.stateHandler.loadConfig(config)
+            

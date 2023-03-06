@@ -13,9 +13,11 @@ from threading import Lock
 from util import *
 from state import *
 
+
 class StateHandler:
 
-    STEP_TIME = 0.02 # (in seconds) bigger steps make sim faster but unprecise/unstable 0.02 seems reasonable
+    # (in seconds) bigger steps make sim faster but unprecise/unstable 0.02 seems reasonable
+    STEP_TIME = 0.02
     MAG_FORCE_FIELD = 1000  # magnetic force of the magnetic-field
     CONNECTION_DISTANCE = 2 * (Cube.RAD - Cube.MRAD) + 4
     CONNECTION_FORCE_MIN = norm(Cube.magForce1on2(
@@ -27,7 +29,7 @@ class StateHandler:
     SENSOR_CTYPE = 1
     BOUNDARIE_RAD = 8
 
-    def __init__(self, width, height):
+    def __init__(self, boardSize=(800, 800)):
         self.space = pymunk.Space()
         self.space.gravity = (0, 0)  # gravity doesn't exist
         self.space.damping = 1.0
@@ -43,12 +45,11 @@ class StateHandler:
             return False
         cHandler.pre_solve = sensorCollision
 
-        self.width = width
-        self.height = height
-        self.bounds = self.__createBoundaries__(width, height)
+        self.boardSize = boardSize
+        self.bounds = []
         self.cube_shapes = {}
         self.sensor_cube = {}
-        
+
         self.magAngle = 0  # orientation of magnetic field (in radians)
         self.magElevation = 0
 
@@ -56,13 +57,13 @@ class StateHandler:
         self.magConnect_pre = {}
         self.polyominoes = PolyCollection()
 
-        self.configToLoad = None
+        self.configToLoad = Configuration(boardSize, math.radians(90), 0, {})
         self.updateLock = Lock()
 
         self.frictionpoints = {}
-        #JOINTS
-        #self.connectJoints = []
-        #self.pivotJoints = []
+        # JOINTS
+        # self.connectJoints = []
+        # self.pivotJoints = []
 
     def getCubeShape(self, cube: Cube):
         return self.cube_shapes[cube][0]
@@ -86,8 +87,7 @@ class StateHandler:
         for cube, shapes in self.cube_shapes.items():
             cube_pos[cube] = shapes[0].body.position
             cube_meta[cube] = (shapes[0].body.angle, shapes[0].body.velocity)
-        config = Configuration(
-            self.magAngle, self.magElevation, cube_pos, self.polyominoes.clone(), cube_meta)
+        config = Configuration(self.boardSize, self.magAngle, self.magElevation, cube_pos, self.polyominoes.clone(), cube_meta)
         self.updateLock.release()
         return config
 
@@ -114,12 +114,12 @@ class StateHandler:
             self.polyominoes.detectPolyominoes(self.magConnect)
         self.magConnect_pre = self.magConnect
         self.magConnect = {}
-        #JOINTS
-        #self.__removePivotJoints__()
+        # JOINTS
+        # self.__removePivotJoints__()
         self.frictionpoints.clear()
         for poly in self.polyominoes.getAll():
-            #self.__updatePivotPiont__(poly)
-            #self.__addPivotJoints__(poly)
+            # self.__updatePivotPiont__(poly)
+            # self.__addPivotJoints__(poly)
             for cube in poly.getCubes():
                 self.__applyForceField__(cube)
                 self.__applyForceFriction__(cube, poly)
@@ -169,47 +169,53 @@ class StateHandler:
         # connect the cubes by adding them to magConnect map
         self.magConnect[cubei][edgei.value] = cubej
         self.magConnect[cubej][edgej.value] = cubei
-        #JOINTS
-        #self.__addConnectionJoint__(cubei, edgei, cubej, edgej)
+        # JOINTS
+        # self.__addConnectionJoint__(cubei, edgei, cubej, edgej)
 
     def __applyForceFriction__(self, cube: Cube, poly: Polyomino):
         shape = self.getCubeShape(cube)
-        #calculate friction force without velocity yet
+        # calculate friction force without velocity yet
         force = -1 * StateHandler.FRICTION_DAMPING * shape.mass
         if self.magElevation == 0:
-            #Apply full friction to cube, at COG
+            # Apply full friction to cube, at COG
             force *= shape.body.velocity
             shape.body.apply_force_at_world_point(force, shape.body.position)
-            self.frictionpoints[shape] = shape.body.position #just for drawing
+            # just for drawing
+            self.frictionpoints[shape] = shape.body.position
         else:
             # define the cubes in poly the have the most friction and the frictionpoint
             if self.magElevation < 0:
                 frictionCubes = set(poly.getTopRow())
-                fricPoint = shape.body.local_to_world((-Cube.MRAD,0))
+                fricPoint = shape.body.local_to_world((-Cube.MRAD, 0))
             elif self.magElevation > 0:
                 frictionCubes = set(poly.getBottomRow())
-                fricPoint = shape.body.local_to_world((Cube.MRAD,0))     
+                fricPoint = shape.body.local_to_world((Cube.MRAD, 0))
             # apply partial friction to cube at the frictionpoint
             force *= shape.body.velocity_at_world_point(fricPoint)
-            shape.body.apply_force_at_world_point(StateHandler.NOMINAL_FRICTION * force, fricPoint)
+            shape.body.apply_force_at_world_point(
+                StateHandler.NOMINAL_FRICTION * force, fricPoint)
             if cube in frictionCubes:
                 # apply the rest if it is a friction cube
-                shape.body.apply_force_at_world_point((1 - StateHandler.NOMINAL_FRICTION) * force * poly.size() / len(frictionCubes), fricPoint)
-                self.frictionpoints[shape] = fricPoint #just for drawing
+                shape.body.apply_force_at_world_point(
+                    (1 - StateHandler.NOMINAL_FRICTION) * force * poly.size() / len(frictionCubes), fricPoint)
+                self.frictionpoints[shape] = fricPoint  # just for drawing
         # damp the angular velocity
-        shape.body.angular_velocity *= StateHandler.ANG_VEL_DAMP   
+        shape.body.angular_velocity *= StateHandler.ANG_VEL_DAMP
 
     def __loadConfig__(self):
         # clear space
-        #JOINTS
-        #self.__removePivotJoints__()
-        #self.__removeConnectJoints__()
+        # JOINTS
+        # self.__removePivotJoints__()
+        # self.__removeConnectJoints__()
+        self.__removeBoundaries__()
         for cube in self.getCubes():
             self.__removeCube__(cube)
         # grab values from configToLoad
+        self.boardSize = self.configToLoad.boardSize
         self.magAngle = self.configToLoad.magAngle
         self.magElevation = self.configToLoad.magElevation
-        # add the cubes
+        # add new objects to space
+        self.__addBoundaries__()
         for cube in self.configToLoad.getCubes():
             pos = self.configToLoad.getPosition(cube)
             ang = self.configToLoad.getAngle(cube)
@@ -259,47 +265,52 @@ class StateHandler:
         self.magConnect[cube] = [None] * 4
         self.sensor_cube[magSensor] = cube
 
-    def __createBoundaries__(self, width, height):
+    def __addBoundaries__(self):
         r = StateHandler.BOUNDARIE_RAD
-        w = width - StateHandler.BOUNDARIE_RAD / 4
-        h = height - StateHandler.BOUNDARIE_RAD / 4
-        bounds = [
+        w = self.boardSize[0] - StateHandler.BOUNDARIE_RAD / 4
+        h = self.boardSize[1] - StateHandler.BOUNDARIE_RAD / 4
+        self.bounds = [
             pymunk.Segment(self.space.static_body, (0, 0), (w, 0), r),
             pymunk.Segment(self.space.static_body, (w, 0), (w, h), r),
             pymunk.Segment(self.space.static_body, (w, h), (0, h), r),
             pymunk.Segment(self.space.static_body, (0, h), (0, 0), r)
         ]
-        for wall in bounds:
+        for wall in self.bounds:
             wall.elasticity = 0.4
             wall.friction = 0.5
             self.space.add(wall)
-        return bounds
-    
-#------------------------------------DEPRECATED----------------------------------------------
+
+    def __removeBoundaries__(self):
+        for wall in self.bounds:
+            self.space.remove(wall)
+        self.bounds.clear()
+
+# ------------------------------------DEPRECATED----------------------------------------------
     def __updatePivotPiont__(self, poly: Polyomino):
         if self.magElevation == 0:
             for cube in poly.getCubes():
                 shape = self.getCubeShape(cube)
-                shape.body.center_of_gravity = (0,0)
+                shape.body.center_of_gravity = (0, 0)
                 pos = shape.body.position
-                shape.body.position = (pos[0],pos[1])
+                shape.body.position = (pos[0], pos[1])
         else:
             if self.magElevation < 0:
                 edgeCubes = poly.getTopRow()
-                edgePointL = (-Cube.MRAD,0)
+                edgePointL = (-Cube.MRAD, 0)
             else:
                 edgeCubes = poly.getBottomRow()
-                edgePointL = (Cube.MRAD,0)
-            pivotPoint = (0,0)
+                edgePointL = (Cube.MRAD, 0)
+            pivotPoint = (0, 0)
             for cube in edgeCubes:
                 shape = self.getCubeShape(cube)
                 pivotPoint += shape.body.local_to_world(edgePointL)
             pivotPoint /= len(edgeCubes)
-            for cube in poly.getCubes(): 
+            for cube in poly.getCubes():
                 shape = self.getCubeShape(cube)
-                shape.body.center_of_gravity = shape.body.world_to_local(pivotPoint)
+                shape.body.center_of_gravity = shape.body.world_to_local(
+                    pivotPoint)
                 pos = shape.body.position
-                shape.body.position = (pos[0],pos[1])
+                shape.body.position = (pos[0], pos[1])
 
     def __addPivotJoints__(self, poly: Polyomino):
         if self.magElevation == 0:
@@ -342,8 +353,7 @@ class StateHandler:
         for joint in self.connectJoints:
             self.space.remove(joint)
         self.connectJoints.clear()
-#--------------------------------------------------------------------------------------------
-
+# --------------------------------------------------------------------------------------------
 
 
 class Renderer:
@@ -352,29 +362,30 @@ class Renderer:
 
     def __init__(self, stateHandler: StateHandler):
         self.stateHandler = stateHandler
-        self.inizialized = False
+        self.initialized = False
         self.window = None
         self.clock = None
         self.drawOpt = None
 
     def pygameInit(self):
         pygame.init()
-        self.window = pygame.display.set_mode((self.stateHandler.width, self.stateHandler.height))
-        pygame.display.set_caption("magnetic cube simulator")
+        self.window = pygame.display.set_mode(
+            (self.stateHandler.boardSize[0], self.stateHandler.boardSize[1]))
+        pygame.display.set_caption("Magnetic Cube Simulator")
         self.drawOpt = pymunk.pygame_util.DrawOptions(self.window)
         self.drawOpt.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS
         self.clock = pygame.time.Clock()
-        self.inizialized = True
+        self.initialized = True
 
     def pygameQuit(self):
         pygame.quit()
         self.window = None
         self.clock = None
         self.drawOpt = None
-        self.inizialized = False
+        self.initialized = False
 
     def draw(self):
-        if not self.inizialized:
+        if not self.initialized:
             return
         self.window.fill(Color.WHITE)
         # draw the walls
@@ -384,11 +395,13 @@ class Renderer:
         # draw the cubes with magnets and CenterOfGravity
         for cube in self.stateHandler.getCubes():
             shape = self.stateHandler.getCubeShape(cube)
-            verts = [shape.body.local_to_world(lv) for lv in shape.get_vertices()]
+            verts = [shape.body.local_to_world(lv)
+                     for lv in shape.get_vertices()]
             pygame.draw.polygon(self.window, shape.color, verts)
             pygame.draw.lines(self.window, Color.DARKGREY, True, verts, 2)
             if shape in self.stateHandler.frictionpoints:
-                pygame.draw.circle(self.window, Color.BLACK, self.stateHandler.frictionpoints[shape], 6)
+                pygame.draw.circle(self.window, Color.BLACK,
+                                   self.stateHandler.frictionpoints[shape], 6)
             for i, magP in enumerate(cube.magnetPos):
                 if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
                     magcolor = Color.BLUE

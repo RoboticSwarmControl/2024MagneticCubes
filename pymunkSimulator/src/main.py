@@ -33,7 +33,7 @@ def demo1():
     rot90ccw = Rotation(math.radians(-90))
     d0 = distance(pos1, pos2)
     sim = Simulation(drawing=False)
-    sim.loadConfig(Configuration(math.radians(90), 0,{cube1: pos1,cube2: pos2}))
+    sim.loadConfig(Configuration((800,800), math.radians(90), 0,{cube1: pos1,cube2: pos2}))
     t0 = time.time()
     while True:
         sim.start()
@@ -59,4 +59,4 @@ def demo1():
     
 
 if __name__ == "__main__":
-    demo1()
+    sandbox()
