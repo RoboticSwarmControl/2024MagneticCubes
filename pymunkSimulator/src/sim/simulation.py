@@ -178,6 +178,8 @@ class Simulation:
         if fps < 8:
             fps = 8
         self.renderer.fps = fps
+        if DEBUG:
+            print(f"Drawing Speed = {fps}fps")
 
     def __run__(self):
         # initialisation
@@ -232,9 +234,9 @@ class Simulation:
                     elif event.key == 100:  # 'd' rotate cw
                         self.executeMotion_nowait(Rotation(math.radians(10)))
                     elif event.key == 121:  # 'y' decrease speed
-                        self.setDrawingSpeed(self.renderer.fps / 2)
+                        self.setDrawingSpeed(int(self.renderer.fps / 2))
                     elif event.key == 120:  # 'x' increase speed
-                        self.setDrawingSpeed(self.renderer.fps * 2)
+                        self.setDrawingSpeed(int(self.renderer.fps * 2))
                     elif event.key == 99:  # 'c' clear space
                         self.stateHandler.loadConfig(StateHandler.DEFAULT_CONFIG)
                     elif event.key == 105:  # 'i' info

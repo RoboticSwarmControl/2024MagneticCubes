@@ -16,8 +16,8 @@ from state import *
 
 class StateHandler:
 
-    # (in seconds) bigger steps make sim faster but unprecise/unstable 0.02 seems reasonable
-    STEP_TIME = 0.02
+    # (in seconds) bigger steps make sim faster but unprecise/unstable 0.04 seems reasonable
+    STEP_TIME = 0.04
     MAG_FORCE_FIELD = 1000  # magnetic force of the magnetic-field
     CONNECTION_DISTANCE = 2 * (Cube.RAD - Cube.MRAD) + 4
     CONNECTION_FORCE_MIN = norm(Cube.magForce1on2(
