@@ -9,7 +9,6 @@ and ANG_VELOCITY for all rotations.
 import math
 from threading import Event
 
-from util import DEBUG
 
 class Step:
 

@@ -3,10 +3,40 @@ Holds the Configuration class
 
 @author: Aaron T Becker, Kjell Keune
 """
-from queue import Queue
 import random
+import math
+from enum import Enum
+from queue import Queue
+from pymunk import Vec2d
 
-from util import *
+
+class Direction(Enum):
+    NORTH = 0
+    EAST = 1
+    SOUTH = 2
+    WEST = 3
+
+    def __str__(self) -> str:
+        return self.name
+
+    def inv(self):
+        """
+        Returns the inverse direction.
+        """
+        return Direction((self.value + 2) % 4)
+    
+    def vec(self, magAngle=0):
+        """
+        Retruns a vector point into this direction depending on the angle of the magnetic field.
+        """
+        if self == Direction.NORTH:
+            return Vec2d(-math.cos(magAngle), -math.sin(magAngle))
+        elif self == Direction.SOUTH:
+            return Vec2d(math.cos(magAngle), math.sin(magAngle))
+        elif self == Direction.EAST:
+            return Vec2d(math.sin(magAngle), math.cos(magAngle))
+        else:
+            return Vec2d(-math.sin(magAngle), -math.cos(magAngle))
 
 class Cube:
     """
@@ -41,9 +71,11 @@ class Cube:
         return hash(self.id)
 
     @staticmethod
-    def magForce1on2(pos1, pos2, ori1, ori2):  # https://en.wikipedia.org/wiki/Magnetic_moment
+    def magForce1on2(pos1, pos2, ori1, ori2) -> Vec2d:  # https://en.wikipedia.org/wiki/Magnetic_moment
         # rhat = unitvector pointing from magnet 1 to magnet 2 and r is the distance
-        r = distance(pos1, pos2)
+        pos1 = Vec2d(pos1[0], pos1[1])
+        pos2 = Vec2d(pos2[0], pos2[1])
+        r = pos1.get_distance(pos2)
         if r < 2*(Cube.RAD-Cube.MRAD):
             r = 2*(Cube.RAD-Cube.MRAD)  # limits the amount of force applied
         # r̂ is the unit vector pointing from magnet 1 to magnet 2
@@ -52,7 +84,7 @@ class Cube:
         m2r = ori2[0]*rhat[0] + ori2[1]*rhat[1]  # m2 dot rhat
         m1m2 = ori1[0]*ori2[0] + ori1[1]*ori2[1]  # m1 dot m2
         # print(repr([r,rhat,m1r,m2r,m1m2]))
-        f = (Cube.MAG_FORCE*1/r**4 * (ori2[0]*m1r + ori1[0]*m2r + rhat[0]*m1m2 - 5*rhat[0]*m1r*m2r),
+        f = Vec2d(Cube.MAG_FORCE*1/r**4 * (ori2[0]*m1r + ori1[0]*m2r + rhat[0]*m1m2 - 5*rhat[0]*m1r*m2r),
              Cube.MAG_FORCE*1/r**4 * (ori2[1]*m1r + ori1[1]*m2r + rhat[1]*m1m2 - 5*rhat[1]*m1r*m2r))
         # print( "force is " + repr(f) )
         # print(repr(f) )
@@ -388,14 +420,16 @@ class Configuration:
     def getCubes(self):
         return list(self.__cube_data.keys())
 
-    def getPosition(self, cube: Cube):
-        return self.__cube_data[cube][0]
+    def getPosition(self, cube: Cube) -> Vec2d:
+        pos = self.__cube_data[cube][0]
+        return Vec2d(pos[0], pos[1])
 
     def getAngle(self, cube: Cube):
         return self.__cube_data[cube][1]
 
-    def getVelocity(self, cube: Cube):
-        return self.__cube_data[cube][2]
+    def getVelocity(self, cube: Cube) -> Vec2d:
+        vel = self.__cube_data[cube][2]
+        return Vec2d(vel[0], vel[1])
 
     def nearestWall(self, cube) -> Direction:
         if not cube in self.__cube_data:
@@ -429,10 +463,10 @@ class Configuration:
                 overlap = False
                 x = random.randint(Cube.RAD, size[0] - Cube.RAD)
                 y = random.randint(Cube.RAD, size[1] - Cube.RAD)
-                pos = (x, y)
+                pos = Vec2d(x, y)
                 for cube in config.getCubes():
                     # TODO dont compare in circle compare in rect
-                    if distance(pos, config.getPosition(cube)) <= Cube.RAD * 1.5:
+                    if pos.get_distance(config.getPosition(cube)) <= Cube.RAD * 1.5:
                         overlap = True
                         break
             config.addCube(newCube, pos)

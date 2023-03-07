@@ -1,15 +1,17 @@
 from enum import Enum
 import time
-from motion import Rotation
+
+from sim.motion import Rotation, PivotWalk
 from sim.simulation import Simulation
-from state import Configuration, Cube
-from util import *
+from sim.state import *
 
 class PlanState(Enum):
 
     UNDEFINED = 0
     SUCCESS = 1
     INVALID = 2
+
+
 
 class Plan:
 
@@ -35,10 +37,9 @@ class Plan:
 class PlanExecutor:
 
     def __init__(self):
-        self.__sim = None
+        self.__sim = Simulation(drawing=True, userInputs=False)
 
     def execute(self, plan: Plan):
-        self.__sim = Simulation(plan.initial.boardSize, True, False)
         self.__sim.loadConfig(plan.initial)
         self.__sim.start()
         for motion in plan.actions:
@@ -71,10 +72,8 @@ class LocalPlanner:
         return plan
     
     def __alignEdges__(self, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Rotation:
-        posA = self.__loadedConfig.getPosition(cubeA)
-        posB = self.__loadedConfig.getPosition(cubeB)
         magAng = self.__loadedConfig.magAngle
-        vecBA = Vec2d(posA[0], posA[1]) - Vec2d(posB[0], posB[1])
+        vecBA = self.__loadedConfig.getPosition(cubeA) - self.__loadedConfig.getPosition(cubeB)
         vecEdgeB = edgeB.vec(magAng)
         if edgeB in (Direction.WEST, Direction.EAST):
             # For side connection just rotate edgeB to vecBA

@@ -10,8 +10,7 @@ import pymunk
 import math
 from threading import Lock
 
-from util import *
-from state import *
+from sim.state import *
 
 
 class StateHandler:
@@ -20,8 +19,8 @@ class StateHandler:
     STEP_TIME = 0.04
     MAG_FORCE_FIELD = 1000  # magnetic force of the magnetic-field
     CONNECTION_DISTANCE = 2 * (Cube.RAD - Cube.MRAD) + 4
-    CONNECTION_FORCE_MIN = norm(Cube.magForce1on2(
-        (0, 0), (0, CONNECTION_DISTANCE), (0, 1), (0, 1)))  # NS connection
+    CONNECTION_FORCE_MIN = Cube.magForce1on2(
+        (0, 0), (0, CONNECTION_DISTANCE), (0, 1), (0, 1)).length # NS connection
     NOMINAL_FRICTION = 0.2
     FRICTION_DAMPING = 0.9
     ANG_VEL_DAMP = 0.95
@@ -145,9 +144,11 @@ class StateHandler:
         for i, magPosLi in enumerate(cubei.magnetPos):
             for j, magPosLj in enumerate(cubej.magnetPos):
                 magPosi = shapei.body.local_to_world(magPosLi)
-                mi = rotateVecbyAng(cubei.magnetOri[i], angi)
+                magOrii = cubei.magnetOri[i]
+                mi = Vec2d(magOrii[0],magOrii[1]).rotated(angi)
                 magPosj = shapej.body.local_to_world(magPosLj)
-                mj = rotateVecbyAng(cubej.magnetOri[j], angj)
+                magOrij = cubej.magnetOri[j]
+                mj = Vec2d(magOrij[0],magOrij[1]).rotated(angj)
                 # magForce1on2( p1, p2, m1,m2)
                 fionj = Cube.magForce1on2(magPosi, magPosj, mi, mj)
                 shapei.body.apply_force_at_world_point(
@@ -155,7 +156,7 @@ class StateHandler:
                 shapej.body.apply_force_at_world_point(
                     fionj,                magPosj)
                 # Determine magnet connections
-                if norm(fionj) >= StateHandler.CONNECTION_FORCE_MIN:
+                if fionj.length >= StateHandler.CONNECTION_FORCE_MIN:
                     self.__connectMagnets__(
                         cubei, Direction(i), cubej, Direction(j))
 
@@ -228,8 +229,6 @@ class StateHandler:
 
     def __removeCube__(self, cube: Cube):
         if not cube in self.cube_shapes:
-            if DEBUG:
-                print("Removing failed. " + str(cube) + " is not registered.")
             return
         shapes = self.cube_shapes[cube]
         self.space.remove(shapes[0].body, shapes[0], shapes[1])
@@ -239,8 +238,6 @@ class StateHandler:
 
     def __addCube__(self, cube: Cube, pos, ang, vel):
         if cube in self.cube_shapes:
-            if DEBUG:
-                print("Adding failed. " + str(cube) + " is already registered.")
             return
         # create the cube body
         body = pymunk.Body()
@@ -253,10 +250,6 @@ class StateHandler:
         shape.mass = 10
         shape.elasticity = 0.4
         shape.friction = 0.4
-        if cube.type == Cube.TYPE_RED:
-            shape.color = Color.LIGHTRED
-        else:
-            shape.color = Color.LIGHTBLUE
         # create sensor-shape that identifies a magnet attraction
         magSensor = pymunk.Circle(body, 3 * Cube.RAD)
         magSensor.collision_type = StateHandler.SENSOR_CTYPE
@@ -360,6 +353,17 @@ class StateHandler:
 
 class Renderer:
 
+    BLACK = (0, 0, 0,100)
+    WHITE = (255, 255, 255, 100)
+    DARKGREY = (90, 90, 90, 100)
+    LIGHTGRAY = (170, 170, 170, 100)
+    RED = (195, 0, 0, 100)
+    LIGHTRED = (250, 150, 150, 100)
+    BLUE = (0, 0, 195, 100)
+    LIGHTBLUE = (150, 150, 250, 100)
+    LIGHTBROWN = (201, 165, 129, 100)
+    PURPLE = (151, 0, 196, 100)
+
     def __init__(self, stateHandler: StateHandler, fps=128):
         self.stateHandler = stateHandler
         self.fps = fps
@@ -391,26 +395,30 @@ class Renderer:
     def draw(self):
         if not self.initialized:
             return
-        self.window.fill(Color.WHITE)
+        self.window.fill(Renderer.WHITE)
         # draw the walls
         for shape in self.stateHandler.getBoundaries():
-            pygame.draw.line(self.window, Color.DARKGREY, shape.body.local_to_world(
+            pygame.draw.line(self.window, Renderer.DARKGREY, shape.body.local_to_world(
                 shape.a), shape.body.local_to_world(shape.b), StateHandler.BOUNDARIE_RAD)
-        # draw the cubes with magnets and CenterOfGravity
+        # draw the cubes with magnets and frictionpoints
         for cube in self.stateHandler.getCubes():
             shape = self.stateHandler.getCubeShape(cube)
             verts = [shape.body.local_to_world(lv)
                      for lv in shape.get_vertices()]
-            pygame.draw.polygon(self.window, shape.color, verts)
-            pygame.draw.lines(self.window, Color.DARKGREY, True, verts, 2)
+            if cube.type == Cube.TYPE_RED:
+                cubeColor = Renderer.LIGHTRED
+            else:
+                cubeColor = Renderer.LIGHTBLUE
+            pygame.draw.polygon(self.window, cubeColor, verts)
+            pygame.draw.lines(self.window, Renderer.DARKGREY, True, verts, 2)
             if shape in self.stateHandler.frictionpoints:
-                pygame.draw.circle(self.window, Color.BLACK,
+                pygame.draw.circle(self.window, Renderer.BLACK,
                                    self.stateHandler.frictionpoints[shape], 6)
             for i, magP in enumerate(cube.magnetPos):
                 if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
-                    magcolor = Color.BLUE
+                    magcolor = Renderer.BLUE
                 else:
-                    magcolor = Color.RED
+                    magcolor = Renderer.RED
                 pygame.draw.circle(
                     self.window, magcolor, shape.body.local_to_world(magP), 4)
         # draw the connections
@@ -420,14 +428,14 @@ class Renderer:
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue
-                    pygame.draw.line(self.window, Color.PURPLE, self.stateHandler.getCubeShape(cube).body.local_to_world(
+                    pygame.draw.line(self.window, Renderer.PURPLE, self.stateHandler.getCubeShape(cube).body.local_to_world(
                         (0, 0)), self.stateHandler.getCubeShape(cubeCon).body.local_to_world((0, 0)), 4)
         # draw the compass
         comPos = pymunk.Vec2d(12,12)
-        pygame.draw.circle(self.window, Color.LIGHTGRAY,  comPos, 12)
-        pygame.draw.circle(self.window, Color.LIGHTBROWN,  comPos, 10)
-        pygame.draw.line(self.window, Color.BLUE, comPos, comPos + 12 * Direction.SOUTH.vec(self.stateHandler.magAngle), 3)
-        pygame.draw.line(self.window, Color.RED, comPos, comPos + 12 * Direction.NORTH.vec(self.stateHandler.magAngle), 3)
+        pygame.draw.circle(self.window, Renderer.LIGHTGRAY,  comPos, 12)
+        pygame.draw.circle(self.window, Renderer.LIGHTBROWN,  comPos, 10)
+        pygame.draw.line(self.window, Renderer.BLUE, comPos, comPos + 12 * Direction.SOUTH.vec(self.stateHandler.magAngle), 3)
+        pygame.draw.line(self.window, Renderer.RED, comPos, comPos + 12 * Direction.NORTH.vec(self.stateHandler.magAngle), 3)
         # debug draw
         self.stateHandler.space.debug_draw(self.drawOpt)
         # update the screen

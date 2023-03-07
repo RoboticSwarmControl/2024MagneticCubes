@@ -7,10 +7,11 @@ import pygame
 import math
 from threading import Thread, Event
 
-from util import DEBUG
-from state import Configuration, Cube
-from motion import *
+from sim.state import Configuration, Cube
+from sim.motion import *
 from sim.handling import *
+
+DEBUG = True
 
 class Simulation:
     """

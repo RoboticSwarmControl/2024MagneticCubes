@@ -9,11 +9,11 @@ Runtime user interaction is also possible. Look in simulation.py method __userIn
 """
 import math
 import time
+from pymunk import Vec2d
 
-from util import *
 from sim.simulation import Simulation
-from motion import *
-from state import Configuration, Cube
+from sim.motion import *
+from sim.state import Configuration, Cube
 
 def sandbox_onMac():
     sim1 = Simulation()
@@ -25,13 +25,13 @@ def sandbox():
 
 def demo1():
     cube1 = Cube(0)
-    pos1 = (150,50)
+    pos1 = Vec2d(150,50)
     cube2 = Cube(1)
-    pos2 = (200, 150)
+    pos2 = Vec2d(200, 150)
     pwLeft = PivotWalk(PivotWalk.LEFT)
     pwRight = PivotWalk(PivotWalk.RIGHT)
     rot90ccw = Rotation(math.radians(-90))
-    d0 = distance(pos1, pos2)
+    d0 = pos1.get_distance(pos2)
     sim = Simulation(drawing=False)
     sim.loadConfig(Configuration((800,800), math.radians(90), 0,{cube1: pos1,cube2: pos2}))
     t0 = time.time()
@@ -41,7 +41,7 @@ def demo1():
         sim.executeMotion(pwLeft)
         sim.stop()
         config = sim.saveConfig()
-        d = distance(config.getPosition(cube1), config.getPosition(cube2))
+        d = config.getPosition(cube1).get_distance(config.getPosition(cube2))
         if not abs(d - d0) < 5:
             break
     savepoint = sim.saveConfig()
@@ -59,4 +59,4 @@ def demo1():
     
 
 if __name__ == "__main__":
-    sandbox()
+    demo1()

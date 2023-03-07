@@ -1,10 +1,10 @@
-
-from pymunk import Vec2d
-from plan.local import LocalPlanner
-from state import Cube, Polyomino, Configuration
-from util import *
-from sim.simulation import Simulation
 import time
+from pymunk import Vec2d
+
+from sim.simulation import Simulation
+from plan.local import LocalPlanner
+from sim.state import *
+
 
 def polyTest():
     cube0 = Cube(0)
