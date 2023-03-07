@@ -258,6 +258,7 @@ class PolyCollection:
         self.maxPolyWidth = 0
         self.maxPolyHeight = 0
         self.__poly_count = {}
+        self.__cube_poly  = {}
 
     def detectPolyominoes(self, connects: dict):
         self.__clear__()
@@ -283,7 +284,10 @@ class PolyCollection:
         self.__clear__()
         for poly in polys:
             self.__add__(poly)
-        
+
+    def getPoly(self, cube: Cube):
+        return self.__cube_poly[cube]
+
     def getAll(self):
         return self.getTrivial() + self.getNonTrivial()
     
@@ -311,6 +315,8 @@ class PolyCollection:
             self.__poly_count[poly] += 1
         else:
             self.__poly_count[poly] = 1
+        for cube in poly.getCubes():
+            self.__cube_poly[cube] = poly
 
     def __clear__(self):
         self.__nonTrivial.clear()
@@ -318,6 +324,7 @@ class PolyCollection:
         self.maxPolyWidth = 0
         self.maxPolyHeight = 0
         self.__poly_count.clear()
+        self.__cube_poly.clear()
 
     def __contains__(self, key):
         return key in self.__poly_count

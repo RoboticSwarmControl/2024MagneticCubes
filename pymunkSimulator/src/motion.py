@@ -83,7 +83,10 @@ class Rotation(Motion):
     def stepSequence(self, stepTime, longestChain):
         steps = []
         k = math.floor(abs(self.angle) / (Rotation.ANG_VELOCITY * stepTime))
-        angPerStep = self.angle / k
+        if k != 0:
+            angPerStep = self.angle / k
+        else:
+            angPerStep = self.angle
         for i in range(k):
             steps.append(Step(angPerStep, 0))
         steps.append(Step(self.angle - k * angPerStep, 0))

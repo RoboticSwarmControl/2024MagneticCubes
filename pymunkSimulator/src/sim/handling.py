@@ -28,7 +28,6 @@ class StateHandler:
 
     SENSOR_CTYPE = 1
     BOUNDARIE_RAD = 8
-    
     DEFAULT_BOARDSIZE = (800,800)
     DEFAULT_CONFIG = Configuration(DEFAULT_BOARDSIZE, math.radians(90), 0, {})
 
@@ -424,12 +423,11 @@ class Renderer:
                     pygame.draw.line(self.window, Color.PURPLE, self.stateHandler.getCubeShape(cube).body.local_to_world(
                         (0, 0)), self.stateHandler.getCubeShape(cubeCon).body.local_to_world((0, 0)), 4)
         # draw the compass
-        pygame.draw.circle(self.window, Color.LIGHTGRAY,  (12, 12), 12)
-        pygame.draw.circle(self.window, Color.LIGHTBROWN,  (12, 12), 10)
-        pygame.draw.line(self.window, Color.BLUE,   (12, 12), (12+12*math.cos(
-            self.stateHandler.magAngle), 12+12*math.sin(self.stateHandler.magAngle)), 3)
-        pygame.draw.line(self.window, Color.RED, (12, 12), (12-12*math.cos(
-            self.stateHandler.magAngle), 12-12*math.sin(self.stateHandler.magAngle)), 3)
+        comPos = pymunk.Vec2d(12,12)
+        pygame.draw.circle(self.window, Color.LIGHTGRAY,  comPos, 12)
+        pygame.draw.circle(self.window, Color.LIGHTBROWN,  comPos, 10)
+        pygame.draw.line(self.window, Color.BLUE, comPos, comPos + 12 * Direction.SOUTH.vec(self.stateHandler.magAngle), 3)
+        pygame.draw.line(self.window, Color.RED, comPos, comPos + 12 * Direction.NORTH.vec(self.stateHandler.magAngle), 3)
         # debug draw
         self.stateHandler.space.debug_draw(self.drawOpt)
         # update the screen

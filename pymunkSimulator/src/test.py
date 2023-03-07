@@ -1,5 +1,6 @@
 
-
+from pymunk import Vec2d
+from plan.local import LocalPlanner
 from state import Cube, Polyomino, Configuration
 from util import *
 from sim.simulation import Simulation
@@ -144,5 +145,18 @@ def simControlTest():
     sim.enableDraw()
 
 
+def winkelTest():
+    p1 = Vec2d(-1,0)
+    p2 = Vec2d(1,1)
+    print(p1.get_angle_degrees_between(p2))
+    print(p1.angle_degrees)
+
+def localPlanner():
+    planer = LocalPlanner()
+    cubeA = Cube(0) #rot
+    cubeB = Cube(1) #blau
+    config = Configuration((800,800),math.radians(90),0,{cubeA: (100,600),cubeB: (100,100)})
+    planer.planCubeConnect(config,cubeA,cubeB,Direction.NORTH)
+
 if __name__ == "__main__":
-    simControlTest()
+    localPlanner()
