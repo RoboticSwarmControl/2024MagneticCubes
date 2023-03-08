@@ -3,6 +3,7 @@ Holds the Simulation class
 
 @author: Aaron T Becker, Kjell Keune
 """
+import sys
 import pygame
 import math
 from threading import Thread, Event
@@ -176,8 +177,8 @@ class Simulation:
             self.start()
 
     def setDrawingSpeed(self, fps):
-        if fps < 8:
-            fps = 8
+        if fps < 2:
+            fps = 2
         self.renderer.fps = fps
         if DEBUG:
             print(f"Drawing Speed = {fps}fps")
@@ -196,6 +197,7 @@ class Simulation:
             if self.drawingActive:
                 self.renderer.draw()
         self.stopped.set()
+        sys.exit()
 
     def __nextStep__(self) -> Step:
         """

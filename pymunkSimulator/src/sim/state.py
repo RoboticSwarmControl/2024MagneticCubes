@@ -34,9 +34,9 @@ class Direction(Enum):
         elif self == Direction.SOUTH:
             return Vec2d(math.cos(magAngle), math.sin(magAngle))
         elif self == Direction.EAST:
-            return Vec2d(math.sin(magAngle), math.cos(magAngle))
+            return Vec2d(math.sin(magAngle), -math.cos(magAngle))
         else:
-            return Vec2d(-math.sin(magAngle), -math.cos(magAngle))
+            return Vec2d(-math.sin(magAngle), math.cos(magAngle))
 
 class Cube:
     """
@@ -256,7 +256,7 @@ class Polyomino:
         return string
 
     def __repr__(self) -> str:
-        return f"Polyomino{self.id}"
+        return f"Polyomino{self.id}[{self.getCubes()}]"
     
     @staticmethod
     def connectPoly(polyA, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction):
@@ -317,7 +317,7 @@ class PolyCollection:
         for poly in polys:
             self.__add__(poly)
 
-    def getPoly(self, cube: Cube):
+    def getPoly(self, cube: Cube)-> Polyomino:
         return self.__cube_poly[cube]
 
     def getAll(self):
@@ -412,10 +412,7 @@ class Configuration:
         self.magAngle = magAng  # orientation of magnetic field (in radians)
         self.magElevation = magElev
         self.boardSize = boardSize
-        if polyominoes == None:
-            self.polyominoes = PolyCollection()
-        else:
-            self.polyominoes = polyominoes
+        self.polyominoes = polyominoes
 
     def getCubes(self):
         return list(self.__cube_data.keys())

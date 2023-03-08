@@ -155,8 +155,11 @@ def localPlanner():
     planer = LocalPlanner()
     cubeA = Cube(0) #rot
     cubeB = Cube(1) #blau
-    config = Configuration((800,800),math.radians(90),0,{cubeA: (100,600),cubeB: (100,100)})
+    config = Configuration((800,800),math.radians(90),0,{cubeA: (50,400),cubeB: (750,100)})
+    t0 = time.time()
     planer.planCubeConnect(config,cubeA,cubeB,Direction.NORTH)
+    t1 = time.time()
+    print("Execution time: ", (t1 - t0), "s")
 
 if __name__ == "__main__":
     localPlanner()
