@@ -16,6 +16,7 @@ class Step:
         self.angChange = angChange
         self.elevChange = elevChange
 
+
 class Motion:
     """
     Abstract super class. All motions have an executed event and a stepSequence.
@@ -26,6 +27,9 @@ class Motion:
 
     def stepSquence(self, stepTime, longestChain):
         return [Step()]
+    
+    def cost(self):
+        return 0
 
 
 class PivotWalk(Motion):
@@ -63,6 +67,9 @@ class PivotWalk(Motion):
         steps.extend(pivotRotationSeq)
         steps.append(Step(0, -1))
         return steps
+    
+    def cost(self):
+        return 4 * abs(self.pivotAng)
 
 class Rotation(Motion):
     """
@@ -92,3 +99,6 @@ class Rotation(Motion):
         zeros = [Step() for _ in range(longestChain * math.floor(Rotation.ROTATION_STALLS / stepTime))]
         steps.extend(zeros)
         return steps
+    
+    def cost(self):
+        return abs(self.angle)

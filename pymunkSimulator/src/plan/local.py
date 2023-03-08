@@ -15,11 +15,17 @@ class PlanState(Enum):
 
 class Plan:
 
-    def __init__(self, initial: Configuration=None, goal: Configuration=None):
+    def __init__(self, initial: Configuration, goal: Configuration, actions, state: PlanState):
         self.initial = initial
         self.goal = goal
-        self.actions = []
-        self.state = PlanState.UNDEFINED
+        self.actions = actions
+        self.state = state
+
+    def cost(self):
+        cost = 0
+        for action in self.actions:
+            cost += action.cost()
+        return cost
 
     @staticmethod
     def concat(planA, planB):
@@ -64,23 +70,34 @@ class LocalPlanner:
         if DEBUG: print("Single update.")
         return save
     
-    def planCubeConnect(self, intitial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Plan:
-        #single update if no poly info available
-        if intitial.polyominoes == None:
-            intitial = self.singleUpdate(intitial)
-        #early failure: wrong cubes, wrong edge, created poly overlapping or cube cant be put in hole
-        plans = []
+    def planCubeConnect(self, initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Plan:
+        # single update if no poly info available
+        if initial.polyominoes == None:
+            initial = self.singleUpdate(initial)
+        # cant connect cubes sideways if they are same type
+        if edgeB in (Direction.EAST, Direction.WEST) and cubeA.type == cubeB.type:
+            return Plan(initial, None, None, PlanState.INVALID)
+        # poly resulting from connection would overlap
+        targetPoly = Polyomino.connectPoly(initial.polyominoes.getPoly(cubeA), cubeA, initial.polyominoes.getPoly(cubeB), cubeB, edgeB)
+        if targetPoly == None:
+            return Plan(initial, None, None, PlanState.INVALID)
+        # creating plan for walking right and one for walking left
+        # runtime failure: polys containing cubeA/B change, created poly overlapping, blocked way (how to dertermin?)
+        plans = {}
         for direction in (PivotWalk.LEFT, PivotWalk.RIGHT):
-            self.__loadConfig__(intitial)
-            plan = Plan(intitial)
+            actions = []
+            self.__loadConfig__(initial)
             while not self.__isConnected__(cubeA, cubeB, edgeB):
-                plan.actions.extend(self.__alignEdges__(cubeA, cubeB, edgeB))
-                plan.actions.extend(self.__walk__(5, direction))
-            plan.goal = self.__config
-            plans.append(plan)
-        #runtime failure: polys containing cubeA/B change, created poly overlapping or cube cant be put in hole
-        #                 blocked way (how to dertermin?)
-        return plans
+                actions.extend(self.__alignEdges__(cubeA, cubeB, edgeB))
+                actions.extend(self.__walk__(5, direction))
+            plans[direction] = Plan(initial, self.__config, actions, PlanState.SUCCESS)
+        # return plan with the lowest costs
+        print(f"Cost Left: {plans[PivotWalk.LEFT].cost()}\nCost Right: {plans[PivotWalk.RIGHT].cost()}")
+        if plans[PivotWalk.LEFT].cost() < plans[PivotWalk.RIGHT].cost():
+            return plans[PivotWalk.LEFT]
+        else:
+            return plans[PivotWalk.RIGHT]
+        
     
     def __alignEdges__(self, cubeA: Cube, cubeB: Cube, edgeB: Direction):
         magAng = self.__config.magAngle
@@ -90,7 +107,6 @@ class LocalPlanner:
             # For side connection just rotate edgeB to vecBA
             vecDes = vecBA
             vecSrc = vecEdgeB
-            print(f"src={vecSrc}\ndes={vecDes}")
         else:
             # For Top bottom connection move vecDes one cube length perpendicular to vecAB
             vecPer = (2 * Cube.RAD) * vecBA.perpendicular_normal()
@@ -111,7 +127,7 @@ class LocalPlanner:
         self.__sim.start()
         self.__sim.executeMotion(rotation)
         self.__sim.stop()
-        self.__config = self.__sim.saveConfig()
+        self.__saveConfig__()
         if DEBUG: print("Edges Aligned.")
         return [rotation]
     
@@ -123,7 +139,7 @@ class LocalPlanner:
             self.__sim.executeMotion(pWalk)
             motions.append(pWalk)
         self.__sim.stop()
-        self.__config = self.__sim.saveConfig()
+        self.__saveConfig__()
         if DEBUG: print("Walking done.")
         return motions
 
@@ -136,5 +152,8 @@ class LocalPlanner:
             return
         self.__sim.loadConfig(config)
         self.__config = config
+
+    def __saveConfig__(self):
+        self.__config = self.__sim.saveConfig()
 
 

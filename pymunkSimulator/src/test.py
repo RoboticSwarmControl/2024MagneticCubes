@@ -2,7 +2,7 @@ import time
 from pymunk import Vec2d
 
 from sim.simulation import Simulation
-from plan.local import LocalPlanner
+from plan.local import LocalPlanner, PlanExecutor
 from sim.state import *
 
 
@@ -155,11 +155,15 @@ def localPlanner():
     planer = LocalPlanner()
     cubeA = Cube(0) #rot
     cubeB = Cube(1) #blau
-    config = Configuration((800,800),math.radians(90),0,{cubeA: (50,400),cubeB: (750,100)})
+    config = Configuration((800,800),math.radians(90),0,{cubeA: (50,400),cubeB: (150,300)})
     t0 = time.time()
-    planer.planCubeConnect(config,cubeA,cubeB,Direction.NORTH)
+    plan = planer.planCubeConnect(config,cubeA,cubeB,Direction.WEST)
     t1 = time.time()
-    print("Execution time: ", (t1 - t0), "s")
+    print("Planning time: ", (t1 - t0), "s")
+    #ex = PlanExecutor()
+    #ex.execute(plan)
+
+
 
 if __name__ == "__main__":
     localPlanner()
