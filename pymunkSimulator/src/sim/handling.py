@@ -51,7 +51,7 @@ class StateHandler:
         self.cube_shapes = {}
         self.sensor_cube = {}
 
-        self.magAngle = 0  # orientation of magnetic field (in radians)
+        self.magAngle = 0
         self.magElevation = 0
 
         self.magConnect = {}
@@ -64,7 +64,6 @@ class StateHandler:
         self.frictionpoints = {}
         # JOINTS
         # self.connectJoints = []
-        # self.pivotJoints = []
 
     def getCubeShape(self, cube: Cube):
         return self.cube_shapes[cube][0]
@@ -114,14 +113,12 @@ class StateHandler:
         # detect polyominos based on the magnetic connections
         if not self.magConnect == self.magConnect_pre:
             self.polyominoes.detectPolyominoes(self.magConnect)
+        # safe magnetic connections to _pre and clear this one
         self.magConnect_pre = self.magConnect
         self.magConnect = {}
-        # JOINTS
-        # self.__removePivotJoints__()
+        # apply forces from magneticfield to each cube in each poly
         self.frictionpoints.clear()
         for poly in self.polyominoes.getAll():
-            # self.__updatePivotPiont__(poly)
-            # self.__addPivotJoints__(poly)
             for cube in poly.getCubes():
                 self.__applyForceField__(cube)
                 self.__applyForceFriction__(cube, poly)
@@ -209,7 +206,6 @@ class StateHandler:
     def __loadConfig__(self):
         # clear space
         # JOINTS
-        # self.__removePivotJoints__()
         # self.__removeConnectJoints__()
         self.__removeBoundaries__()
         for cube in self.getCubes():
@@ -306,35 +302,6 @@ class StateHandler:
                     pivotPoint)
                 pos = shape.body.position
                 shape.body.position = (pos[0], pos[1])
-
-    def __addPivotJoints__(self, poly: Polyomino):
-        if self.magElevation == 0:
-            return
-        if self.magElevation < 0:
-            edgeCubes = poly.getTopRow()
-            edgePointL = (-Cube.MRAD, 0)
-        else:
-            edgeCubes = poly.getBottomRow()
-            edgePointL = (Cube.MRAD, 0)
-        pivotPoint = (0, 0)
-        for cube in edgeCubes:
-            shape = self.getCubeShape(cube)
-            pivotPoint += shape.body.local_to_world(edgePointL)
-        pivotPoint /= len(edgeCubes)
-        staticBody = pymunk.Body(body_type=pymunk.Body.STATIC)
-        staticBody.position = pivotPoint
-        self.pivotJoints.append(staticBody)
-        self.space.add(staticBody)
-        for cube in edgeCubes:
-            shape = self.getCubeShape(cube)
-            joint = pymunk.PinJoint(shape.body, staticBody, edgePointL)
-            self.pivotJoints.append(joint)
-            self.space.add(joint)
-
-    def __removePivotJoints__(self):
-        for element in self.pivotJoints:
-            self.space.remove(element)
-        self.pivotJoints.clear()
 
     def __addConnectionJoint__(self, cubei: Cube, edgei: Direction, cubej: Cube, edgej: Direction):
         shapei = self.getCubeShape(cubei)

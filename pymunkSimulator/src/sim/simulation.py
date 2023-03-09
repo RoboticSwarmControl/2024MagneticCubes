@@ -12,7 +12,7 @@ from sim.state import Configuration, Cube
 from sim.motion import *
 from sim.handling import *
 
-DEBUG = True
+DEBUG = False
 
 class Simulation:
     """

@@ -5,7 +5,6 @@ and ANG_VELOCITY for all rotations.
 
 @author: Aaron T Becker, Kjell Keune
 """
-
 import math
 from threading import Event
 
@@ -15,7 +14,6 @@ class Step:
     def __init__(self, angChange=0, elevChange=0):
         self.angChange = angChange
         self.elevChange = elevChange
-
 
 class Motion:
     """
@@ -30,7 +28,6 @@ class Motion:
     
     def cost(self):
         return 0
-
 
 class PivotWalk(Motion):
     """
@@ -102,3 +99,18 @@ class Rotation(Motion):
     
     def cost(self):
         return abs(self.angle)
+    
+class Idle(Motion):
+    """
+    Idle motion meaning a certain amount of zero updates
+    """
+
+    def __init__(self, updates):
+        self.executed = Event()
+        self.updates = updates
+
+    def stepSequence(self, stepTime, longestChain):
+        return [Step()] * self.updates
+    
+    def cost(self):
+        return 0
