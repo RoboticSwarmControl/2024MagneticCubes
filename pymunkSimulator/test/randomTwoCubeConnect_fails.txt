@@ -1,0 +1,5 @@
+# Connected to side 
+[17] FAILURE: 48.4rad in 0.33s
+0 at Vec2d(88, 650) --NORTH-> 1 at Vec2d(380, 579). Ang=347
+[28] FAILURE: 19.1rad in 0.28s
+1 at Vec2d(309, 603) --NORTH-> 0 at Vec2d(127, 625). Ang=212

@@ -1,11 +1,12 @@
+import sys
+sys.path.append("..")
 import time
 from pymunk import Vec2d
 
 from sim.simulation import Simulation
 from plan.local import LocalPlanner
-from plan.plan import Plan
+from plan.plan import Plan, PlanState
 from sim.state import *
-
 
 def polyTest():
     cube0 = Cube(0)
@@ -60,15 +61,12 @@ def randomConfig():
     width = 1000
     height = 1000
     ncubes = 10
-    sim = Simulation(width, height)
+    sim = Simulation()
     sim.start()
     while True:
-        config = Configuration.initRandomConfig(ncubes, (width, height))
+        config = Configuration.initRandomConfig((width, height), ncubes, ncubes)
         sim.loadConfig(config)
-        time.sleep(1)
-        print("Registerd Cubes: \n" + str(sim.stateHandler.getCubes()))
-        print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
-        input()
+        input("New config:")
         
 def forceSideConect():
     sim = Simulation(500,500)
@@ -153,16 +151,49 @@ def winkelTest():
     print(p1.angle_degrees)
 
 def localPlanner():
-    planer = LocalPlanner()
-    cubeA = Cube(0) #rot
-    cubeB = Cube(1) #blau
-    config = Configuration((800,800),math.radians(90),0,{cubeA: (50,400),cubeB: (150,300)})
-    #config = Configuration((800,800),math.radians(90),0,{cubeA: (50,100),cubeB: (150,300)})
+    planer = LocalPlanner(drawing=False)
+    c1 = Cube(1) #rot
+    p1 = (309, 603) 
+    c2 = Cube(0) #blau
+    p2 = (127, 625)
+    ed2 = Direction.NORTH
+    ang = math.radians(212)
+    #config = Configuration((800,800),math.radians(90),0,{cubeA: (50,400),cubeB: (150,300)})
+    #connected to side failure case
+    config = Configuration((800,800),ang, 0,{c1: p1, c2: p2})
     t0 = time.time()
-    plan = planer.planCubeConnect(config,cubeA,cubeB,Direction.NORTH)
+    plan = planer.planCubeConnect(config,c1,c2,ed2)
     t1 = time.time()
-    print(f"Planning time: {round(t1 - t0, 4)}s")
+    print(f"{plan.state}: {round(plan.cost(),2)}rad in {round(t1 - t0, 2)}s")
+    print(f"Cube{c1.type} at {config.getPosition(c1)} --{ed2}-> Cube{c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(ang))}")
 
+def randomTwoCubeConnect():
+    planer = LocalPlanner()
+    plans = {}
+    globalTime = 0
+    samples = 25
+    for i in range(samples):
+        config = Configuration.initRandomConfig((800,800), 2, 1)
+        c1 = config.getCubes()[0]
+        c2 = config.getCubes()[1]
+        ed = Direction(random.randint(0,3))
+        t0 = time.time()
+        plan = planer.planCubeConnect(config, c1, c2, ed)
+        t1 = time.time()
+        dt = t1 -t0
+        globalTime += dt
+        plans[i] = plan
+        print(f"[{i}] {plan.state}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
+    fails = []
+    for key, plan in plans.items():
+        if plan.state == PlanState.FAILURE:
+            fails.append(key)
+    print(f"Time summed: {round(globalTime, 2)}, {len(fails)}/{samples} FAILURES")
+    print(fails)
+    while True:
+        inp = input("Select index to play:")
+        planer.executePlan(plans[int(inp)])
 
 
 if __name__ == "__main__":

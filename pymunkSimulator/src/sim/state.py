@@ -450,10 +450,22 @@ class Configuration:
         return hash(tuple(toHash))
 
     @staticmethod
-    def initRandomConfig(ncubes, size):
-        config = Configuration(0, 0, {})
+    def initRandomConfig(size, ncubes, nred=None):
+        ang = random.random() * 2 * math.pi
+        config = Configuration(size, ang, 0, {})
         for _ in range(ncubes):
-            newCube = Cube(random.randint(0, 1))
+            # create random cube
+            if nred == None:
+                newCube = Cube(random.randint(0, 1))
+            else:
+                rnd = random.randint(1,ncubes)
+                if rnd <= nred:
+                    newCube = Cube(Cube.TYPE_RED)
+                    nred -= 1
+                else:
+                    newCube = Cube(Cube.TYPE_BLUE)
+                ncubes -= 1
+            # create random non overlapping posistion
             overlap = True
             pos = (0, 0)
             while overlap:

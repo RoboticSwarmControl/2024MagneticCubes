@@ -7,7 +7,7 @@ from sim.state import *
 from plan.plan import *
 
 
-DEBUG = True
+DEBUG = False
 
 class LocalPlanner:
 
@@ -18,8 +18,8 @@ class LocalPlanner:
     STEPS_NONCRT = 4
     STEPS_CRT = 2
 
-    def __init__(self):
-        self.__sim = Simulation(drawing=True, userInputs=True)
+    def __init__(self, drawing=False):
+        self.__sim = Simulation(drawing, userInputs=True)
         self.__config = None
 
     def executePlan(self, plan: Plan):
@@ -68,10 +68,12 @@ class LocalPlanner:
                 # if we cant conect after a lot of iterations report failure
                 if itr >= LocalPlanner.MAX_ITR:
                     state = PlanState.FAILURE
+                    if DEBUG: print(f"Dir{direction}: maxIteration failure")
                     break
                 # check if you can connect the polys of A and B
                 if not self.__polyConnectPossible__(cubeA, cubeB, edgeB):
                     state = PlanState.FAILURE
+                    if DEBUG: print(f"Dir{direction}: polyConnect failure")
                     break
                 actions.extend(self.__walk__(cubeA, cubeB, direction))
                 actions.extend(self.__alignEdges__(cubeA, cubeB, edgeB))
@@ -79,8 +81,6 @@ class LocalPlanner:
             plans[direction] = Plan(initial, self.__config, actions, state)
             self.__loadConfig__(configAligned)
         # evaluate wich plan to return
-        print(f"Left: {plans[PivotWalk.LEFT].state}, {round(plans[PivotWalk.LEFT].cost(), 2)}rad")
-        print(f"Right: {plans[PivotWalk.RIGHT].state}, {round(plans[PivotWalk.RIGHT].cost(), 2)}rad")
         return plans[PivotWalk.LEFT].compare(plans[PivotWalk.RIGHT])
     
     def __alignEdges__(self, cubeA: Cube, cubeB: Cube, edgeB: Direction):
