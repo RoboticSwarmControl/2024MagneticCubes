@@ -151,13 +151,13 @@ def winkelTest():
     print(p1.angle_degrees)
 
 def localPlanner():
-    planer = LocalPlanner(drawing=False)
-    c1 = Cube(1) #rot
-    p1 = (309, 603) 
-    c2 = Cube(0) #blau
-    p2 = (127, 625)
-    ed2 = Direction.NORTH
-    ang = math.radians(212)
+    planer = LocalPlanner(drawing=True)
+    c1 = Cube(0) #red
+    p1 = (708, 587) 
+    c2 = Cube(1) #blue
+    p2 = (522, 140)
+    ed2 = Direction.SOUTH
+    ang = math.radians(346)
     #config = Configuration((800,800),math.radians(90),0,{cubeA: (50,400),cubeB: (150,300)})
     #connected to side failure case
     config = Configuration((800,800),ang, 0,{c1: p1, c2: p2})
@@ -165,13 +165,13 @@ def localPlanner():
     plan = planer.planCubeConnect(config,c1,c2,ed2)
     t1 = time.time()
     print(f"{plan.state}: {round(plan.cost(),2)}rad in {round(t1 - t0, 2)}s")
-    print(f"Cube{c1.type} at {config.getPosition(c1)} --{ed2}-> Cube{c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(ang))}")
+    print(f"{c1.type} at {config.getPosition(c1)} --{ed2}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(ang))}")
 
 def randomTwoCubeConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 25
+    samples = 50
     for i in range(samples):
         config = Configuration.initRandomConfig((800,800), 2, 1)
         c1 = config.getCubes()[0]
@@ -197,4 +197,4 @@ def randomTwoCubeConnect():
 
 
 if __name__ == "__main__":
-    localPlanner()
+    randomTwoCubeConnect()

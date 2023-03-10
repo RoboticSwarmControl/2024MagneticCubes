@@ -13,9 +13,10 @@ class LocalPlanner:
 
     MAX_ITR = 100
     CRITICAL_DISTANCE = 4 * Cube.RAD
+    SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 1.5
     ANG_NONCRT = PivotWalk.DEFAULT_PIVOT_ANG
-    ANG_CRT = math.radians(12)
-    STEPS_NONCRT = 4
+    ANG_CRT = ANG_NONCRT / 1.5
+    STEPS_NONCRT = 3
     STEPS_CRT = 2
 
     def __init__(self, drawing=False):
@@ -61,22 +62,32 @@ class LocalPlanner:
             actions = list(alignRot)
             itr = 0
             while True:
+                # check if cubes are in critical distance for magnets to attract
+                distance = self.__config.getPosition(cubeA).get_distance(self.__config.getPosition(cubeB))
+                if distance < LocalPlanner.CRITICAL_DISTANCE:
+                    # if so let magnets do the rest
+                    wait = [Idle(10)]
+                    self.__executeMotions__(wait)
+                    actions.extend(wait)
+                else:
+                    # if not walk into direction
+                    actions.extend(self.__walk__(cubeA, cubeB, direction))
+                # re aligne the cubes
+                actions.extend(self.__alignEdges__(cubeA, cubeB, edgeB))
                 # check if cubes are connected at edgeB
                 if self.__isConnected__(cubeA, cubeB, edgeB):
                     state = PlanState.SUCCESS
-                    break
-                # if we cant conect after a lot of iterations report failure
-                if itr >= LocalPlanner.MAX_ITR:
-                    state = PlanState.FAILURE
-                    if DEBUG: print(f"Dir{direction}: maxIteration failure")
                     break
                 # check if you can connect the polys of A and B
                 if not self.__polyConnectPossible__(cubeA, cubeB, edgeB):
                     state = PlanState.FAILURE
                     if DEBUG: print(f"Dir{direction}: polyConnect failure")
                     break
-                actions.extend(self.__walk__(cubeA, cubeB, direction))
-                actions.extend(self.__alignEdges__(cubeA, cubeB, edgeB))
+                # if we cant conect after a lot of iterations report failure
+                if itr >= LocalPlanner.MAX_ITR:
+                    state = PlanState.FAILURE
+                    if DEBUG: print(f"Dir{direction}: maxIteration failure")
+                    break
                 itr += 1
             plans[direction] = Plan(initial, self.__config, actions, state)
             self.__loadConfig__(configAligned)
@@ -120,7 +131,7 @@ class LocalPlanner:
         posA = self.__config.getPosition(cubeA)
         posB = self.__config.getPosition(cubeB)
         distance = posA.get_distance(posB)
-        if distance < LocalPlanner.CRITICAL_DISTANCE:
+        if distance < LocalPlanner.SLOWWALK_DISTANCE:
             pivotAng = LocalPlanner.ANG_CRT
             steps = LocalPlanner.STEPS_CRT
         else:

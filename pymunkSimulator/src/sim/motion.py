@@ -109,6 +109,9 @@ class Idle(Motion):
         self.executed = Event()
         self.updates = updates
 
+    def __str__(self):
+        return f"Idle({self.updates}upd)"
+
     def stepSequence(self, stepTime, longestChain):
         return [Step()] * self.updates
     
