@@ -14,12 +14,16 @@ from sim.handling import *
 
 DEBUG = False
 
+
 class Simulation:
     """
     Top-level class for interacting with the Simulation
     """
 
-    def __init__(self, drawing=True, userInputs=True):
+    # (in seconds) bigger steps make sim faster but unprecise/unstable 0.04 seems reasonable
+    STEP_TIME = 0.05
+
+    def __init__(self, drawing=True, userControls=True):
         """
         creates a Simulation with empty configuration
 
@@ -27,16 +31,18 @@ class Simulation:
             width: screen width
             height: screen height
             drawing: if the simulation should draw
-            userInputs: if user inputs are enabled
+            userControls: if the user is able to alter the simulation state
         """
         self.drawingActive = drawing
-        self.userInputsActive = userInputs
+        self.userControls = userControls
 
         self.stopped = Event()
         self.started = Event()
 
         self.stateHandler = StateHandler()
         self.renderer = Renderer(self.stateHandler)
+        self.fps = 64
+        self.updatePerFrame = 1
 
         self.motionsToExecute = Queue()
         self.currentMotion = None
@@ -47,7 +53,8 @@ class Simulation:
         Notifies the simulation to load a new configuration on the next update.
         """
         wasRunning = self.started.is_set()
-        resize = (not self.stateHandler.boardSize == newConfig.boardSize) and self.drawingActive
+        resize = (not self.stateHandler.boardSize ==
+                  newConfig.boardSize) and self.drawingActive
         if resize:
             if wasRunning:
                 self.stop()
@@ -176,26 +183,22 @@ class Simulation:
         if wasRunning:
             self.start()
 
-    def setDrawingSpeed(self, fps):
-        if fps < 2:
-            fps = 2
-        self.renderer.fps = fps
-        if DEBUG:
-            print(f"Drawing Speed = {fps}fps")
-
     def __run__(self):
         # initialisation
         if self.drawingActive:
             self.renderer.pygameInit()
+        update = 0
         self.started.set()
         # Simulation loop
         while self.started.isSet():
             if self.drawingActive:
                 self.__userInputs__()
             step = self.__nextStep__()
-            self.stateHandler.update(step.angChange, step.elevChange)
-            if self.drawingActive:
-                self.renderer.draw()
+            self.stateHandler.update(
+                step.angChange, step.elevChange, Simulation.STEP_TIME)
+            if self.drawingActive and (update % self.updatePerFrame == 0 or not self.started.is_set()):
+                self.renderer.render(self.fps)
+            update += 1
         self.stopped.set()
         sys.exit()
 
@@ -214,11 +217,25 @@ class Simulation:
                 self.currentMotion = None
                 return Step()
             self.currentMotion = self.motionsToExecute.get()
-            longestChain = max(self.stateHandler.polyominoes.maxPolyWidth, self.stateHandler.polyominoes.maxPolyHeight)
-            steps = self.currentMotion.stepSequence(StateHandler.STEP_TIME, longestChain)
+            longestChain = max(self.stateHandler.polyominoes.maxPolyWidth,
+                               self.stateHandler.polyominoes.maxPolyHeight)
+            steps = self.currentMotion.stepSequence(
+                Simulation.STEP_TIME, longestChain)
             for i in steps:
-                self.motionSteps.put(i) 
+                self.motionSteps.put(i)
         return self.motionSteps.get()
+
+    def __speedUp__(self):
+        if self.fps >= 64:
+            self.updatePerFrame += 2
+        else:
+            self.fps *= 2
+
+    def __slowDown__(self):
+        if self.updatePerFrame > 1:
+            self.updatePerFrame -= 2
+        elif self.fps > 2:
+            self.fps /= 2
 
     def __userInputs__(self):
         for event in pygame.event.get():
@@ -226,34 +243,32 @@ class Simulation:
                 thread = Thread(target=self.terminate, daemon=False)
                 thread.start()
                 break
-            if self.userInputsActive:   
-                if event.type == pygame.KEYDOWN:
-                    if event.key == 119:  # 'w' pivotwalk right
-                        self.executeMotion_nowait(PivotWalk(PivotWalk.RIGHT))
-                    elif event.key == 97:  # 'a' rotate ccw
-                        self.executeMotion_nowait(Rotation(math.radians(-10)))
-                    elif event.key == 115:  # 's' pivotwalk left
-                        self.executeMotion_nowait(PivotWalk(PivotWalk.LEFT))
-                    elif event.key == 100:  # 'd' rotate cw
-                        self.executeMotion_nowait(Rotation(math.radians(10)))
-                    elif event.key == 121:  # 'y' decrease speed
-                        self.setDrawingSpeed(int(self.renderer.fps / 2))
-                    elif event.key == 120:  # 'x' increase speed
-                        self.setDrawingSpeed(int(self.renderer.fps * 2))
-                    elif event.key == 99:  # 'c' clear space
-                        self.stateHandler.loadConfig(StateHandler.DEFAULT_CONFIG)
-                    elif event.key == 105:  # 'i' info
-                        config = self.stateHandler.saveConfig()
-                        print(config.polyominoes)
-                        pass
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    mouse_pos = pygame.mouse.get_pos()
-                    if event.button == 1:  # 'left click' places cube TYPE_RED
-                        config = self.stateHandler.saveConfig()
-                        config.addCube(Cube(Cube.TYPE_RED), mouse_pos)
-                        self.stateHandler.loadConfig(config)
-                    elif event.button == 3:  # 'right click' places cube TYPE_BLUE
-                        config = self.stateHandler.saveConfig()
-                        config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
-                        self.stateHandler.loadConfig(config)
-            
+            elif event.type == pygame.KEYDOWN:
+                if event.key == 119 and self.userControls:  # 'w' pivotwalk right
+                    self.executeMotion_nowait(PivotWalk(PivotWalk.RIGHT))
+                elif event.key == 97 and self.userControls:  # 'a' rotate ccw
+                    self.executeMotion_nowait(Rotation(math.radians(-10)))
+                elif event.key == 115 and self.userControls:  # 's' pivotwalk left
+                    self.executeMotion_nowait(PivotWalk(PivotWalk.LEFT))
+                elif event.key == 100 and self.userControls:  # 'd' rotate cw
+                    self.executeMotion_nowait(Rotation(math.radians(10)))
+                elif event.key == 121:  # 'y' decrease speed
+                    self.__slowDown__()
+                elif event.key == 120:  # 'x' increase speed
+                    self.__speedUp__()
+                elif event.key == 99 and self.userControls:  # 'c' clear space
+                    self.stateHandler.loadConfig(StateHandler.DEFAULT_CONFIG)
+                elif event.key == 105:  # 'i' info
+                    config = self.stateHandler.saveConfig()
+                    print(config.polyominoes)
+                    pass
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if event.button == 1 and self.userControls:  # 'left click' places cube TYPE_RED
+                    config = self.stateHandler.saveConfig()
+                    config.addCube(Cube(Cube.TYPE_RED), mouse_pos)
+                    self.stateHandler.loadConfig(config)
+                elif event.button == 3 and self.userControls:  # 'right click' places cube TYPE_BLUE
+                    config = self.stateHandler.saveConfig()
+                    config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
+                    self.stateHandler.loadConfig(config)

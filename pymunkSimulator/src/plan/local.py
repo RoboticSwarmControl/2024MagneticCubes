@@ -20,7 +20,7 @@ class LocalPlanner:
     STEPS_CRT = 2
 
     def __init__(self, drawing=False):
-        self.__sim = Simulation(drawing, userInputs=True)
+        self.__sim = Simulation(drawing, userControls=False)
         self.__config = None
 
     def executePlan(self, plan: Plan):
@@ -69,6 +69,7 @@ class LocalPlanner:
                     wait = [Idle(10)]
                     self.__executeMotions__(wait)
                     actions.extend(wait)
+                    actions.append(Idle(1))
                 else:
                     # if not walk into direction
                     actions.extend(self.__walk__(cubeA, cubeB, direction))
@@ -124,6 +125,7 @@ class LocalPlanner:
         rotAng = vecSrc.get_angle_between(vecDes)
         rotation = [Rotation(rotAng)]
         self.__executeMotions__(rotation)
+        rotation.append(Idle(1))
         if DEBUG: print(f"Edges Aligned by turning {round(math.degrees(rotAng), 3)}°")
         return rotation
     
@@ -139,6 +141,7 @@ class LocalPlanner:
             steps = LocalPlanner.STEPS_NONCRT
         pWalks = [PivotWalk(direction, pivotAng)] * steps
         self.__executeMotions__(pWalks)
+        pWalks.append(Idle(1))
         if DEBUG: print(f"Walking {steps} steps with pivAng {round(math.degrees(pivotAng), 3)}")
         return pWalks
 

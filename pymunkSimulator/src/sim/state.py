@@ -3,7 +3,6 @@ Holds the Configuration class
 
 @author: Aaron T Becker, Kjell Keune
 """
-import random
 import math
 from enum import Enum
 from queue import Queue
@@ -103,7 +102,7 @@ class Polyomino:
         self.__xmax = 0
         self.__ymin = 0
         self.__ymax = 0
-        self.valid = True
+        self.__valid = True
         self.id = Polyomino.nextId
         Polyomino.nextId += 1
         # The root should allways be the most left most bottom cube.
@@ -139,7 +138,7 @@ class Polyomino:
         neighborW = self.getConnection(cubeA, Direction.WEST)
         neighborE = self.getConnection(cubeA, Direction.EAST)
         if (neighborW != None and neighborW.type == cubeA.type) or (neighborE != None and neighborE.type == cubeA.type):
-            self.valid = False
+            self.__valid = False
         return True
 
     def remove(self, cube: Cube):
@@ -188,6 +187,9 @@ class Polyomino:
     def isTrivial(self) -> bool:
         return len(self.__cube_pos) == 1
 
+    def isValid(self):
+        return self.__valid
+
     def size(self) -> int:
         return len(self.__cube_pos)
 
@@ -202,7 +204,7 @@ class Polyomino:
         for cube, pos in self.__cube_pos.items():
             clone.__cube_pos[cube] = pos
             clone.__pos_cube[pos] = cube
-        clone.valid = self.valid
+        clone.__valid = self.__valid
         clone.__xmax = self.__xmax
         clone.__xmin = self.__xmin
         clone.__ymax = self.__ymax
@@ -284,13 +286,17 @@ class Polyomino:
 
 class PolyCollection:
 
-    def __init__(self):
+    def __init__(self, polys=None):
         self.__nonTrivial = []
         self.__trivial = []
         self.maxPolyWidth = 0
         self.maxPolyHeight = 0
         self.__poly_count = {}
         self.__cube_poly  = {}
+        if polys == None:
+            return
+        for poly in polys:
+            self.__add__(poly)
 
     def detectPolyominoes(self, connects: dict):
         self.__clear__()
@@ -448,35 +454,3 @@ class Configuration:
         toHash.sort()
         toHash.append(self.magAngle)
         return hash(tuple(toHash))
-
-    @staticmethod
-    def initRandomConfig(size, ncubes, nred=None):
-        ang = random.random() * 2 * math.pi
-        config = Configuration(size, ang, 0, {})
-        for _ in range(ncubes):
-            # create random cube
-            if nred == None:
-                newCube = Cube(random.randint(0, 1))
-            else:
-                rnd = random.randint(1,ncubes)
-                if rnd <= nred:
-                    newCube = Cube(Cube.TYPE_RED)
-                    nred -= 1
-                else:
-                    newCube = Cube(Cube.TYPE_BLUE)
-                ncubes -= 1
-            # create random non overlapping posistion
-            overlap = True
-            pos = (0, 0)
-            while overlap:
-                overlap = False
-                x = random.randint(Cube.RAD, size[0] - Cube.RAD)
-                y = random.randint(Cube.RAD, size[1] - Cube.RAD)
-                pos = Vec2d(x, y)
-                for cube in config.getCubes():
-                    # TODO dont compare in circle compare in rect
-                    if pos.get_distance(config.getPosition(cube)) <= Cube.RAD * 1.5:
-                        overlap = True
-                        break
-            config.addCube(newCube, pos)
-        return config

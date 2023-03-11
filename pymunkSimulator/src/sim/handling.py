@@ -15,8 +15,6 @@ from sim.state import *
 
 class StateHandler:
 
-    # (in seconds) bigger steps make sim faster but unprecise/unstable 0.04 seems reasonable
-    STEP_TIME = 0.04
     MAG_FORCE_FIELD = 1000  # magnetic force of the magnetic-field
     CONNECTION_DISTANCE = 2 * (Cube.RAD - Cube.MRAD) + 4
     CONNECTION_FORCE_MIN = Cube.magForce1on2(
@@ -92,7 +90,7 @@ class StateHandler:
         self.updateLock.release()
         return config
 
-    def update(self, angChange, elevChange):
+    def update(self, angChange, elevChange, dt):
         """
         Updates the configuration by adding angChange and elevChange to the current magnetic field orientation.
         Also loads a new configuration if loadConfig got called.
@@ -106,7 +104,7 @@ class StateHandler:
         if not self.configToLoad == None:
             self.__loadConfig__()
         # let pymunk update the space this also creates the magnetic connections
-        self.space.step(StateHandler.STEP_TIME)
+        self.space.step(dt)
         # apply the change
         self.magAngle += angChange
         self.magElevation += elevChange
@@ -359,7 +357,7 @@ class Renderer:
         self.drawOpt = None
         self.initialized = False
 
-    def draw(self):
+    def render(self, fps):
         if not self.initialized:
             return
         self.window.fill(Renderer.WHITE)
@@ -407,4 +405,4 @@ class Renderer:
         self.stateHandler.space.debug_draw(self.drawOpt)
         # update the screen
         pygame.display.update()
-        self.clock.tick(self.fps)
+        self.clock.tick(fps)

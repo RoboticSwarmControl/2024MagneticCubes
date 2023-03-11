@@ -4,9 +4,10 @@ import time
 from pymunk import Vec2d
 
 from sim.simulation import Simulation
+from sim.state import *
 from plan.local import LocalPlanner
 from plan.plan import Plan, PlanState
-from sim.state import *
+from plan.factory import *
 
 def polyTest():
     cube0 = Cube(0)
@@ -57,14 +58,14 @@ def nearestWall():
     print(str(cube1) + ": " + str(nwallCube1))
     print(str(cube2) + ": " + str(nwallCube2))
     
-def randomConfig():
+def randomConfigTest():
     width = 1000
     height = 1000
     ncubes = 10
     sim = Simulation()
     sim.start()
     while True:
-        config = Configuration.initRandomConfig((width, height), ncubes, ncubes)
+        config = randomConfig((width, height), ncubes, ncubes)
         sim.loadConfig(config)
         input("New config:")
         
@@ -143,21 +144,22 @@ def simControlTest():
     sim.loadConfig(Configuration((400,400), 0, 0, {Cube(0): (200,200)}))
     sim.enableDraw()
 
-
-def winkelTest():
-    p1 = Vec2d(-1,0)
-    p2 = Vec2d(1,1)
-    print(p1.get_angle_degrees_between(p2))
-    print(p1.angle_degrees)
+def randomPolyTest():
+    samples = 50
+    polys = []
+    for _ in range(samples):
+        polys.append(randomPoly(10, 5))
+    polys = PolyCollection(polys)
+    print(polys)
 
 def localPlanner():
     planer = LocalPlanner(drawing=True)
-    c1 = Cube(0) #red
-    p1 = (708, 587) 
-    c2 = Cube(1) #blue
-    p2 = (522, 140)
-    ed2 = Direction.SOUTH
-    ang = math.radians(346)
+    c1 = Cube(1) #red
+    p1 = (485, 587)
+    c2 = Cube(0) #blue
+    p2 = (36, 34)
+    ed2 = Direction.WEST
+    ang = math.radians(150)
     #config = Configuration((800,800),math.radians(90),0,{cubeA: (50,400),cubeB: (150,300)})
     #connected to side failure case
     config = Configuration((800,800),ang, 0,{c1: p1, c2: p2})
@@ -171,9 +173,9 @@ def randomTwoCubeConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 50
+    samples = 20
     for i in range(samples):
-        config = Configuration.initRandomConfig((800,800), 2, 1)
+        config = randomConfig((800,800), 2, 1)
         c1 = config.getCubes()[0]
         c2 = config.getCubes()[1]
         ed = Direction(random.randint(0,3))

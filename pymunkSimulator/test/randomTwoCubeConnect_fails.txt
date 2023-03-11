@@ -3,3 +3,6 @@
 0 at Vec2d(88, 650) --NORTH-> 1 at Vec2d(380, 579). Ang=347
 [28] FAILURE: 19.1rad in 0.28s
 1 at Vec2d(309, 603) --NORTH-> 0 at Vec2d(127, 625). Ang=212
+# weird drawing
+[20] SUCCESS: 38.52rad in 0.24s
+1 at Vec2d(485, 587) --WEST-> 0 at Vec2d(36, 34). Ang=150
