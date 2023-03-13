@@ -52,7 +52,7 @@ def randomPoly(ncubes, nred=None):
     return poly
 
 
-def randomConfig(size, ncubes, nred=None) -> Configuration:
+def randomConfigWithCubes(size, ncubes, nred=None) -> Configuration:
     ang = generator.random() * 2 * math.pi
     config = Configuration(size, ang, 0, {})
     for _ in range(ncubes):
@@ -63,18 +63,40 @@ def randomConfig(size, ncubes, nred=None) -> Configuration:
             nred -= 1
         # create random non overlapping posistion
         overlap = True
-        pos = (0, 0)
         while overlap:
             overlap = False
-            x = generator.randint(Cube.RAD, size[0] - Cube.RAD)
-            y = generator.randint(Cube.RAD, size[1] - Cube.RAD)
-            pos = Vec2d(x, y)
-            for cube in config.getCubes():
-                # TODO dont compare in circle compare in rect
-                if pos.get_distance(config.getPosition(cube)) <= Cube.RAD * 1.5:
-                    overlap = True
-                    break
+            pos = Vec2d(generator.randint(Cube.RAD, size[0] - Cube.RAD), generator.randint(Cube.RAD, size[1] - Cube.RAD))
+            if config.posCubeOverlap(pos):
+                overlap = True  
         config.addCube(newCube, pos)
+    return config
+
+def randomConfigWithPolys(size, polyominoes: list):
+    ang = generator.random() * 2 * math.pi
+    config = Configuration(size, ang, 0, {})
+    vecNorth = Direction.NORTH.vec(ang)
+    vecEast = Direction.EAST.vec(ang)
+    for poly in polyominoes:
+        invalid = True
+        while invalid:
+            # create random position for root cube
+            invalid = False
+            rootPos = Vec2d(generator.randint(Cube.RAD, size[0] - Cube.RAD), generator.randint(Cube.RAD, size[1] - Cube.RAD))
+            cubePos = {}
+            for cube in poly.getCubes():
+                # add cubes based on root cube
+                coords = poly.getLocalCoordinates(cube)
+                pos = rootPos + (coords[0] * 2 * Cube.RAD) * vecEast + (coords[1] * 2 * Cube.RAD) * vecNorth
+                cubePos[cube] = pos
+                # if a cube ends up out of bounds or is overlapping with existing cubes try new rootPos
+                if (not config.posInBounds(pos)) or config.posCubeOverlap(pos):
+                    invalid = True
+                    break
+        # if everything is valid add the cubes to config
+        for cube, pos in cubePos.items():
+            config.addCube(cube, pos)
+
+
     return config
 
 

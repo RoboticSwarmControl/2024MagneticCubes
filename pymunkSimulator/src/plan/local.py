@@ -51,7 +51,10 @@ class LocalPlanner:
             return Plan(initial, self.__config, [], PlanState.SUCCESS)
         # cant connect cubes sideways if they are same type
         if edgeB in (Direction.EAST, Direction.WEST) and cubeA.type == cubeB.type:
-            return Plan(initial, None, None, PlanState.FAILURE)
+            return Plan(initial, None, None, PlanState.FAILURE_SAME_TYPE)
+        # pre check if connecting the polys is even possible
+        if not self.__polyConnectPossible__(cubeA, cubeB, edgeB):
+            return Plan(initial, self.__config, [], PlanState.FAILURE_POLY_CON)
         # first align of the cubes
         alignRot = self.__alignEdges__(cubeA, cubeB, edgeB)
         configAligned = self.__saveConfig__()
@@ -81,12 +84,12 @@ class LocalPlanner:
                     break
                 # check if you can connect the polys of A and B
                 if not self.__polyConnectPossible__(cubeA, cubeB, edgeB):
-                    state = PlanState.FAILURE
+                    state = PlanState.FAILURE_POLY_CON
                     if DEBUG: print(f"Dir{direction}: polyConnect failure")
                     break
                 # if we cant conect after a lot of iterations report failure
                 if itr >= LocalPlanner.MAX_ITR:
-                    state = PlanState.FAILURE
+                    state = PlanState.FAILURE_MAX_ITR
                     if DEBUG: print(f"Dir{direction}: maxIteration failure")
                     break
                 itr += 1

@@ -7,6 +7,9 @@ class PlanState(Enum):
     UNDEFINED = 0
     SUCCESS = 1
     FAILURE = 2
+    FAILURE_SAME_TYPE = 3
+    FAILURE_POLY_CON = 4
+    FAILURE_MAX_ITR = 5
 
     def  __str__(self) -> str:
         return self.name

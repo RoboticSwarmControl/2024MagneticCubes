@@ -65,7 +65,7 @@ def randomConfigTest():
     sim = Simulation()
     sim.start()
     while True:
-        config = randomConfig((width, height), ncubes, ncubes)
+        config = randomConfigWithCubes((width, height), ncubes, ncubes)
         sim.loadConfig(config)
         input("New config:")
         
@@ -169,13 +169,44 @@ def localPlanner():
     print(f"{plan.state}: {round(plan.cost(),2)}rad in {round(t1 - t0, 2)}s")
     print(f"{c1.type} at {config.getPosition(c1)} --{ed2}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(ang))}")
 
+
+def randomTwoPolyConnect():
+    planer = LocalPlanner()
+    plans = {}
+    globalTime = 0
+    samples = 5
+    for i in range(samples):
+        p1 = randomPoly(3)
+        p2 = randomPoly(3)
+        config = randomConfigWithPolys((800,800),[p1,p2])
+        c1 = p1.getCubes()[generator.randint(0, p1.size() - 1)]
+        c2 = p2.getCubes()[generator.randint(0, p2.size() - 1)]
+        ed = Direction(random.randint(0,3))
+        t0 = time.time()
+        plan = planer.planCubeConnect(config, c1, c2, ed)
+        t1 = time.time()
+        dt = t1 -t0
+        globalTime += dt
+        plans[i] = plan
+        print(f"[{i}] {plan.state}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
+    fails = []
+    for key, plan in plans.items():
+        if plan.state != PlanState.SUCCESS:
+            fails.append(key)
+    print(f"Time summed: {round(globalTime, 2)}, {len(fails)}/{samples} FAILURES")
+    print(fails)
+    while True:
+        inp = input("Select index to play:")
+        planer.executePlan(plans[int(inp)])
+
 def randomTwoCubeConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
     samples = 20
     for i in range(samples):
-        config = randomConfig((800,800), 2, 1)
+        config = randomConfigWithCubes((800,800), 2, 1)
         c1 = config.getCubes()[0]
         c2 = config.getCubes()[1]
         ed = Direction(random.randint(0,3))
@@ -189,7 +220,7 @@ def randomTwoCubeConnect():
         print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
     fails = []
     for key, plan in plans.items():
-        if plan.state == PlanState.FAILURE:
+        if plan.state != PlanState.SUCCESS:
             fails.append(key)
     print(f"Time summed: {round(globalTime, 2)}, {len(fails)}/{samples} FAILURES")
     print(fails)

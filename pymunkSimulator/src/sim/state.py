@@ -169,6 +169,12 @@ class Polyomino:
     def getCubes(self):
         return list(self.__cube_pos.keys())
 
+    def getRoot(self):
+        return self.__pos_cube[(0, 0)]
+
+    def getLocalCoordinates(self, cube) -> Vec2d:
+        return self.__cube_pos[cube]
+
     def getBottomRow(self):
         return self.__getRow__(self.__ymin)
 
@@ -200,7 +206,7 @@ class Polyomino:
         return (self.__xmax - self.__xmin + 1, self.__ymax - self.__ymin + 1)
 
     def clone(self):
-        clone = Polyomino(self.__getRoot__())
+        clone = Polyomino(self.getRoot())
         for cube, pos in self.__cube_pos.items():
             clone.__cube_pos[cube] = pos
             clone.__pos_cube[pos] = cube
@@ -223,9 +229,6 @@ class Polyomino:
             posNew = (posOld[0] - posUpdate[0], posOld[1] - posUpdate[1])
             self.__pos_cube[posNew] = cube
             self.__cube_pos[cube] = posNew
-
-    def __getRoot__(self):
-        return self.__pos_cube[(0, 0)]
 
     def __eq__(self, __o: object) -> bool:
         if not type(__o) is Polyomino:
@@ -404,7 +407,7 @@ class Configuration:
         creates configuration
 
         Parameters:
-            ang: orientation of magnetic field (in radians)
+            ang: orientation of magnetile field (in radians)
             elev: elevation of magnetic field
             cube_pos: dictionary with key=cube value=postion (x,y)
         """
@@ -440,6 +443,16 @@ class Configuration:
         pos = self.__cube_data[cube]
         dis = [pos[1], abs(self.boardSize[0] - pos[0]), abs(self.boardSize[1] - pos[1]), pos[0]]
         return Direction(dis.index(min(dis)))
+
+    def posInBounds(self, pos: Vec2d):
+        return pos[0] < self.boardSize[0] and pos[0] >= 0 and pos[1] < self.boardSize[1] and pos[1] >= 0 
+
+    def posCubeOverlap(self, pos: Vec2d):
+        for cube in self.getCubes():
+            # TODO dont compare in circle compare in rect
+            if pos.get_distance(self.getPosition(cube)) <= Cube.RAD * 1.5:
+                return True
+        return False
 
     def addCube(self, cube, pos, ang=None, vel=(0,0)):
         if ang == None:
