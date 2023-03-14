@@ -1,76 +1,83 @@
 \chapter{Introduction}
 
-Self-assembling modular parts forming bigger structures, is a well known concept in nature and most functionalities of living organisms follow this principle \cite{bishop2005}.
-Structures can be assembled and disassembled depending on the task they should accomplish during a given point in time. 
-Resembling this concept, with self-reconfiguring robot swarms, has promising applications in the Future.
-Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or it could be used for milliscale and microscale manufacturing \cite{pelrine2016}.
+Self-assembling modular parts forming bigger structures is a well-known concept in nature and most functionalities of living organisms follow this principle \cite{bishop2005}.
+DNA for example has the ability to self-replicate by using differently shaped proteins, that combine themselves in various ways.
+If you zoom out, these cells can by combined to assemble things like tissue, organs and even whole organisms.
+Complex structures can be assembled and disassembled depending on the task they should accomplish during a given point in time. 
+Using self-reconfiguring robot swarms in such a way, has promising applications in the future.
+Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or a robot swarm could be used for milliscale and microscale manufacturing \cite{pelrine2016}.
 
-Designing robots at these small scales faces serious problems.
+Designing robots at these small scales faces challenging problems.
 Equipping each robot with its own sensors, actuation-system, connection-system and power supply seem very infeasible, in terms of the sheer size and power-limitations \cite{white2007}.
-Therefore, the use of external global control, effecting every robot uniformly, seem like a promising solution \cite{white2007}.
-Using robots, with no other system than embedded permanent magnets, has all the desired effects.
-Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply \cite{saab2019}.
+%Condider C-atoms
+Therefore, the use of external global control, effecting every robot uniformly, is a promising solution \cite{white2007}.
+Using robots with embedded permanent magnets, has all the desired effects.
+Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply and for sensing an external camera can be used \cite{saab2019}.
 
 One example for magnetically controlled robots are the magnetic modular cubes by Bhattacharjee et al. \cite{Bhattacharjee2022}, which are the subjects of this thesis.
-We will develop a simulation, that simulates the behavior of magnetic modular cubes, without assuming discrete movement or limiting rotations to a certain amount.
-The simulation will be used for developing closed loop planing algorithms, which provide a control sequence to assemble desired target shapes.
+% state that they have discrete planning... but i am doing that in related work
+We will develop a simulation that simulates the behavior of magnetic modular cubes, without assuming discrete movement or limiting rotations to a certain amount.
+The simulation will be used for developing closed-loop planing algorithms, which provide a control sequence to assemble desired target shapes.
 For that it is necessary to develop a local planner that is able to connect structures at desired faces.
-We will look at the difficulties and problems that occur, when working with magnetic modular cubes in the 2-dimensional special euclidean group.
+We will look at the difficulties and problems that occur, when working with magnetic modular cubes in the 2-dimensional special euclidean group \(SE(2)\), the space of rigid movements in a 2-dimensional plane.
 
 
 \section{Related Work}
 
-Motion planning is a crucial subject in the field of robotics.
-The goal is to find a continues path from the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
+Continues motion planning is a crucial subject in the field of robotics.
+The goal is to find a path from the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
 For that it is necessary to avoid collision with static obstacles and with other robots.
-The state of the system is also called a configuration and all possible configurations one or multiple robots can be in, is defined as the configuration-space.
+The state of the system is also called a configuration.
+All possible configurations one or multiple robots can be in is defined as the configuration-space.
 The dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and possible actions.
 It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a sequence of actions that lead to the goal configuration, or report failure, if the goal is not reachable.
 A lot of research was done on motion planning and the textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
 
-When working with configuration-spaces that are uncountable infinite, like the special euclidean group, one of these concepts is sample-based motion planing.
-%it is not only impossible to cover the howl space, it is also unclear how to traverse it.
+When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one of these concepts is sample-based motion planning.
+%define uncountable infinite and complete
 By taking samples, you can reduce the configuration space to a finite object, but you might lose possible solutions.
 Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point, and therefore these algorithms can be called resolution complete.
 Ways of sampling include random sampling or using a grid with a resolution that is dynamically adjustable.
 After sampling, conventional discrete planning algorithms can be applied \cite{LaValle2006}.
 
-One state of the art sample-based approach are algorithms that use rapidly-exploring random trees (RRT).
-This method tries to move into the direction of a randomly chosen sample from the nearest already explored configuration, that way the space gets explored uniformly without being too fixated on the goal configuration \cite{lavalle1998,lavalle2001}.
+One state-of-the-art sampling-based approach are algorithms that use rapidly-exploring random trees (RRT).
+This method tries to grow a tree-shaped graph in the configuration space by moving into the direction of randomly chosen samples from already explored configuration. That way the space gets explored uniformly without being too fixated on the goal configuration \cite{lavalle1998,lavalle2001}.
 
-When working with multiple robots, the question of how these interact with each other comes to mind.
+When working with multiple robots, the interaction of robots with each other becomes important.
 One interesting idea is that single robots can connect to form bigger structures.
 This is referred to as self-assembly and E. Winfree \cite{winfree1998} proposed the abstract Tile Assembly Model (aTAM) in the context of assembling DNA.
 In this model, particles can have different sets of glues and connect according to certain rules regarding the glue type.
 However, he considers this process as nondeterministic, so there is no exact instruction on how to assemble a desired structure.
+% define particles, non-derministic
 
-One model more related to the here used magnetic modular cubes is the Tilt model from Becker et al. \cite{Becker2014_SP}.
-In the Tilt model, all tiles move either one step or the maximum amount, until hitting an obstacle, into one of the cardinal directions.
+One model more related to the magnetic modular cubes used in this thesis is the Tilt model from Becker et al. \cite{Becker2014_SP}.
+In the Tilt model, all tiles move into one of the cardinal directions until hitting an obstacle.
+Different variations of the model include moving everything only one step, or the maximally possible amount.
 It offers a solution when robots are controlled uniformly by external global control inputs.
-In this paper it is shown, that transforming one configuration into another, known as the reconfiguration-problem, is NP-hard.
-Following work \cite{Becker2014} also proves, that finding an optimal control sequence, minimizing the number of actions, for the configuration-problem is PSPACE-complete.
+% solution to what
+In this paper it is shown that transforming one configuration into another, known as the reconfiguration-problem, is NP-hard.
+Following work \cite{Becker2014} also proves that finding an optimal control sequence, minimizing the number of actions, for the configuration-problem is PSPACE-complete.
 Furthermore, research is done on designing environments in which the Tilt model can be used to accomplish certain tasks.
 In particular, Becker et al. \cite{Becker2014} create connected logic gates that can evaluate logical expressions.
 
 More on the side of self-assembly, in \cite{Becker2020} the construction of desired shapes using the tilt model is researched.
 It presents a method that can determine a building sequence for a polyomino by adding one tile at a time, considering the rules of Tilt.
-Ways of modifying the environment to create factories constructing shapes in a pipeline by repeating the same global control inputs, are also examined.
-Shapes can not only be constructed by adding one tile at a time.
-Two multi-tiled shapes can connect to an even bigger structure.
+Which is also examined are ways of modifying the environment to create factories that construct shapes in a pipeline by repeating the same global control inputs.
+Shapes can be constructed more efficiently by combining multi-tiled shapes to an even bigger structure.
 One article considering the construction with so called sub-assemblies is proposed by A. Schmidt \cite{Schmidt2018}.
 
 Most recently, Bhattacharjee et al. \cite{Bhattacharjee2022} developed the magnetic modular cubes.
 These robots contain embedded permanent magnets and have no computation or power supply.
-Therefore, they are all controlled uniformly by an external time-varying magnetic field and are able to perform various actions.
+Instead, they are controlled by an external time-varying magnetic field and are able to perform various actions.
 Most importantly, they can rotate in place or use a technique called pivot walking to move either left or right.
 The magnets also act as glues and allow the cubes to perform self-assembly.
 Although it is theoretically possible to assemble 3-dimensional structures, most research was done by only connecting cubes in two dimensions.
-Since all cubes are the same size, the assembled shapes can be viewed as polyominoes.
-An enumeration was done on the amount of possible polyominoes, that can be created by cubes with different magnet configurations \cite{Lu2021}.
+Since all cubes are the same size, the assembled 2-dimensional shapes can be represented as polyominoes.
+An enumeration was done on the amount of possible polyominoes that can be created by cubes with different magnet configurations \cite{Lu2021}.
 
 By limiting the controls to only 90 degree turns and assuming a uniform pivot walking distance for all structures per step, magnetic modular cubes follow rules similar to the Tilt model.
 Following these limitations, a simple discrete motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Bhattacharjee2022}.
-One interesting paper from Blumenberg et al. \cite{blumenberg2023} explores the assembly of polyominoes in arbitrary environments, considering the tilt model.
+One interesting paper from Blumenberg et al. \cite{blumenberg2023} explores the assembly of polyominoes in arbitrary environments, when cubes obey the tilt model.
 He provides different algorithmic approaches using various distance heuristics and even a solution making use of RRTs.
 For that he follows the rules of Tilt in a discrete setting.
 
