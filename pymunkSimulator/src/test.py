@@ -169,13 +169,18 @@ def localPlanner():
     planer.executePlan(plan)
 
 def randomTwoPolyConnect():
+    #----------------------
+    seed = 8
+    size = 4
+    #----------------------
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
     samples = 1
+    generator.seed(seed)
     for i in range(samples):
-        p1 = randomPoly(3)
-        p2 = randomPoly(3)
+        p1 = randomPoly(size)
+        p2 = randomPoly(size)
         config = randomConfigWithPolys((800,800),[p1,p2])
         c1, c2, ed = randomPossibleConnection(p1, p2)
         t0 = time.time()
@@ -184,8 +189,8 @@ def randomTwoPolyConnect():
         dt = t1 -t0
         globalTime += dt
         plans[i] = plan
-        print(f"[{i}] {plan.state}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
-        print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
+        print(f"[{i}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
     fails = []
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
@@ -200,7 +205,7 @@ def randomTwoCubeConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 50
+    samples = 20
     generator.seed(12)
     for i in range(samples):
         config = randomConfigWithCubes((800,800), 2, 1)
@@ -213,8 +218,8 @@ def randomTwoCubeConnect():
         dt = t1 -t0
         globalTime += dt
         plans[i] = plan
-        print(f"[{i}] {plan.state}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
-        print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
+        print(f"[{i}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
     fails = []
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
@@ -227,4 +232,4 @@ def randomTwoCubeConnect():
 
 
 if __name__ == "__main__":
-    randomTwoCubeConnect()
+    randomTwoPolyConnect()

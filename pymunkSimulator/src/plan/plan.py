@@ -17,7 +17,7 @@ class PlanState(Enum):
 
 class Plan:
 
-    def __init__(self, initial: Configuration, goal: Configuration, actions, state: PlanState):
+    def __init__(self, initial: Configuration, goal: Configuration, actions, state: PlanState, info=None):
         self.initial = initial
         self.goal = goal
         if actions == None:
@@ -25,6 +25,10 @@ class Plan:
         else:
             self.actions = actions
         self.state = state
+        self.info = info
+
+    def __str__(self) -> str:
+        return f"{self.state}, {self.info}"
 
     def cost(self):
         cost = 0

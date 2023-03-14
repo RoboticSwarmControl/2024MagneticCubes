@@ -1,0 +1,12 @@
+seed 0, size 3:
+    straight align failed
+
+ seed 5, size 4:
+    stuck in corner example
+
+seed 6, size 4:
+    pivotwalk of the verticle-line overshoots and connects to wrong edge
+
+seed 8 size 4:
+    oscilating. similar angle not recognized,
+    because alternating between N-S and Straight align

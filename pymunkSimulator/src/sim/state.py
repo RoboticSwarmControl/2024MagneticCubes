@@ -18,6 +18,9 @@ class Direction(Enum):
     def __str__(self) -> str:
         return self.name
 
+    def __repr__(self) -> str:
+        return self.name
+
     def inv(self):
         """
         Returns the inverse direction.

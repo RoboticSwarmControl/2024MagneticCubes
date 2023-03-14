@@ -44,12 +44,11 @@ class PivotWalk(Motion):
         self.pivotAng = pivotAng
         
     def __str__(self):
-        str = "PivotWalk("
         if self.direction == PivotWalk.LEFT:
-            str += "LEFT"
+            dire = "LEFT"
         else:
-            str += "RIGHT"
-        return str + ")"     
+            dire = "RIGHT"
+        return f"PivotWalk({dire},{round(math.degrees(self.pivotAng), 2)}°)"    
 
     def stepSequence(self, stepTime, longestChain):
         steps = []
@@ -81,7 +80,7 @@ class Rotation(Motion):
         self.angle = angle
 
     def __str__(self):
-        return "Rotation(" + str(math.degrees(self.angle)) + "°)"
+        return f"Rotation({round(math.degrees(self.angle),2)}°)"
 
     def stepSequence(self, stepTime, longestChain):
         steps = []
