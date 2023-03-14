@@ -153,35 +153,31 @@ def randomPolyTest():
     print(polys)
 
 def localPlanner():
-    planer = LocalPlanner(drawing=True)
+    planer = LocalPlanner()
     c1 = Cube(1) #red
-    p1 = (485, 587)
+    p1 = (304, 528)
     c2 = Cube(0) #blue
-    p2 = (36, 34)
-    ed2 = Direction.WEST
-    ang = math.radians(150)
-    #config = Configuration((800,800),math.radians(90),0,{cubeA: (50,400),cubeB: (150,300)})
-    #connected to side failure case
+    p2 = (397, 487)
+    ed2 = Direction.NORTH
+    ang = math.radians(52)
     config = Configuration((800,800),ang, 0,{c1: p1, c2: p2})
     t0 = time.time()
     plan = planer.planCubeConnect(config,c1,c2,ed2)
     t1 = time.time()
     print(f"{plan.state}: {round(plan.cost(),2)}rad in {round(t1 - t0, 2)}s")
     print(f"{c1.type} at {config.getPosition(c1)} --{ed2}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(ang))}")
-
+    planer.executePlan(plan)
 
 def randomTwoPolyConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 5
+    samples = 1
     for i in range(samples):
         p1 = randomPoly(3)
         p2 = randomPoly(3)
         config = randomConfigWithPolys((800,800),[p1,p2])
-        c1 = p1.getCubes()[generator.randint(0, p1.size() - 1)]
-        c2 = p2.getCubes()[generator.randint(0, p2.size() - 1)]
-        ed = Direction(random.randint(0,3))
+        c1, c2, ed = randomPossibleConnection(p1, p2)
         t0 = time.time()
         plan = planer.planCubeConnect(config, c1, c2, ed)
         t1 = time.time()
@@ -204,12 +200,13 @@ def randomTwoCubeConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 20
+    samples = 50
+    generator.seed(12)
     for i in range(samples):
         config = randomConfigWithCubes((800,800), 2, 1)
         c1 = config.getCubes()[0]
         c2 = config.getCubes()[1]
-        ed = Direction(random.randint(0,3))
+        ed = Direction(generator.randint(0,3))
         t0 = time.time()
         plan = planer.planCubeConnect(config, c1, c2, ed)
         t1 = time.time()

@@ -145,6 +145,15 @@ class Polyomino:
         pos = self.__cube_pos[cube]
         # remove if polyomino doesnt break
         return
+    
+    def getOpenEdges(self, cube: Cube, onlyNS:bool=False):
+        edges = [Direction(i) for i, x in enumerate(self.getConnections(cube)) if x == None]
+        if onlyNS:
+            if Direction.WEST in edges:
+                edges.remove(Direction.WEST)
+            if Direction.EAST in edges:
+                edges.remove(Direction.EAST)
+        return edges
 
     def getConnections(self, cube: Cube):
         connects = []

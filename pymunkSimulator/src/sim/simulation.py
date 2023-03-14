@@ -100,7 +100,6 @@ class Simulation:
         Starts the simulation on a new thread. The new thread initializes pygame if drawing is activ. Returns when initialization is done.
         """
         if (self.started.isSet()):
-            print("Simulation already running.")
             return
         thread = Thread(target=self.__run__, daemon=False)
         thread.start()
@@ -119,8 +118,7 @@ class Simulation:
         Parameters:
             callable: this function gets called on a new thread this simulation gets passed as parameter
         """
-        if (self.started.isSet()):
-            print("Simulation already running.")
+        if (self.started.is_set()):
             return
         if not callable == None:
             controllThread = Thread(target=callable, args=[self], daemon=True)
@@ -134,8 +132,7 @@ class Simulation:
         """
         Stops the Simulation. Returns when simulation is stopped.
         """
-        if (self.stopped.isSet()):
-            print("Simulation is not running.")
+        if (self.stopped.is_set()):
             return
         self.started.clear()
         self.stopped.wait(1)
@@ -182,6 +179,12 @@ class Simulation:
         self.drawingActive = True
         if wasRunning:
             self.start()
+
+    def markCube(self, cube: Cube):
+        self.renderer.markCube(cube)
+
+    def clearMarking(self):
+        self.renderer.clearMarking()
 
     def __run__(self):
         # initialisation

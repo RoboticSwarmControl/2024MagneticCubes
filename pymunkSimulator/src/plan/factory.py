@@ -26,28 +26,22 @@ def randomPoly(ncubes, nred=None):
                 break
             cube = currCubes[generator.randint(0, len(currCubes) - 1)]
             # determin all possible open edges
-            connects = poly.getConnections(cube)
-            indices = [i for i, x in enumerate(connects) if x == None]
-            if newCube.type == cube.type:
-                if Direction.WEST.value in indices:
-                    indices.remove(Direction.WEST.value)
-                if Direction.EAST.value in indices:
-                    indices.remove(Direction.EAST.value)
+            edgesAvail = poly.getOpenEdges(cube, newCube.type == cube.type)
             # connect at an random available edge
             save = poly.clone()
             while True:
                 # if no edge is available try the next cube
-                if len(indices) == 0:
+                if len(edgesAvail) == 0:
                     currCubes.remove(cube)
                     break
                 # check if the connection would create a non valid polyomino
-                edge = Direction(generator.choice(indices))
+                edge = generator.choice(edgesAvail)
                 poly.connect(newCube, cube, edge)
                 if poly.isValid():
                     placed = True
                     break
                 else:
-                    indices.remove(edge.value)
+                    edgesAvail.remove(edge)
                     poly = save
     return poly
 
@@ -108,3 +102,15 @@ def randomCube(ncubes=None, nred=None):
         return Cube(Cube.TYPE_RED)
     else:
         return Cube(Cube.TYPE_BLUE)
+    
+
+def randomPossibleConnection(polyA: Polyomino, polyB: Polyomino):
+    while True:
+        cubeA = generator.choice(polyA.getCubes())
+        cubeB = generator.choice(polyB.getCubes())
+        edgesA = polyA.getOpenEdges(cubeA, cubeA.type == cubeB.type)
+        edgesB = polyB.getOpenEdges(cubeB, cubeA.type == cubeB.type)
+        possibleEdgesB = [edgeB for edgeB in edgesB if edgeB.inv() in edgesA]
+        if len(possibleEdgesB) > 0:
+            return cubeA, cubeB, generator.choice(possibleEdgesB)
+        

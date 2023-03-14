@@ -6,3 +6,14 @@
 # weird drawing
 [20] SUCCESS: 38.52rad in 0.24s
 1 at Vec2d(485, 587) --WEST-> 0 at Vec2d(36, 34). Ang=150
+
+# this might be the longer one
+[52] SUCCESS: 51.23rad in 0.94s
+0 at Vec2d(733, 284) --NORTH-> 1 at Vec2d(659, 487). Ang=99
+
+# longest comptime but low rotation cost
+[14] SUCCESS: 8.17rad in 0.58s
+1 at Vec2d(711, 426) --SOUTH-> 0 at Vec2d(621, 423). Ang=212
+
+[14] SUCCESS: 18.01rad in 0.65s
+1 at Vec2d(304, 528) --NORTH-> 0 at Vec2d(397, 487). Ang=52

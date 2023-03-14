@@ -1,5 +1,8 @@
 from enum import Enum
+from multiprocessing.pool import Pool
+from threading import Event
 import time
+from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED, ALL_COMPLETED
 
 from sim.motion import Idle, Rotation, PivotWalk
 from sim.simulation import Simulation
@@ -8,6 +11,7 @@ from plan.plan import *
 
 
 DEBUG = False
+
 
 class LocalPlanner:
 
@@ -19,89 +23,126 @@ class LocalPlanner:
     STEPS_NONCRT = 3
     STEPS_CRT = 2
 
-    def __init__(self, drawing=False):
-        self.__sim = Simulation(drawing, userControls=False)
-        self.__config = None
-
     def executePlan(self, plan: Plan):
-        self.__sim.enableDraw()
-        self.__loadConfig__(plan.initial)
-        self.__executeMotions__(plan.actions)
+        sim = Simulation(True, False)
+        sim.loadConfig(plan.initial)
+        sim.start()
+        for motion in plan.actions:
+            sim.executeMotion(motion)
+        sim.stop()
         time.sleep(1)
-        self.__sim.disableDraw()
+        sim.terminate()
 
-    def loadAndUpdate(self, config: Configuration) -> Configuration:
+    def singleUpdate(self, config: Configuration) -> Configuration:
         """
         Loads the config and lets it do a single update
         Can be useful for retrieving polyomino information.
         returns:
             the config after updating
         """
-        self.__loadConfig__(config)
-        return self.__executeMotions__([Idle(1)])
+        sim = Simulation(False, False)
+        sim.loadConfig(config)
+        sim.start()
+        sim.executeMotion(Idle(1))
+        return sim.terminate()
 
     def planCubeConnect(self, initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Plan:
-        # single update if no poly info available else just load
+        # single update if no poly info available
         if initial.polyominoes == None:
-            self.loadAndUpdate(initial)
-        else:
-            self.__loadConfig__(initial)
+            initial = self.singleUpdate(initial)
         # when already connected return successfull plan
-        if self.__isConnected__(cubeA, cubeB, edgeB):
-            return Plan(initial, self.__config, [], PlanState.SUCCESS)
+        if self.__isConnected__(initial, cubeA, cubeB, edgeB):
+            return Plan(initial, initial, [], PlanState.SUCCESS)
         # cant connect cubes sideways if they are same type
         if edgeB in (Direction.EAST, Direction.WEST) and cubeA.type == cubeB.type:
             return Plan(initial, None, None, PlanState.FAILURE_SAME_TYPE)
         # pre check if connecting the polys is even possible
-        if not self.__polyConnectPossible__(cubeA, cubeB, edgeB):
-            return Plan(initial, self.__config, [], PlanState.FAILURE_POLY_CON)
-        # first align of the cubes
-        alignRot = self.__alignEdges__(cubeA, cubeB, edgeB)
-        configAligned = self.__saveConfig__()
-        # creating plan for walking right and one for walking left
-        plans = {}
-        for direction in (PivotWalk.LEFT, PivotWalk.RIGHT):
-            state = PlanState.UNDEFINED
-            actions = list(alignRot)
-            itr = 0
-            while True:
-                # check if cubes are in critical distance for magnets to attract
-                distance = self.__config.getPosition(cubeA).get_distance(self.__config.getPosition(cubeB))
-                if distance < LocalPlanner.CRITICAL_DISTANCE:
-                    # if so let magnets do the rest
-                    wait = [Idle(10)]
-                    self.__executeMotions__(wait)
-                    actions.extend(wait)
-                    actions.append(Idle(1))
-                else:
-                    # if not walk into direction
-                    actions.extend(self.__walk__(cubeA, cubeB, direction))
-                # re aligne the cubes
-                actions.extend(self.__alignEdges__(cubeA, cubeB, edgeB))
-                # check if cubes are connected at edgeB
-                if self.__isConnected__(cubeA, cubeB, edgeB):
-                    state = PlanState.SUCCESS
-                    break
-                # check if you can connect the polys of A and B
-                if not self.__polyConnectPossible__(cubeA, cubeB, edgeB):
-                    state = PlanState.FAILURE_POLY_CON
-                    if DEBUG: print(f"Dir{direction}: polyConnect failure")
-                    break
-                # if we cant conect after a lot of iterations report failure
-                if itr >= LocalPlanner.MAX_ITR:
-                    state = PlanState.FAILURE_MAX_ITR
-                    if DEBUG: print(f"Dir{direction}: maxIteration failure")
-                    break
-                itr += 1
-            plans[direction] = Plan(initial, self.__config, actions, state)
-            self.__loadConfig__(configAligned)
-        # evaluate wich plan to return
-        return plans[PivotWalk.LEFT].compare(plans[PivotWalk.RIGHT])
-    
-    def __alignEdges__(self, cubeA: Cube, cubeB: Cube, edgeB: Direction):
-        magAng = self.__config.magAngle
-        posA = self.__config.getPosition(cubeA)
-        posB = self.__config.getPosition(cubeB)
+        if not self.__polyConnectPossible__(initial, cubeA, cubeB, edgeB):
+            return Plan(initial, None, None, PlanState.FAILURE_POLY_CON)
+        # Make plans for moving left, right and choose better one
+        left =  self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT)
+        right =  self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT)
+        return left.compare(right)
+        #----multi threading solution. 50% slower than just single thread.
+        # with ThreadPoolExecutor(2) as executor:
+        #    terminated = Event()
+        #    left = executor.submit(self.__alignWalkRealign__, initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, terminated)
+        #    right = executor.submit(self.__alignWalkRealign__, initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, terminated)
+        #    done, notDone = wait([left, right], return_when=FIRST_COMPLETED)
+        #    firstPlan = done.pop().result()
+        #    if firstPlan.state == PlanState.SUCCESS:
+        #        terminated.set()
+        #        executor.shutdown(wait=False)
+        #        return firstPlan
+        #    done, _ = wait(notDone, return_when=ALL_COMPLETED)
+        #    executor.shutdown(wait=False)
+        #    secondPlan = done.pop().result()
+        #    if secondPlan.state == PlanState.SUCCESS:
+        #        return secondPlan
+        #    return firstPlan
+        #----Use multi processing. I cant return a plan because "It iS nO ThReAd.LoCk ObJeCt"... wichser
+        # with Pool(2) as pool:
+        #     it = pool.imap_unordered(self.__alignWalkRealign__,[(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT),(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT)])
+        #     first = next(it)
+        #     if first.state == PlanState.SUCCESS:
+        #         pool.terminate()
+        #         return first
+        #     second = next(it)
+        #     pool.terminate()
+        #     if first.state == PlanState.SUCCESS:
+        #         return second
+        #     return first
+            
+
+    def __alignWalkRealign__(self, initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, direction, terminated: Event=None):
+        if terminated == None:
+            terminated = Event()
+        sim = Simulation(False, False)
+        sim.loadConfig(initial)
+        config = initial
+        state = PlanState.UNDEFINED
+        actions = []
+        itr = 0
+        while not terminated.is_set():
+            # aligne the cubes
+            rotation = self.__alignCubesByEdge__(config, cubeA, cubeB, edgeB)
+            self.__executeMotions__(sim, [rotation])
+            actions.extend([rotation, Idle(1)])
+            config = sim.saveConfig()
+            # check if cubes are in critical distance for magnets to attract
+            distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
+            if distance < LocalPlanner.CRITICAL_DISTANCE:
+                # if so let magnets do the rest
+                wait = Idle(10)
+                self.__executeMotions__(sim, [wait])
+                actions.append(wait)
+            else:
+                # if not walk into direction
+                pWalks = self.__walkDirectionDynamic__(config, cubeA, cubeB, direction)
+                self.__executeMotions__(sim, pWalks)
+                pWalks.append(Idle(1))
+                actions.extend(pWalks)
+            config = sim.saveConfig()
+            # check if cubes are connected at edgeB
+            if self.__isConnected__(config, cubeA, cubeB, edgeB):
+                state = PlanState.SUCCESS
+                break
+            # check if you can connect the polys of A and B
+            if not self.__polyConnectPossible__(config, cubeA, cubeB, edgeB):
+                state = PlanState.FAILURE_POLY_CON
+                break
+            # if we cant conect after a lot of iterations report failure
+            if itr >= LocalPlanner.MAX_ITR:
+                state = PlanState.FAILURE_MAX_ITR
+                break
+            itr += 1
+        sim.terminate()
+        return Plan(initial, config, actions, state)
+
+    def __alignCubesByEdge__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction):
+        magAng = config.magAngle
+        posA = config.getPosition(cubeA)
+        posB = config.getPosition(cubeB)
         vecBA = posA - posB
         vecEdgeB = edgeB.vec(magAng)
         distance = posA.get_distance(posB)
@@ -112,7 +153,7 @@ class LocalPlanner:
         else:
             # For Top bottom connection move vecDes one cube length perpendicular to vecAB
             vecPer = (2.5 * Cube.RAD) * vecBA.perpendicular_normal()
-            dotPerEdgeB = round(vecPer.dot(vecEdgeB),3)
+            dotPerEdgeB = round(vecPer.dot(vecEdgeB), 3)
             if dotPerEdgeB <= 0:
                 vecDes = vecBA + vecPer
             else:
@@ -126,15 +167,11 @@ class LocalPlanner:
                 vecSrc = vecW
         # Calculate the rotation and execute it
         rotAng = vecSrc.get_angle_between(vecDes)
-        rotation = [Rotation(rotAng)]
-        self.__executeMotions__(rotation)
-        rotation.append(Idle(1))
-        if DEBUG: print(f"Edges Aligned by turning {round(math.degrees(rotAng), 3)}°")
-        return rotation
-    
-    def __walk__(self, cubeA: Cube, cubeB: Cube, direction):
-        posA = self.__config.getPosition(cubeA)
-        posB = self.__config.getPosition(cubeB)
+        return Rotation(rotAng)
+
+    def __walkDirectionDynamic__(self, config: Configuration, cubeA: Cube, cubeB: Cube, direction) -> list:
+        posA = config.getPosition(cubeA)
+        posB = config.getPosition(cubeB)
         distance = posA.get_distance(posB)
         if distance < LocalPlanner.SLOWWALK_DISTANCE:
             pivotAng = LocalPlanner.ANG_CRT
@@ -142,20 +179,16 @@ class LocalPlanner:
         else:
             pivotAng = LocalPlanner.ANG_NONCRT
             steps = LocalPlanner.STEPS_NONCRT
-        pWalks = [PivotWalk(direction, pivotAng)] * steps
-        self.__executeMotions__(pWalks)
-        pWalks.append(Idle(1))
-        if DEBUG: print(f"Walking {steps} steps with pivAng {round(math.degrees(pivotAng), 3)}")
-        return pWalks
+        return [PivotWalk(direction, pivotAng)] * steps
 
-    def __isConnected__(self, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
-        polyB = self.__config.polyominoes.getPoly(cubeB)
+    def __isConnected__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
+        polyB = config.polyominoes.getPoly(cubeB)
         return polyB.getConnection(cubeB, edgeB) == cubeA
 
-    def __polyConnectPossible__(self, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
+    def __polyConnectPossible__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
         # cubes are inside the same polyomino
-        polyA = self.__config.polyominoes.getPoly(cubeA)
-        polyB = self.__config.polyominoes.getPoly(cubeB)
+        polyA = config.polyominoes.getPoly(cubeA)
+        polyB = config.polyominoes.getPoly(cubeB)
         if polyA.id == polyB.id:
             return False
         # poly resulting from connection would overlap
@@ -164,20 +197,8 @@ class LocalPlanner:
             return False
         return True
 
-    def __executeMotions__(self, motions)-> Configuration:
-        self.__sim.start()
+    def __executeMotions__(self, sim: Simulation, motions):
+        sim.start()
         for motion in motions:
-            self.__sim.executeMotion(motion)
-        self.__sim.stop()
-        return self.__saveConfig__()
-
-    def __loadConfig__(self, config: Configuration):
-        self.__sim.loadConfig(config)
-        self.__config = config
-
-    def __saveConfig__(self) -> Configuration:
-        save = self.__sim.saveConfig()
-        self.__config = save
-        return save
-
-
+            sim.executeMotion(motion)
+        sim.stop()

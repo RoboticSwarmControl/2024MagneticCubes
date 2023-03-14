@@ -328,6 +328,7 @@ class Renderer:
     LIGHTBLUE = (150, 150, 250, 100)
     LIGHTBROWN = (201, 165, 129, 100)
     PURPLE = (151, 0, 196, 100)
+    YELLOW = (252, 214, 88, 100)
 
     def __init__(self, stateHandler: StateHandler, fps=128):
         self.stateHandler = stateHandler
@@ -336,6 +337,7 @@ class Renderer:
         self.clock = None
         self.drawOpt = None
         self.initialized = False
+        self.marked = set()
 
     def pygameInit(self):
         if self.initialized:
@@ -357,6 +359,12 @@ class Renderer:
         self.drawOpt = None
         self.initialized = False
 
+    def markCube(self, cube: Cube):
+        self.marked.add(cube)
+
+    def clearMarking(self):
+        self.marked.clear()
+
     def render(self, fps):
         if not self.initialized:
             return
@@ -375,7 +383,11 @@ class Renderer:
             else:
                 cubeColor = Renderer.LIGHTBLUE
             pygame.draw.polygon(self.window, cubeColor, verts)
-            pygame.draw.lines(self.window, Renderer.DARKGREY, True, verts, 2)
+            if cube in self.marked:
+                outlineColor = Renderer.YELLOW
+            else:
+                outlineColor = Renderer.DARKGREY
+            pygame.draw.lines(self.window, outlineColor, True, verts, 2)
             if shape in self.stateHandler.frictionpoints:
                 pygame.draw.circle(self.window, Renderer.BLACK,
                                    self.stateHandler.frictionpoints[shape], 6)
