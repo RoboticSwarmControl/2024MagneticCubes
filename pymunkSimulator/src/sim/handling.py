@@ -9,6 +9,7 @@ import pymunk.pygame_util
 import pymunk
 import math
 from threading import Lock
+from sim.motion import Tilt
 
 from sim.state import *
 
@@ -20,13 +21,13 @@ class StateHandler:
     CONNECTION_FORCE_MIN = Cube.magForce1on2(
         (0, 0), (0, CONNECTION_DISTANCE), (0, 1), (0, 1)).length # NS connection
     NOMINAL_FRICTION = 0.2
-    FRICTION_DAMPING = 0.95
+    FRICTION_DAMPING = 0.9
     ANG_VEL_DAMP = 0.95
 
     SENSOR_CTYPE = 1
     BOUNDARIE_RAD = 8
     DEFAULT_BOARDSIZE = (800,800)
-    DEFAULT_CONFIG = Configuration(DEFAULT_BOARDSIZE, math.radians(90), 0, {})
+    DEFAULT_CONFIG = Configuration(DEFAULT_BOARDSIZE, math.radians(90), {})
 
     def __init__(self):
         self.space = pymunk.Space()
@@ -50,7 +51,7 @@ class StateHandler:
         self.sensor_cube = {}
 
         self.magAngle = 0
-        self.magElevation = 0
+        self.magElevation = Tilt.HORIZONTAL
 
         self.magConnect = {}
         self.magConnect_pre = {}
@@ -86,11 +87,11 @@ class StateHandler:
         for cube, shapes in self.cube_shapes.items():
             cube_pos[cube] = shapes[0].body.position
             cube_meta[cube] = (shapes[0].body.angle, shapes[0].body.velocity)
-        config = Configuration(self.boardSize, self.magAngle, self.magElevation, cube_pos, cube_meta, self.polyominoes.getAll())
+        config = Configuration(self.boardSize, self.magAngle, cube_pos, cube_meta, self.polyominoes.getAll(), self.magElevation)
         self.updateLock.release()
         return config
 
-    def update(self, angChange, elevChange, dt):
+    def update(self, angChange, elevation, dt):
         """
         Updates the configuration by adding angChange and elevChange to the current magnetic field orientation.
         Also loads a new configuration if loadConfig got called.
@@ -107,7 +108,8 @@ class StateHandler:
         self.space.step(dt)
         # apply the change
         self.magAngle += angChange
-        self.magElevation += elevChange
+        if elevation != 0:
+            self.magElevation = elevation
         # detect polyominos based on the magnetic connections
         if not self.magConnect == self.magConnect_pre:
             self.polyominoes.detectPolyominoes(self.magConnect)
@@ -175,7 +177,7 @@ class StateHandler:
         shape = self.getCubeShape(cube)
         # calculate friction force without velocity yet
         force = -1 * StateHandler.FRICTION_DAMPING * shape.mass
-        if self.magElevation == 0:
+        if self.magElevation == Tilt.HORIZONTAL:
             # Apply full friction to cube, at COG
             force *= shape.body.velocity
             shape.body.apply_force_at_world_point(force, shape.body.position)
@@ -183,10 +185,10 @@ class StateHandler:
             self.frictionpoints[shape] = shape.body.position
         else:
             # define the cubes in poly the have the most friction and the frictionpoint
-            if self.magElevation < 0:
+            if self.magElevation == Tilt.NORTH_DOWN:
                 frictionCubes = set(poly.getTopRow())
                 fricPoint = shape.body.local_to_world((-Cube.MRAD, 0))
-            elif self.magElevation > 0:
+            elif self.magElevation == Tilt.SOUTH_DOWN:
                 frictionCubes = set(poly.getBottomRow())
                 fricPoint = shape.body.local_to_world((Cube.MRAD, 0))
             # apply partial friction to cube at the frictionpoint

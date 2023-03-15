@@ -52,7 +52,7 @@ def nearestWall():
     pos1 = (410,100)
     cube2 = Cube(1)
     pos2 = (50, 400)
-    config = Configuration(0, 0, {cube1: pos1, cube2: pos2})
+    config = Configuration(size, 0, {cube1: pos1, cube2: pos2})
     nwallCube1 = config.nearestWall(cube1, size)
     nwallCube2 = config.nearestWall(cube2, size)
     print(str(cube1) + ": " + str(nwallCube1))
@@ -72,7 +72,7 @@ def randomConfigTest():
 def forceSideConect():
     sim = Simulation(500,500)
     sim.start()
-    sim.loadConfig(Configuration(0,0,{Cube(1): (20,20), Cube(1): (20,60)}))
+    sim.loadConfig(Configuration((500,500), 0,{Cube(1): (20,20), Cube(1): (20,60)}))
     print("Connects: \n" + str(sim.stateHandler.magConnect))
     print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
     time.sleep(0.25)
@@ -136,12 +136,12 @@ def simControlTest():
     sim = Simulation()
     sim.start()
     time.sleep(1)
-    sim.loadConfig(Configuration((800,800), 0, 0, {Cube(0): (100,100)}))
+    sim.loadConfig(Configuration((800,800), 0, {Cube(0): (100,100)}))
     time.sleep(1)
-    sim.loadConfig(Configuration((1000,400), 0, 0, {Cube(0): (500,100)}))
+    sim.loadConfig(Configuration((1000,400), 0, {Cube(0): (500,100)}))
     time.sleep(1)
     sim.disableDraw()
-    sim.loadConfig(Configuration((400,400), 0, 0, {Cube(0): (200,200)}))
+    sim.loadConfig(Configuration((400,400), 0, {Cube(0): (200,200)}))
     sim.enableDraw()
 
 def randomPolyTest():
@@ -160,7 +160,7 @@ def localPlanner():
     p2 = (397, 487)
     ed2 = Direction.NORTH
     ang = math.radians(52)
-    config = Configuration((800,800),ang, 0,{c1: p1, c2: p2})
+    config = Configuration((800,800),ang,{c1: p1, c2: p2})
     t0 = time.time()
     plan = planer.planCubeConnect(config,c1,c2,ed2)
     t1 = time.time()
@@ -232,4 +232,4 @@ def randomTwoCubeConnect():
 
 
 if __name__ == "__main__":
-    randomTwoPolyConnect()
+    randomTwoCubeConnect()

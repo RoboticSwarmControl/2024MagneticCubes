@@ -8,7 +8,7 @@ from enum import Enum
 from queue import Queue
 from pymunk import Vec2d
 
-from sim.motion import PivotWalk
+from sim.motion import PivotWalk, Tilt
 
 
 class Direction(Enum):
@@ -306,8 +306,9 @@ class PolyCollection:
     def __init__(self, polys=None):
         self.__nonTrivial = []
         self.__trivial = []
-        self.maxPolyWidth = 0
-        self.maxPolyHeight = 0
+        self.maxWidth = 0
+        self.maxHeight = 0
+        self.maxSize = 0
         self.__poly_count = {}
         self.__cube_poly  = {}
         if polys == None:
@@ -360,9 +361,10 @@ class PolyCollection:
             self.__trivial.append(poly)
         else:
             self.__nonTrivial.append(poly)
-        size = poly.bounds()
-        self.maxPolyWidth = max(self.maxPolyWidth, size[0]) 
-        self.maxPolyHeight = max(self.maxPolyHeight, size[1])
+        bounds = poly.bounds()
+        self.maxWidth = max(self.maxWidth, bounds[0]) 
+        self.maxHeight = max(self.maxHeight, bounds[1])
+        self.maxSize = max(self.maxSize, poly.size())
         if poly in self.__poly_count:
             self.__poly_count[poly] += 1
         else:
@@ -373,8 +375,9 @@ class PolyCollection:
     def __clear__(self):
         self.__nonTrivial.clear()
         self.__trivial.clear()
-        self.maxPolyWidth = 0
-        self.maxPolyHeight = 0
+        self.maxWidth = 0
+        self.maxHeight = 0
+        self.maxSize = 0
         self.__poly_count.clear()
         self.__cube_poly.clear()
 
@@ -388,7 +391,7 @@ class PolyCollection:
     
     def __str__(self) -> str: 
         line = ""
-        for i in range(self.maxPolyWidth):
+        for i in range(self.maxWidth):
             line += "-"
         line += "\n"
         string = line
@@ -413,7 +416,7 @@ class Configuration:
     if it was loaded and updated by a simulation
     """
 
-    def __init__(self, boardSize, magAng, magElev, cube_pos:dict, cube_meta:dict=None, polys:list=None):
+    def __init__(self, boardSize, magAng, cube_pos:dict, cube_meta:dict=None, polys:list=None,  magElev=Tilt.HORIZONTAL):
         self.magAngle = magAng  # orientation of magnetic field (in radians)
         self.magElevation = magElev
         self.boardSize = boardSize

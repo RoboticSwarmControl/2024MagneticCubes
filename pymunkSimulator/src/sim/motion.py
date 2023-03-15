@@ -11,9 +11,9 @@ from threading import Event
 
 class Step:
 
-    def __init__(self, angChange=0, elevChange=0):
+    def __init__(self, angChange=0, elevation=0):
         self.angChange = angChange
-        self.elevChange = elevChange
+        self.elevation = elevation
 
 class Motion:
     """
@@ -23,7 +23,7 @@ class Motion:
     def __init__(self):
         self.executed = Event()
 
-    def stepSquence(self, stepTime, longestChain):
+    def stepSequence(self, stepTime, longestChain):
         return [Step()]
     
     def cost(self):
@@ -55,13 +55,13 @@ class PivotWalk(Motion):
         pivotRotationSeq = Rotation(self.direction * self.pivotAng).stepSequence(stepTime, longestChain)
         pivotRotationSeqInv = Rotation(-2 * self.direction * self.pivotAng).stepSequence(stepTime, longestChain)
         #Assamble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
-        steps.append(Step(0, 1))
+        steps.append(Step(0, Tilt.SOUTH_DOWN))
         steps.extend(pivotRotationSeq)
-        steps.append(Step(0, -2))
+        steps.append(Step(0, Tilt.NORTH_DOWN))
         steps.extend(pivotRotationSeqInv)
-        steps.append(Step(0, 2))
+        steps.append(Step(0, Tilt.SOUTH_DOWN))
         steps.extend(pivotRotationSeq)
-        steps.append(Step(0, -1))
+        steps.append(Step(0, Tilt.HORIZONTAL))
         return steps
     
     def cost(self):
@@ -98,7 +98,33 @@ class Rotation(Motion):
     
     def cost(self):
         return abs(self.angle)
+
+class Tilt(Motion):
+
+    HORIZONTAL = 1
+    NORTH_DOWN = 2
+    SOUTH_DOWN = 3
+
+    def __init__(self, tilt):
+        super().__init__()
+        self.tilt = tilt
+
+    def __str__(self):
+        if self.tilt == Tilt.HORIZONTAL:
+            str = "HORIZONTAL"
+        elif self.tilt == Tilt.NORTH_DOWN:
+            str = "NORTH_DOWN"
+        elif self.tilt == Tilt.SOUTH_DOWN:
+            str = "SOUTH_DOWN"
+        return f"Tilt({str})"
+
+    def stepSequence(self, stepTime, longestChain):
+        return [Step(0, self.tilt)]
     
+    def cost(self):
+        return 0
+
+
 class Idle(Motion):
     """
     Idle motion meaning a certain amount of zero updates

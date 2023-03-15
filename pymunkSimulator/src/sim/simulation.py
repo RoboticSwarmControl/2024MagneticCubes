@@ -192,7 +192,7 @@ class Simulation:
                 self.__userInputs__()
             step = self.__nextStep__()
             self.stateHandler.update(
-                step.angChange, step.elevChange, Simulation.STEP_TIME)
+                step.angChange, step.elevation, Simulation.STEP_TIME)
             if self.drawingActive and (update % self.updatePerFrame == 0 or not self.started.is_set()):
                 self.renderer.render(self.fps)
             update += 1
@@ -214,10 +214,9 @@ class Simulation:
                 self.currentMotion = None
                 return Step()
             self.currentMotion = self.motionsToExecute.get()
-            longestChain = max(self.stateHandler.polyominoes.maxPolyWidth,
-                               self.stateHandler.polyominoes.maxPolyHeight)
-            steps = self.currentMotion.stepSequence(
-                Simulation.STEP_TIME, longestChain)
+            longestChain = self.stateHandler.polyominoes.maxSize
+            #longestChain = max(self.stateHandler.polyominoes.maxWidth, self.stateHandler.polyominoes.maxHeight)
+            steps = self.currentMotion.stepSequence(Simulation.STEP_TIME, longestChain)
             for i in steps:
                 self.motionSteps.put(i)
         return self.motionSteps.get()
@@ -234,6 +233,11 @@ class Simulation:
         elif self.fps > 2:
             self.fps /= 2
 
+    def __clearSpace__(self):
+        self.renderer.linesToDraw.clear()
+        self.renderer.pointsToDraw.clear()
+        self.stateHandler.loadConfig(StateHandler.DEFAULT_CONFIG)
+
     def __userInputs__(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -249,23 +253,16 @@ class Simulation:
                     self.executeMotion_nowait(PivotWalk(PivotWalk.LEFT))
                 elif event.key == 100 and self.userControls:  # 'd' rotate cw
                     self.executeMotion_nowait(Rotation(math.radians(10)))
+                elif event.key == 116 and self.userControls:  # 't' change elevation
+                    self.executeMotion_nowait(Tilt((self.stateHandler.magElevation % 3) + 1))
+                elif event.key == 99 and self.userControls:  # 'c' clear space
+                    self.__clearSpace__()
                 elif event.key == 121:  # 'y' decrease speed
                     self.__slowDown__()
                 elif event.key == 120:  # 'x' increase speed
                     self.__speedUp__()
-                elif event.key == 99 and self.userControls:  # 'c' clear space
-                    self.renderer.linesToDraw.clear()
-                    self.renderer.pointsToDraw.clear()
-                    self.stateHandler.loadConfig(StateHandler.DEFAULT_CONFIG)
                 elif event.key == 105:  # 'i' info
-                    config = self.stateHandler.saveConfig()
-                    self.renderer.pointsToDraw.clear()
-                    for poly in config.getPolyominoes().getAll():
-                        start = config.getCOM(poly)
-                        self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
-                        end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
-                        self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))
-                    pass
+                    self.__info__()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
                 if event.button == 1 and self.userControls:  # 'left click' places cube TYPE_RED
@@ -276,3 +273,14 @@ class Simulation:
                     config = self.stateHandler.saveConfig()
                     config.addCube(Cube(Cube.TYPE_BLUE), mouse_pos)
                     self.stateHandler.loadConfig(config)
+    
+    def __info__(self):
+        config = self.stateHandler.saveConfig()
+        #self.renderer.pointsToDraw.clear()
+        for poly in config.getPolyominoes().getAll():
+            self.renderer.pointsToDraw.append((Renderer.BLUE, config.getPivotS(poly),4))
+            self.renderer.pointsToDraw.append((Renderer.RED, config.getPivotN(poly),4))
+            # start = config.getCOM(poly)
+            # self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
+            # end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
+            # self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))

@@ -1,6 +1,7 @@
 
 import math
 import random
+from sim.motion import Tilt
 from sim.state import *
 
 generator = random.Random()
@@ -48,7 +49,7 @@ def randomPoly(ncubes, nred=None):
 
 def randomConfigWithCubes(size, ncubes, nred=None) -> Configuration:
     ang = generator.random() * 2 * math.pi
-    config = Configuration(size, ang, 0, {})
+    config = Configuration(size, ang, {})
     for _ in range(ncubes):
         # create random cube
         newCube = randomCube(ncubes, nred)
@@ -67,7 +68,7 @@ def randomConfigWithCubes(size, ncubes, nred=None) -> Configuration:
 
 def randomConfigWithPolys(size, polyominoes: list):
     ang = generator.random() * 2 * math.pi
-    config = Configuration(size, ang, 0, {})
+    config = Configuration(size, ang, {})
     vecNorth = Direction.NORTH.vec(ang)
     vecEast = Direction.EAST.vec(ang)
     for poly in polyominoes:
