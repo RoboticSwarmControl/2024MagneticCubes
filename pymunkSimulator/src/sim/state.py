@@ -8,6 +8,8 @@ from enum import Enum
 from queue import Queue
 from pymunk import Vec2d
 
+from sim.motion import PivotWalk
+
 
 class Direction(Enum):
     NORTH = 0
@@ -350,11 +352,8 @@ class PolyCollection:
     def getNonTrivial(self):
         return list(self.__nonTrivial)
 
-    def clone(self):
-        clone = PolyCollection()
-        for poly in self.getAll():
-            clone.__add__(poly.clone())
-        return clone
+    def isEmpty(self) -> bool:
+        return len(self.__poly_count) == 0
 
     def __add__(self, poly: Polyomino):
         if poly.isTrivial():
@@ -410,19 +409,14 @@ class Configuration:
     Can be used to store configuration data or can be loaded into a Simulation
     where it will be updated according to changes in the magnetic field.
 
-    It also stores additional information about the polyominoes present 
+    It also stores additional information about the polyominoes present
     if it was loaded and updated by a simulation
     """
 
-    def __init__(self, boardSize, magAng, magElev, cube_pos, polyominoes: PolyCollection = None, cube_meta=None):
-        """
-        creates configuration
-
-        Parameters:
-            ang: orientation of magnetile field (in radians)
-            elev: elevation of magnetic field
-            cube_pos: dictionary with key=cube value=postion (x,y)
-        """
+    def __init__(self, boardSize, magAng, magElev, cube_pos:dict, cube_meta:dict=None, polys:list=None):
+        self.magAngle = magAng  # orientation of magnetic field (in radians)
+        self.magElevation = magElev
+        self.boardSize = boardSize
         self.__cube_data = {}
         for cube, pos in cube_pos.items():
             if cube_meta == None:
@@ -430,10 +424,14 @@ class Configuration:
             else:
                 meta = cube_meta[cube]
             self.__cube_data[cube] = (pos, meta[0], meta[1])
-        self.magAngle = magAng  # orientation of magnetic field (in radians)
-        self.magElevation = magElev
-        self.boardSize = boardSize
-        self.polyominoes = polyominoes
+        self.__poly_meta = {}
+        if polys != None:
+            for poly in polys:
+                com = self.__calcCOM__(poly)
+                pn = self.__calcPivotN__(poly)
+                ps = self.__calcPivotS__(poly)
+                self.__poly_meta[poly.id] = (com, pn, ps)
+        self.__polyominoes = PolyCollection(polys)
 
     def getCubes(self):
         return list(self.__cube_data.keys())
@@ -448,6 +446,34 @@ class Configuration:
     def getVelocity(self, cube: Cube) -> Vec2d:
         vel = self.__cube_data[cube][2]
         return Vec2d(vel[0], vel[1])
+
+    def getPolyominoes(self) -> PolyCollection:
+        return self.__polyominoes
+
+    def getCOM(self, poly: Polyomino) -> Vec2d:
+        return self.__poly_meta[poly.id][0]
+
+    def getPivotN(self, poly: Polyomino) -> Vec2d:
+        return self.__poly_meta[poly.id][1]
+    
+    def getPivotS(self, poly: Polyomino) -> Vec2d:
+        return self.__poly_meta[poly.id][2]
+
+    def getPivotWalkingDistance(self, poly: Polyomino, pivotAng):
+        axis = self.getPivotN(poly) - self.getPivotS(poly)
+        return 2 * math.sin(pivotAng) * axis.length
+
+    def getPivotWalkingVec(self, poly: Polyomino, pivotAng, direction) -> Vec2d:
+        axis = self.getPivotN(poly) - self.getPivotS(poly)
+        distWalk = 2 * math.sin(pivotAng) * axis.length
+        vecWalk = axis.perpendicular().scale_to_length(distWalk)
+        if direction == PivotWalk.LEFT:
+            vecDir = Direction.WEST.vec(self.magAngle)
+        else:
+            vecDir = Direction.EAST.vec(self.magAngle)
+        if vecWalk.dot(vecDir) < 0:
+            vecWalk *= -1
+        return vecWalk
 
     def nearestWall(self, cube) -> Direction:
         if not cube in self.__cube_data:
@@ -466,10 +492,28 @@ class Configuration:
                 return True
         return False
 
-    def addCube(self, cube, pos, ang=None, vel=(0,0)):
-        if ang == None:
-            ang = self.magAngle
-        self.__cube_data[cube] = (pos, ang, vel)
+    def __calcCOM__(self, poly: Polyomino) -> Vec2d:
+        com = Vec2d(0,0)
+        for cube in poly.getCubes():
+            com += self.getPosition(cube)
+        com /= poly.size()
+        return com
+        
+    def __calcPivotN__(self, poly: Polyomino) -> Vec2d:
+        pn = Vec2d(0,0)
+        topRow = poly.getTopRow()
+        for cube in topRow:
+            pn += (self.getPosition(cube) + Cube.RAD * Direction.NORTH.vec(self.getAngle(cube)))
+        pn /= len(topRow)
+        return pn
+
+    def __calcPivotS__(self, poly: Polyomino) -> Vec2d:
+        ps = Vec2d(0,0)
+        bottomRow = poly.getBottomRow()
+        for cube in bottomRow:
+            ps += (self.getPosition(cube) + Cube.RAD * Direction.SOUTH.vec(self.getAngle(cube)))
+        ps /= len(bottomRow)
+        return ps
 
     def __eq__(self, __o: object) -> bool:
         return hash(self) == hash(__o)
@@ -479,3 +523,8 @@ class Configuration:
         toHash.sort()
         toHash.append(self.magAngle)
         return hash(tuple(toHash))
+    
+    def addCube(self, cube, pos, ang=None, vel=(0,0)):
+        if ang == None:
+            ang = self.magAngle
+        self.__cube_data[cube] = (pos, ang, vel)

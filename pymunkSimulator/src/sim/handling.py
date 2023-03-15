@@ -20,7 +20,7 @@ class StateHandler:
     CONNECTION_FORCE_MIN = Cube.magForce1on2(
         (0, 0), (0, CONNECTION_DISTANCE), (0, 1), (0, 1)).length # NS connection
     NOMINAL_FRICTION = 0.2
-    FRICTION_DAMPING = 0.9
+    FRICTION_DAMPING = 0.95
     ANG_VEL_DAMP = 0.95
 
     SENSOR_CTYPE = 1
@@ -86,7 +86,7 @@ class StateHandler:
         for cube, shapes in self.cube_shapes.items():
             cube_pos[cube] = shapes[0].body.position
             cube_meta[cube] = (shapes[0].body.angle, shapes[0].body.velocity)
-        config = Configuration(self.boardSize, self.magAngle, self.magElevation, cube_pos, self.polyominoes.clone(), cube_meta)
+        config = Configuration(self.boardSize, self.magAngle, self.magElevation, cube_pos, cube_meta, self.polyominoes.getAll())
         self.updateLock.release()
         return config
 
@@ -331,90 +331,94 @@ class Renderer:
     YELLOW = (252, 214, 88, 100)
 
     def __init__(self, stateHandler: StateHandler, fps=128):
-        self.stateHandler = stateHandler
-        self.fps = fps
-        self.window = None
-        self.clock = None
-        self.drawOpt = None
+        self.__stateHandler = stateHandler
+        self.__window = None
+        self.__clock = None
+        self.__drawOpt = None
         self.initialized = False
-        self.marked = set()
+        self.markedCubes = set()
+        self.pointsToDraw = []
+        self.linesToDraw = []
 
     def pygameInit(self):
         if self.initialized:
             return
         pygame.init()
-        self.window = pygame.display.set_mode(self.stateHandler.boardSize)
+        self.__window = pygame.display.set_mode(self.__stateHandler.boardSize)
         pygame.display.set_caption("Magnetic Cube Simulator")
-        self.drawOpt = pymunk.pygame_util.DrawOptions(self.window)
-        self.drawOpt.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS
-        self.clock = pygame.time.Clock()
+        self.__drawOpt = pymunk.pygame_util.DrawOptions(self.__window)
+        self.__drawOpt.flags = pymunk.SpaceDebugDrawOptions.DRAW_CONSTRAINTS
+        self.__clock = pygame.time.Clock()
         self.initialized = True
 
     def pygameQuit(self):
         if not self.initialized:
             return
         pygame.quit()
-        self.window = None
-        self.clock = None
-        self.drawOpt = None
+        self.__window = None
+        self.__clock = None
+        self.__drawOpt = None
         self.initialized = False
-
-    def markCube(self, cube: Cube):
-        self.marked.add(cube)
-
-    def clearMarking(self):
-        self.marked.clear()
 
     def render(self, fps):
         if not self.initialized:
             return
-        self.window.fill(Renderer.WHITE)
+        self.__window.fill(Renderer.WHITE)
         # draw the walls
-        for shape in self.stateHandler.getBoundaries():
-            pygame.draw.line(self.window, Renderer.DARKGREY, shape.body.local_to_world(
+        for shape in self.__stateHandler.getBoundaries():
+            pygame.draw.line(self.__window, Renderer.DARKGREY, shape.body.local_to_world(
                 shape.a), shape.body.local_to_world(shape.b), StateHandler.BOUNDARIE_RAD)
         # draw the cubes with magnets and frictionpoints
-        for cube in self.stateHandler.getCubes():
-            shape = self.stateHandler.getCubeShape(cube)
+        for cube in self.__stateHandler.getCubes():
+            shape = self.__stateHandler.getCubeShape(cube)
             verts = [shape.body.local_to_world(lv)
                      for lv in shape.get_vertices()]
+            # draw cube rect
             if cube.type == Cube.TYPE_RED:
                 cubeColor = Renderer.LIGHTRED
             else:
                 cubeColor = Renderer.LIGHTBLUE
-            pygame.draw.polygon(self.window, cubeColor, verts)
-            if cube in self.marked:
+            pygame.draw.polygon(self.__window, cubeColor, verts)
+            # draw cube outline
+            if cube in self.markedCubes:
                 outlineColor = Renderer.YELLOW
             else:
                 outlineColor = Renderer.DARKGREY
-            pygame.draw.lines(self.window, outlineColor, True, verts, 2)
-            if shape in self.stateHandler.frictionpoints:
-                pygame.draw.circle(self.window, Renderer.BLACK,
-                                   self.stateHandler.frictionpoints[shape], 6)
+            pygame.draw.lines(self.__window, outlineColor, True, verts, 2)
+            # draw the magnets
             for i, magP in enumerate(cube.magnetPos):
                 if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
                     magcolor = Renderer.BLUE
                 else:
                     magcolor = Renderer.RED
                 pygame.draw.circle(
-                    self.window, magcolor, shape.body.local_to_world(magP), 4)
-        # draw the connections
-        for i, poly in enumerate(self.stateHandler.polyominoes.getAll()):
+                    self.__window, magcolor, shape.body.local_to_world(magP), 4)
+            # draw frictino points
+            if shape in self.__stateHandler.frictionpoints:
+                pygame.draw.circle(self.__window, Renderer.PURPLE,
+                                   self.__stateHandler.frictionpoints[shape], 3)
+        # polyomino drawing
+        for i, poly in enumerate(self.__stateHandler.polyominoes.getAll()):
             for cube in poly.getCubes():
                 connects = poly.getConnections(cube)
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue
-                    pygame.draw.line(self.window, Renderer.PURPLE, self.stateHandler.getCubeShape(cube).body.local_to_world(
-                        (0, 0)), self.stateHandler.getCubeShape(cubeCon).body.local_to_world((0, 0)), 4)
+                    pygame.draw.line(self.__window, Renderer.PURPLE, self.__stateHandler.getCubeShape(cube).body.local_to_world(
+                        (0, 0)), self.__stateHandler.getCubeShape(cubeCon).body.local_to_world((0, 0)), 4)
+        # draw user points and lines
+        for point in self.pointsToDraw:
+            pygame.draw.circle(self.__window, point[0], point[1], point[2])
+        for line in self.linesToDraw:
+            pygame.draw.line(self.__window, line[0], line[1], line[2], line[3])
         # draw the compass
         comPos = pymunk.Vec2d(12,12)
-        pygame.draw.circle(self.window, Renderer.LIGHTGRAY,  comPos, 12)
-        pygame.draw.circle(self.window, Renderer.LIGHTBROWN,  comPos, 10)
-        pygame.draw.line(self.window, Renderer.BLUE, comPos, comPos + 12 * Direction.SOUTH.vec(self.stateHandler.magAngle), 3)
-        pygame.draw.line(self.window, Renderer.RED, comPos, comPos + 12 * Direction.NORTH.vec(self.stateHandler.magAngle), 3)
+        pygame.draw.circle(self.__window, Renderer.LIGHTGRAY,  comPos, 12)
+        pygame.draw.circle(self.__window, Renderer.LIGHTBROWN,  comPos, 10)
+        pygame.draw.line(self.__window, Renderer.BLUE, comPos, comPos + 12 * Direction.SOUTH.vec(self.__stateHandler.magAngle), 3)
+        pygame.draw.line(self.__window, Renderer.RED, comPos, comPos + 12 * Direction.NORTH.vec(self.__stateHandler.magAngle), 3)
         # debug draw
-        self.stateHandler.space.debug_draw(self.drawOpt)
+        self.__stateHandler.space.debug_draw(self.__drawOpt)
         # update the screen
         pygame.display.update()
-        self.clock.tick(fps)
+        self.__clock.tick(fps)

@@ -180,12 +180,6 @@ class Simulation:
         if wasRunning:
             self.start()
 
-    def markCube(self, cube: Cube):
-        self.renderer.markCube(cube)
-
-    def clearMarking(self):
-        self.renderer.clearMarking()
-
     def __run__(self):
         # initialisation
         if self.drawingActive:
@@ -260,10 +254,17 @@ class Simulation:
                 elif event.key == 120:  # 'x' increase speed
                     self.__speedUp__()
                 elif event.key == 99 and self.userControls:  # 'c' clear space
+                    self.renderer.linesToDraw.clear()
+                    self.renderer.pointsToDraw.clear()
                     self.stateHandler.loadConfig(StateHandler.DEFAULT_CONFIG)
                 elif event.key == 105:  # 'i' info
                     config = self.stateHandler.saveConfig()
-                    print(config.polyominoes)
+                    self.renderer.pointsToDraw.clear()
+                    for poly in config.getPolyominoes().getAll():
+                        start = config.getCOM(poly)
+                        self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
+                        end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
+                        self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))
                     pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()

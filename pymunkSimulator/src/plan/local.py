@@ -28,8 +28,8 @@ class LocalPlanner:
         sim = Simulation(True, False)
         sim.loadConfig(plan.initial)
         if plan.info != None:
-            sim.markCube(plan.info[0])
-            sim.markCube(plan.info[1])
+            sim.renderer.markedCubes.add(plan.info[0])
+            sim.renderer.markedCubes.add(plan.info[1])
         sim.start()
         for motion in plan.actions:
             sim.executeMotion(motion)
@@ -52,7 +52,7 @@ class LocalPlanner:
 
     def planCubeConnect(self, initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Plan:
         # single update if no poly info available
-        if initial.polyominoes == None:
+        if initial.getPolyominoes().isEmpty():
             initial = self.singleUpdate(initial)
         # when already connected return successfull plan
         if self.__isConnected__(initial, cubeA, cubeB, edgeB):
@@ -76,8 +76,8 @@ class LocalPlanner:
             terminated = Event()
         sim = Simulation(DEBUG, False)
         sim.loadConfig(initial)
-        sim.markCube(cubeA)
-        sim.markCube(cubeB)
+        sim.renderer.markedCubes.add(cubeA)
+        sim.renderer.markedCubes.add(cubeB)
         config = initial
         state = PlanState.UNDEFINED
         actions = []
@@ -160,7 +160,7 @@ class LocalPlanner:
             else:
                 vecSrc = vecW
             if DEBUG: print("N-S align")
-        # Calculate the rotation and execute it
+        # Calculate the rotation
         rotAng = vecSrc.get_angle_between(vecDes)
         return Rotation(rotAng)
 
@@ -177,13 +177,13 @@ class LocalPlanner:
         return [PivotWalk(direction, pivotAng)] * steps
 
     def __isConnected__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
-        polyB = config.polyominoes.getPoly(cubeB)
+        polyB = config.getPolyominoes().getPoly(cubeB)
         return polyB.getConnection(cubeB, edgeB) == cubeA
 
     def __polyConnectPossible__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
         # cubes are inside the same polyomino
-        polyA = config.polyominoes.getPoly(cubeA)
-        polyB = config.polyominoes.getPoly(cubeB)
+        polyA = config.getPolyominoes().getPoly(cubeA)
+        polyB = config.getPolyominoes().getPoly(cubeB)
         if polyA.id == polyB.id:
             return False
         # poly resulting from connection would overlap

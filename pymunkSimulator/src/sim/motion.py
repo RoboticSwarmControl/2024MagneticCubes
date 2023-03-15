@@ -73,7 +73,7 @@ class Rotation(Motion):
     """
 
     ANG_VELOCITY = math.radians(22.5)  #in radians/seconds
-    ROTATION_STALLS = 0.25 #zerochanges/update when rotating
+    ROTATION_STALLS = 0.4 #zerochanges/update when rotating
 
     def __init__(self, angle):
         super().__init__()
