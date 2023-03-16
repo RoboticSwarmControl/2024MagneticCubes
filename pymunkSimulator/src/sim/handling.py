@@ -20,9 +20,9 @@ class StateHandler:
     CONNECTION_DISTANCE = 2 * (Cube.RAD - Cube.MRAD) + 4
     CONNECTION_FORCE_MIN = Cube.magForce1on2(
         (0, 0), (0, CONNECTION_DISTANCE), (0, 1), (0, 1)).length # NS connection
-    NOMINAL_FRICTION = 0.2
+    NOMINAL_FRICTION = 0.35
     FRICTION_DAMPING = 0.9
-    ANG_VEL_DAMP = 0.95
+    ANG_VEL_DAMP = 0.85
 
     SENSOR_CTYPE = 1
     BOUNDARIE_RAD = 8

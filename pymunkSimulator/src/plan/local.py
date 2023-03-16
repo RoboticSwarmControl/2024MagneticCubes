@@ -9,19 +9,18 @@ from sim.state import *
 from plan.plan import *
 
 
-DEBUG = False
-
+DEBUG = True
 
 class LocalPlanner:
 
-    MAX_ITR = 64
+    MAX_ITR = 16
     CRITICAL_DISTANCE = 4 * Cube.RAD
     SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 2
-    ANG_NONCRT = PivotWalk.DEFAULT_PIVOT_ANG
-    ANG_CRT = ANG_NONCRT / 1.5
-    STEPS_NONCRT = 3
-    STEPS_CRT = 1
+    ANG_BIG = PivotWalk.DEFAULT_PIVOT_ANG
+    ANG_SMALL = ANG_BIG / 1.5
     ANG_ALIGNED = math.radians(4)
+    ALIGN_TRIES = 2
+    IDLE_TRIES = 1
 
 
     def executePlan(self, plan: Plan):
@@ -82,38 +81,43 @@ class LocalPlanner:
         state = PlanState.UNDEFINED
         actions = []
         itr = 0
+        idleTry = 0
         while not terminated.is_set():
-            # aligne the cubes multiple times until they are nearly aligned
-            rotation_pre = Rotation(0)
-            while True:
+            # aligne the cubes as long as poly connection is still possible
+            alignTry = 0
+            while self.__polyConnectPossible__(config, cubeA, cubeB, edgeB):
+                # check if alignement is neccessary
                 rotation = self.__alignCubesByEdge__(config, cubeA, cubeB, edgeB)
                 if abs(rotation.angle) < LocalPlanner.ANG_ALIGNED:
                     if DEBUG: print(f"Aligned.")
                     break
-                if abs(abs(rotation.angle) - abs(rotation_pre.angle)) < LocalPlanner.ANG_ALIGNED:
+                # after normal align failed ALIGN_TRIES times we cut the angle in half to avoid oscilation
+                if alignTry > LocalPlanner.ALIGN_TRIES:
                     if DEBUG: print(f"Cutting rotation in half.")
                     rotation.angle /= 2
-                if not self.__polyConnectPossible__(config, cubeA, cubeB, edgeB):
-                    break 
+                # execute the rotation
                 self.__executeMotions__(sim, [rotation])
-                actions.extend([rotation, Idle(1)])
-                if DEBUG: print(f"{itr}: {rotation}")
+                actions.append(rotation)
+                actions.append(Idle(1))
                 config = sim.saveConfig()
-                rotation_pre = rotation
+                alignTry += 1
+                if DEBUG: print(f"{itr}: {rotation}")
             # check if cubes are in critical distance for magnets to attract
             distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
-            if distance < LocalPlanner.CRITICAL_DISTANCE:
+            if distance < LocalPlanner.CRITICAL_DISTANCE and idleTry < LocalPlanner.IDLE_TRIES:
                 # if so let magnets do the rest
                 wait = Idle(10)
                 self.__executeMotions__(sim, [wait])
                 actions.append(wait)
+                idleTry += 1
                 if DEBUG: print(f"{itr}: {wait}")
             else:
                 # if not walk into direction
                 pWalks = self.__walkDirectionDynamic__(config, cubeA, cubeB, direction)
                 self.__executeMotions__(sim, pWalks)
-                pWalks.append(Idle(1))
                 actions.extend(pWalks)
+                actions.append(Idle(1))
+                idleTry = 0
                 if DEBUG: print(f"{itr}: {len(pWalks)-1} x {pWalks[0]}")
             config = sim.saveConfig()
             # check if cubes are connected at edgeB
@@ -130,6 +134,8 @@ class LocalPlanner:
                 break
             itr += 1
         sim.terminate()
+        actions.append(Idle(3))
+        print(itr)
         return Plan(initial, config, actions, state, (cubeA,cubeB,edgeB))
 
     def __alignCubesByEdge__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction):
@@ -138,7 +144,7 @@ class LocalPlanner:
         posB = config.getPosition(cubeB)
         vecBA = posA - posB
         vecEdgeB = edgeB.vec(magAng)
-        distance = posA.get_distance(posB)
+        distance = vecBA.length
         if edgeB in (Direction.WEST, Direction.EAST) or distance < LocalPlanner.CRITICAL_DISTANCE:
             # For side connection, or if cubes are near enought, just rotate edgeB to vecBA
             vecDes = vecBA
@@ -167,14 +173,25 @@ class LocalPlanner:
     def __walkDirectionDynamic__(self, config: Configuration, cubeA: Cube, cubeB: Cube, direction) -> list:
         posA = config.getPosition(cubeA)
         posB = config.getPosition(cubeB)
-        distance = posA.get_distance(posB)
+        vecBA = posA - posB
+        distance = vecBA.length
+        # take eith big or small pivot angle depending on distance
         if distance < LocalPlanner.SLOWWALK_DISTANCE:
-            pivotAng = LocalPlanner.ANG_CRT
-            steps = LocalPlanner.STEPS_CRT
+            pivotAng = LocalPlanner.ANG_SMALL
         else:
-            pivotAng = LocalPlanner.ANG_NONCRT
-            steps = LocalPlanner.STEPS_NONCRT
-        return [PivotWalk(direction, pivotAng)] * steps
+            pivotAng = LocalPlanner.ANG_BIG
+        # determin which poly is chasing which
+        if direction == PivotWalk.LEFT:
+            vecDir = Direction.WEST.vec(config.magAngle)
+        else:
+            vecDir = Direction.EAST.vec(config.magAngle)
+        if vecBA.dot(vecDir) > 0:
+            chasingPoly = config.getPolyominoes().getPoly(cubeB)
+        else:
+            chasingPoly = config.getPolyominoes().getPoly(cubeA)
+        # estimate the pivot steps neccessary for the chasing poly to reach the other. Only take half.
+        pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) / 2)
+        return [PivotWalk(direction, pivotAng)] * pivotSteps
 
     def __isConnected__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
         polyB = config.getPolyominoes().getPoly(cubeB)

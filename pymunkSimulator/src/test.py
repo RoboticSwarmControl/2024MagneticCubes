@@ -1,5 +1,5 @@
-import sys
-sys.path.append("..")
+
+
 import time
 from pymunk import Vec2d
 
@@ -7,7 +7,8 @@ from sim.simulation import Simulation
 from sim.state import *
 from plan.local import LocalPlanner
 from plan.plan import Plan, PlanState
-from plan.factory import *
+import plan.factory as factory
+from sim.motion import Rotation, PivotWalk
 
 def polyTest():
     cube0 = Cube(0)
@@ -46,7 +47,7 @@ def polyEqualTest():
     print("p2: " + str(p2))
     print("equal = " + str(p1 == p2))
 
-def nearestWall():
+def nearestWallTest():
     size = (500,500)
     cube1 = Cube(0)
     pos1 = (410,100)
@@ -65,21 +66,11 @@ def randomConfigTest():
     sim = Simulation()
     sim.start()
     while True:
-        config = randomConfigWithCubes((width, height), ncubes, ncubes)
+        config = factory.randomConfigWithCubes((width, height), ncubes, ncubes)
         sim.loadConfig(config)
         input("New config:")
-        
-def forceSideConect():
-    sim = Simulation(500,500)
-    sim.start()
-    sim.loadConfig(Configuration((500,500), 0,{Cube(1): (20,20), Cube(1): (20,60)}))
-    print("Connects: \n" + str(sim.stateHandler.magConnect))
-    print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
-    time.sleep(0.25)
-    print("Connects: \n" + str(sim.stateHandler.magConnect))
-    print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
 
-def polyToPolyConnect():
+def connectPolyTest():
     c0 = Cube(0)
     c1 = Cube(1)
     c2 = Cube(1)
@@ -96,14 +87,6 @@ def polyToPolyConnect():
     print(p2)
     print(Polyomino.connectPoly(p2, c5, p1, c0, Direction.WEST))
 
-def connectAndPoly():
-    sim = Simulation(1000,1000)
-    sim.start()
-    while True:
-        input("Press Enter for information:")
-        print("Connects: \n" + str(sim.stateHandler.magConnect))
-        print("Polyominoes: \n" + str(sim.stateHandler.polyominoes))
-
 def configurationHash():
     c1 = Cube(0)
     c2 = Cube(1)
@@ -115,44 +98,79 @@ def configurationHash():
     con2 = Configuration(0,0,{c5:(200,200), c6:(300,300), c4:(100,100)})
     print("Hash equality = " + str(hash(con1) == hash(con2)))
 
-def configPoly():
-    c0 = Cube(0)
-    c1 = Cube(1)
-    c2 = Cube(1)
-    c3 = Cube(0)
-    c4 = Cube(1)
-    c5 = Cube(1)
-    p1 = Polyomino(c0)
-    p1.connect(c1, c0, Direction.EAST)
-    p1.connect(c2, c1, Direction.NORTH)
-    p2 = Polyomino(c5)
-    p2.connect(c4, c5, Direction.SOUTH)
-    p2.connect(c3, c4, Direction.WEST)
-    con1 = Configuration(0,0,{},[p1, p2])
-    print("contain p1:", con1.contains(p1))
-    print("contain p2:", con1.contains(p2))
-
-def simControlTest():
-    sim = Simulation()
-    sim.start()
-    time.sleep(1)
-    sim.loadConfig(Configuration((800,800), 0, {Cube(0): (100,100)}))
-    time.sleep(1)
-    sim.loadConfig(Configuration((1000,400), 0, {Cube(0): (500,100)}))
-    time.sleep(1)
-    sim.disableDraw()
-    sim.loadConfig(Configuration((400,400), 0, {Cube(0): (200,200)}))
-    sim.enableDraw()
-
 def randomPolyTest():
-    samples = 50
+    samples = 5
     polys = []
     for _ in range(samples):
-        polys.append(randomPoly(10, 5))
+        polys.append(factory.linePoly(10, 1, False))
     polys = PolyCollection(polys)
     print(polys)
 
-def localPlanner():
+
+def motionAnalysis():
+    maxSize = 10
+    sim = Simulation(False, False)
+    pl = LocalPlanner()
+    pWalk = PivotWalk(PivotWalk.RIGHT, PivotWalk.DEFAULT_PIVOT_ANG)
+    rot10 = Rotation(math.radians(10))
+    rot20 = Rotation(math.radians(20))
+    rot45 = Rotation(math.radians(45))
+    rot90 = Rotation(math.radians(90))
+    rot180 = Rotation(math.radians(180))
+    for size in range(1,maxSize+1):
+        #size = 4
+        config = factory.configWithPolys((1000,1000), math.radians(90), [factory.linePoly(size)], [(400,600)])
+        refCube = config.getCubes()[0]
+        save0 = pl.singleUpdate(config)
+        sim.loadConfig(save0)
+        t0 = time.time()
+        sim.start()
+        sim.executeMotion(pWalk)
+        sim.stop()
+        t1 = time.time()
+        save1 = sim.saveConfig()
+        dt = t1 -t0
+        poly0 = save0.getPolyominoes().getPoly(refCube)
+        poly1 = save1.getPolyominoes().getPoly(refCube)
+        displacementIdeal = save0.getPivotWalkingVec(poly0, pWalk.pivotAng, pWalk.direction)
+        displacement = save1.getCOM(poly1) - save0.getCOM(poly0)
+        angDiff = displacement.get_angle_degrees_between(displacementIdeal)
+        lenDiff = (displacementIdeal.length - displacement.length) / (2 * Cube.RAD)
+        print(f"Poly size {size}:")
+        print(f"[{pWalk}] Time: {round(t1 -t0, 4)}s, AngDiff: {round(angDiff,3)}°, LenDiff: {round(lenDiff, 3)}ø")
+        t0 = time.time()
+        sim.start()
+        sim.executeMotion(rot10)
+        sim.stop()
+        t1 = time.time()
+        print(f"[{rot10}] Time: {round(t1 -t0, 4)}s")
+        t0 = time.time()
+        sim.start()
+        sim.executeMotion(rot20)
+        sim.stop()
+        t1 = time.time()
+        print(f"[{rot20}] Time: {round(t1 -t0, 4)}s")
+        t0 = time.time()
+        sim.start()
+        sim.executeMotion(rot45)
+        sim.stop()
+        t1 = time.time()
+        print(f"[{rot45}] Time: {round(t1 -t0, 4)}s")
+        t0 = time.time()
+        sim.start()
+        sim.executeMotion(rot90)
+        sim.stop()
+        t1 = time.time()
+        print(f"[{rot90}] Time: {round(t1 -t0, 4)}s")
+        t0 = time.time()
+        sim.start()
+        sim.executeMotion(rot180)
+        sim.stop()
+        t1 = time.time()
+        print(f"[{rot180}] Time: {round(t1 -t0, 4)}s\n")
+
+
+def twoCostumCubeConnect():
     planer = LocalPlanner()
     c1 = Cube(1) #red
     p1 = (304, 528)
@@ -168,29 +186,29 @@ def localPlanner():
     print(f"{c1.type} at {config.getPosition(c1)} --{ed2}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(ang))}")
     planer.executePlan(plan)
 
-def randomTwoPolyConnect():
-    #----------------------
-    seed = 8
-    size = 4
-    #----------------------
+
+def twoCubeConnect():
+    seed = 12
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 1
-    generator.seed(seed)
+    samples = 20
     for i in range(samples):
-        p1 = randomPoly(size)
-        p2 = randomPoly(size)
-        config = randomConfigWithPolys((800,800),[p1,p2])
-        c1, c2, ed = randomPossibleConnection(p1, p2)
+        factory.generator.seed(seed)
+        config = factory.randomConfigWithCubes((800,800), 2, 1)
+        c1 = config.getCubes()[0]
+        c2 = config.getCubes()[1]
+        ed = Direction(factory.generator.randint(0,3))
         t0 = time.time()
         plan = planer.planCubeConnect(config, c1, c2, ed)
         t1 = time.time()
         dt = t1 -t0
         globalTime += dt
         plans[i] = plan
+        print(f"Seed: {seed}")
         print(f"[{i}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
         #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
+        seed += 1
     fails = []
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
@@ -201,25 +219,32 @@ def randomTwoPolyConnect():
         inp = input("Select index to play:")
         planer.executePlan(plans[int(inp)])
 
-def randomTwoCubeConnect():
+
+def twoPolyConnect():
+    #----------------------
+    seed = 9
+    size = 4
+    #----------------------
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 20
-    generator.seed(12)
+    samples = 10
     for i in range(samples):
-        config = randomConfigWithCubes((800,800), 2, 1)
-        c1 = config.getCubes()[0]
-        c2 = config.getCubes()[1]
-        ed = Direction(generator.randint(0,3))
+        factory.generator.seed(seed)
+        p1 = factory.randomPoly(size)
+        p2 = factory.randomPoly(size)
+        config = factory.randomConfigWithPolys((800,800),[p1,p2])
+        c1, c2, ed = factory.randomPossibleConnection(p1, p2)
         t0 = time.time()
         plan = planer.planCubeConnect(config, c1, c2, ed)
         t1 = time.time()
         dt = t1 -t0
         globalTime += dt
         plans[i] = plan
+        print(f"Seed: {seed}")
         print(f"[{i}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
         #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
+        seed += 1
     fails = []
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
@@ -232,4 +257,4 @@ def randomTwoCubeConnect():
 
 
 if __name__ == "__main__":
-    randomTwoCubeConnect()
+    motionAnalysis()

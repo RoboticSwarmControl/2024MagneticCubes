@@ -73,7 +73,7 @@ class Rotation(Motion):
     """
 
     ANG_VELOCITY = math.radians(22.5)  #in radians/seconds
-    ROTATION_STALLS = 0.4 #zerochanges/update when rotating
+    ROTATION_STALLS = 0.2 #zero upodates that get adding. Percentage of the total updates
 
     def __init__(self, angle):
         super().__init__()
@@ -84,15 +84,12 @@ class Rotation(Motion):
 
     def stepSequence(self, stepTime, longestChain):
         steps = []
-        k = math.floor(abs(self.angle) / (Rotation.ANG_VELOCITY * stepTime))
-        if k != 0:
-            angPerStep = self.angle / k
-        else:
-            angPerStep = self.angle
-        for i in range(k):
-            steps.append(Step(angPerStep, 0))
-        steps.append(Step(self.angle - k * angPerStep, 0))
-        zeros = [Step() for _ in range(longestChain * math.floor(Rotation.ROTATION_STALLS / stepTime))]
+        updates = math.ceil(abs(self.angle) / (Rotation.ANG_VELOCITY * stepTime))
+        angPerUpdate = self.angle / updates
+        for i in range(updates):
+            steps.append(Step(angPerUpdate, 0))
+        steps.append(Step(self.angle - updates * angPerUpdate, 0))
+        zeros = [Step() for _ in range(longestChain * math.ceil(Rotation.ROTATION_STALLS * updates))]
         steps.extend(zeros)
         return steps
     
