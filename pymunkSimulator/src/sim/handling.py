@@ -51,7 +51,7 @@ class StateHandler:
         self.sensor_cube = {}
 
         self.magAngle = 0
-        self.magElevation = Tilt.HORIZONTAL
+        self.magElevation = 0
 
         self.magConnect = {}
         self.magConnect_pre = {}

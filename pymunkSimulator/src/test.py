@@ -85,7 +85,31 @@ def connectPolyTest():
     p2.connect(c3, c4, Direction.WEST)
     print(p1)
     print(p2)
-    print(Polyomino.connectPoly(p2, c5, p1, c0, Direction.WEST))
+    print(p2.connectPoly(c5, p1, c0, Direction.WEST))
+
+def connectPolyPossibleTest():
+    sim = Simulation(True, False)
+    seed = 0
+    while True:
+        factory.generator.seed(seed)
+        p1 = factory.randomPoly(5)
+        p2 = factory.randomPoly(5)
+        c1,c2,e2 = factory.randomPossibleConnection(p1,p2)
+        slideInEast = p1.connectPolyPossible(c1, p2, c2, e2, Direction.EAST)
+        slideInWest = p1.connectPolyPossible(c1, p2, c2, e2, Direction.WEST)
+        print(f"seed: [{seed}]")
+        print(f"c1 --{e2}-> c2")
+        print(f"p1 --EAST-> p2: {slideInEast}")
+        print(f"p1 --WEST-> p2: {slideInWest}")
+        config = factory.configWithPolys((1500, 800), math.radians(90),[p1,p2],[(300,500),(1000,500)])
+        sim.renderer.markedCubes.add(c1)
+        sim.renderer.markedCubes.add(c2)
+        sim.loadConfig(config)
+        sim.start()
+        input("Next:")
+        sim.stop()
+        sim.renderer.markedCubes.clear()
+        seed += 1
 
 def configurationHash():
     c1 = Cube(0)
@@ -222,13 +246,13 @@ def twoCubeConnect():
 
 def twoPolyConnect():
     #----------------------
-    seed = 9
+    seed = 66
     size = 4
     #----------------------
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 10
+    samples = 1
     for i in range(samples):
         factory.generator.seed(seed)
         p1 = factory.randomPoly(size)
@@ -257,4 +281,4 @@ def twoPolyConnect():
 
 
 if __name__ == "__main__":
-    motionAnalysis()
+    twoPolyConnect()

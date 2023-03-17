@@ -17,7 +17,7 @@ class PlanState(Enum):
 
 class Plan:
 
-    def __init__(self, initial: Configuration, goal: Configuration, actions, state: PlanState, info=None):
+    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED, info=None):
         self.initial = initial
         self.goal = goal
         if actions == None:
