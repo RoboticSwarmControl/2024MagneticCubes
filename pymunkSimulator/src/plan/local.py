@@ -16,13 +16,15 @@ class LocalPlanner:
 
     MAX_ITR = 24
     CRITICAL_DISTANCE = 4 * Cube.RAD
-    SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 2
-    ANG_BIG = PivotWalk.DEFAULT_PIVOT_ANG
-    ANG_SMALL = ANG_BIG / 1.5
-    ANG_ALIGNED = math.radians(4)
+    NS_ALIGN_OFFSET = 2.75 * Cube.RAD
+    ALIGNED_THRESHOLD = math.radians(4)
     ALIGN_TRIES = 2
-    IDLE_TRIES = 1
 
+    SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 2
+    PWALK_ANG_BIG = PivotWalk.DEFAULT_PIVOT_ANG
+    PWALK_ANG_SMALL = PWALK_ANG_BIG / 1.5
+    PWALK_PORTION = 2/3
+    IDLE_TRIES = 1
 
     def __init__(self) -> None:
         self.plans = {}
@@ -67,19 +69,15 @@ class LocalPlanner:
         # pre check if connecting the polys is even possible
         if not self.__polyConnectPossible__(initial, cubeA, cubeB, edgeB):
             return Plan(initial=initial, state=PlanState.FAILURE_POLY_CON, info=info)
+        # pre check if polys can slide together from either east or west
         slide = self.__slideInPossible__(initial, cubeA, cubeB, edgeB)
         if not slide[0] and not slide[1]:
             return Plan(initial=initial, state=PlanState.FAILURE_POLY_CON, info=info)
         # determine if flip neccesary
-        flip = False
-        if edgeB in (Direction.NORTH,Direction.SOUTH) and slide[0] ^ slide[1]:
-            vecAB = initial.getPosition(cubeB) - initial.getPosition(cubeA)
-            faceingEast = vecAB.dot(Direction.EAST.vec(initial.magAngle)) > 0
-            if slide != (faceingEast, not faceingEast):
-                flip = True
+        flip = self.__flipNeccesary__(initial, cubeA, cubeB, edgeB, slide)
+        # Make plans for moving left, right and choose better one
         self.plans[PivotWalk.LEFT] = Plan(initial=initial, info=info)
         self.plans[PivotWalk.RIGHT] = Plan(initial=initial, info=info)
-        # Make plans for moving left, right and choose better one
         self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, flip)
         if DEBUG: print(f"Left plan done. {self.plans[PivotWalk.LEFT].state} in {round(self.plans[PivotWalk.LEFT].cost(),2)}rad")
         self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, flip)
@@ -119,12 +117,14 @@ class LocalPlanner:
         itr = 0
         idleTry = 0
         while True:
+            if DEBUG: print(f"Itr: {itr}")
             # aligne the cubes as long as poly connection is still possible
             alignTry = 0
-            while self.__polyConnectPossible__(config, cubeA, cubeB, edgeB):
+            distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
+            while self.__polyConnectPossible__(config, cubeA, cubeB, edgeB) and distance > LocalPlanner.CRITICAL_DISTANCE:
                 # check if alignement is neccessary
                 rotation = self.__alignCubesByEdge__(config, cubeA, cubeB, edgeB)
-                if abs(rotation.angle) < LocalPlanner.ANG_ALIGNED:
+                if abs(rotation.angle) < LocalPlanner.ALIGNED_THRESHOLD:
                     if DEBUG: print(f"Aligned.")
                     break
                 # after normal align failed ALIGN_TRIES times we cut the angle in half to avoid oscilation
@@ -136,17 +136,17 @@ class LocalPlanner:
                 self.plans[direction].actions.append(rotation)
                 self.plans[direction].actions.append(Idle(1))
                 config = sim.saveConfig()
+                distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
                 alignTry += 1
-                if DEBUG: print(f"{itr}: {rotation}")
+                if DEBUG: print(rotation)
             # check if cubes are in critical distance for magnets to attract
-            distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
             if distance < LocalPlanner.CRITICAL_DISTANCE and idleTry < LocalPlanner.IDLE_TRIES:
                 # if so let magnets do the rest
                 wait = Idle(10)
                 self.__executeMotions__(sim, [wait])
                 self.plans[direction].actions.append(wait)
                 idleTry += 1
-                if DEBUG: print(f"{itr}: {wait}")
+                if DEBUG: print(wait)
             else:
                 # if not walk into direction
                 pWalks = self.__walkDirectionDynamic__(config, cubeA, cubeB, direction)
@@ -154,7 +154,7 @@ class LocalPlanner:
                 self.plans[direction].actions.extend(pWalks)
                 self.plans[direction].actions.append(Idle(1))
                 idleTry = 0
-                if DEBUG: print(f"{itr}: {len(pWalks)-1} x {pWalks[0]}")
+                if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
             config = sim.saveConfig()
             # check if cubes are connected at edgeB
             if self.__isConnected__(config, cubeA, cubeB, edgeB):
@@ -172,8 +172,11 @@ class LocalPlanner:
         sim.terminate()
         self.plans[direction].actions.append(Idle(3))
         self.plans[direction].goal = config
-        print(itr)
+        print(f"itrations: {itr}")
         return direction
+
+    def __dynamicAlign__():
+        pass
 
     def __alignCubesByEdge__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, flip: bool=False):
         magAng = config.magAngle
@@ -181,15 +184,14 @@ class LocalPlanner:
         posB = config.getPosition(cubeB)
         vecBA = posA - posB
         vecEdgeB = edgeB.vec(magAng)
-        distance = vecBA.length
-        if edgeB in (Direction.WEST, Direction.EAST) or distance < LocalPlanner.CRITICAL_DISTANCE:
+        if edgeB in (Direction.WEST, Direction.EAST):
             # For side connection, or if cubes are near enought, just rotate edgeB to vecBA
             vecDes = vecBA
             vecSrc = vecEdgeB
             if DEBUG: print("Straight align")
         else:
             # For Top bottom connection move vecDes one cube length perpendicular to vecAB
-            vecPer = (2.5 * Cube.RAD) * vecBA.perpendicular_normal()
+            vecPer = LocalPlanner.NS_ALIGN_OFFSET * vecBA.perpendicular_normal()
             dotPerEdgeB = round(vecPer.dot(vecEdgeB), 3)
             if bool(dotPerEdgeB <= 0) ^ flip:
                 vecDes = vecBA + vecPer
@@ -214,9 +216,9 @@ class LocalPlanner:
         distance = vecBA.length
         # take eith big or small pivot angle depending on distance
         if distance < LocalPlanner.SLOWWALK_DISTANCE:
-            pivotAng = LocalPlanner.ANG_SMALL
+            pivotAng = LocalPlanner.PWALK_ANG_SMALL
         else:
-            pivotAng = LocalPlanner.ANG_BIG
+            pivotAng = LocalPlanner.PWALK_ANG_BIG
         # determin which poly is chasing which
         if direction == PivotWalk.LEFT:
             vecDir = Direction.WEST.vec(config.magAngle)
@@ -227,7 +229,7 @@ class LocalPlanner:
         else:
             chasingPoly = config.getPolyominoes().getPoly(cubeA)
         # estimate the pivot steps neccessary for the chasing poly to reach the other. Only take half.
-        pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) / 2)
+        pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) * LocalPlanner.PWALK_PORTION)
         return [PivotWalk(direction, pivotAng)] * pivotSteps
 
     def __isConnected__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
@@ -237,7 +239,7 @@ class LocalPlanner:
     def __polyConnectPossible__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
         polyA = config.getPolyominoes().getPoly(cubeA)
         polyB = config.getPolyominoes().getPoly(cubeB)
-        # poly resulting from connection would overlap, orcubes are inside the same polyomino
+        # poly resulting from connection would overlap, or cubes are inside the same polyomino
         targetPoly = polyA.connectPoly(cubeA, polyB, cubeB, edgeB)
         if targetPoly == None:
             return False
@@ -250,6 +252,14 @@ class LocalPlanner:
         eastSlide = polyA.connectPolyPossible(cubeA, polyB, cubeB, edgeB, Direction.EAST)
         westSlide = polyA.connectPolyPossible(cubeA, polyB, cubeB, edgeB, Direction.WEST)
         return eastSlide, westSlide
+
+    def __flipNeccesary__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide: tuple):
+        if edgeB in (Direction.NORTH,Direction.SOUTH) and slide[0] ^ slide[1]:
+            vecAB = config.getPosition(cubeB) - config.getPosition(cubeA)
+            faceingEast = vecAB.dot(Direction.EAST.vec(config.magAngle)) > 0
+            if slide != (faceingEast, not faceingEast):
+                return True
+        return False
 
     def __executeMotions__(self, sim: Simulation, motions):
         sim.start()

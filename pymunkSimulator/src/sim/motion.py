@@ -73,7 +73,7 @@ class Rotation(Motion):
     """
 
     ANG_VELOCITY = math.radians(22.5)  #in radians/seconds
-    ROTATION_STALLS = 0.2 #zero upodates that get adding. Percentage of the total updates
+    ROTATION_STALLS = 5 #zero upodates to append to motion
 
     def __init__(self, angle):
         super().__init__()
@@ -89,7 +89,7 @@ class Rotation(Motion):
         for i in range(updates):
             steps.append(Step(angPerUpdate, 0))
         steps.append(Step(self.angle - updates * angPerUpdate, 0))
-        zeros = [Step() for _ in range(longestChain * math.ceil(Rotation.ROTATION_STALLS * updates))]
+        zeros = [Step() for _ in range(longestChain * Rotation.ROTATION_STALLS)]
         steps.extend(zeros)
         return steps
     
