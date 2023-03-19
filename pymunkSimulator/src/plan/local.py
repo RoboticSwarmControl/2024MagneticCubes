@@ -169,10 +169,11 @@ class LocalPlanner:
                 self.plans[direction].state = PlanState.FAILURE_MAX_ITR
                 break
             itr += 1
+        print(f"itrations: {itr}")
+        sim.stateHandler.timer.printTimeStats()
         sim.terminate()
         self.plans[direction].actions.append(Idle(3))
         self.plans[direction].goal = config
-        print(f"itrations: {itr}")
         return direction
 
     def __dynamicAlign__():
@@ -266,7 +267,6 @@ class LocalPlanner:
         for motion in motions:
             sim.executeMotion(motion)
         sim.stop()
-
 
         #----multi threading solution. 50% slower than just single thread.
         # with ThreadPoolExecutor(2) as executor:

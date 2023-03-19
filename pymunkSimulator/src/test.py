@@ -216,7 +216,7 @@ def twoCubeConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 20
+    samples = 2
     for i in range(samples):
         factory.generator.seed(seed)
         config = factory.randomConfigWithCubes((800,800), 2, 1)

@@ -4,6 +4,7 @@ Holds the StateHandler class
 
 @author: Aaron T Becker, Kjell Keune
 """
+import time
 import pygame
 import pymunk.pygame_util
 import pymunk
@@ -38,7 +39,7 @@ class StateHandler:
         cHandler = self.space.add_collision_handler(
             StateHandler.SENSOR_CTYPE, StateHandler.SENSOR_CTYPE)
 
-        def sensorCollision(arbiter: pymunk.Arbiter, space, data):
+        def sensorCollision(arbiter: pymunk.Arbiter, space, data): 
             cubei = self.sensor_cube[arbiter.shapes[0]]
             cubej = self.sensor_cube[arbiter.shapes[1]]
             self.__applyForceMagnets__(cubei, cubej)
@@ -60,6 +61,7 @@ class StateHandler:
         self.configToLoad = StateHandler.DEFAULT_CONFIG
         self.updateLock = Lock()
 
+        self.timer = Timer()
         self.frictionpoints = {}
         # JOINTS
         # self.connectJoints = []
@@ -100,30 +102,40 @@ class StateHandler:
             angChange: angular change (in radians)
             elevChange: elevation change
         """
+        ts = time.time()
         self.updateLock.acquire()
         # load new config if present
         if not self.configToLoad == None:
+            t0 = time.time()
             self.__loadConfig__()
+            self.timer.addToTask("load_config", time.time() - t0)
         # let pymunk update the space this also creates the magnetic connections
+        t0 = time.time()
         self.space.step(dt)
+        self.timer.addToTask("pymunk_step", time.time() - t0)
         # apply the change
         self.magAngle += angChange
         if elevation != 0:
             self.magElevation = elevation
         # detect polyominos based on the magnetic connections
+        t0 = time.time()
         if not self.magConnect == self.magConnect_pre:
             self.polyominoes.detectPolyominoes(self.magConnect)
+        self.timer.addToTask("poly_detect", time.time() - t0)
         # safe magnetic connections to _pre and clear this one
         self.magConnect_pre = self.magConnect
         self.magConnect = {}
         # apply forces from magneticfield to each cube in each poly
         self.frictionpoints.clear()
+        t0 = time.time()
         for poly in self.polyominoes.getAll():
             for cube in poly.getCubes():
                 self.__applyForceField__(cube)
                 self.__applyForceFriction__(cube, poly)
                 self.magConnect[cube] = [None] * 4
+        self.timer.addToTask("force_apply", time.time() - t0)
         self.updateLock.release()
+        self.timer.addToTotal(time.time() - ts)
 
     def __applyForceField__(self, cube: Cube):
         shape = self.getCubeShape(cube)
@@ -134,28 +146,35 @@ class StateHandler:
             (0, math.sin(ang-self.magAngle) * StateHandler.MAG_FORCE_FIELD), (-Cube.MRAD, 0))
 
     def __applyForceMagnets__(self, cubei: Cube, cubej: Cube):
+        ts = time.time()
         shapei = self.getCubeShape(cubei)
         shapej = self.getCubeShape(cubej)
         angi = shapei.body.angle
         angj = shapej.body.angle
         for i, magPosLi in enumerate(cubei.magnetPos):
             for j, magPosLj in enumerate(cubej.magnetPos):
+                t0 = time.time()
                 magPosi = shapei.body.local_to_world(magPosLi)
                 magOrii = cubei.magnetOri[i]
                 mi = Vec2d(magOrii[0],magOrii[1]).rotated(angi)
                 magPosj = shapej.body.local_to_world(magPosLj)
                 magOrij = cubej.magnetOri[j]
                 mj = Vec2d(magOrij[0],magOrij[1]).rotated(angj)
-                # magForce1on2( p1, p2, m1,m2)
                 fionj = Cube.magForce1on2(magPosi, magPosj, mi, mj)
+                self.timer.addToTask("mag_calc", time.time() - t0)
+                t0 = time.time()
                 shapei.body.apply_force_at_world_point(
                     (-fionj[0], -fionj[1]), magPosi)
                 shapej.body.apply_force_at_world_point(
                     fionj,                magPosj)
+                self.timer.addToTask("mag_apply", time.time() - t0)
                 # Determine magnet connections
+                t0 = time.time()
                 if fionj.length >= StateHandler.CONNECTION_FORCE_MIN:
                     self.__connectMagnets__(
                         cubei, Direction(i), cubej, Direction(j))
+                self.timer.addToTask("mag_conn", time.time() - t0)
+        self.timer.addToTask("force_mag", time.time() - ts)
 
     def __connectMagnets__(self, cubei: Cube, edgei: Direction, cubej: Cube, edgej: Direction):
         # check if there already is a connection
@@ -424,3 +443,29 @@ class Renderer:
         # update the screen
         pygame.display.update()
         self.__clock.tick(fps)
+
+
+class Timer:
+
+    def __init__(self) -> None:
+        self.__total_time = 0
+        self.__task_time = {}
+
+    def addToTotal(self,dt):
+        self.__total_time += dt
+
+    def addToTask(self, task, dt):
+        if task in self.__task_time:
+            self.__task_time[task] += dt
+        else:
+            self.__task_time[task] = dt
+
+    def reset(self):
+        self.__total_time = 0
+        self.__task_time.clear()
+
+    def printTimeStats(self):
+        print(f"Total time: {round(self.__total_time, 2)}s")
+        for task, time in self.__task_time.items():
+            portion = (time / self.__total_time) * 100
+            print(f"    {task}: {round(portion, 2)}%")
