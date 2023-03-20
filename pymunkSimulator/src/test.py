@@ -212,12 +212,14 @@ def twoCostumCubeConnect():
 
 
 def twoCubeConnect():
+    #----------------------
     seed = 12
+    samples = 20
+    #----------------------
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 50
-    for i in range(samples):
+    for _ in range(samples):
         factory.generator.seed(seed)
         config = factory.randomConfigWithCubes((800,800), 2, 1)
         c1 = config.getCubes()[0]
@@ -228,32 +230,31 @@ def twoCubeConnect():
         t1 = time.time()
         dt = t1 -t0
         globalTime += dt
-        plans[i] = plan
-        print(f"Seed: {seed}")
-        print(f"[{i}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        plans[seed] = plan
+        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
         #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
         seed += 1
     fails = []
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
             fails.append(key)
-    print(f"Time summed: {round(globalTime, 2)}, {len(fails)}/{samples} FAILURES")
+    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES")
     print(fails)
     while True:
-        inp = input("Select index to play:")
+        inp = input("Select seed to play:")
         planer.executePlan(plans[int(inp)])
 
 
 def twoPolyConnect():
     #----------------------
-    seed = 9
+    seed = 1
     size = 4
+    samples = 1
     #----------------------
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 5
-    for i in range(samples):
+    for _ in range(samples):
         factory.generator.seed(seed)
         p1 = factory.randomPoly(size)
         p2 = factory.randomPoly(size)
@@ -264,19 +265,18 @@ def twoPolyConnect():
         t1 = time.time()
         dt = t1 -t0
         globalTime += dt
-        plans[i] = plan
-        print(f"Seed: {seed}")
-        print(f"[{i}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        plans[seed] = plan
+        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
         #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
         seed += 1
     fails = []
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
             fails.append(key)
-    print(f"Time summed: {round(globalTime, 2)}, {len(fails)}/{samples} FAILURES")
+    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES")
     print(fails)
     while True:
-        inp = input("Select index to play:")
+        inp = input("Select seed to play:")
         planer.executePlan(plans[int(inp)])
 
 

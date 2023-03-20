@@ -67,23 +67,30 @@ class LocalPlanner:
         if not self.__polyConnectPossible__(initial, cubeA, cubeB, edgeB):
             return Plan(initial=initial, state=PlanState.FAILURE_POLY_CON, info=info)
         # pre check if polys can slide together from either east or west
-        slide = self.__slideInPossible__(initial, cubeA, cubeB, edgeB)
-        if not slide[0] and not slide[1]:
-            return Plan(initial=initial, state=PlanState.FAILURE_POLY_CON, info=info)
-        # determine if flip neccesary
-        flip = self.__flipNeccesary__(initial, cubeA, cubeB, edgeB, slide)
+        slideDirections = self.__slideInDirections__(initial, cubeA, cubeB, edgeB)
+        if len(slideDirections) == 0:
+            return Plan(initial=initial, state=PlanState.FAILURE_SLIDE_IN, info=info)
+        # determine which plans to execute. left and right either with or without initial flip
+        plansToExec = []
+        faceingDirection = self.__faceingDirection__(initial, cubeA, cubeB)
+        if faceingDirection in slideDirections:
+            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, False))
+            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, False))
+        if faceingDirection.inv() in slideDirections:
+            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, True))
+            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, True))
         # calc plans in parallel take the first successfull plan
-        with Pool(2) as pool:
-            it = pool.imap_unordered(self.__alignWalkRealign__,[(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, flip),(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, flip)])
-            first = next(it)
-            if first.state == PlanState.SUCCESS:
-                pool.terminate()
-                return first
-            second = next(it)
+        print(f"Starting {len(plansToExec)} processes for simulation...")
+        with Pool(len(plansToExec)) as pool:
+            it = pool.imap_unordered(self.__alignWalkRealign__, plansToExec)
+            for i in range(len(plansToExec)):
+                plan = next(it)
+                print(f"{i+1} finished: {plan}")
+                if plan.state == PlanState.SUCCESS:
+                    pool.terminate()
+                    return plan
             pool.terminate()
-            if first.state == PlanState.SUCCESS:
-                return second
-            return first
+            return plan
         # Make plans for moving left, right and choose better one
         # left = self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, flip)
         # if DEBUG: print(f"Left plan done. {self.plans[PivotWalk.LEFT].state} in {round(self.plans[PivotWalk.LEFT].cost(),2)}rad")
@@ -216,14 +223,10 @@ class LocalPlanner:
         else:
             pivotAng = LocalPlanner.PWALK_ANG_BIG
         # determin which poly is chasing which
-        if direction == PivotWalk.LEFT:
-            vecDir = Direction.WEST.vec(config.magAngle)
-        else:
-            vecDir = Direction.EAST.vec(config.magAngle)
-        if vecBA.dot(vecDir) > 0:
-            chasingPoly = config.getPolyominoes().getPoly(cubeB)
-        else:
+        if bool(self.__faceingDirection__(config, cubeA, cubeB) == Direction.EAST) ^ bool(direction == PivotWalk.LEFT):
             chasingPoly = config.getPolyominoes().getPoly(cubeA)
+        else:
+            chasingPoly = config.getPolyominoes().getPoly(cubeB)
         # estimate the pivot steps neccessary for the chasing poly to reach the other. Only take half.
         pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) * LocalPlanner.PWALK_PORTION)
         return [PivotWalk(direction, pivotAng)] * pivotSteps
@@ -241,21 +244,23 @@ class LocalPlanner:
             return False
         return True
 
-    def __slideInPossible__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction):
+    def __slideInDirections__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> set:
         # check if poly can be connected by walking in form the east and west
+        slide = set()
         polyA = config.getPolyominoes().getPoly(cubeA)
         polyB = config.getPolyominoes().getPoly(cubeB)
-        eastSlide = polyA.connectPolyPossible(cubeA, polyB, cubeB, edgeB, Direction.EAST)
-        westSlide = polyA.connectPolyPossible(cubeA, polyB, cubeB, edgeB, Direction.WEST)
-        return eastSlide, westSlide
-
-    def __flipNeccesary__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide: tuple):
-        if edgeB in (Direction.NORTH,Direction.SOUTH) and slide[0] ^ slide[1]:
-            vecAB = config.getPosition(cubeB) - config.getPosition(cubeA)
-            faceingEast = vecAB.dot(Direction.EAST.vec(config.magAngle)) > 0
-            if slide != (faceingEast, not faceingEast):
-                return True
-        return False
+        if polyA.connectPolyPossible(cubeA, polyB, cubeB, edgeB, Direction.EAST):
+            slide.add(Direction.EAST)
+        if polyA.connectPolyPossible(cubeA, polyB, cubeB, edgeB, Direction.WEST):
+            slide.add(Direction.WEST)
+        return slide
+    
+    def __faceingDirection__(self, config: Configuration, cubeA: Cube, cubeB: Cube) -> Direction:
+        vecAB = config.getPosition(cubeB) - config.getPosition(cubeA)
+        if vecAB.dot(Direction.EAST.vec(config.magAngle)) > 0:
+            return Direction.EAST
+        else:
+            return Direction.WEST
 
     def __executeMotions__(self, sim: Simulation, motions):
         sim.start()
