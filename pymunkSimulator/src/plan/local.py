@@ -26,9 +26,6 @@ class LocalPlanner:
     PWALK_PORTION = 2/3
     IDLE_TRIES = 1
 
-    def __init__(self) -> None:
-        self.plans = {}
-
     def executePlan(self, plan: Plan):
         sim = Simulation(True, False)
         sim.loadConfig(plan.initial)
@@ -75,34 +72,34 @@ class LocalPlanner:
             return Plan(initial=initial, state=PlanState.FAILURE_POLY_CON, info=info)
         # determine if flip neccesary
         flip = self.__flipNeccesary__(initial, cubeA, cubeB, edgeB, slide)
+        # calc plans in parallel take the first successfull plan
+        with Pool(2) as pool:
+            it = pool.imap_unordered(self.__alignWalkRealign__,[(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, flip),(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, flip)])
+            first = next(it)
+            if first.state == PlanState.SUCCESS:
+                pool.terminate()
+                return first
+            second = next(it)
+            pool.terminate()
+            if first.state == PlanState.SUCCESS:
+                return second
+            return first
         # Make plans for moving left, right and choose better one
-        self.plans[PivotWalk.LEFT] = Plan(initial=initial, info=info)
-        self.plans[PivotWalk.RIGHT] = Plan(initial=initial, info=info)
-        self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, flip)
-        if DEBUG: print(f"Left plan done. {self.plans[PivotWalk.LEFT].state} in {round(self.plans[PivotWalk.LEFT].cost(),2)}rad")
-        self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, flip)
-        if DEBUG: print(f"Right plan done. {self.plans[PivotWalk.RIGHT].state} in {round(self.plans[PivotWalk.RIGHT].cost(),2)}rad")
-        return self.plans[PivotWalk.LEFT].compare(self.plans[PivotWalk.RIGHT])
-        # with Pool(2) as pool:
-        #     it = pool.imap_unordered(self.__alignWalkRealign__,[(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, flip),(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, flip)])
-        #     first = self.plans[next(it)]
-        #     if first.state == PlanState.SUCCESS:
-        #         pool.terminate()
-        #         return first
-        #     second = self.plans[next(it)]
-        #     pool.terminate()
-        #     if first.state == PlanState.SUCCESS:
-        #         return second
-        #     return first
+        # left = self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, flip)
+        # if DEBUG: print(f"Left plan done. {self.plans[PivotWalk.LEFT].state} in {round(self.plans[PivotWalk.LEFT].cost(),2)}rad")
+        # right =self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, flip)
+        # if DEBUG: print(f"Right plan done. {self.plans[PivotWalk.RIGHT].state} in {round(self.plans[PivotWalk.RIGHT].cost(),2)}rad")
+        # return left.compare(right)
             
-    def __alignWalkRealign__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, direction, flip: bool):
-    # def __alignWalkRealign__(self, data: tuple):
-    #     config = data[0]
-    #     cubeA = data[1]
-    #     cubeB  = data[2]
-    #     edgeB = data[3]
-    #     direction = data[4]
-    #     flip = data[5]
+    #def __alignWalkRealign__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, direction, flip: bool) -> Plan:
+    def __alignWalkRealign__(self, data: tuple) -> Plan:
+        config = data[0]
+        cubeA = data[1]
+        cubeB  = data[2]
+        edgeB = data[3]
+        direction = data[4]
+        flip = data[5]
+        plan = Plan(initial=config, info=(cubeA,cubeB,edgeB))
         sim = Simulation(DEBUG, False)
         sim.loadConfig(config)
         sim.renderer.markedCubes.add(cubeA)
@@ -110,8 +107,8 @@ class LocalPlanner:
         # Make an initial alignement rotation also handels an initial flip
         initAlign = self.__alignCubesByEdge__(config, cubeA, cubeB, edgeB, flip)
         self.__executeMotions__(sim, [initAlign])
-        self.plans[direction].actions.append(initAlign)
-        self.plans[direction].actions.append(Idle(1))
+        plan.actions.append(initAlign)
+        plan.actions.append(Idle(1))
         if DEBUG: print(f"Initial Align: {initAlign}, flip={flip}")
         config = sim.saveConfig()
         itr = 0
@@ -121,7 +118,7 @@ class LocalPlanner:
             # aligne the cubes as long as poly connection is still possible
             alignTry = 0
             distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
-            while self.__polyConnectPossible__(config, cubeA, cubeB, edgeB) and distance > LocalPlanner.CRITICAL_DISTANCE:
+            while self.__polyConnectPossible__(config, cubeA, cubeB, edgeB):
                 # check if alignement is neccessary
                 rotation = self.__alignCubesByEdge__(config, cubeA, cubeB, edgeB)
                 if abs(rotation.angle) < LocalPlanner.ALIGNED_THRESHOLD:
@@ -133,8 +130,8 @@ class LocalPlanner:
                     rotation.angle /= 2
                 # execute the rotation
                 self.__executeMotions__(sim, [rotation])
-                self.plans[direction].actions.append(rotation)
-                self.plans[direction].actions.append(Idle(1))
+                plan.actions.append(rotation)
+                plan.actions.append(Idle(1))
                 config = sim.saveConfig()
                 distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
                 alignTry += 1
@@ -144,40 +141,37 @@ class LocalPlanner:
                 # if so let magnets do the rest
                 wait = Idle(10)
                 self.__executeMotions__(sim, [wait])
-                self.plans[direction].actions.append(wait)
+                plan.actions.append(wait)
                 idleTry += 1
                 if DEBUG: print(wait)
             else:
                 # if not walk into direction
                 pWalks = self.__walkDirectionDynamic__(config, cubeA, cubeB, direction)
                 self.__executeMotions__(sim, pWalks)
-                self.plans[direction].actions.extend(pWalks)
-                self.plans[direction].actions.append(Idle(1))
+                plan.actions.extend(pWalks)
+                plan.actions.append(Idle(1))
                 idleTry = 0
                 if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
             config = sim.saveConfig()
             # check if cubes are connected at edgeB
             if self.__isConnected__(config, cubeA, cubeB, edgeB):
-                self.plans[direction].state = PlanState.SUCCESS
+                plan.state = PlanState.SUCCESS
                 break
             # check if you can connect the polys of A and B
             if not self.__polyConnectPossible__(config, cubeA, cubeB, edgeB):
-                self.plans[direction].state = PlanState.FAILURE_POLY_CON
+                plan.state = PlanState.FAILURE_POLY_CON
                 break
             # if we cant conect after a lot of iterations report failure
             if itr >= LocalPlanner.MAX_ITR:
-                self.plans[direction].state = PlanState.FAILURE_MAX_ITR
+                plan.state = PlanState.FAILURE_MAX_ITR
                 break
             itr += 1
-        print(f"itrations: {itr}")
-        sim.stateHandler.timer.printTimeStats()
+        #print(f"itrations: {itr}")
+        #sim.stateHandler.timer.printTimeStats()
         sim.terminate()
-        self.plans[direction].actions.append(Idle(3))
-        self.plans[direction].goal = config
-        return direction
-
-    def __dynamicAlign__():
-        pass
+        plan.actions.append(Idle(3))
+        plan.goal = config
+        return plan
 
     def __alignCubesByEdge__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, flip: bool=False):
         magAng = config.magAngle
@@ -185,7 +179,8 @@ class LocalPlanner:
         posB = config.getPosition(cubeB)
         vecBA = posA - posB
         vecEdgeB = edgeB.vec(magAng)
-        if edgeB in (Direction.WEST, Direction.EAST):
+        distance = vecBA.length
+        if edgeB in (Direction.WEST, Direction.EAST) or distance < LocalPlanner.CRITICAL_DISTANCE:
             # For side connection, or if cubes are near enought, just rotate edgeB to vecBA
             vecDes = vecBA
             vecSrc = vecEdgeB
@@ -267,33 +262,3 @@ class LocalPlanner:
         for motion in motions:
             sim.executeMotion(motion)
         sim.stop()
-
-        #----multi threading solution. 50% slower than just single thread.
-        # with ThreadPoolExecutor(2) as executor:
-        #    terminated = Event()
-        #    left = executor.submit(self.__alignWalkRealign__, initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, terminated)
-        #    right = executor.submit(self.__alignWalkRealign__, initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, terminated)
-        #    done, notDone = wait([left, right], return_when=FIRST_COMPLETED)
-        #    firstPlan = done.pop().result()
-        #    if firstPlan.state == PlanState.SUCCESS:
-        #        terminated.set()
-        #        executor.shutdown(wait=False)
-        #        return firstPlan
-        #    done, _ = wait(notDone, return_when=ALL_COMPLETED)
-        #    executor.shutdown(wait=False)
-        #    secondPlan = done.pop().result()
-        #    if secondPlan.state == PlanState.SUCCESS:
-        #        return secondPlan
-        #    return firstPlan
-        #----Use multi processing. I cant return a plan because "It iS nO ThReAd.LoCk ObJeCt"... wichser
-        # with Pool(2) as pool:
-        #     it = pool.imap_unordered(self.__alignWalkRealign__,[(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT),(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT)])
-        #     first = next(it)
-        #     if first.state == PlanState.SUCCESS:
-        #         pool.terminate()
-        #         return first
-        #     second = next(it)
-        #     pool.terminate()
-        #     if first.state == PlanState.SUCCESS:
-        #         return second
-        #     return first

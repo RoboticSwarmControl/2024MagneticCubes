@@ -26,3 +26,11 @@ seed 17 size 4:
     single update is not enought for poly info.
     one full iteration until releasing poly connect not possible.
     Due to bad random generation I guess.
+
+seed 22 size 4:
+    angle cutting doesnt get below threshhold cause the polys are intertwined
+    endless loop with aligning
+
+seed 10 size 4:
+    side magnet prevents the connection to top magnet
+    resulting poly would be illegal

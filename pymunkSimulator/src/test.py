@@ -216,7 +216,7 @@ def twoCubeConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 2
+    samples = 50
     for i in range(samples):
         factory.generator.seed(seed)
         config = factory.randomConfigWithCubes((800,800), 2, 1)
@@ -252,7 +252,7 @@ def twoPolyConnect():
     planer = LocalPlanner()
     plans = {}
     globalTime = 0
-    samples = 1
+    samples = 5
     for i in range(samples):
         factory.generator.seed(seed)
         p1 = factory.randomPoly(size)

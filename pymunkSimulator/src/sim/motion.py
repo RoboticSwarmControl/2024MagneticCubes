@@ -28,6 +28,15 @@ class Motion:
     
     def cost(self):
         return 0
+    
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['executed']
+        return state
+    
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.executed = Event()
 
 class PivotWalk(Motion):
     """
