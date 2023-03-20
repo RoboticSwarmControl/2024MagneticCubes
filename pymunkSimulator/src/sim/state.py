@@ -78,7 +78,6 @@ class Cube:
     def magForce1on2(pos1, pos2, ori1, ori2) -> Vec2d:  # https://en.wikipedia.org/wiki/Magnetic_moment
         # rhat = unitvector pointing from magnet 1 to magnet 2 and r is the distance
         pos1 = Vec2d(pos1[0], pos1[1])
-        pos2 = Vec2d(pos2[0], pos2[1])
         r = pos1.get_distance(pos2)
         if r < 2*(Cube.RAD-Cube.MRAD):
             r = 2*(Cube.RAD-Cube.MRAD)  # limits the amount of force applied

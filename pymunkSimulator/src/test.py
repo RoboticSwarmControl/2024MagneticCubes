@@ -30,6 +30,29 @@ def polyTest():
     print(poly.getTopRow())
     print(poly.getBottomRow())
 
+def directPolyAngCalc():
+    seed = 1
+    factory.generator.seed(seed)
+    p1 = factory.linePoly(3, vertical=True)
+    c1ref = p1.getCubes()[0]
+    p2 = factory.linePoly(6, vertical=False)
+    c2ref = p2.getCubes()[0]
+    cf = factory.configWithPolys((800,800), math.radians(90), [p1,p2],[(300,400),(600,400)])
+    planner = LocalPlanner()
+    cf = planner.singleUpdate(cf)
+    p1 = cf.getPolyominoes().getPoly(c1ref)
+    p2 = cf.getPolyominoes().getPoly(c2ref)
+    r1 = cf.getCOM(p1) - cf.getPosition(c1ref)
+    r2 = cf.getCOM(p2) - cf.getPosition(c2ref)
+    step = 5
+    rotAng = step
+    angDiff = {}
+    while rotAng < 360:
+        r1 = r1.rotated_degrees(step)
+        r2 = r2.rotated_degrees(step)
+        rotAng += step
+
+
 def polyEqualTest():
     c0 = Cube(0)
     c1 = Cube(1)
@@ -247,9 +270,9 @@ def twoCubeConnect():
 
 def twoPolyConnect():
     #----------------------
-    seed = 1
+    seed = 34
     size = 4
-    samples = 1
+    samples = 15
     #----------------------
     planer = LocalPlanner()
     plans = {}
@@ -281,4 +304,4 @@ def twoPolyConnect():
 
 
 if __name__ == "__main__":
-    twoPolyConnect()
+    motionAnalysis()

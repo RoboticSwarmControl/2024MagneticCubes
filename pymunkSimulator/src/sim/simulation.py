@@ -20,8 +20,8 @@ class Simulation:
     Top-level class for interacting with the Simulation
     """
 
-    # (in seconds) bigger steps make sim faster but unprecise/unstable 0.04 seems reasonable
-    STEP_TIME = 0.05
+    # (in seconds) bigger steps make sim faster but unprecise/unstable 0.05 seems reasonable
+    STEP_TIME = 0.07
 
     def __init__(self, drawing=True, userControls=True):
         """
@@ -276,12 +276,12 @@ class Simulation:
     
     def __info__(self):
         config = self.stateHandler.saveConfig()
-        self.renderer.pointsToDraw.clear()
-        print(math.degrees(config.magAngle))
-        for poly in config.getPolyominoes().getAll():
-            #self.renderer.pointsToDraw.append((Renderer.BLUE, config.getPivotS(poly),4))
-            #self.renderer.pointsToDraw.append((Renderer.RED, config.getPivotN(poly),4))
-            start = config.getCOM(poly)
-            self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
-            end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
-            self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))
+        self.stateHandler.timer.printTimeStats()
+        # self.renderer.pointsToDraw.clear()
+        # for poly in config.getPolyominoes().getAll():
+        #     self.renderer.pointsToDraw.append((Renderer.BLUE, config.getPivotS(poly),4))
+        #     self.renderer.pointsToDraw.append((Renderer.RED, config.getPivotN(poly),4))
+        #     start = config.getCOM(poly)
+        #     self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
+        #     end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
+        #     self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))

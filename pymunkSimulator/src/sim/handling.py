@@ -151,29 +151,37 @@ class StateHandler:
         shapej = self.getCubeShape(cubej)
         angi = shapei.body.angle
         angj = shapej.body.angle
-        for i, magPosLi in enumerate(cubei.magnetPos):
-            for j, magPosLj in enumerate(cubej.magnetPos):
-                t0 = time.time()
-                magPosi = shapei.body.local_to_world(magPosLi)
-                magOrii = cubei.magnetOri[i]
-                mi = Vec2d(magOrii[0],magOrii[1]).rotated(angi)
-                magPosj = shapej.body.local_to_world(magPosLj)
-                magOrij = cubej.magnetOri[j]
-                mj = Vec2d(magOrij[0],magOrij[1]).rotated(angj)
-                fionj = Cube.magForce1on2(magPosi, magPosj, mi, mj)
-                self.timer.addToTask("mag_calc", time.time() - t0)
-                t0 = time.time()
-                shapei.body.apply_force_at_world_point(
-                    (-fionj[0], -fionj[1]), magPosi)
-                shapej.body.apply_force_at_world_point(
-                    fionj,                magPosj)
-                self.timer.addToTask("mag_apply", time.time() - t0)
-                # Determine magnet connections
-                t0 = time.time()
-                if fionj.length >= StateHandler.CONNECTION_FORCE_MIN:
-                    self.__connectMagnets__(
-                        cubei, Direction(i), cubej, Direction(j))
-                self.timer.addToTask("mag_conn", time.time() - t0)
+        t0 = time.time()
+        # determine the magnetpair with the smallest distance
+        dismin = math.inf
+        for i in range(4):
+            for j in range(4):
+                magPosi = shapei.body.local_to_world(cubei.magnetPos[i])
+                magPosj = shapej.body.local_to_world(cubej.magnetPos[j])
+                dis = Vec2d(magPosi[0], magPosi[1]).get_distance(magPosj)
+                if dis < dismin:
+                    dismin = dis
+                    imin = i
+                    jmin = j
+        # calc magnetic force only for this magnet pair
+        magPosi = shapei.body.local_to_world(cubei.magnetPos[imin])
+        magOrii = cubei.magnetOri[imin]
+        mi = Vec2d(magOrii[0],magOrii[1]).rotated(angi)
+        magPosj = shapej.body.local_to_world(cubej.magnetPos[jmin])
+        magOrij = cubej.magnetOri[jmin]
+        mj = Vec2d(magOrij[0],magOrij[1]).rotated(angj)
+        fionj = Cube.magForce1on2(magPosi, magPosj, mi, mj)
+        self.timer.addToTask("mag_calc", time.time() - t0)
+        t0 = time.time()
+        shapei.body.apply_force_at_world_point((-fionj[0], -fionj[1]), magPosi)
+        shapej.body.apply_force_at_world_point(fionj, magPosj)
+        self.timer.addToTask("mag_apply", time.time() - t0)
+        # Determine magnet connections
+        t0 = time.time()
+        if fionj.length >= StateHandler.CONNECTION_FORCE_MIN:
+            self.__connectMagnets__(
+                cubei, Direction(imin), cubej, Direction(jmin))
+        self.timer.addToTask("mag_conn", time.time() - t0)
         self.timer.addToTask("force_mag", time.time() - ts)
 
     def __connectMagnets__(self, cubei: Cube, edgei: Direction, cubej: Cube, edgej: Direction):
@@ -469,3 +477,36 @@ class Timer:
         for task, time in self.__task_time.items():
             portion = (time / self.__total_time) * 100
             print(f"    {task}: {round(portion, 2)}%")
+
+
+# magnet force between all magnets
+# def __applyForceMagnets__(self, cubei: Cube, cubej: Cube):
+#         ts = time.time()
+#         shapei = self.getCubeShape(cubei)
+#         shapej = self.getCubeShape(cubej)
+#         angi = shapei.body.angle
+#         angj = shapej.body.angle
+#         for i, magPosLi in enumerate(cubei.magnetPos):
+#             for j, magPosLj in enumerate(cubej.magnetPos):
+#                 t0 = time.time()
+#                 magPosi = shapei.body.local_to_world(magPosLi)
+#                 magOrii = cubei.magnetOri[i]
+#                 mi = Vec2d(magOrii[0],magOrii[1]).rotated(angi)
+#                 magPosj = shapej.body.local_to_world(magPosLj)
+#                 magOrij = cubej.magnetOri[j]
+#                 mj = Vec2d(magOrij[0],magOrij[1]).rotated(angj)
+#                 fionj = Cube.magForce1on2(magPosi, magPosj, mi, mj)
+#                 self.timer.addToTask("mag_calc", time.time() - t0)
+#                 t0 = time.time()
+#                 shapei.body.apply_force_at_world_point(
+#                     (-fionj[0], -fionj[1]), magPosi)
+#                 shapej.body.apply_force_at_world_point(
+#                     fionj,                magPosj)
+#                 self.timer.addToTask("mag_apply", time.time() - t0)
+#                 # Determine magnet connections
+#                 t0 = time.time()
+#                 if fionj.length >= StateHandler.CONNECTION_FORCE_MIN:
+#                     self.__connectMagnets__(
+#                         cubei, Direction(i), cubej, Direction(j))
+#                 self.timer.addToTask("mag_conn", time.time() - t0)
+#         self.timer.addToTask("force_mag", time.time() - ts)
