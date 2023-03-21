@@ -270,9 +270,9 @@ def twoCubeConnect():
 
 def twoPolyConnect():
     #----------------------
-    seed = 36
+    seed = 18
     size = 4
-    samples = 10
+    samples = 15
     #----------------------
     planer = LocalPlanner()
     plans = {}

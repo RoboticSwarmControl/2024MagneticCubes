@@ -49,7 +49,7 @@ class LocalPlanner:
         sim = Simulation(False, False)
         sim.loadConfig(config)
         sim.start()
-        sim.executeMotion(Idle(3))
+        sim.executeMotion(Idle(2))
         return sim.terminate()
 
     def planCubeConnect(self, initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Plan:
@@ -112,7 +112,7 @@ class LocalPlanner:
         sim.renderer.markedCubes.add(cubeA)
         sim.renderer.markedCubes.add(cubeB)
         # Make an initial alignement rotation also handels an initial flip
-        initAlign = self.__alignCubesByEdge__(config, cubeA, cubeB, edgeB, flip)
+        initAlign = self.__alignCubes__(config, cubeA, cubeB, edgeB, flip)
         self.__executeMotions__(sim, [initAlign])
         plan.actions.append(initAlign)
         plan.actions.append(Idle(1))
@@ -125,9 +125,9 @@ class LocalPlanner:
             # aligne the cubes as long as poly connection is still possible
             alignTry = 0
             distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
-            while self.__polyConnectPossible__(config, cubeA, cubeB, edgeB):
+            while self.__polyConnectPossible__(config, cubeA, cubeB, edgeB) and alignTry < LocalPlanner.ALIGN_TRIES + 5:
                 # check if alignement is neccessary
-                rotation = self.__alignCubesByEdge__(config, cubeA, cubeB, edgeB)
+                rotation = self.__alignCubes__(config, cubeA, cubeB, edgeB)
                 if abs(rotation.angle) < LocalPlanner.ALIGNED_THRESHOLD:
                     if DEBUG: print(f"Aligned.")
                     break
@@ -180,34 +180,43 @@ class LocalPlanner:
         plan.goal = config
         return plan
 
-    def __alignCubesByEdge__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, flip: bool=False):
-        magAng = config.magAngle
-        posA = config.getPosition(cubeA)
-        posB = config.getPosition(cubeB)
-        vecBA = posA - posB
-        vecEdgeB = edgeB.vec(magAng)
-        distance = vecBA.length
+    def __alignCubes__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, flip: bool=False):
+        distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
         if edgeB in (Direction.WEST, Direction.EAST) or distance < LocalPlanner.CRITICAL_DISTANCE:
-            # For side connection, or if cubes are near enought, just rotate edgeB to vecBA
-            vecDes = vecBA
-            vecSrc = vecEdgeB
+            # For side connection, or if cubes are near enought, do straight align
             if DEBUG: print("Straight align")
+            return self.__straightAlign__(config, cubeA, cubeB, edgeB)
         else:
-            # For Top bottom connection move vecDes one cube length perpendicular to vecAB
-            vecPer = LocalPlanner.NS_ALIGN_OFFSET * vecBA.perpendicular_normal()
-            dotPerEdgeB = round(vecPer.dot(vecEdgeB), 3)
-            if bool(dotPerEdgeB <= 0) ^ flip:
-                vecDes = vecBA + vecPer
-            else:
-                vecDes = vecBA - vecPer
-            # Take either west or east as vecSrc. Always the angle <= 90
-            vecE = Direction.EAST.vec(magAng)
-            vecW = Direction.WEST.vec(magAng)
-            if (bool(vecDes.dot(vecE) >= 0) ^ bool(dotPerEdgeB == 0)) ^ flip:
-                vecSrc = vecE
-            else:
-                vecSrc = vecW
+            # For Top bottom connection do n-s align
             if DEBUG: print("N-S align")
+            return self.__northSouthAlign__(config, cubeA, cubeB, edgeB, flip)
+
+    def __straightAlign__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Rotation:
+        magAng = config.magAngle
+        vecBA = config.getPosition(cubeA) - config.getPosition(cubeB)
+        vecEdgeB = edgeB.vec(magAng)
+        # Calculate the rotation
+        rotAng = vecEdgeB.get_angle_between(vecBA)
+        return Rotation(rotAng)
+
+    def __northSouthAlign__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, flip:bool) -> Rotation:
+        magAng = config.magAngle
+        vecBA = config.getPosition(cubeA) - config.getPosition(cubeB)
+        vecEdgeB = edgeB.vec(magAng)
+        # move vecDes one cube length perpendicular to vecAB
+        vecPer = LocalPlanner.NS_ALIGN_OFFSET * vecBA.perpendicular_normal()
+        dotPerEdgeB = round(vecPer.dot(vecEdgeB), 3)
+        if bool(dotPerEdgeB <= 0) ^ flip:
+            vecDes = vecBA + vecPer
+        else:
+            vecDes = vecBA - vecPer
+        # Take either west or east as vecSrc. Always the angle <= 90, or >= 90 if flip is set
+        vecE = Direction.EAST.vec(magAng)
+        vecW = Direction.WEST.vec(magAng)
+        if (bool(vecDes.dot(vecE) >= 0) ^ bool(dotPerEdgeB == 0)) ^ flip:
+            vecSrc = vecE
+        else:
+            vecSrc = vecW
         # Calculate the rotation
         rotAng = vecSrc.get_angle_between(vecDes)
         return Rotation(rotAng)

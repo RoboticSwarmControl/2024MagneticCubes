@@ -153,7 +153,7 @@ class StateHandler:
         angj = shapej.body.angle
         # determine which pairs to consider
         t0 = time.time()
-        pairs = self.__magPairsAll__(cubei, cubej)
+        pairs = self.__magPairsMinDist__(cubei, cubej)
         self.timer.addToTask("mag_deter", time.time() - t0)
         # calc magnetic force for the determined magnet pairs
         for i, j in pairs:
