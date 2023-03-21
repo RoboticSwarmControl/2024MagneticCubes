@@ -49,7 +49,7 @@ class LocalPlanner:
         sim = Simulation(False, False)
         sim.loadConfig(config)
         sim.start()
-        sim.executeMotion(Idle(1))
+        sim.executeMotion(Idle(3))
         return sim.terminate()
 
     def planCubeConnect(self, initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Plan:
@@ -138,7 +138,7 @@ class LocalPlanner:
                 # execute the rotation
                 self.__executeMotions__(sim, [rotation])
                 plan.actions.append(rotation)
-                plan.actions.append(Idle(1))
+                plan.actions.append(Idle(2))
                 config = sim.saveConfig()
                 distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
                 alignTry += 1
@@ -156,7 +156,7 @@ class LocalPlanner:
                 pWalks = self.__walkDirectionDynamic__(config, cubeA, cubeB, direction)
                 self.__executeMotions__(sim, pWalks)
                 plan.actions.extend(pWalks)
-                plan.actions.append(Idle(1))
+                plan.actions.append(Idle(2))
                 idleTry = 0
                 if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
             config = sim.saveConfig()
@@ -176,7 +176,7 @@ class LocalPlanner:
         #print(f"itrations: {itr}")
         #sim.stateHandler.timer.printTimeStats()
         sim.terminate()
-        plan.actions.append(Idle(3))
+        plan.actions.append(Idle(2))
         plan.goal = config
         return plan
 

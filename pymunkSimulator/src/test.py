@@ -2,6 +2,7 @@
 
 import time
 from pymunk import Vec2d
+from sim.handling import Renderer
 
 from sim.simulation import Simulation
 from sim.state import *
@@ -33,9 +34,9 @@ def polyTest():
 def directPolyAngCalc():
     seed = 1
     factory.generator.seed(seed)
-    p1 = factory.linePoly(3, vertical=True)
+    p1 = factory.linePolyVert(3, vertical=True)
     c1ref = p1.getCubes()[0]
-    p2 = factory.linePoly(6, vertical=False)
+    p2 = factory.linePolyVert(6, vertical=False)
     c2ref = p2.getCubes()[0]
     cf = factory.configWithPolys((800,800), math.radians(90), [p1,p2],[(300,400),(600,400)])
     planner = LocalPlanner()
@@ -149,7 +150,7 @@ def randomPolyTest():
     samples = 5
     polys = []
     for _ in range(samples):
-        polys.append(factory.linePoly(10, 1, False))
+        polys.append(factory.linePolyVert(10, 1, False))
     polys = PolyCollection(polys)
     print(polys)
 
@@ -166,7 +167,7 @@ def motionAnalysis():
     rot180 = Rotation(math.radians(180))
     for size in range(1,maxSize+1):
         #size = 4
-        config = factory.configWithPolys((1000,1000), math.radians(90), [factory.linePoly(size)], [(400,600)])
+        config = factory.configWithPolys((1000,1000), math.radians(90), [factory.linePolyVert(size)], [(400,600)])
         refCube = config.getCubes()[0]
         save0 = pl.singleUpdate(config)
         sim.loadConfig(save0)
@@ -176,15 +177,14 @@ def motionAnalysis():
         sim.stop()
         t1 = time.time()
         save1 = sim.saveConfig()
-        dt = t1 -t0
         poly0 = save0.getPolyominoes().getPoly(refCube)
         poly1 = save1.getPolyominoes().getPoly(refCube)
         displacementIdeal = save0.getPivotWalkingVec(poly0, pWalk.pivotAng, pWalk.direction)
         displacement = save1.getCOM(poly1) - save0.getCOM(poly0)
         angDiff = displacement.get_angle_degrees_between(displacementIdeal)
-        lenDiff = (displacementIdeal.length - displacement.length) / (2 * Cube.RAD)
+        lenDiff = (displacement.length / displacementIdeal.length) * 100
         print(f"Poly size {size}:")
-        print(f"[{pWalk}] Time: {round(t1 -t0, 4)}s, AngDiff: {round(angDiff,3)}°, LenDiff: {round(lenDiff, 3)}ø")
+        print(f"[{pWalk}] Time: {round(t1 -t0, 4)}s, AngDiff: {round(angDiff,3)}°, LenOfIdeal: {round(lenDiff, 3)}%")
         t0 = time.time()
         sim.start()
         sim.executeMotion(rot10)
@@ -270,9 +270,9 @@ def twoCubeConnect():
 
 def twoPolyConnect():
     #----------------------
-    seed = 34
+    seed = 36
     size = 4
-    samples = 15
+    samples = 10
     #----------------------
     planer = LocalPlanner()
     plans = {}
@@ -304,4 +304,4 @@ def twoPolyConnect():
 
 
 if __name__ == "__main__":
-    motionAnalysis()
+    twoPolyConnect()

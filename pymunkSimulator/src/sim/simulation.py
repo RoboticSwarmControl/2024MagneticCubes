@@ -214,8 +214,8 @@ class Simulation:
                 self.currentMotion = None
                 return Step()
             self.currentMotion = self.motionsToExecute.get()
-            longestChain = self.stateHandler.polyominoes.maxSize
-            #longestChain = max(self.stateHandler.polyominoes.maxWidth, self.stateHandler.polyominoes.maxHeight)
+            #longestChain = self.stateHandler.polyominoes.maxSize
+            longestChain = max(self.stateHandler.polyominoes.maxWidth, self.stateHandler.polyominoes.maxHeight)
             steps = self.currentMotion.stepSequence(Simulation.STEP_TIME, longestChain)
             for i in steps:
                 self.motionSteps.put(i)
@@ -276,12 +276,12 @@ class Simulation:
     
     def __info__(self):
         config = self.stateHandler.saveConfig()
-        self.stateHandler.timer.printTimeStats()
-        # self.renderer.pointsToDraw.clear()
-        # for poly in config.getPolyominoes().getAll():
-        #     self.renderer.pointsToDraw.append((Renderer.BLUE, config.getPivotS(poly),4))
-        #     self.renderer.pointsToDraw.append((Renderer.RED, config.getPivotN(poly),4))
-        #     start = config.getCOM(poly)
-        #     self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
-        #     end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
-        #     self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))
+        #self.stateHandler.timer.printTimeStats()
+        self.renderer.pointsToDraw.clear()
+        for poly in config.getPolyominoes().getAll():
+            self.renderer.pointsToDraw.append((Renderer.BLUE, config.getPivotS(poly),4))
+            self.renderer.pointsToDraw.append((Renderer.RED, config.getPivotN(poly),4))
+            start = config.getCOM(poly)
+            self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
+            end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
+            self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))

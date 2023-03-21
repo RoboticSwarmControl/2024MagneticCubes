@@ -75,11 +75,8 @@ def randomConfigWithPolys(size, polyominoes: list):
     return config
 
 
-def linePoly(ncubes, nred=None, vertical=True):
-    if vertical:
-        edge = Direction.NORTH
-    else:
-        edge = Direction.EAST
+def linePolyVert(ncubes, nred=None):
+    conEdge = Direction.NORTH
     poly = None
     lastCube = None
     for i in range(ncubes):
@@ -93,9 +90,30 @@ def linePoly(ncubes, nred=None, vertical=True):
             poly = Polyomino(newCube)
             lastCube = newCube
             continue
-        poly.connect(newCube, lastCube, edge)
+        poly.connect(newCube, lastCube, conEdge)
         lastCube = newCube
     return poly
+
+
+def linePolyHori(ncubes, firstType=None):
+    if firstType == None:
+        firstType = generator.randint(0,1)
+    conEdge = Direction.EAST
+    poly = None
+    lastCube = None
+    for i in range(ncubes):
+        # create cube
+        newCube = Cube(firstType)
+        firstType = (firstType + 1) % 2
+        # if first iteration create a poly
+        if poly == None:
+            poly = Polyomino(newCube)
+            lastCube = newCube
+            continue
+        poly.connect(newCube, lastCube, conEdge)
+        lastCube = newCube
+    return poly
+    
 
 
 def randomPoly(ncubes, nred=None):
