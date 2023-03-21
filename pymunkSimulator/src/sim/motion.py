@@ -92,6 +92,8 @@ class Rotation(Motion):
         return f"Rotation({round(math.degrees(self.angle),2)}°)"
 
     def stepSequence(self, stepTime, longestChain):
+        if self.angle == 0:
+            return [Step()]
         steps = []
         updates = math.ceil(abs(self.angle) / (Rotation.ANG_VELOCITY * stepTime))
         angPerUpdate = self.angle / updates

@@ -23,7 +23,7 @@ class LocalPlanner:
     SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 2
     PWALK_ANG_BIG = PivotWalk.DEFAULT_PIVOT_ANG
     PWALK_ANG_SMALL = PWALK_ANG_BIG / 1.5
-    PWALK_PORTION = 2/3
+    PWALK_PORTION = 1/2
     IDLE_TRIES = 1
 
     def executePlan(self, plan: Plan):
@@ -72,18 +72,25 @@ class LocalPlanner:
             return Plan(initial=initial, state=PlanState.FAILURE_SLIDE_IN, info=info)
         # determine which plans to execute. left and right either with or without initial flip
         plansToExec = []
-        faceingDirection = self.__faceingDirection__(initial, cubeA, cubeB)
-        if faceingDirection in slideDirections:
-            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, False))
-            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, False))
-        if faceingDirection.inv() in slideDirections:
-            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, True))
-            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, True))
-        # calc plans in parallel take the first successfull plan
-        print(f"Starting {len(plansToExec)} processes for simulation...")
-        with Pool(len(plansToExec)) as pool:
-            it = pool.imap_unordered(self.__alignWalkRealign__, plansToExec)
-            for i in range(len(plansToExec)):
+        faceing = self.__faceingDirection__(initial, cubeA, cubeB)
+        facingInv = faceing.inv()
+        if faceing in slideDirections:
+            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, faceing))
+            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, faceing))
+        if facingInv  in slideDirections:
+            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, facingInv))
+            plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, facingInv))
+        if DEBUG:
+            return self.__planSequential__(plansToExec)
+        else:
+            return self.__planParallel__(plansToExec)
+        
+
+    def __planParallel__(self, data) -> Plan:
+        print(f"Starting {len(data)} processes for simulation...")
+        with Pool(len(data)) as pool:
+            it = pool.imap_unordered(self.__alignWalkRealign__, data)
+            for i in range(len(data)):
                 plan = next(it)
                 print(f"{i+1} finished: {plan}")
                 if plan.state == PlanState.SUCCESS:
@@ -91,13 +98,19 @@ class LocalPlanner:
                     return plan
             pool.terminate()
             return plan
-        # Make plans for moving left, right and choose better one
-        # left = self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, flip)
-        # if DEBUG: print(f"Left plan done. {self.plans[PivotWalk.LEFT].state} in {round(self.plans[PivotWalk.LEFT].cost(),2)}rad")
-        # right =self.__alignWalkRealign__(initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, flip)
-        # if DEBUG: print(f"Right plan done. {self.plans[PivotWalk.RIGHT].state} in {round(self.plans[PivotWalk.RIGHT].cost(),2)}rad")
-        # return left.compare(right)
+
+    def __planSequential__(self, data) -> Plan:
+        optPlan = None
+        for i, item in enumerate(data):
+            plan = self.__alignWalkRealign__(item)
+            print(f"{i+1} finished: {plan}")
+            if optPlan == None:
+                optPlan = plan
+            else:
+                optPlan = optPlan.compare(plan)
+        return optPlan
             
+
     #def __alignWalkRealign__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, direction, flip: bool) -> Plan:
     def __alignWalkRealign__(self, data: tuple) -> Plan:
         config = data[0]
@@ -105,45 +118,26 @@ class LocalPlanner:
         cubeB  = data[2]
         edgeB = data[3]
         direction = data[4]
-        flip = data[5]
+        slide = data[5]
         plan = Plan(initial=config, info=(cubeA,cubeB,edgeB))
         sim = Simulation(DEBUG, False)
         sim.loadConfig(config)
         sim.renderer.markedCubes.add(cubeA)
         sim.renderer.markedCubes.add(cubeB)
-        # Make an initial alignement rotation also handels an initial flip
-        initAlign = self.__alignCubes__(config, cubeA, cubeB, edgeB, flip)
-        self.__executeMotions__(sim, [initAlign])
-        plan.actions.append(initAlign)
-        plan.actions.append(Idle(1))
-        if DEBUG: print(f"Initial Align: {initAlign}, flip={flip}")
-        config = sim.saveConfig()
         itr = 0
         idleTry = 0
         while True:
             if DEBUG: print(f"Itr: {itr}")
-            # aligne the cubes as long as poly connection is still possible
-            alignTry = 0
-            distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
-            while self.__polyConnectPossible__(config, cubeA, cubeB, edgeB) and alignTry < LocalPlanner.ALIGN_TRIES + 5:
-                # check if alignement is neccessary
-                rotation = self.__alignCubes__(config, cubeA, cubeB, edgeB)
-                if abs(rotation.angle) < LocalPlanner.ALIGNED_THRESHOLD:
-                    if DEBUG: print(f"Aligned.")
-                    break
-                # after normal align failed ALIGN_TRIES times we cut the angle in half to avoid oscilation
-                if alignTry > LocalPlanner.ALIGN_TRIES:
-                    if DEBUG: print(f"Cutting rotation in half.")
-                    rotation.angle /= 2
-                # execute the rotation
-                self.__executeMotions__(sim, [rotation])
-                plan.actions.append(rotation)
-                plan.actions.append(Idle(2))
-                config = sim.saveConfig()
-                distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
-                alignTry += 1
-                if DEBUG: print(rotation)
+            # aligne the cubes
+            rotation = self.__alignCubes__(config, cubeA, cubeB, edgeB, slide)
+            # execute the rotation
+            self.__executeMotions__(sim, [rotation])
+            plan.actions.append(rotation)
+            plan.actions.append(Idle(2))
+            config = sim.saveConfig()
+            if DEBUG: print(rotation)
             # check if cubes are in critical distance for magnets to attract
+            distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
             if distance < LocalPlanner.CRITICAL_DISTANCE and idleTry < LocalPlanner.IDLE_TRIES:
                 # if so let magnets do the rest
                 wait = Idle(10)
@@ -174,52 +168,51 @@ class LocalPlanner:
                 break
             itr += 1
         #print(f"itrations: {itr}")
-        #sim.stateHandler.timer.printTimeStats()
+        sim.stateHandler.timer.printTimeStats()
         sim.terminate()
         plan.actions.append(Idle(2))
         plan.goal = config
         return plan
 
-    def __alignCubes__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, flip: bool=False):
-        distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
-        if edgeB in (Direction.WEST, Direction.EAST) or distance < LocalPlanner.CRITICAL_DISTANCE:
+    def __alignCubes__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction):
+        posA = config.getPosition(cubeA)
+        posB = config.getPosition(cubeB)
+        comA = config.getCOM(config.getPolyominoes().getPoly(cubeA))
+        comB = config.getCOM(config.getPolyominoes().getPoly(cubeB))
+        #distance = posA.get_distance(posB)
+        if edgeB in (Direction.WEST, Direction.EAST):
             # For side connection, or if cubes are near enought, do straight align
+            alignEdge = edgeB
             if DEBUG: print("Straight align")
-            return self.__straightAlign__(config, cubeA, cubeB, edgeB)
         else:
             # For Top bottom connection do n-s align
+            alignEdge = slide.inv()
+            posB += LocalPlanner.NS_ALIGN_OFFSET  * edgeB.vec(config.magAngle)
             if DEBUG: print("N-S align")
-            return self.__northSouthAlign__(config, cubeA, cubeB, edgeB, flip)
+        return self.__calcAlignRotation__(comA, posA, comB, posB, alignEdge, config.magAngle)
 
-    def __straightAlign__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Rotation:
-        magAng = config.magAngle
-        vecBA = config.getPosition(cubeA) - config.getPosition(cubeB)
-        vecEdgeB = edgeB.vec(magAng)
-        # Calculate the rotation
-        rotAng = vecEdgeB.get_angle_between(vecBA)
-        return Rotation(rotAng)
-
-    def __northSouthAlign__(self, config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, flip:bool) -> Rotation:
-        magAng = config.magAngle
-        vecBA = config.getPosition(cubeA) - config.getPosition(cubeB)
-        vecEdgeB = edgeB.vec(magAng)
-        # move vecDes one cube length perpendicular to vecAB
-        vecPer = LocalPlanner.NS_ALIGN_OFFSET * vecBA.perpendicular_normal()
-        dotPerEdgeB = round(vecPer.dot(vecEdgeB), 3)
-        if bool(dotPerEdgeB <= 0) ^ flip:
-            vecDes = vecBA + vecPer
-        else:
-            vecDes = vecBA - vecPer
-        # Take either west or east as vecSrc. Always the angle <= 90, or >= 90 if flip is set
-        vecE = Direction.EAST.vec(magAng)
-        vecW = Direction.WEST.vec(magAng)
-        if (bool(vecDes.dot(vecE) >= 0) ^ bool(dotPerEdgeB == 0)) ^ flip:
-            vecSrc = vecE
-        else:
-            vecSrc = vecW
-        # Calculate the rotation
-        rotAng = vecSrc.get_angle_between(vecDes)
-        return Rotation(rotAng)
+    def __calcAlignRotation__(self, comA: Vec2d, posA: Vec2d, comB: Vec2d, posB: Vec2d, edgeB: Direction, magAngle):
+        step = math.radians(2)
+        minAngDiff = 2 * math.pi
+        minRotAng = 2 * math.pi
+        ang = magAngle
+        while ang < (magAngle + 2 * math.pi):
+            rotAng = ang - magAngle
+            if abs(rotAng) > math.pi:
+                rotAng = -1 * (2 * math.pi - rotAng)
+            rA = (posA - comA).rotated(rotAng)
+            rB = (posB - comB).rotated(rotAng)
+            vecBA = (comA + rA) - (comB + rB)
+            vecEdgeB = edgeB.vec(ang)
+            angDiff = abs(vecEdgeB.get_angle_between(vecBA))
+            if angDiff < LocalPlanner.ALIGNED_THRESHOLD:
+                return Rotation(rotAng)
+            if angDiff < minAngDiff:
+                minAngDiff = angDiff
+                minRotAng = rotAng
+            ang += step
+            #print(f"angleBetween: {round(math.degrees(angDiff),2)}, rotation: {round(math.degrees(rotAng),2)}")
+        return Rotation(minRotAng)
 
     def __walkDirectionDynamic__(self, config: Configuration, cubeA: Cube, cubeB: Cube, direction) -> list:
         posA = config.getPosition(cubeA)
@@ -265,6 +258,10 @@ class LocalPlanner:
         return slide
     
     def __faceingDirection__(self, config: Configuration, cubeA: Cube, cubeB: Cube) -> Direction:
+        """
+        returns 'direction',that cubeB is in 'direction' of cubeA.
+        Direction is either EAST or WEST
+        """
         vecAB = config.getPosition(cubeB) - config.getPosition(cubeA)
         if vecAB.dot(Direction.EAST.vec(config.magAngle)) > 0:
             return Direction.EAST

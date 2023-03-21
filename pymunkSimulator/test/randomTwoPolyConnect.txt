@@ -34,3 +34,6 @@ seed 22 size 4:
 seed 10 size 4:
     side magnet prevents the connection to top magnet
     resulting poly would be illegal
+
+seed 40 size 4:
+    

@@ -43,12 +43,13 @@ def directPolyAngCalc():
     cf = planner.singleUpdate(cf)
     p1 = cf.getPolyominoes().getPoly(c1ref)
     p2 = cf.getPolyominoes().getPoly(c2ref)
-    r1 = cf.getCOM(p1) - cf.getPosition(c1ref)
-    r2 = cf.getCOM(p2) - cf.getPosition(c2ref)
+    
     step = 5
     rotAng = step
     angDiff = {}
     while rotAng < 360:
+        r1 = cf.getPosition(c1ref) - cf.getCOM(p1)
+        r2 = cf.getPosition(c2ref) - cf.getCOM(p2)
         r1 = r1.rotated_degrees(step)
         r2 = r2.rotated_degrees(step)
         rotAng += step
@@ -270,9 +271,9 @@ def twoCubeConnect():
 
 def twoPolyConnect():
     #----------------------
-    seed = 18
+    seed = 39
     size = 4
-    samples = 15
+    samples = 1
     #----------------------
     planer = LocalPlanner()
     plans = {}
