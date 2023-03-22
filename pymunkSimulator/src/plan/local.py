@@ -7,7 +7,7 @@ from sim.state import *
 from plan.plan import *
 
 
-DEBUG = True
+DEBUG = False
 
 MAX_ITR = 24
 
@@ -106,6 +106,10 @@ def __alignWalkRealign(data: tuple) -> Plan:
         plan.actions.append(Idle(1))
         config = sim.saveConfig()
         if DEBUG: print(rotation)
+        # update the planstate. Check failure and success conditions
+        plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide, itr)
+        if plan.state != PlanState.UNDEFINED:
+            break
         # check if cubes are in critical distance for magnets to attract
         distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
         if distance < CRITICAL_DISTANCE and idleTry < IDLE_TRIES:
@@ -125,31 +129,15 @@ def __alignWalkRealign(data: tuple) -> Plan:
             idleTry = 0
             if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
         config = sim.saveConfig()
-        # check if cubes are connected at edgeB
-        if __isConnected(config, cubeA, cubeB, edgeB):
-            plan.state = PlanState.SUCCESS
-            break
-        # check if you can connect the polys of A and B
-        if not __connectPossible(config, cubeA, cubeB, edgeB):
-            plan.state = PlanState.FAILURE_CONNECT
-            break
-        # check if we cant slide in anymore
-        if not slide in __slideInDirections(config, cubeA, cubeB, edgeB):
-            plan.state = PlanState.FAILURE_SLIDE_IN
-            break
-        # check if config contains inValid polys
-        if config.getPolyominoes().containsInvalid():
-            plan.state = PlanState.FAILURE_INVAL_POLY
-            break
-        # if we cant conect after a lot of iterations report failure
-        if itr >= MAX_ITR:
-            plan.state = PlanState.FAILURE_MAX_ITR
+        # update the planstate. Check failure and success conditions
+        plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide, itr)
+        if plan.state != PlanState.UNDEFINED:
             break
         itr += 1
-    #print(f"itrations: {itr}")
-    #sim.stateHandler.timer.printTimeStats()
     sim.terminate()
     plan.goal = config
+    #print(f"itrations: {itr}")
+    #sim.stateHandler.timer.printTimeStats()
     return plan
 
 def __alignCubes(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction):
@@ -157,7 +145,6 @@ def __alignCubes(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Directi
     posB = config.getPosition(cubeB)
     comA = config.getCOM(config.getPolyominoes().getPoly(cubeA))
     comB = config.getCOM(config.getPolyominoes().getPoly(cubeB))
-    #distance = posA.get_distance(posB)
     if edgeB in (Direction.WEST, Direction.EAST):
         # For side connection, or if cubes are near enought, do straight align
         alignEdge = edgeB
@@ -210,6 +197,24 @@ def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction) ->
     # estimate the pivot steps neccessary for the chasing poly to reach the other. Only take half.
     pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) * PWALK_PORTION)
     return [PivotWalk(direction, pivotAng)] * pivotSteps
+
+def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction, itr) -> PlanState:
+    # check if config contains inValid polys
+    if config.getPolyominoes().containsInvalid():
+        return PlanState.FAILURE_INVAL_POLY
+    # check if cubes are connected at edgeB
+    if __isConnected(config, cubeA, cubeB, edgeB):
+        return PlanState.SUCCESS
+    # check if you can connect the polys of A and B
+    if not __connectPossible(config, cubeA, cubeB, edgeB):
+        return PlanState.FAILURE_CONNECT
+    # check if we cant slide in anymore
+    if not slide in __slideInDirections(config, cubeA, cubeB, edgeB):
+        return PlanState.FAILURE_SLIDE_IN
+    # if we cant conect after a lot of iterations report failure
+    if itr >= MAX_ITR:
+        return PlanState.FAILURE_MAX_ITR
+    return PlanState.UNDEFINED
 
 def __isConnected(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
     polyB = config.getPolyominoes().getPoly(cubeB)

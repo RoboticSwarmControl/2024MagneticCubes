@@ -205,21 +205,24 @@ class Simulation:
             The next step to execute the current motion.
             Returns Step with zero updates if all motions have been executed.
         """
-        if self.motionSteps.empty():
-            if not self.currentMotion == None:
-                self.currentMotion.executed.set()
-                if DEBUG:
-                    print(f"{self.currentMotion} executed.")
-            if self.motionsToExecute.empty():
-                self.currentMotion = None
-                return Step()
+        if self.currentMotion == None and not self.motionsToExecute.empty():
             self.currentMotion = self.motionsToExecute.get()
             #longestChain = self.stateHandler.polyominoes.maxSize
             longestChain = max(self.stateHandler.polyominoes.maxWidth, self.stateHandler.polyominoes.maxHeight)
             steps = self.currentMotion.stepSequence(Simulation.STEP_TIME, longestChain)
             for i in steps:
                 self.motionSteps.put(i)
-        return self.motionSteps.get()
+        if self.motionSteps.empty():
+            return Step()
+        nextStep = self.motionSteps.get()
+        if self.motionSteps.empty():
+            self.currentMotion.executed.set()
+            if DEBUG: print(f"{self.currentMotion} executed.")
+            self.currentMotion = None
+        return nextStep
+
+
+            
 
     def __speedUp__(self):
         if self.fps >= 64:
