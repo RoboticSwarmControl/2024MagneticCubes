@@ -351,6 +351,7 @@ class PolyCollection:
         self.maxWidth = 0
         self.maxHeight = 0
         self.maxSize = 0
+        self.__valid = True
         self.__poly_count = {}
         self.__cube_poly  = {}
         if polys == None:
@@ -398,6 +399,9 @@ class PolyCollection:
     def isEmpty(self) -> bool:
         return len(self.__poly_count) == 0
 
+    def containsInvalid(self):
+        return not self.__valid
+
     def __add__(self, poly: Polyomino):
         if poly.isTrivial():
             self.__trivial.append(poly)
@@ -407,6 +411,8 @@ class PolyCollection:
         self.maxWidth = max(self.maxWidth, bounds[0]) 
         self.maxHeight = max(self.maxHeight, bounds[1])
         self.maxSize = max(self.maxSize, poly.size())
+        if not poly.isValid():
+            self.__valid = False
         if poly in self.__poly_count:
             self.__poly_count[poly] += 1
         else:
@@ -420,6 +426,7 @@ class PolyCollection:
         self.maxWidth = 0
         self.maxHeight = 0
         self.maxSize = 0
+        self.__valid = True
         self.__poly_count.clear()
         self.__cube_poly.clear()
 

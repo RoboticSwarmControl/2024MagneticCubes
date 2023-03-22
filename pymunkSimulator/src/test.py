@@ -6,8 +6,8 @@ from sim.handling import Renderer
 
 from sim.simulation import Simulation
 from sim.state import *
-from plan.local import LocalPlanner
-from plan.plan import Plan, PlanState
+import plan.local as local
+from plan.plan import *
 import plan.factory as factory
 from sim.motion import Rotation, PivotWalk
 
@@ -39,8 +39,7 @@ def directPolyAngCalc():
     p2 = factory.linePolyVert(6, vertical=False)
     c2ref = p2.getCubes()[0]
     cf = factory.configWithPolys((800,800), math.radians(90), [p1,p2],[(300,400),(600,400)])
-    planner = LocalPlanner()
-    cf = planner.singleUpdate(cf)
+    cf = local.singleUpdate(cf)
     p1 = cf.getPolyominoes().getPoly(c1ref)
     p2 = cf.getPolyominoes().getPoly(c2ref)
     
@@ -119,7 +118,7 @@ def connectPolyPossibleTest():
         factory.generator.seed(seed)
         p1 = factory.randomPoly(5)
         p2 = factory.randomPoly(5)
-        c1,c2,e2 = factory.randomPossibleConnection(p1,p2)
+        c1,c2,e2 = factory.randomConnection(p1,p2)
         slideInEast = p1.connectPolyPossible(c1, p2, c2, e2, Direction.EAST)
         slideInWest = p1.connectPolyPossible(c1, p2, c2, e2, Direction.WEST)
         print(f"seed: [{seed}]")
@@ -159,7 +158,6 @@ def randomPolyTest():
 def motionAnalysis():
     maxSize = 10
     sim = Simulation(False, False)
-    pl = LocalPlanner()
     pWalk = PivotWalk(PivotWalk.RIGHT, PivotWalk.DEFAULT_PIVOT_ANG)
     rot10 = Rotation(math.radians(10))
     rot20 = Rotation(math.radians(20))
@@ -170,7 +168,7 @@ def motionAnalysis():
         #size = 4
         config = factory.configWithPolys((1000,1000), math.radians(90), [factory.linePolyVert(size)], [(400,600)])
         refCube = config.getCubes()[0]
-        save0 = pl.singleUpdate(config)
+        save0 = local.singleUpdate(config)
         sim.loadConfig(save0)
         t0 = time.time()
         sim.start()
@@ -219,7 +217,6 @@ def motionAnalysis():
 
 
 def twoCostumCubeConnect():
-    planer = LocalPlanner()
     c1 = Cube(1) #red
     p1 = (304, 528)
     c2 = Cube(0) #blue
@@ -228,11 +225,11 @@ def twoCostumCubeConnect():
     ang = math.radians(52)
     config = Configuration((800,800),ang,{c1: p1, c2: p2})
     t0 = time.time()
-    plan = planer.planCubeConnect(config,c1,c2,ed2)
+    plan = local.planCubeConnect(config,c1,c2,ed2)
     t1 = time.time()
     print(f"{plan.state}: {round(plan.cost(),2)}rad in {round(t1 - t0, 2)}s")
     print(f"{c1.type} at {config.getPosition(c1)} --{ed2}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(ang))}")
-    planer.executePlan(plan)
+    plan.execute()
 
 
 def twoCubeConnect():
@@ -240,7 +237,6 @@ def twoCubeConnect():
     seed = 12
     samples = 20
     #----------------------
-    planer = LocalPlanner()
     plans = {}
     globalTime = 0
     for _ in range(samples):
@@ -250,7 +246,7 @@ def twoCubeConnect():
         c2 = config.getCubes()[1]
         ed = Direction(factory.generator.randint(0,3))
         t0 = time.time()
-        plan = planer.planCubeConnect(config, c1, c2, ed)
+        plan = local.planCubeConnect(config, c1, c2, ed)
         t1 = time.time()
         dt = t1 -t0
         globalTime += dt
@@ -266,26 +262,27 @@ def twoCubeConnect():
     print(fails)
     while True:
         inp = input("Select seed to play:")
-        planer.executePlan(plans[int(inp)])
+        plans[int(inp)].execute()
 
 
-def twoPolyConnect():
-    #----------------------
-    seed = 39
-    size = 4
-    samples = 1
-    #----------------------
-    planer = LocalPlanner()
+def twoPolyConnect(seed = 0, samples = 1, polyMaxSize = 4 ,forceMaxSize = True):
     plans = {}
     globalTime = 0
     for _ in range(samples):
         factory.generator.seed(seed)
-        p1 = factory.randomPoly(size)
-        p2 = factory.randomPoly(size)
+        while True:
+            if forceMaxSize:
+                p1 = factory.randomPoly(polyMaxSize)
+                p2 = factory.randomPoly(polyMaxSize)
+            else:
+                p1 = factory.randomPoly(factory.generator.randint(1,polyMaxSize))
+                p2 = factory.randomPoly(factory.generator.randint(1,polyMaxSize))
+            c1, c2, ed = factory.randomConnection(p1, p2, True, True)
+            if c1 != None:
+                break
         config = factory.randomConfigWithPolys((800,800),[p1,p2])
-        c1, c2, ed = factory.randomPossibleConnection(p1, p2)
         t0 = time.time()
-        plan = planer.planCubeConnect(config, c1, c2, ed)
+        plan = local.planCubeConnect(config, c1, c2, ed)
         t1 = time.time()
         dt = t1 -t0
         globalTime += dt
@@ -301,8 +298,44 @@ def twoPolyConnect():
     print(fails)
     while True:
         inp = input("Select seed to play:")
-        planer.executePlan(plans[int(inp)])
+        print(f"Is plan valid? = {plans[int(inp)].validate()}")
+        plans[int(inp)].execute()
 
+
+def twoPolyConnect_othersOnBoard(seed = 0, samples = 1, polyMaxSize = 4 , others = 2):
+    plans = {}
+    globalTime = 0
+    for _ in range(samples):
+        factory.generator.seed(seed)
+        while True:
+            p1 = factory.randomPoly(factory.generator.randint(1,polyMaxSize))
+            p2 = factory.randomPoly(factory.generator.randint(1,polyMaxSize))
+            c1, c2, ed = factory.randomConnection(p1, p2, True, True)
+            if c1 != None:
+                break
+        polys = [p1,p2]
+        for _ in range(others):
+            polys.append(factory.randomPoly(factory.generator.randint(1,polyMaxSize)))
+        config = factory.randomConfigWithPolys((1000,1000),polys)
+        t0 = time.time()
+        plan = local.planCubeConnect(config, c1, c2, ed)
+        t1 = time.time()
+        dt = t1 -t0
+        globalTime += dt
+        plans[seed] = plan
+        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
+        seed += 1
+    fails = []
+    for key, plan in plans.items():
+        if plan.state != PlanState.SUCCESS:
+            fails.append(key)
+    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES")
+    print(fails)
+    while True:
+        inp = input("Select seed to play:")
+        print(f"Is plan valid? = {plans[int(inp)].validate()}")
+        plans[int(inp)].execute()
 
 if __name__ == "__main__":
-    twoPolyConnect()
+    twoPolyConnect_othersOnBoard(8, 1, 4, 2)

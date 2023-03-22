@@ -115,7 +115,6 @@ def linePolyHori(ncubes, firstType=None):
     return poly
     
 
-
 def randomPoly(ncubes, nred=None):
     poly = None
     for _ in range(ncubes):
@@ -167,13 +166,24 @@ def randomCube(ncubes=None, nred=None):
         return Cube(Cube.TYPE_BLUE)
     
 
-def randomPossibleConnection(polyA: Polyomino, polyB: Polyomino):
-    while True:
+def randomConnection(polyA: Polyomino, polyB: Polyomino, connectPoss:bool, onlyValid:bool):
+    itr = 0 
+    while itr < 256:
+        itr += 1
         cubeA = generator.choice(polyA.getCubes())
         cubeB = generator.choice(polyB.getCubes())
         edgesA = polyA.getOpenEdges(cubeA, cubeA.type == cubeB.type)
         edgesB = polyB.getOpenEdges(cubeB, cubeA.type == cubeB.type)
         possibleEdgesB = [edgeB for edgeB in edgesB if edgeB.inv() in edgesA]
-        if len(possibleEdgesB) > 0:
-            return cubeA, cubeB, generator.choice(possibleEdgesB)
+        if len(possibleEdgesB) == 0:
+            continue
+        edgeB = generator.choice(possibleEdgesB)
+        if connectPoss:
+            target = polyA.connectPoly(cubeA, polyB, cubeB, edgeB)
+            if target == None:
+                continue
+            if onlyValid and not target.isValid():
+                continue
+        return cubeA, cubeB, edgeB
+    return None, None, None
         
