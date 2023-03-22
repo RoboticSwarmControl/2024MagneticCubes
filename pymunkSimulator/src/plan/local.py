@@ -100,7 +100,7 @@ def __alignWalkRealign(data: tuple) -> Plan:
         if DEBUG: print(f"Itr: {itr}")
         # aligne the cubes
         rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide)
-        __executeMotions(sim, [rotation])
+        executeMotions(sim, [rotation])
         plan.actions.append(Idle(1))
         plan.actions.append(rotation)
         plan.actions.append(Idle(1))
@@ -115,14 +115,14 @@ def __alignWalkRealign(data: tuple) -> Plan:
         if distance < CRITICAL_DISTANCE and idleTry < IDLE_TRIES:
             # if so let magnets do the rest
             wait = Idle(IDLE_AMOUNT)
-            __executeMotions(sim, [wait])
+            executeMotions(sim, [wait])
             plan.actions.append(wait)
             idleTry += 1
             if DEBUG: print(wait)
         else:
             # if not walk into direction
             pWalks = __walkDynamic(config, cubeA, cubeB, direction)
-            __executeMotions(sim, pWalks)
+            executeMotions(sim, pWalks)
             plan.actions.append(Idle(1))
             plan.actions.extend(pWalks)
             plan.actions.append(Idle(1))
@@ -250,9 +250,3 @@ def __faceingDirection(config: Configuration, cubeA: Cube, cubeB: Cube) -> Direc
         return Direction.EAST
     else:
         return Direction.WEST
-
-def __executeMotions(sim: Simulation, motions):
-    sim.start()
-    for motion in motions:
-        sim.executeMotion(motion)
-    sim.stop()

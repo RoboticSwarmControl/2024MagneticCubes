@@ -76,10 +76,7 @@ class Plan:
         if self.info != None:
             sim.renderer.markedCubes.add(self.info[0])
             sim.renderer.markedCubes.add(self.info[1])
-        sim.start()
-        for motion in self.actions:
-            sim.executeMotion(motion)
-        sim.stop()
+        executeMotions(sim, self.actions)
         time.sleep(1)
         sim.terminate()
 
@@ -89,10 +86,7 @@ class Plan:
         """
         sim = Simulation(False, False)
         sim.loadConfig(self.initial)
-        sim.start()
-        for motion in self.actions:
-            sim.executeMotion(motion)
-        sim.stop()
+        executeMotions(sim, self.actions)
         save = sim.saveConfig()
         polyB = save.getPolyominoes().getPoly(self.info[1])
         return bool(polyB.getConnection(self.info[1], self.info[2]) != self.info[0]) ^ bool(self.state == PlanState.SUCCESS)
@@ -109,5 +103,18 @@ def singleUpdate(config: Configuration) -> Configuration:
     sim = Simulation(False, False)
     sim.loadConfig(config)
     sim.start()
-    sim.executeMotion(Idle(2))
+    sim.executeMotion(Idle(1))
     return sim.terminate()
+
+def executeMotions(sim: Simulation, motions: list):
+    """
+    Starts sim, executes motions and stops sim.
+    This happens in a way which tries to prevent any zero updates.
+    Neitherless while stating and stopping one zero update each can occure.
+    """
+    last = motions[len(motions) - 1]
+    for i in range(len(motions)):
+        sim.executeMotion_nowait(motions[i])
+    sim.start()
+    last.executed.wait()
+    sim.stop()

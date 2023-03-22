@@ -220,10 +220,7 @@ class Simulation:
             if DEBUG: print(f"{self.currentMotion} executed.")
             self.currentMotion = None
         return nextStep
-
-
             
-
     def __speedUp__(self):
         if self.fps >= 64:
             self.updatePerFrame += 2

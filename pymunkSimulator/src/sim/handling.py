@@ -178,7 +178,7 @@ class StateHandler:
         self.timer.addToTask("force_mag", time.time() - ts)
 
     def __magPairMinDist__(self, cubei: Cube, cubej: Cube) -> list:
-        # determine the magnetpair with the smallest distance
+        # determine the magnetpair with the smallest distance. Only on pair is returned
         shapei = self.getCubeShape(cubei)
         shapej = self.getCubeShape(cubej)
         dismin = math.inf
@@ -194,7 +194,7 @@ class StateHandler:
         return [pair]
 
     def __magPairsMinDist__(self, cubei: Cube, cubej: Cube) -> list:
-        # determine the magnetpair with the smallest distance
+        # determine the magnetpairs with the smallest distance. In total 4 pairs are returned
         pairs = []
         shapei = self.getCubeShape(cubei)
         shapej = self.getCubeShape(cubej)
@@ -212,7 +212,7 @@ class StateHandler:
         return pairs
 
     def __magPairsAll__(self, cubei: Cube, cubej: Cube) -> list:
-        # determine the magnetpair with the smallest distance
+        # returns all magnetpairs. 16 in total
         pairs = []
         for i in range(4):
             for j in range(4):
@@ -339,44 +339,44 @@ class StateHandler:
         self.bounds.clear()
 
 # ------------------------------------DEPRECATED----------------------------------------------
-    def __updatePivotPiont__(self, poly: Polyomino):
-        if self.magElevation == 0:
-            for cube in poly.getCubes():
-                shape = self.getCubeShape(cube)
-                shape.body.center_of_gravity = (0, 0)
-                pos = shape.body.position
-                shape.body.position = (pos[0], pos[1])
-        else:
-            if self.magElevation < 0:
-                edgeCubes = poly.getTopRow()
-                edgePointL = (-Cube.MRAD, 0)
-            else:
-                edgeCubes = poly.getBottomRow()
-                edgePointL = (Cube.MRAD, 0)
-            pivotPoint = (0, 0)
-            for cube in edgeCubes:
-                shape = self.getCubeShape(cube)
-                pivotPoint += shape.body.local_to_world(edgePointL)
-            pivotPoint /= len(edgeCubes)
-            for cube in poly.getCubes():
-                shape = self.getCubeShape(cube)
-                shape.body.center_of_gravity = shape.body.world_to_local(
-                    pivotPoint)
-                pos = shape.body.position
-                shape.body.position = (pos[0], pos[1])
+    # def __updatePivotPiont__(self, poly: Polyomino):
+    #     if self.magElevation == 0:
+    #         for cube in poly.getCubes():
+    #             shape = self.getCubeShape(cube)
+    #             shape.body.center_of_gravity = (0, 0)
+    #             pos = shape.body.position
+    #             shape.body.position = (pos[0], pos[1])
+    #     else:
+    #         if self.magElevation < 0:
+    #             edgeCubes = poly.getTopRow()
+    #             edgePointL = (-Cube.MRAD, 0)
+    #         else:
+    #             edgeCubes = poly.getBottomRow()
+    #             edgePointL = (Cube.MRAD, 0)
+    #         pivotPoint = (0, 0)
+    #         for cube in edgeCubes:
+    #             shape = self.getCubeShape(cube)
+    #             pivotPoint += shape.body.local_to_world(edgePointL)
+    #         pivotPoint /= len(edgeCubes)
+    #         for cube in poly.getCubes():
+    #             shape = self.getCubeShape(cube)
+    #             shape.body.center_of_gravity = shape.body.world_to_local(
+    #                 pivotPoint)
+    #             pos = shape.body.position
+    #             shape.body.position = (pos[0], pos[1])
 
-    def __addConnectionJoint__(self, cubei: Cube, edgei: Direction, cubej: Cube, edgej: Direction):
-        shapei = self.getCubeShape(cubei)
-        shapej = self.getCubeShape(cubej)
-        pinJoint = pymunk.SlideJoint(
-            shapei.body, shapej.body, cubei.magnetPos[edgei.value], cubej.magnetPos[edgej.value], StateHandler.CONNECTION_DISTANCE - 2, StateHandler.CONNECTION_DISTANCE)
-        self.connectJoints.append(pinJoint)
-        self.space.add(pinJoint)
+    # def __addConnectionJoint__(self, cubei: Cube, edgei: Direction, cubej: Cube, edgej: Direction):
+    #     shapei = self.getCubeShape(cubei)
+    #     shapej = self.getCubeShape(cubej)
+    #     pinJoint = pymunk.SlideJoint(
+    #         shapei.body, shapej.body, cubei.magnetPos[edgei.value], cubej.magnetPos[edgej.value], StateHandler.CONNECTION_DISTANCE - 2, StateHandler.CONNECTION_DISTANCE)
+    #     self.connectJoints.append(pinJoint)
+    #     self.space.add(pinJoint)
 
-    def __removeConnectJoints__(self):
-        for joint in self.connectJoints:
-            self.space.remove(joint)
-        self.connectJoints.clear()
+    # def __removeConnectJoints__(self):
+    #     for joint in self.connectJoints:
+    #         self.space.remove(joint)
+    #     self.connectJoints.clear()
 # --------------------------------------------------------------------------------------------
 
 
