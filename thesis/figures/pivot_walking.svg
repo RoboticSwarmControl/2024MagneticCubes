@@ -9,6 +9,9 @@
    id="svg582"
    inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
    sodipodi:docname="pivot_walking.svg"
+   inkscape:export-filename="../5178a4b8/pivot_walking.pdf"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -25,14 +28,14 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.7852694"
-     inkscape:cx="189.88731"
+     inkscape:cx="180.36494"
      inkscape:cy="234.69847"
-     inkscape:window-width="2560"
-     inkscape:window-height="1355"
-     inkscape:window-x="1920"
-     inkscape:window-y="0"
+     inkscape:window-width="1920"
+     inkscape:window-height="995"
+     inkscape:window-x="0"
+     inkscape:window-y="119"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
+     inkscape:current-layer="g5769" />
   <defs
      id="defs579">
     <marker
@@ -549,7 +552,7 @@
         <g
            id="g3873-6-3-5-6-4-3"
            inkscape:label="red"
-           transform="matrix(0,0.27219452,-0.27219452,0,54.701837,-9.1528881)"
+           transform="matrix(0.27219452,0,0,0.27219452,30.739754,-6.0063523)"
            style="opacity:0.302452">
           <rect
              style="fill:#fa9696;fill-opacity:1;stroke:#5a5a5a;stroke-width:1.165;stroke-opacity:1"
@@ -1147,7 +1150,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan45640">a)</tspan></text>
+         id="tspan1559">a)</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-72.264004,-11.864152)"
@@ -1155,7 +1158,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-7);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan45642">b)</tspan></text>
+         id="tspan1561">b)</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-72.060337,34.67988)"
@@ -1163,6 +1166,6 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-1);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan45644">c)</tspan></text>
+         id="tspan1563">c)</tspan></text>
   </g>
 </svg>
