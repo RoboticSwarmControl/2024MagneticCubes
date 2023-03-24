@@ -26,8 +26,12 @@ Two important lengths that we use for planning and simulating, are the cube radi
 $r_C$ is one half length of a cube face and $r_M$ is the distance from the center of the cube to the center of the magnet.
 
 \section{Workspace And Configuration}
+Magnetic modular cubes could theoretical be placed and maneuvered on any 2-dimensional plane with numerous obstacles, as long as you can surround the workspace with a time varying magnetic field.
+The magnetic field should be able to change its orientation around all 3-dimensional axes, so that the cubes can operate in all desired motion modes.
+Because the motion planning problem of self-assembling target shapes in the special euclidean group is hard enough without considering obstacles and arbitrary workspace shapes, we only work in a rectangular workspace with no obstacles.
+The workspace is limited by surrounding walls, which are the only objects that could be considered as obstacles in classical motion planning.
+However we don't assume a fixed size, as long as the workspace stays finite and rectangular.
 
-%the workspace only walls as obstacles, magnetic field abilities
 %configuration. cubes at positions. Use graphic.
 %Our configuration-space, SE(2)
 
@@ -39,7 +43,7 @@ $r_C$ is one half length of a cube face and $r_M$ is the distance from the cente
 \end{figure}
 
 \section{Polyominoes}
-%polyominoes. Fixed polys. Illegal polyominoes. Single cubes trivial polys, COM, pivot-foot/axis
+%polyominoes. Fixed polys. Illegal polyominoes. Single cubes trivial polys, 
 
 
 \begin{figure}
@@ -50,5 +54,21 @@ $r_C$ is one half length of a cube face and $r_M$ is the distance from the cente
 \end{figure}
 
 \section{Motion}
-%Rotation, Pivot-Walking, displacement for polys
+In \cite{Bhattacharjee2022} three motion modes are presented. Rotation, pivot walking and rolling.
+If the magnetic field orientation lays in the plane of the workspace, a rotation inside the plane forces all cubes to realign with the magnetic field.
+Without any inclination of the magnetic field this rotation is performed around the center of mass for all polyominoes and we consider this motion a normal rotation.
+Rotating the magnetic field perpendicular to the workspace plane, cubes can role forwards or backwards.
+This rolling motion becomes problematic for self-assembly, because the top and bottom face of the cube, which contain no magnets, can become a side face.
+Because rotation and pivot walking are sufficient enough to reach any position in the workspace, we don't consider rolling in our simulation and planning algorithms.
+Elevating the magnetic field orientation by lifting up the south pole, all polyominoes will pivot on the north face bottom edges of their most north placed cubes.
+Pulling up the north pole does the opposite. The polyominoes will pivot on the south face bottom edges of their most south placed cubes.
+The sum of all these cube edges are called the north or south pivot-edge and by keeping the magnetic field elevated and rotating around the normal vector of the workspace plane, the polyominoes will rotate around the center point of their pivot-edge.
+This point is called the north or south pivot-point or foot.
+All these edges and points are illustrated in figure \ref{fig:pivot_walking} b).
+
+\paragraph{pivot walking}
+
+
+%Rotation, Pivot-Walking, displacement for polys, COM, pivot-foot/axis
+% add pivot edges to figure and rename pivot axis to pivot walking axis
 
