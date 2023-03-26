@@ -27,15 +27,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.7852694"
-     inkscape:cx="250.66245"
-     inkscape:cy="207.81177"
+     inkscape:zoom="3.5705388"
+     inkscape:cx="413.24295"
+     inkscape:cy="127.99189"
      inkscape:window-width="2560"
      inkscape:window-height="1355"
      inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g38507" />
+     inkscape:current-layer="g42631" />
   <defs
      id="defs579">
     <marker
@@ -463,7 +463,7 @@
            id="g5619"
            inkscape:label="g5619">
           <path
-             style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.799999;stroke-dasharray:none;stroke-opacity:1"
+             style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.7;stroke-dasharray:none;stroke-opacity:1"
              d="M 44.29363,34.691629 59.697973,65.171412"
              id="path5611" />
           <circle
@@ -501,38 +501,46 @@
       </g>
       <text
          xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;opacity:1;fill:#000000;fill-opacity:1;stroke:#8b8b8b;stroke-width:0;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
-         x="62.639992"
-         y="-99.424721"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;opacity:1;fill:#000000;fill-opacity:1;stroke:#8b8b8b;stroke-width:0;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+         x="58.910557"
+         y="-99.483971"
          id="text36368-7-2"
          transform="rotate(62.814832)"><tspan
            sodipodi:role="line"
            id="tspan36366-1-7"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0"
-           x="62.639992"
-           y="-99.424721">pivot axis</tspan></text>
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0"
+           x="58.910557"
+           y="-99.483971">pivot walking axis</tspan></text>
       <text
          xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#a40000;fill-opacity:1;stroke:#8b8b8b;stroke-width:0;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
-         x="108.81075"
-         y="-2.1407843"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#a40000;fill-opacity:1;stroke:#8b8b8b;stroke-width:0;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+         x="102.90742"
+         y="-2.6094518"
          id="text36368-7-26"><tspan
            sodipodi:role="line"
            id="tspan36366-1-1"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#a40000;fill-opacity:1;stroke-width:0"
-           x="108.81075"
-           y="-2.1407843">north foot</tspan></text>
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#a40000;fill-opacity:1;stroke-width:0"
+           x="102.90742"
+           y="-2.6094518">north pivot edge/piont</tspan></text>
       <text
          xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#0000a4;fill-opacity:1;stroke:#8b8b8b;stroke-width:0;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
-         x="124.22014"
-         y="34.030155"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#0000a4;fill-opacity:1;stroke:#8b8b8b;stroke-width:0;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+         x="118.15403"
+         y="33.708061"
          id="text36368-7-26-0"><tspan
            sodipodi:role="line"
            id="tspan36366-1-1-6"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.82222px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#0000a4;fill-opacity:1;stroke-width:0"
-           x="124.22014"
-           y="34.030155">south foot</tspan></text>
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:2.46944px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#0000a4;fill-opacity:1;stroke-width:0"
+           x="118.15403"
+           y="33.708061">south pivot edge/point</tspan></text>
+      <path
+         style="fill:#a40000;stroke-width:0.589;stroke-dasharray:none;fill-opacity:1;stroke:#a40000;stroke-opacity:1"
+         d="M 91.918787,-0.3297728 H 137.79136"
+         id="path663" />
+      <path
+         style="fill:#a40000;fill-opacity:1;stroke:#0000a4;stroke-width:0.589;stroke-dasharray:none;stroke-opacity:1"
+         d="m 122.7158,30.150134 h 15.08724"
+         id="path3539" />
     </g>
     <rect
        style="opacity:1;fill:none;stroke:#808080;stroke-width:0.69548;stroke-dasharray:1.39096, 0.69548;stroke-dashoffset:0;stroke-opacity:1"
@@ -1158,7 +1166,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan1741">a)</tspan></text>
+         id="tspan6589">a)</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-72.264004,-11.864152)"
@@ -1166,7 +1174,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-7);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan1743">b)</tspan></text>
+         id="tspan6591">b)</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-72.060337,34.67988)"
@@ -1174,6 +1182,6 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-1);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan1745">c)</tspan></text>
+         id="tspan6593">c)</tspan></text>
   </g>
 </svg>
