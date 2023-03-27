@@ -42,7 +42,7 @@ class StateHandler:
         def sensorCollision(arbiter: pymunk.Arbiter, space, data): 
             cubei = self.sensor_cube[arbiter.shapes[0]]
             cubej = self.sensor_cube[arbiter.shapes[1]]
-            self.__applyForceMagnets__(cubei, cubej)
+            self.__calcForceMagnets__(cubei, cubej)
             return False
         cHandler.pre_solve = sensorCollision
 
@@ -50,6 +50,7 @@ class StateHandler:
         self.bounds = []
         self.cube_shapes = {}
         self.sensor_cube = {}
+        self.cube_forcePos = {}
 
         self.magAngle = 0
         self.magElevation = 0
@@ -130,22 +131,36 @@ class StateHandler:
         t0 = time.time()
         for poly in self.polyominoes.getAll():
             for cube in poly.getCubes():
-                self.__applyForceField__(cube)
+                self.__calcForceField__(cube)
                 self.__applyForceFriction__(cube, poly)
                 self.magConnect[cube] = [None] * 4
+        self.applyAllForces()
         self.timer.addToTask("force_apply", time.time() - t0)
         self.updateLock.release()
         self.timer.addToTotal(time.time() - ts)
 
-    def __applyForceField__(self, cube: Cube):
+    def applyAllForces(self):
+        for cube, forces in self.cube_forcePos.items():
+            shape = self.getCubeShape(cube)
+            for force, pos in forces:
+                shape.body.apply_force_at_world_point(force, pos)
+            self.cube_forcePos[cube].clear()
+
+    def __calcForceField__(self, cube: Cube):
         shape = self.getCubeShape(cube)
         ang = shape.body.angle
+        # We need to apply world force to world point
+        # magPosN = shape.body.local_to_world(cube.magnetPos[Direction.NORTH.value])
+        # magPosS = shape.body.local_to_world(cube.magnetPos[Direction.SOUTH.value])
+        # force = shape.body.local_to_world((0, math.sin(ang-self.magAngle) * StateHandler.MAG_FORCE_FIELD))
+        # self.cube_forcePos[cube].append((force, magPosN))
+        # self.cube_forcePos[cube].append(((force[0], -force[1]), magPosS))
         shape.body.apply_force_at_local_point(
             (0, -math.sin(ang-self.magAngle) * StateHandler.MAG_FORCE_FIELD), cube.magnetPos[Direction.SOUTH.value])
         shape.body.apply_force_at_local_point(
             (0, math.sin(ang-self.magAngle) * StateHandler.MAG_FORCE_FIELD), cube.magnetPos[Direction.NORTH.value])
 
-    def __applyForceMagnets__(self, cubei: Cube, cubej: Cube):
+    def __calcForceMagnets__(self, cubei: Cube, cubej: Cube):
         ts = time.time()
         shapei = self.getCubeShape(cubei)
         shapej = self.getCubeShape(cubej)
@@ -166,6 +181,8 @@ class StateHandler:
             mj = Vec2d(magOrij[0],magOrij[1]).rotated(angj)
             fionj = Cube.magForce1on2(magPosi, magPosj, mi, mj)
             self.timer.addToTask("mag_calc", time.time() - t0)
+            # self.cube_forcePos[cubei].append(((-fionj[0], -fionj[1]), magPosi))
+            # self.cube_forcePos[cubej].append((fionj, magPosj))
             t0 = time.time()
             shapei.body.apply_force_at_world_point((-fionj[0], -fionj[1]), magPosi)
             shapej.body.apply_force_at_world_point(fionj, magPosj)
@@ -293,6 +310,7 @@ class StateHandler:
         del self.cube_shapes[cube]
         del self.magConnect[cube]
         del self.sensor_cube[shapes[1]]
+        del self.cube_forcePos[cube]
 
     def __addCube__(self, cube: Cube, pos, ang, vel):
         if cube in self.cube_shapes:
@@ -316,6 +334,7 @@ class StateHandler:
         self.space.add(body, magSensor, shape)
         self.cube_shapes[cube] = (shape, magSensor)
         self.magConnect[cube] = [None] * 4
+        self.cube_forcePos[cube] = []
         self.sensor_cube[magSensor] = cube
 
     def __addBoundaries__(self):
