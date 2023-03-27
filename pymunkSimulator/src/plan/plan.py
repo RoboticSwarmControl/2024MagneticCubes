@@ -15,6 +15,7 @@ class PlanState(Enum):
     FAILURE_SLIDE_IN = 5
     FAILURE_INVAL_POLY = 6
     FAILURE_MAX_ITR = 7
+    FAILURE_STUCK = 8
 
     def  __str__(self) -> str:
         return self.name
@@ -112,6 +113,8 @@ def executeMotions(sim: Simulation, motions: list):
     This happens in a way which tries to prevent any zero updates.
     Neitherless while stating and stopping one zero update each can occure.
     """
+    if len(motions) == 0:
+        return
     last = motions[len(motions) - 1]
     for i in range(len(motions)):
         sim.executeMotion_nowait(motions[i])

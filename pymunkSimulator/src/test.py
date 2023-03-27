@@ -338,4 +338,4 @@ def twoPolyConnect_othersOnBoard(seed = 0, samples = 1, polyMaxSize = 4 , others
         plans[int(inp)].execute()
 
 if __name__ == "__main__":
-    twoPolyConnect_othersOnBoard(8, 1, 4, 2)
+    twoPolyConnect(27, 1, 6, False)

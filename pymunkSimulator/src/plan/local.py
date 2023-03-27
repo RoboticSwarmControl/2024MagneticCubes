@@ -1,5 +1,6 @@
 from multiprocessing.pool import Pool
 import time
+from sim.handling import Renderer
 
 from sim.motion import Idle, Rotation, PivotWalk
 from sim.simulation import Simulation
@@ -7,7 +8,7 @@ from sim.state import *
 from plan.plan import *
 
 
-DEBUG = False
+DEBUG = True
 
 MAX_ITR = 24
 
@@ -15,6 +16,10 @@ CRITICAL_DISTANCE = 4 * Cube.RAD
 SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 2
 IDLE_TRIES = 1
 IDLE_AMOUNT = 10
+
+STUCK_TIMES_MAX = IDLE_TRIES + 1
+STUCK_OFFSET = Cube.RAD / 4
+IDLE_STUCK_AMOUNT = 150
 
 NS_ALIGN_OFFSET = 2.75 * Cube.RAD
 ALIGNED_THRESHOLD = math.radians(4)
@@ -96,10 +101,24 @@ def __alignWalkRealign(data: tuple) -> Plan:
     sim.renderer.markedCubes.add(cubeB)
     itr = 0
     idleTry = 0
+    stuckTimes = 0
+    # not a mistake this insures that initial stuck check is false
+    posA = config.getPosition(cubeB)
+    posB = config.getPosition(cubeA)
     while True:
-        if DEBUG: print(f"Itr: {itr}")
-        # aligne the cubes
-        rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide)
+        # check if the polys got stuck.
+        #sim.renderer.pointsToDraw.clear()
+        if __arePolysStuck(config.getPosition(cubeA), posA, config.getPosition(cubeB), posB):
+            stuckTimes += 1
+        else:
+            stuckTimes = 0
+        if DEBUG: print(f"Itr: {itr}, {stuckTimes} times stuck.")
+        posA = config.getPosition(cubeA)
+        posB = config.getPosition(cubeB)
+        #sim.renderer.pointsToDraw.append((Renderer.BLUE, posA, 3))
+        #sim.renderer.pointsToDraw.append((Renderer.RED, posB, 3))
+        # aligne the cubes. If they are stuck straight align
+        rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide, stuckTimes >= STUCK_TIMES_MAX)
         executeMotions(sim, [rotation])
         plan.actions.append(Idle(1))
         plan.actions.append(rotation)
@@ -107,14 +126,17 @@ def __alignWalkRealign(data: tuple) -> Plan:
         config = sim.saveConfig()
         if DEBUG: print(rotation)
         # update the planstate. Check failure and success conditions
-        plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide, itr)
+        plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide)
         if plan.state != PlanState.UNDEFINED:
             break
         # check if cubes are in critical distance for magnets to attract
         distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
         if distance < CRITICAL_DISTANCE and idleTry < IDLE_TRIES:
             # if so let magnets do the rest
-            wait = Idle(IDLE_AMOUNT)
+            if stuckTimes >= STUCK_TIMES_MAX:
+                wait = Idle(IDLE_STUCK_AMOUNT)
+            else:
+                wait = Idle(IDLE_AMOUNT)
             executeMotions(sim, [wait])
             plan.actions.append(wait)
             idleTry += 1
@@ -130,8 +152,16 @@ def __alignWalkRealign(data: tuple) -> Plan:
             if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
         config = sim.saveConfig()
         # update the planstate. Check failure and success conditions
-        plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide, itr)
+        plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide)
         if plan.state != PlanState.UNDEFINED:
+            break
+        # if the polys got stuck and the straight align didnt fix report failure
+        if stuckTimes >= STUCK_TIMES_MAX:
+            plan.state = PlanState.FAILURE_STUCK
+            break
+        # if we cant conect after a lot of iterations report failure
+        if itr >= MAX_ITR:
+            plan.state = PlanState.FAILURE_MAX_ITR
             break
         itr += 1
     sim.terminate()
@@ -140,12 +170,12 @@ def __alignWalkRealign(data: tuple) -> Plan:
     #sim.stateHandler.timer.printTimeStats()
     return plan
 
-def __alignCubes(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction):
+def __alignCubes(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction, forceStraight: bool=False):
     posA = config.getPosition(cubeA)
     posB = config.getPosition(cubeB)
     comA = config.getCOM(config.getPolyominoes().getPoly(cubeA))
     comB = config.getCOM(config.getPolyominoes().getPoly(cubeB))
-    if edgeB in (Direction.WEST, Direction.EAST):
+    if (edgeB in (Direction.WEST, Direction.EAST)) or forceStraight:
         # For side connection, or if cubes are near enought, do straight align
         alignEdge = edgeB
         if DEBUG: print("Straight align")
@@ -198,7 +228,7 @@ def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction) ->
     pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) * PWALK_PORTION)
     return [PivotWalk(direction, pivotAng)] * pivotSteps
 
-def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction, itr) -> PlanState:
+def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction) -> PlanState:
     # check if config contains inValid polys
     if config.getPolyominoes().containsInvalid():
         return PlanState.FAILURE_INVAL_POLY
@@ -211,9 +241,6 @@ def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Di
     # check if we cant slide in anymore
     if not slide in __slideInDirections(config, cubeA, cubeB, edgeB):
         return PlanState.FAILURE_SLIDE_IN
-    # if we cant conect after a lot of iterations report failure
-    if itr >= MAX_ITR:
-        return PlanState.FAILURE_MAX_ITR
     return PlanState.UNDEFINED
 
 def __isConnected(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
@@ -228,6 +255,11 @@ def __connectPossible(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Di
     if targetPoly == None or not targetPoly.isValid():
         return False
     return True
+
+def __arePolysStuck(newPosA: Vec2d, oldPosA: Vec2d, newPosB: Vec2d, oldPosB: Vec2d) -> bool:
+    distChangeA = newPosA.get_distance(oldPosA)
+    distChangeB = newPosB.get_distance(oldPosB)
+    return distChangeA < STUCK_OFFSET and distChangeB < STUCK_OFFSET
 
 def __slideInDirections(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> set:
     # check if poly can be connected by walking in form the east and west
