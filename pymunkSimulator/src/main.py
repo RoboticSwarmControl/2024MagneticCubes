@@ -21,6 +21,7 @@ def sandbox_onMac():
 
 def sandbox():
     sim1 = Simulation()
+    #sim1.loadConfig(Configuration((600,600), math.radians(90), {}))
     sim1.start()
 
 def demo1():
