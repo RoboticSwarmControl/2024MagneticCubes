@@ -28,14 +28,14 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="3.5705388"
-     inkscape:cx="413.24295"
-     inkscape:cy="127.99189"
+     inkscape:cx="342.24527"
+     inkscape:cy="305.55613"
      inkscape:window-width="2560"
      inkscape:window-height="1355"
      inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g42631" />
+     inkscape:current-layer="g38507" />
   <defs
      id="defs579">
     <marker
@@ -1127,15 +1127,15 @@
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.28535px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;opacity:1;fill:#000000;fill-opacity:1;stroke:#8b8b8b;stroke-width:0;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
-         x="-89.886612"
-         y="155.13814"
+         x="-92.208466"
+         y="155.08324"
          id="text36368-7"
          transform="rotate(-90)"><tspan
            sodipodi:role="line"
            id="tspan36366-1"
            style="fill:#000000;fill-opacity:1;stroke-width:0"
-           x="-89.886612"
-           y="155.13814">pivot axis</tspan></text>
+           x="-92.208466"
+           y="155.08324">pivot walking axis</tspan></text>
       <text
          xml:space="preserve"
          style="font-size:1.82948px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';fill:none;stroke-width:0.144095;stroke-dasharray:0.288189, 0.576377"
@@ -1166,7 +1166,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan6589">a)</tspan></text>
+         id="tspan1685">a)</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-72.264004,-11.864152)"
@@ -1174,7 +1174,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-7);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan6591">b)</tspan></text>
+         id="tspan1687">b)</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-72.060337,34.67988)"
@@ -1182,6 +1182,6 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-1);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.935207"
-         id="tspan6593">c)</tspan></text>
+         id="tspan1689">c)</tspan></text>
   </g>
 </svg>
