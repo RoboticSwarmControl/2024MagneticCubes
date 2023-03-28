@@ -2,15 +2,15 @@
 
 Self-assembling modular parts forming bigger structures is a well-known concept in nature and most functionalities of living organisms follow this principle \cite{bishop2005}.
 DNA for example has the ability to self-replicate by using differently shaped proteins, that combine themselves in various ways.
-If you zoom out, these cells can by combined to assemble things like tissue, organs and even whole organisms.
-Complex structures can be assembled and disassembled depending on the task they should accomplish during a given point in time. 
-Using self-reconfiguring robot swarms in such a way, has promising applications in the future.
+At larger sizes, these cells can be combined to assemble things like tissue, organs and even whole organisms.
+Complex structures can be assembled and disassembled depending on the task they should accomplish at a given point in time. 
+Using self-reconfiguring robot swarms in such a way has promising applications in the future.
 Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or a robot swarm could be used for milliscale and microscale manufacturing \cite{pelrine2016}.
 
-Designing robots at these small scales faces challenging problems.
-Equipping each robot with its own sensors, actuation-system, connection-system and power supply seem very infeasible, in terms of the sheer size and power-limitations \cite{white2007}.
+Designing robots at these small sizes faces challenging problems.
+Equipping each robot with its own sensors, actuation-system, connection-system and power supply seem infeasible, in terms of the miniaturization required and power-limitations \cite{white2007}.
 %Condider C-atoms
-Therefore, the use of external global control, effecting every robot uniformly, is a promising solution \cite{white2007}.
+Therefore, the use of external global control, effecting every robot in the workspace with the same torque and force, is a promising solution \cite{white2007}.
 Using robots with embedded permanent magnets, has all the desired effects.
 Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply and for sensing an external camera can be used \cite{saab2019}.
 
@@ -19,23 +19,23 @@ One example for magnetically controlled robots are the magnetic modular cubes by
 We will develop a simulation that simulates the behavior of magnetic modular cubes, without assuming discrete movement or limiting rotations to a certain amount.
 The simulation will be used for developing closed-loop planing algorithms, which provide a control sequence to assemble desired target shapes.
 For that it is necessary to develop a local planner that is able to connect structures at desired faces.
-We will look at the difficulties and problems that occur, when working with magnetic modular cubes in the 2-dimensional special euclidean group \(SE(2)\), the space of rigid movements in a 2-dimensional plane.
+We will look at the difficulties and problems that occur, when working with magnetic modular cubes in the 2-dimensional special Euclidean group \(SE(2)\), the space of rigid movements in a 2-dimensional plane.
 
 
 \section{Related Work}
 
 Continues motion planning is a crucial subject in the field of robotics.
 The goal is to find a path from the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
-For that it is necessary to avoid collision with static obstacles and with other robots.
+The movement may result in collision with static obstacles and with other robots.
 The state of the system is also called a configuration.
 All possible configurations one or multiple robots can be in is defined as the configuration-space.
-The dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and possible actions.
-It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a sequence of actions that lead to the goal configuration, or report failure, if the goal is not reachable.
+Increasing the dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and possible actions.
+It is difficult to engineer algorithms that explore these huge configuration-spaces and provide continuous path from the initial to the goal configuration, or report failure, if the goal is not reachable.
 A lot of research was done on motion planning and the textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
 
-When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one of these concepts is sample-based motion planning.
+When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one concept that has been successful for many robotics problem is sample-based motion planning.
 %define uncountable infinite and complete
-By taking samples, you can reduce the configuration space to a finite object, but you might lose possible solutions.
+By taking samples, you can reduce the planning problem from navigating a configuration space to planning on a graph, but you might lose possible solutions.
 Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point, and therefore these algorithms can be called resolution complete.
 Ways of sampling include random sampling or using a grid with a resolution that is dynamically adjustable.
 After sampling, conventional discrete planning algorithms can be applied \cite{LaValle2006}.
@@ -55,16 +55,16 @@ In the Tilt model, all tiles move into one of the cardinal directions until hitt
 Different variations of the model include moving everything only one step, or the maximally possible amount.
 It offers a solution when robots are controlled uniformly by external global control inputs.
 % solution to what
-In this paper it is shown that transforming one configuration into another, known as the reconfiguration-problem, is NP-hard.
+In \cite{Becker2014_SP} it is shown that transforming one configuration into another, known as the reconfiguration-problem, is NP-hard.
 Following work \cite{Becker2014} also proves that finding an optimal control sequence, minimizing the number of actions, for the configuration-problem is PSPACE-complete.
 Furthermore, research is done on designing environments in which the Tilt model can be used to accomplish certain tasks.
 In particular, Becker et al. \cite{Becker2014} create connected logic gates that can evaluate logical expressions.
 
 More on the side of self-assembly, in \cite{Becker2020} the construction of desired shapes using the tilt model is researched.
 It presents a method that can determine a building sequence for a polyomino by adding one tile at a time, considering the rules of Tilt.
-Which is also examined are ways of modifying the environment to create factories that construct shapes in a pipeline by repeating the same global control inputs.
+Also examined are ways of modifying the environment to create factories that construct shapes in a pipeline by repeating the same global control inputs.
 Shapes can be constructed more efficiently by combining multi-tiled shapes to an even bigger structure.
-One article considering the construction with so called sub-assemblies is proposed by A. Schmidt \cite{Schmidt2018}.
+One article considering the construction with so-called sub-assemblies is proposed by A. Schmidt \cite{Schmidt2018}.
 
 Most recently, Bhattacharjee et al. \cite{Bhattacharjee2022} developed the magnetic modular cubes.
 These robots contain embedded permanent magnets and have no computation or power supply.
