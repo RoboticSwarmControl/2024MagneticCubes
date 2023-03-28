@@ -40,8 +40,8 @@ def directPolyAngCalc():
     c2ref = p2.getCubes()[0]
     cf = factory.configWithPolys((800,800), math.radians(90), [p1,p2],[(300,400),(600,400)])
     cf = local.singleUpdate(cf)
-    p1 = cf.getPolyominoes().getPoly(c1ref)
-    p2 = cf.getPolyominoes().getPoly(c2ref)
+    p1 = cf.getPolyominoes().getForCube(c1ref)
+    p2 = cf.getPolyominoes().getForCube(c2ref)
     
     step = 5
     rotAng = step
@@ -176,8 +176,8 @@ def motionAnalysis():
         sim.stop()
         t1 = time.time()
         save1 = sim.saveConfig()
-        poly0 = save0.getPolyominoes().getPoly(refCube)
-        poly1 = save1.getPolyominoes().getPoly(refCube)
+        poly0 = save0.getPolyominoes().getForCube(refCube)
+        poly1 = save1.getPolyominoes().getForCube(refCube)
         displacementIdeal = save0.getPivotWalkingVec(poly0, pWalk.pivotAng, pWalk.direction)
         displacement = save1.getCOM(poly1) - save0.getCOM(poly0)
         angDiff = displacement.get_angle_degrees_between(displacementIdeal)
@@ -338,4 +338,4 @@ def twoPolyConnect_othersOnBoard(seed = 0, samples = 1, polyMaxSize = 4 , others
         plans[int(inp)].execute()
 
 if __name__ == "__main__":
-    twoPolyConnect(66, 1, 6, False)
+    twoPolyConnect(66, 10, 6, False)

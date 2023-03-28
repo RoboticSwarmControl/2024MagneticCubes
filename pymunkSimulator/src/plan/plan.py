@@ -92,7 +92,7 @@ class Plan:
             sim.loadConfig(self.initial)
             executeMotions(sim, self.actions)
             save = sim.saveConfig()
-        polyB = save.getPolyominoes().getPoly(self.info[1])
+        polyB = save.getPolyominoes().getForCube(self.info[1])
         return bool(polyB.getConnection(self.info[1], self.info[2]) != self.info[0]) ^ bool(self.state == PlanState.SUCCESS)
 
 

@@ -337,23 +337,16 @@ class Polyomino:
                     return False
         return True
 
-        
-        
 
-        
-            
-
-
+   
 class PolyCollection:
 
     def __init__(self, polys=None):
-        self.__nonTrivial = []
-        self.__trivial = []
         self.maxWidth = 0
         self.maxHeight = 0
         self.maxSize = 0
         self.__valid = True
-        self.__poly_count = {}
+        self.__polyType_polys = {}
         self.__cube_poly  = {}
         if polys == None:
             return
@@ -385,72 +378,82 @@ class PolyCollection:
         for poly in polys:
             self.__add__(poly)
 
-    def getPoly(self, cube: Cube)-> Polyomino:
+    def getForCube(self, cube: Cube)-> Polyomino:
         return self.__cube_poly[cube]
 
-    def getAll(self):
-        return self.getTrivial() + self.getNonTrivial()
-    
-    def getTrivial(self):
-        return list(self.__trivial)
+    def getForType(self, type: Polyomino) -> list:
+        if not type in self:
+            return []
+        return self.__polyType_polys[type]
 
-    def getNonTrivial(self):
-        return list(self.__nonTrivial)
+    def getAll(self) -> list:
+        if len(self.__polyType_polys) == 0:
+            return []
+        values = list(self.__polyType_polys.values())
+        polys = list(values[0])
+        for i in range(1, len(values)):
+            polys.extend(values[i])
+        return polys
 
     def isEmpty(self) -> bool:
-        return len(self.__poly_count) == 0
+        return len(self.__polyType_polys) == 0
 
     def containsInvalid(self):
         return not self.__valid
 
     def __add__(self, poly: Polyomino):
-        if poly.isTrivial():
-            self.__trivial.append(poly)
-        else:
-            self.__nonTrivial.append(poly)
         bounds = poly.bounds()
         self.maxWidth = max(self.maxWidth, bounds[0]) 
         self.maxHeight = max(self.maxHeight, bounds[1])
         self.maxSize = max(self.maxSize, poly.size())
         if not poly.isValid():
             self.__valid = False
-        if poly in self.__poly_count:
-            self.__poly_count[poly] += 1
+        if poly in self.__polyType_polys:
+            self.__polyType_polys[poly].append(poly)
         else:
-            self.__poly_count[poly] = 1
+            self.__polyType_polys[poly] = [poly]
         for cube in poly.getCubes():
             self.__cube_poly[cube] = poly
 
     def __clear__(self):
-        self.__nonTrivial.clear()
-        self.__trivial.clear()
         self.maxWidth = 0
         self.maxHeight = 0
         self.maxSize = 0
         self.__valid = True
-        self.__poly_count.clear()
+        self.__polyType_polys.clear()
         self.__cube_poly.clear()
 
     def __contains__(self, key):
-        return key in self.__poly_count
+        return key in self.__polyType_polys
     
     def __eq__(self, __o: object) -> bool:
         if not type(__o) is PolyCollection:
             return False
-        return __o.__poly_count == self.__poly_count
+        for key in self.__polyType_polys.keys():
+            try:
+                if len(__o.__polyType_polys[key]) != len(self.__polyType_polys[key]):
+                    return False
+            except KeyError:
+                return False
+        return True
     
+    def __hash__(self) -> int:
+        toHash = [(hash(k), len(v)) for k, v in self.__polyType_polys.items()]
+        toHash.sort(key=lambda t: t[0])
+        return hash(tuple(toHash))
+
     def __str__(self) -> str: 
         line = ""
         for i in range(self.maxWidth):
             line += "-"
         line += "\n"
         string = line
-        for poly, count in self.__poly_count.items():
-            string += str(count) + " x:\n\n" + str(poly) + line
+        for type, polys in self.__polyType_polys.items():
+            string += str(len(polys)) + " x:\n\n" + str(type) + line
         return string
     
     def __repr__(self) -> str:
-        return repr(self.__nonTrivial)
+        return repr(self.getAll())
 
 
 

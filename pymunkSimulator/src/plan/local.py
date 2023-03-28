@@ -182,8 +182,8 @@ def __alignWalkRealign(data: tuple) -> Plan:
 def __alignCubes(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction, forceStraight: bool=False):
     posA = config.getPosition(cubeA)
     posB = config.getPosition(cubeB)
-    comA = config.getCOM(config.getPolyominoes().getPoly(cubeA))
-    comB = config.getCOM(config.getPolyominoes().getPoly(cubeB))
+    comA = config.getCOM(config.getPolyominoes().getForCube(cubeA))
+    comB = config.getCOM(config.getPolyominoes().getForCube(cubeB))
     if (edgeB in (Direction.WEST, Direction.EAST)) or forceStraight:
         # For side connection, or if cubes are near enought, do straight align
         alignEdge = edgeB
@@ -230,9 +230,9 @@ def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction) ->
         pivotAng = PWALK_ANG_BIG
     # determin which poly is chasing which
     if bool(__faceingDirection(config, cubeA, cubeB) == Direction.EAST) ^ bool(direction == PivotWalk.LEFT):
-        chasingPoly = config.getPolyominoes().getPoly(cubeA)
+        chasingPoly = config.getPolyominoes().getForCube(cubeA)
     else:
-        chasingPoly = config.getPolyominoes().getPoly(cubeB)
+        chasingPoly = config.getPolyominoes().getForCube(cubeB)
     # estimate the pivot steps neccessary for the chasing poly to reach the other. Only take half.
     pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) * PWALK_PORTION)
     return [PivotWalk(direction, pivotAng)] * pivotSteps
@@ -253,12 +253,12 @@ def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Di
     return PlanState.UNDEFINED
 
 def __isConnected(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
-    polyB = config.getPolyominoes().getPoly(cubeB)
+    polyB = config.getPolyominoes().getForCube(cubeB)
     return polyB.getConnection(cubeB, edgeB) == cubeA
 
 def __connectPossible(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
-    polyA = config.getPolyominoes().getPoly(cubeA)
-    polyB = config.getPolyominoes().getPoly(cubeB)
+    polyA = config.getPolyominoes().getForCube(cubeA)
+    polyB = config.getPolyominoes().getForCube(cubeB)
     # poly resulting from connection would overlap, or cubes are inside the same polyomino
     targetPoly = polyA.connectPoly(cubeA, polyB, cubeB, edgeB)
     if targetPoly == None or not targetPoly.isValid():
@@ -273,8 +273,8 @@ def __arePolysStuck(newPosA: Vec2d, oldPosA: Vec2d, newPosB: Vec2d, oldPosB: Vec
 def __slideInDirections(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> set:
     # check if poly can be connected by walking in form the east and west
     slide = set()
-    polyA = config.getPolyominoes().getPoly(cubeA)
-    polyB = config.getPolyominoes().getPoly(cubeB)
+    polyA = config.getPolyominoes().getForCube(cubeA)
+    polyB = config.getPolyominoes().getForCube(cubeB)
     if polyA.connectPolyPossible(cubeA, polyB, cubeB, edgeB, Direction.EAST):
         slide.add(Direction.EAST)
     if polyA.connectPolyPossible(cubeA, polyB, cubeB, edgeB, Direction.WEST):
