@@ -8,18 +8,18 @@ from sim.state import *
 from plan.plan import *
 
 
-DEBUG = True
+DEBUG = False
 
-MAX_ITR = 24
+MAX_ITR = 32
 
-CRITICAL_DISTANCE = 4 * Cube.RAD
-SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 2
+CRITICAL_DISTANCE = Cube.MAG_DISTANCE_MIN
+SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 1.5
 IDLE_TRIES = 1
-IDLE_AMOUNT = 10
+IDLE_AMOUNT = 20
 
 STUCK_TIMES_MAX = IDLE_TRIES + 1
-STUCK_OFFSET = Cube.RAD / 4
-IDLE_STUCK_AMOUNT = 150
+STUCK_OFFSET = Cube.RAD / 6
+IDLE_STUCK_AMOUNT = 60
 
 NS_ALIGN_OFFSET = 2.75 * Cube.RAD
 ALIGNED_THRESHOLD = math.radians(4)
@@ -117,7 +117,7 @@ def __alignWalkRealign(data: tuple) -> Plan:
         posB = config.getPosition(cubeB)
         #sim.renderer.pointsToDraw.append((Renderer.BLUE, posA, 3))
         #sim.renderer.pointsToDraw.append((Renderer.RED, posB, 3))
-        # aligne the cubes. If they are stuck straight align
+        # aligne the cubes. If they are stuck force straight align
         rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide, stuckTimes >= STUCK_TIMES_MAX)
         executeMotions(sim, [rotation])
         plan.actions.append(Idle(1))
@@ -129,28 +129,37 @@ def __alignWalkRealign(data: tuple) -> Plan:
         plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide)
         if plan.state != PlanState.UNDEFINED:
             break
-        # check if cubes are in critical distance for magnets to attract
+        # determine next actions based on distance anf stucktimes
         distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
-        if distance < CRITICAL_DISTANCE and idleTry < IDLE_TRIES:
-            # if so let magnets do the rest
-            if stuckTimes >= STUCK_TIMES_MAX:
-                wait = Idle(IDLE_STUCK_AMOUNT)
-            else:
-                wait = Idle(IDLE_AMOUNT)
-            executeMotions(sim, [wait])
-            plan.actions.append(wait)
-            idleTry += 1
-            if DEBUG: print(wait)
+        if stuckTimes >= STUCK_TIMES_MAX:
+            # if stuck wait as long as their positions change
+            while True:
+                idle = Idle(IDLE_STUCK_AMOUNT)
+                executeMotions(sim, [idle])
+                if DEBUG: print(f"{idle} because stuck.")
+                plan.actions.append(Idle(1))
+                plan.actions.append(idle)
+                plan.actions.append(Idle(1))
+                config = sim.saveConfig()
+                newDist = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
+                if distance - newDist < STUCK_OFFSET / 2:
+                    break
+                distance = newDist
         else:
-            # if not walk into direction
-            pWalks = __walkDynamic(config, cubeA, cubeB, direction)
-            executeMotions(sim, pWalks)
+            if distance < CRITICAL_DISTANCE and idleTry < IDLE_TRIES:
+                # if in critical distance wait short time
+                motions = [Idle(IDLE_AMOUNT)]
+                idleTry += 1
+            else:
+                # if not walk into direction
+                motions = __walkDynamic(config, cubeA, cubeB, direction)
+                idleTry = 0 
+            executeMotions(sim, motions)
+            if DEBUG: print(f"{len(motions)} x {motions[0]}")
             plan.actions.append(Idle(1))
-            plan.actions.extend(pWalks)
+            plan.actions.extend(motions)
             plan.actions.append(Idle(1))
-            idleTry = 0
-            if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
-        config = sim.saveConfig()
+            config = sim.saveConfig()
         # update the planstate. Check failure and success conditions
         plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide)
         if plan.state != PlanState.UNDEFINED:

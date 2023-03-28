@@ -54,6 +54,7 @@ class Cube:
     MAG_FORCE = 25000000  # force of the magnets
     MRAD = 15  # distance of magnet from center of cube
     RAD = 20  # half length of side of cube
+    MAG_DISTANCE_MIN = 5 * RAD
 
     def __init__(self, type):
         self.type = type

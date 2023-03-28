@@ -13,3 +13,12 @@ seed 14 size 5:
 
 seed 17 size 5:
     polys hunt each other in circle end up at wrong connection
+
+seed 27 size 6 !sameSize:
+    poly stuck example for 2 / 4 proccesses
+
+seed 56 size 6 !sameSize:
+    max itr failure one itr more would have solved
+
+seed 61 size 6 !sameSize:
+    max itr failure hunt in circle

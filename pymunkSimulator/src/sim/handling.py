@@ -327,7 +327,7 @@ class StateHandler:
         shape.elasticity = 0.4
         shape.friction = 0.4
         # create sensor-shape that identifies a magnet attraction
-        magSensor = pymunk.Circle(body, 3 * Cube.RAD)
+        magSensor = pymunk.Circle(body, Cube.MAG_DISTANCE_MIN / 2)
         magSensor.collision_type = StateHandler.SENSOR_CTYPE
         magSensor.sensor = True
         # add to space and dictionarys

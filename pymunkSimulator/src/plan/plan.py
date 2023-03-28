@@ -85,10 +85,13 @@ class Plan:
         """
         Validates the plan by executing its actions and checking if the goal matches
         """
-        sim = Simulation(False, False)
-        sim.loadConfig(self.initial)
-        executeMotions(sim, self.actions)
-        save = sim.saveConfig()
+        if len(self.actions) == 0:
+            save = singleUpdate(self.initial)
+        else:
+            sim = Simulation(False, False)
+            sim.loadConfig(self.initial)
+            executeMotions(sim, self.actions)
+            save = sim.saveConfig()
         polyB = save.getPolyominoes().getPoly(self.info[1])
         return bool(polyB.getConnection(self.info[1], self.info[2]) != self.info[0]) ^ bool(self.state == PlanState.SUCCESS)
 
