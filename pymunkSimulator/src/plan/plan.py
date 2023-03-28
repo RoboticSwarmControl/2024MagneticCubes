@@ -46,17 +46,29 @@ class Plan:
         """
         Returns the better plan, meaning the one with lowest costs if it is valid
         """
-        # if both plans are valid return the one with lowest costs
-        if self.state == PlanState.SUCCESS and other.state == PlanState.SUCCESS:
-            if self.cost() < other.cost():
-                return self
-            else:
-                return other
-        # if only one in valid return that one. If both are invalid it doesnt matter so return planB
+        # return successfull plan with lowest costs
         if self.state == PlanState.SUCCESS:
-            return self
-        else:
+            if not other.state == PlanState.SUCCESS:
+                return self
+            if self.cost() <= other.cost():
+                return self
             return other
+        if other.state == PlanState.SUCCESS:
+            return other
+        # if both are not successfull connect and slide failure are preferable
+        if self.state in (PlanState.FAILURE_CONNECT, PlanState.FAILURE_SLIDE_IN):
+            if not other.state in (PlanState.FAILURE_CONNECT, PlanState.FAILURE_SLIDE_IN):
+                return self
+            if self.cost() <= other.cost():
+                return self
+            return other
+        if other.state in (PlanState.FAILURE_CONNECT, PlanState.FAILURE_SLIDE_IN):
+            return other
+        # as a last resort take the one with lowest costs
+        if self.cost() <= other.cost():
+            return self
+        return other
+        
 
     def concat(self, other):
         if self.goal != other.initial:

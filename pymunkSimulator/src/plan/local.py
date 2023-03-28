@@ -8,20 +8,20 @@ from sim.state import *
 from plan.plan import *
 
 
-DEBUG = False
+DEBUG = True
 
-MAX_ITR = 32
+MAX_ITR = 24
 
 CRITICAL_DISTANCE = Cube.MAG_DISTANCE_MIN
 SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 1.5
 IDLE_TRIES = 1
-IDLE_AMOUNT = 20
+IDLE_AMOUNT = 10
 
 STUCK_TIMES_MAX = IDLE_TRIES + 1
 STUCK_OFFSET = Cube.RAD / 6
 IDLE_STUCK_AMOUNT = 60
 
-NS_ALIGN_OFFSET = 2.75 * Cube.RAD
+NS_ALIGN_OFFSET = 3 * Cube.RAD
 ALIGNED_THRESHOLD = math.radians(4)
 
 PWALK_ANG_BIG = PivotWalk.DEFAULT_PIVOT_ANG
@@ -65,6 +65,7 @@ def planCubeConnect(initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Dir
     
 def __planParallel(data) -> Plan:
     print(f"Starting {len(data)} processes for simulation...")
+    optPlan = None
     with Pool(len(data)) as pool:
         it = pool.imap_unordered(__alignWalkRealign, data)
         for i in range(len(data)):
@@ -73,8 +74,12 @@ def __planParallel(data) -> Plan:
             if plan.state == PlanState.SUCCESS:
                 pool.terminate()
                 return plan
+            if optPlan == None:
+                optPlan = plan
+            else:
+                optPlan = optPlan.compare(plan)
         pool.terminate()
-        return plan
+        return optPlan
 
 def __planSequential(data) -> Plan:
     optPlan = None
@@ -120,9 +125,7 @@ def __alignWalkRealign(data: tuple) -> Plan:
         # aligne the cubes. If they are stuck force straight align
         rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide, stuckTimes >= STUCK_TIMES_MAX)
         executeMotions(sim, [rotation])
-        plan.actions.append(Idle(1))
         plan.actions.append(rotation)
-        plan.actions.append(Idle(1))
         config = sim.saveConfig()
         if DEBUG: print(rotation)
         # update the planstate. Check failure and success conditions
@@ -137,9 +140,7 @@ def __alignWalkRealign(data: tuple) -> Plan:
                 idle = Idle(IDLE_STUCK_AMOUNT)
                 executeMotions(sim, [idle])
                 if DEBUG: print(f"{idle} because stuck.")
-                plan.actions.append(Idle(1))
                 plan.actions.append(idle)
-                plan.actions.append(Idle(1))
                 config = sim.saveConfig()
                 newDist = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
                 if distance - newDist < STUCK_OFFSET / 2:
@@ -156,9 +157,7 @@ def __alignWalkRealign(data: tuple) -> Plan:
                 idleTry = 0 
             executeMotions(sim, motions)
             if DEBUG: print(f"{len(motions)} x {motions[0]}")
-            plan.actions.append(Idle(1))
             plan.actions.extend(motions)
-            plan.actions.append(Idle(1))
             config = sim.saveConfig()
         # update the planstate. Check failure and success conditions
         plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide)

@@ -155,6 +155,11 @@ def randomPolyTest():
     print(polys)
 
 
+
+#-------------------------------------------------------------------------------------------------------------------
+
+
+
 def motionAnalysis():
     maxSize = 10
     sim = Simulation(False, False)
@@ -258,8 +263,7 @@ def twoCubeConnect():
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
             fails.append(key)
-    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES")
-    print(fails)
+    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES: {fails}")
     while True:
         inp = input("Select seed to play:")
         plans[int(inp)].execute()
@@ -294,11 +298,10 @@ def twoPolyConnect(seed = 0, samples = 1, polyMaxSize = 4 ,forceMaxSize = True):
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
             fails.append(key)
-    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES")
-    print(fails)
+    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES: {fails}")
     while True:
         inp = input("Select seed to play:")
-        print(f"Is plan valid? = {plans[int(inp)].validate()}")
+        #print(f"Is plan valid? = {plans[int(inp)].validate()}")
         plans[int(inp)].execute()
 
 
@@ -330,12 +333,57 @@ def twoPolyConnect_othersOnBoard(seed = 0, samples = 1, polyMaxSize = 4 , others
     for key, plan in plans.items():
         if plan.state != PlanState.SUCCESS:
             fails.append(key)
-    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES")
-    print(fails)
+    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES: {fails}")
     while True:
         inp = input("Select seed to play:")
-        print(f"Is plan valid? = {plans[int(inp)].validate()}")
+        #print(f"Is plan valid? = {plans[int(inp)].validate()}")
         plans[int(inp)].execute()
 
+
+def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
+    plans = {}
+    globalTime = 0
+    for _ in range(samples):
+        cubesLeft = ncubes
+        factory.generator.seed(seed)
+        while True:
+            p1 = factory.randomPoly(factory.generator.randint(1, cubesLeft - 1))
+            p2 = factory.randomPoly(factory.generator.randint(1, cubesLeft - p1.size()))
+            c1, c2, ed = factory.randomConnection(p1, p2, True, True)
+            if c1 != None:
+                cubesLeft -= (p1.size() + p2.size())
+                break
+        polys = [p1,p2]
+        while cubesLeft > 0:
+            p = factory.randomPoly(factory.generator.randint(1,cubesLeft))
+            polys.append(p)
+            cubesLeft -= p.size()
+        config = factory.randomConfigWithPolys((1000,1000),polys)
+        t0 = time.time()
+        plan = local.planCubeConnect(config, c1, c2, ed)
+        t1 = time.time()
+        dt = t1 -t0
+        globalTime += dt
+        plans[seed] = plan
+        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
+        seed += 1
+    fails = []
+    for key, plan in plans.items():
+        if plan.state != PlanState.SUCCESS:
+            fails.append(key)
+    print(f"Time summed: {round(globalTime, 2)}s, {len(fails)}/{samples} FAILURES: {fails}")
+    while True:
+        inp = input("Select seed to play:")
+        if inp == 'v':
+            invalid = []
+            for seed, plan in plans.items():
+                if not plan.validate():
+                    invalid.append(seed)
+            print(f"{len(invalid)}/{samples} invalid: {invalid}")
+        else:
+            inp = int(inp)
+            plans[inp].execute()
+
 if __name__ == "__main__":
-    twoPolyConnect(66, 10, 6, False)
+    twoPolyConnect_ncubes(17, 1, 10)
