@@ -1,4 +1,5 @@
 \chapter{Preliminaries}
+\label{chap:prelim}
 
 \begin{figure}
 	\centering
@@ -21,11 +22,11 @@ For simplification we call magnets by their outwards pointing pole in further se
 
 Furthermore, two different cube types are defined:
 Either both side magnets point out their north pole, these cubes are called red cubes, or they point out their south pole, which is then called a blue cube.
-Figure \ref{fig:magnetic_cubes} shows a top-down view of the two cube types with all the outwards pointing magnet poles.
+\autoref{fig:magnetic_cubes} shows a top-down view of the two cube types with all the outwards pointing magnet poles.
 A compass always shows the orientation of the magnetic field in our illustrations.
 
 Magnetic Modular Cubes can be constructed in different sizes and ways. For more technical details and length measurements, we refer to the original \cite{Bhattacharjee2022}.
-Two important lengths that we use for planning and simulating are the cube radius $r_C$ and the magnet radius $r_M$ (also illustrated in Figure \ref{fig:magnetic_cubes}).
+Two important lengths that we use for planning and simulating are the cube radius $r_C$ and the magnet radius $r_M$ (also illustrated in \autoref{fig:magnetic_cubes}).
 $r_C$ is one half-length of a cube face and $r_M$ is the distance from the center of the cube to the center of the magnet.
 
 \begin{figure}
@@ -46,8 +47,8 @@ For planning we work in the configuration space of the 2-dimensional special Euc
 When only considering one cube, the group consists of the position in $\mathbb{R}^2$ and an orientation $\mathbb{S} = [0,2\pi)$ \cite{LaValle2006}.
 When working with $n$ cubes, the dimension of our configuration space increases to $\mathbb{R}^{2n} \times \mathbb{S}^1$.
 Note that we can still assume only one orientation for $n$ cubes, because we are working with a global magnetic field orienting all cubes the same way.
-Figure \ref{fig:workspace_config} shows a configuration with four cubes in the workspace.
-It is irrelevant which exact physical cube is at which position as long as they are the same type, so switching the positions of the two red cubes in Figure \ref{fig:workspace_config} would lead to the same configuration as before.
+\autoref{fig:workspace_config} shows a configuration with four cubes in the workspace.
+It is irrelevant which exact physical cube is at which position as long as they are the same type, so switching the positions of the two red cubes in \autoref{fig:workspace_config} would lead to the same configuration as before.
 
 \begin{figure}
 	\centering
@@ -57,6 +58,7 @@ It is irrelevant which exact physical cube is at which position as long as they 
 \end{figure}
 
 \section{Polyominoes}
+\label{sec:polys}
 The embedded magnets not only align the cube with the magnetic field, they also allow cubes to self-assemble into polyominoes.
 Two cube faces can connect if their magnets have opposite polarities.
 Because of this and the alignment with the magnetic field, cubes can either be connected at north and south faces, or east and west faces, if the cubes are not the same type.
@@ -64,14 +66,14 @@ A polyomino is a set of uniformly sized cubes on a 2-dimensional grid.
 Because we work with arbitrary positions and orientations the grid alignment does not hold true for multiple polyominoes in the workspace, but for each polyomino on its own the cubes can be represented in a local coordinate system with position $(x,y)$, $x,y \in \mathbb{Z}$ \cite{Lu2021}.
 
 We consider fixed polyominoes, meaning that two polyominoes are distinct if their shape or orientation are different \cite{Lu2021}.
-The magnetic field always provides an orientation, so in Figure \ref{fig:polyominoes} a) and d) the polyominoes are equal, just the magnetic field is rotated.
-Conversely, the polyominoes in Figure \ref{fig:polyominoes} a) and c) are the same shape but with a different rotation under the same magnetic field orientation, so they are not equal.
+The magnetic field always provides an orientation, so in \autoref{fig:polyominoes} a) and d) the polyominoes are equal, just the magnetic field is rotated.
+Conversely, the polyominoes in \autoref{fig:polyominoes} a) and c) are the same shape but with a different rotation under the same magnetic field orientation, so they are not equal.
 Furthermore, two polyominoes are only equal if all the cubes at equal positions are the same type.
-The polyominoes in Figure \ref{fig:polyominoes} a) and b) are not equal because the cube types differ.
+The polyominoes in \autoref{fig:polyominoes} a) and b) are not equal because the cube types differ.
 
 The size of a polyomino is the number of cubes it consists of.
 Because it is easier to view all structures in the workspace as a polyomino, single cubes are often referred to as trivial polyominoes with size 1.
-Although it is not possible to connect cubes of same type at east and west faces, the magnetic modular cubes can assemble structures like the one shown in Figure \ref{fig:polyominoes} e).
+Although it is not possible to connect cubes of same type at east and west faces, the magnetic modular cubes can assemble structures like the one shown in \autoref{fig:polyominoes} e).
 The connection of the bottom two cubes is strong enough to hold the structure together, even though the four blue cubes on the top repel each other.
 The resulting polyomino in its grid representation has two east-west connections between cubes the same type and is therefor marked as an invalid polyomino.
 Because construction of invalid polyominoes is hard to handle, we omit any configuration containing them in our planning algorithms.
@@ -85,6 +87,7 @@ Because construction of invalid polyominoes is hard to handle, we omit any confi
 \end{figure}
 
 \section{Motion Modes}
+\label{sec:motion}
 In \cite{Bhattacharjee2022} three motion modes are presented. Rotation, pivot walking and rolling.
 
 If the magnetic field orientation lays in the plane of the workspace and rotates without any inclination the rotation is performed around the center of mass for all polyominoes and we consider this motion a normal rotation.
@@ -97,7 +100,7 @@ When elevating the magnetic field orientation by lifting up the south pole sligh
 Pulling up the north pole does the opposite. The polyominoes will pivot on the south face bottom edges of their most south-placed cubes.
 The sum of all these cube edges is called the north or south pivot-edge and by keeping the magnetic field elevated and rotating around the normal vector of the workspace plane, the polyominoes will rotate around the center point of their pivot-edge.
 This point is called the north or south pivot-point.
-All these edges and points are illustrated in Figure \ref{fig:pivot_walking} b).
+All these edges and points are illustrated in \autoref{fig:pivot_walking} b).
 
 \begin{figure}
 	\centering
@@ -113,11 +116,11 @@ As a second step a rotation of $-\frac{1}{2} \cdot \alpha$ is performed around t
 $-\pi \leq \alpha \leq \pi$ is the pivot walking angle.
 For step 3 and 4 the elevation changes to its opposite to perform a rotation of $\alpha$ around the south pivot point.
 Step 5 and 6 are equal to 1 and 2 and will bring the polyomino back to its original orientation.
-You can see the pivot walking cycle steps in Figure \ref{fig:pivot_walking} a) and have a closer look at its parameters in Figure \ref{fig:pivot_walking} c).
+You can see the pivot walking cycle steps in \autoref{fig:pivot_walking} a) and have a closer look at its parameters in \autoref{fig:pivot_walking} c).
 
 After one pivot walking cycle, the polyomino has moved by a displacement vector $\vec{d}$ with $\lVert \vec{d} \rVert = d_p$, so $d_p$ is the distance the polyomino moved.
 The direction and length of $\vec{d}$ changes with the shape of the polyomino.
-The movement is always perpendicular to the pivot walking axis $\vec{a}$ with $\lVert \vec{a} \rVert = a_p$, which is the vector between the north and the south pivot point, visualized in Figure \ref{fig:pivot_walking} b).
+The movement is always perpendicular to the pivot walking axis $\vec{a}$ with $\lVert \vec{a} \rVert = a_p$, which is the vector between the north and the south pivot point, visualized in \autoref{fig:pivot_walking} b).
 $d_p$ can be calculated as
 \begin{equation*}´
 d_p = \sin\left(\frac{1}{2} \cdot \alpha \right) \cdot a_p \,.
@@ -129,5 +132,5 @@ When you choose a big $\alpha$ according to amount, $d_p$ becomes also bigger, b
 For better maneuvering smaller values of $\alpha$ are preferable.
 There is a strong deviation of length and direction of the displacement for different polyomino shapes.
 So moving a pivot walking step might not move two polyominoes in the exact same direction.
-Figure \ref{fig:displacement_pivot_walking} shows all 19 four-cube polyomino shapes with their displacement vectors.
+\autoref{fig:displacement_pivot_walking} shows all 19 four-cube polyomino shapes with their displacement vectors.
 
