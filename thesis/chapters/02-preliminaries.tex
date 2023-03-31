@@ -18,6 +18,7 @@ The two other side faces must have the same outwards pointing pole, so that it i
 
 In fact, this is the reason a distinct definition of front, back and side is even possible.
 Since the front is always pointing to the north pole of the magnetic field, we also call it the north face, or north edge in two dimensions, and all the other faces can also be called by their corresponding cardinal direction.
+For each face we define a vector $\vec{e} \in \{ \vec{N},\vec{E},\vec{S},\vec{W}\}$ with $\lVert \vec{e} \rVert = 1$ pointing the the cardinal direction of the magnetic field.
 For simplification we call magnets by their outwards pointing pole in further sections.
 
 Furthermore, two different cube types are defined:
@@ -123,7 +124,7 @@ The direction and length of $\vec{d}$ changes with the shape of the polyomino.
 The movement is always perpendicular to the pivot walking axis $\vec{a}$ with $\lVert \vec{a} \rVert = a_p$, which is the vector between the north and the south pivot point, visualized in \autoref{fig:pivot_walking} b).
 $d_p$ can be calculated as
 \begin{equation*}´
-d_p = \sin\left(\frac{1}{2} \cdot \alpha \right) \cdot a_p \,.
+d_p = 2 \cdot \sin\left(\frac{1}{2} \cdot \alpha \right) \cdot a_p \,.
 \end{equation*}
 To calculate $\vec{d}$ you can take the perpendicular of $\vec{a}$ and scale it to the length $d_p$.
 

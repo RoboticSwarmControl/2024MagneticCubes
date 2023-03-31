@@ -6,7 +6,7 @@ Local planning means that the planner only focuses on one concrete task.
 The task could be, to develop a plan that moves a polyomino from position $a$ to position $b$, or even simpler, to develop a plan for one pivot walk.
 Since on a global scale we consider the problem of self-assembly, we are not really interested in changing positions alone.
 To work efficiently with local plans in the global planner, the initial and goal configuration of those plans should differ in the set of polyominoes they contain.
-The local planner takes two cubes out of different polyominoes and a valid edge-pair as inputs and attempts to establish a connection.
+The local planner takes two cubes $c_A$ and $c_B$ out of different polyominoes $A$ and $B$ and attempts to establish a connection at an valid edge-pair $(e_A, e_B)$.
 If a local plan was successful, this guaranties a change of polyominoes in the workspace.
 
 For this the local planner makes use of our simulator from \autoref{chap:sim} in a closed-loop manner, meaning that the state of the simulation can be observed at any time and the actions can be adjusted accordingly.
@@ -19,11 +19,12 @@ The following sections \ref{sec:connect} to \ref{sec:plan} explain the technique
 \section{Connecting Polyominoes}
 \label{sec:connect}
 
-The two main rules that have to considered when connecting two polyominoes are:
+The two main rules that have to be considered when connecting two polyominoes $A$ and $B$ are:
 First, cubes can only be connected in the way described in \autoref{sec:polys}, so we can distinguish between east-west and north-south connections
 Second, pivot walking (\autoref{sec:motion}) only allows the polyominoes to move left, in the direction on their west faces, or right, in the direction of their east faces.
-To move in any arbitrary direction it is necessary to rotate the polyomino, so that the east or west faces point into the desired direction.
-Keep in mind that a pivot walking cycle is not always performed in the exact east or west, depending on the polyomino shape.
+Keep in mind that a pivot walking motion is actually performed in the direction of the displacement $\vec{d}$ and not directly in $\vec{E}$ or $\vec{W}$ direction.
+We can still say that for instance a pivot walk right moves to the east, because $\angle \left( \vec{E}, \vec{d} \right) < \frac{\pi}{2}$.
+To move in any arbitrary direction it is necessary to rotate the polyomino, so that $\vec{d}$ points into the desired direction.
 
 East-west connections are generally easier to handle.
 If we want to connect an east face of polyomino $A$ to a west face of polyomino $B$, $A$ has to walk into the east direction towards $B$, or the other way around.
@@ -54,20 +55,86 @@ In our simulator the connection-face will be more attracted or repelled by faces
 Pivot walking into east-west holes, even with small values for $\alpha$, has also a high failure rate because of other magnets.
 We generally try to avoid local plans that are connecting polyominoes inside holes.  
 
+\begin{figure}
+	\centering
+	\includegraphics[width=0.90\textwidth]{figures/aligning.pdf}
+	\caption{Aligning...}
+	\label{fig:aligning}
+\end{figure}
+
 \section{Aligning Cubes}
 \label{sec:align}
 
+To establish a connection between two polyominoes $A$ and $B$, the connection-cubes $c_A$ and $c_B$ with their connection-edges $e_A$ and $e_B$ need to be aligned in the right way.
+When $A$ is rotated without magnetic field elevation, a cube of the polyomino with position $P_{c_A}$ rotates in a circle around the center of mass $C_A$.
+The vector $\vec{r_A} = P_{c_A} - C_A$ is the radius of this rotation-circle.
+When also considering $B$, a rotation of the magnetic field rotates $\vec{r_A}$ and $\vec{r_B}$ by the same angle $\beta$.
+The goal is to find this angular difference $\beta$, so that the cubes are aligned.
+There are two different approaches for alignment: Straight-align and offset-align.
+
+\paragraph{Straight-Align:}
+
+For straight aligning, we define a vector $\overrightarrow{AB} = P_{c_B} - P_{c_A}$ pointing form $c_A$ to $c_B$.
+The aligning is done when $\vec{e_A}$ points in the same direction as $\overrightarrow{AB}$, so $\angle \left( \vec{e_A}, \overrightarrow{AB} \right) = 0$.
+Consequently $\angle \left( \vec{e_B}, \overrightarrow{AB} \right) = \pi$, since $e_A$ and $e_B$ have to be opposite edges for a connection.
+
+\autoref{fig:aligning} a) illustrates a straight-align for an east-west connection with all the parameters.
+The two polyominoes could now theoretically pivot walk together and connect the desired edges.
+Straight-aligning is always used for east-west connections, but we also use it for north-south connection in one special case. More on that in \autoref{sec:plan}.
+
+\paragraph{Offset-Align:}
+
+When considering north-south connections we need to align with an offset, so that the cubes can be moved together from east or west direction.
+We again define $\overrightarrow{AB} = \hat{P}_{c_B} - P_{c_A}$ with $\hat{P}_{c_B} = d_o \cdot \vec{e_B} + P_{c_B}$.
+We add an offset $d_o$ to $P_{c_B}$ in the direction of $e_B$, so $\overrightarrow{AB}$ points from $P_{c_A}$ to a position above or below $P_{c_B}$.
+In a perfect world $d_o = 2 \cdot r_C$ is exactly one cube length, but to avoid failures when moving together, we give the alignment some more offset.
+Instead of pointing $e_A$ in the same direction as $\overrightarrow{AB}$ we now have two options:
+Either solving $\angle \left( \vec{E}, \overrightarrow{AB} \right) = 0$ or $\angle \left( \vec{W}, \overrightarrow{AB} \right) = 0$, depending on if we want to move $A$ in east direction, or in the west direction towards $B$.
+
+You can see the two options for offset-aligning in \autoref{fig:aligning} b).
+For the two polyominoes you can also see that aligning with east or west edge can make a difference when moving together.
+Establishing a connection by letting $A$ move towards $B$ in west direction is possible, but by moving in east direction other cubes of the polyominoes are blocking the way.
+In \autoref{sec:plan} we present a method for checking, if moving in from east or west is possible. 
+
+\paragraph{Solving Alignment:}
 
 
-\section{Walking And Waiting}
+
+\section{Moving Polyominoes Together}
 \label{sec:walk_wait}
 
+Since both polyominoes $A$ and $B$ perform the same motion, due to global control, a connection will most likely happen when one polyomino walks into a wall of the workspace boundary.
+Connection can only happen in the middle of the workspace when on polyomino is faster than the other, meaning it was a greater pivot walking distance $d_P$.
+At a first glance it seems easy to move polyominoes together, after the connection-cubes are aligned as described in \autoref{sec:align}.
+The two options of walking left and right determine if either $A$ is chasing $B$, or if $B$ is chasing $A$, which is of course also dependent on their initial position and orientation.
+In the end one option might be shorter or better in terms of other polyominoes interfering with $A$ and $B$, but theoretically both are able to establish the connection.
 
+In reality it becomes more difficult.
+When a polyomino is continuously walking against a wall in more or less than a 90 degree angle, the polyomino will move along the wall. In \cite{schmidt2020} research is done on how friction with boundary-walls under global control forces can be used to calculate the necessary motions to achieve a desired goal configuration.
+Another difficulty are the differently orientate displacements for polyomino-shapes.
+It is mathematically possible to calculate the right orientation of the magnetic field to result in a collision after $n$ pivot walking cycle for both polyominoes, even at desired edges, but it is not guarantied that this collision-point is within the workspace boundaries.
+In that case the calculation of friction and displacement have to be combined together with other factors like polyominoes blocking each other or changing their shape during movement.
+This seems fairly complex and recalculating would be necessary in many situations, so we choose a simpler dynamic approach.
+
+We estimate the pivot walking cycles necessary until $c_A$ moved to the position of $c_B$ with
+\begin{equation*}
+n = \frac{\lVert P_{c_A} - P_{c_B}\rVert}{\lVert \vec{d_A} \rVert} \,.
+\end{equation*}
+We then only do a portion of the pivot walking cycles $n$ and realign the cubes.
+When $c_A$ and $c_B$ are near enough for magnetic forces to act we frequently wait a short time to let magnetic attraction pull $e_A$ and $e_B$ together.
 
 \section{Plan And Plan-State}
 \label{sec:plan}
 
-
+\begin{algorithm}
+	\caption{Align-Walk-Realign}
+	\label{alg:local_algo}
+	\begin{algorithmic}
+		\REQUIRE Cubes $c_A$,$c_B$, Edges $e_A$,$e_B$, 
+		\ENSURE Plan for connecting $c_A$ and $c_B$ at $e_A$ and $e_B$
+		\STATE $a \gets$ Foo(a,b)
+	\end{algorithmic}
+\end{algorithm}
 
 \section{Local Planning Algorithm}
 \label{sec:local_algo}

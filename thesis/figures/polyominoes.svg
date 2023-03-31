@@ -29,14 +29,14 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.4142136"
-     inkscape:cx="342.94678"
-     inkscape:cy="231.22391"
+     inkscape:cx="289.56022"
+     inkscape:cy="190.21172"
      inkscape:window-width="2560"
      inkscape:window-height="1355"
      inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g13800" /><defs
+     inkscape:current-layer="layer1" /><defs
      id="defs2018"><rect
        x="575.82347"
        y="8.1220237"
@@ -227,7 +227,8 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-7.4048817,-3.3198628)"><g
-       id="g8564"><g
+       id="g8564"
+       style="display:inline"><g
          id="g4746-9-1"
          inkscape:label="polyA"
          transform="translate(-1.6536916,-10.682939)"><g
@@ -389,7 +390,7 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan6576">a)</tspan></text></g><g
+           id="tspan8179">a)</tspan></text></g><g
        id="g8804"><g
          id="g4746-9-1-2-0"
          inkscape:label="polyC"
@@ -552,7 +553,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-2);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="29.423994"
-         id="tspan6578">c)</tspan></text><g
+         id="tspan8181">c)</tspan></text><g
        id="g8724"><g
          id="g4746-9-1-2"
          inkscape:label="polyA_rot"
@@ -715,7 +716,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-9);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="29.423994"
-         id="tspan6580">d)</tspan></text><g
+         id="tspan8183">d)</tspan></text><g
        id="g8644"><g
          id="g4746-9"
          inkscape:label="polyB"
@@ -878,7 +879,7 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan6582">b)</tspan></text></g><g
+           id="tspan8185">b)</tspan></text></g><g
        id="g13800"
        inkscape:label="g13800"><rect
          style="fill:none;stroke:#808080;stroke-width:0.682296;stroke-dasharray:1.36459, 0.682296;stroke-dashoffset:0;stroke-opacity:1"
@@ -1115,4 +1116,4 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan6584">e)</tspan></text></g></g></svg>
+           id="tspan8187">e)</tspan></text></g></g></svg>
