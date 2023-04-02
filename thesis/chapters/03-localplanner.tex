@@ -6,10 +6,10 @@ Local planning means that the planner only focuses on one concrete task.
 The task could be, to develop a plan that moves a polyomino from position $a$ to position $b$, or even simpler, to develop a plan for one pivot walk.
 Since on a global scale we consider the problem of self-assembly, we are not really interested in changing positions alone.
 To work efficiently with local plans in the global planner, the initial and goal configuration of those plans should differ in the set of polyominoes they contain.
-The local planner takes two cubes $c_A$ and $c_B$ out of different polyominoes $A$ and $B$ and attempts to establish a connection at an valid edge-pair $(e_A, e_B)$.
+The local planner takes two cubes $c_A$ and $c_B$ out of different polyominoes $A$ and $B$ and attempts to establish a connection at a valid edge-pair $(e_A, e_B)$.
 If a local plan was successful, this guaranties a change of polyominoes in the workspace.
 
-For this the local planner makes use of our simulator from \autoref{chap:sim} in a closed-loop manner, meaning that the state of the simulation can be observed at any time and the actions can be adjusted accordingly.
+For this, the local planner makes use of our simulator from \autoref{chap:sim} in a closed-loop manner, meaning that the state of the simulation can be observed at any time and the actions can be adjusted accordingly.
 The local planner observes the position of cubes and polyominoes and works with the distance between them.
 It also works with the orientation of cube faces.
 In a real application of Magnetic Modular Cubes a camera, able to track cubes in the workspace, could to used to retrieve the necessary information. 
@@ -29,7 +29,7 @@ To move in any arbitrary direction it is necessary to rotate the polyomino, so t
 East-west connections are generally easier to handle.
 If we want to connect an east face of polyomino $A$ to a west face of polyomino $B$, $A$ has to walk into the east direction towards $B$, or the other way around.
 When $A$ should be connected at an south face of $B$, $A$ can now walk into east or west direction towards $B$, or $B$ could again do the opposite.
-A closer look on why these movement directions are important and how all of them can be established at any position is taken in \autoref{sec:align}.
+A closer look on why these two options differ and how both can be established at any position is taken in \autoref{sec:align}.
 
 \begin{figure}
 	\centering
@@ -45,7 +45,7 @@ We differentiate between east-west and north-south located holes.
 Furthermore a hole can be of a certain depth measured in multiples of $2 r_C$.
 \autoref{fig:holes} shows examples for different holes with different depths.
 
-Connecting into a hole with a depth of more than one times $2 r_C$ is not possible.
+Connecting into a hole with a depth of more than $2 r_C$ is not possible.
 For instance, when inserting the blue single cube into the polyomino in \autoref{fig:holes} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the hole.
 But even holes with depth $2 r_C$ are hard to handle.
 Inserting into a hole can be done by pivot walking, this would only work for east-west holes, or by letting magnetic forces attract the connection-faces.
@@ -66,7 +66,7 @@ We generally try to avoid local plans that are connecting polyominoes inside hol
 \label{sec:align}
 
 To establish a connection between two polyominoes $A$ and $B$, the connection-cubes $c_A$ and $c_B$ with their connection-edges $e_A$ and $e_B$ need to be aligned in the right way.
-When $A$ is rotated without magnetic field elevation, a cube of the polyomino with position $P_{c_A}$ rotates in a circle around the center of mass $C_A$.
+When $A$ is rotated without magnetic field elevation, a cube with position $P_{c_A}$ rotates in a circle around the center of mass of its polyomino $C_A$.
 The vector $\vec{r_A} = P_{c_A} - C_A$ is the radius of this rotation-circle.
 When also considering $B$, a rotation of the magnetic field rotates $\vec{r_A}$ and $\vec{r_B}$ by the same angle $\beta$.
 The goal is to find this angular difference $\beta$, so that the cubes are aligned.
@@ -87,7 +87,7 @@ Straight-aligning is always used for east-west connections, but we also use it f
 When considering north-south connections we need to align with an offset, so that the cubes can be moved together from east or west direction.
 We again define $\overrightarrow{AB} = \hat{P}_{c_B} - P_{c_A}$ with $\hat{P}_{c_B} = d_o \cdot \vec{e_B} + P_{c_B}$.
 We add an offset $d_o$ to $P_{c_B}$ in the direction of $e_B$, so $\overrightarrow{AB}$ points from $P_{c_A}$ to a position above or below $P_{c_B}$.
-In a perfect world $d_o = 2 \cdot r_C$ is exactly one cube length, but to avoid failures when moving together, we give the alignment some more offset.
+In a perfect world $d_o = 2 \cdot r_C$ is exactly one cube length, but to avoid failures when moving together, we give the alignment a greater offset.
 Instead of pointing $e_A$ in the same direction as $\overrightarrow{AB}$ we now have two options:
 Either solving $\angle \left( \vec{E}, \overrightarrow{AB} \right) = 0$ or $\angle \left( \vec{W}, \overrightarrow{AB} \right) = 0$, depending on if we want to move $A$ in east direction, or in the west direction towards $B$.
 
@@ -98,7 +98,22 @@ In \autoref{sec:plan} we present a method for checking, if moving in from east o
 
 \paragraph{Solving Alignment:}
 
+We define a function for straight-aligning based on the rotation angle $\beta$, where both $\vec{e_A}$ and $\overrightarrow{AB}$ change according to $\beta$.
+\begin{equation*}
+a(\beta) = \angle \left( R_\beta \vec{e_A}, \, \left( R_\beta r_B + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,.
+\end{equation*}
+$R_\beta$ is a rotation matrix used for rotating vectors by $\beta$.
+For an offset-align the function would be
+\begin{equation*}
+a(\beta) = \angle \left( R_\beta \vec{e}, \, \left( R_\beta \hat{r_B} + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,,
+\end{equation*}
+with $\vec{e} \in \{ \vec{E}, \vec{W}\}$ and $\hat{r_B} = \hat{P}_{c_B} - C_B$
 
+Alignment is not always possible, so instead of solving $a(\beta) = 0$, we are minimizing $a(\beta)$.
+Because $-\pi < \beta \leq \pi$ we can iterate through increasing values of $\beta$.
+If we encounter a value close enough to zero we can return it.
+If not we return the minimum of all the calculated values.
+This way we at least get as close to an alignment as possible.
 
 \section{Moving Polyominoes Together}
 \label{sec:walk_wait}
@@ -110,21 +125,46 @@ The two options of walking left and right determine if either $A$ is chasing $B$
 In the end one option might be shorter or better in terms of other polyominoes interfering with $A$ and $B$, but theoretically both are able to establish the connection.
 
 In reality it becomes more difficult.
-When a polyomino is continuously walking against a wall in more or less than a 90 degree angle, the polyomino will move along the wall. In \cite{schmidt2020} research is done on how friction with boundary-walls under global control forces can be used to calculate the necessary motions to achieve a desired goal configuration.
-Another difficulty are the differently orientate displacements for polyomino-shapes.
+When a polyomino is continuously walking against a wall in more or less than a 90 degree angle, the polyomino will move alongside the wall. In \cite{schmidt2020} research is done on how friction with boundary-walls under global control forces can be used to calculate the necessary motions for reaching a desired goal configuration.
+Another difficulty are different orientations of displacement vectors.
 It is mathematically possible to calculate the right orientation of the magnetic field to result in a collision after $n$ pivot walking cycle for both polyominoes, even at desired edges, but it is not guarantied that this collision-point is within the workspace boundaries.
 In that case the calculation of friction and displacement have to be combined together with other factors like polyominoes blocking each other or changing their shape during movement.
 This seems fairly complex and recalculating would be necessary in many situations, so we choose a simpler dynamic approach.
 
 We estimate the pivot walking cycles necessary until $c_A$ moved to the position of $c_B$ with
 \begin{equation*}
-n = \frac{\lVert P_{c_A} - P_{c_B}\rVert}{\lVert \vec{d_A} \rVert} \,.
+n = \frac{\lVert P_{c_A} - P_{c_B}\rVert}{d_{p,A}} \,.
 \end{equation*}
-We then only do a portion of the pivot walking cycles $n$ and realign the cubes.
-When $c_A$ and $c_B$ are near enough for magnetic forces to act we frequently wait a short time to let magnetic attraction pull $e_A$ and $e_B$ together.
+We then only walk a portion of $n$ and re-align the cubes.
+When $c_A$ and $c_B$ are near enough for magnetic forces to act we frequently wait a short period to let magnetic attraction pull $e_A$ and $e_B$ together.
+This will automatically adjust the alignment, but for even more precision we decreased the pivot waling angle $\alpha$, when in close proximity.
 
 \section{Plan And Plan-State}
 \label{sec:plan}
+
+A plan is a sequence of actions $a_1, ... , a_n$ that when applied to an initial configuration, leads to a goal configuration.
+Two plans can be concatenated, when the goal of the first matches with the initial configuration of the second.
+That way multiple local plans can be connected to form a global plan.
+We define a metric to compare and evaluate plans based on rotational cost of its actions only considering magnetic field rotations, not elevation.
+Let $a_i$ be a normal rotation of angle $\beta$, then $cost(a_i) = |\beta|$.
+If it is a pivot walking motion, then $cost(a_i) = |2\alpha|$.
+The cost for the plan is the sum of the costs of all its actions
+\begin{equation*}
+\sum_{i=1}^{n} cost(a_i) \,.
+\end{equation*}
+A local plan is successful, if the goal configuration contains a polyominoes with the desired connection of $c_A$ and $c_B$ at $(e_A, e_B)$.
+
+\paragraph{Polyomino Connection Failure}
+
+\paragraph{Slide-In Failure}
+
+\paragraph{Polyominoes Stuck Failure}
+
+\paragraph{Other Failures}
+
+%invalid polys
+%max iterations
+%assembly of of polys
 
 \begin{algorithm}
 	\caption{Align-Walk-Realign}
