@@ -136,7 +136,7 @@ def randomPoly(ncubes, nred=None):
                 break
             cube = currCubes[generator.randint(0, len(currCubes) - 1)]
             # determin all possible open edges
-            edgesAvail = poly.getOpenEdges(cube, newCube.type == cube.type)
+            edgesAvail = poly.getFreeEdges(cube, newCube.type == cube.type)
             # connect at an random available edge
             save = poly.clone()
             while True:
@@ -172,8 +172,8 @@ def randomConnection(polyA: Polyomino, polyB: Polyomino, connectPoss:bool, onlyV
         itr += 1
         cubeA = generator.choice(polyA.getCubes())
         cubeB = generator.choice(polyB.getCubes())
-        edgesA = polyA.getOpenEdges(cubeA, cubeA.type == cubeB.type)
-        edgesB = polyB.getOpenEdges(cubeB, cubeA.type == cubeB.type)
+        edgesA = polyA.getFreeEdges(cubeA, cubeA.type == cubeB.type)
+        edgesB = polyB.getFreeEdges(cubeB, cubeA.type == cubeB.type)
         possibleEdgesB = [edgeB for edgeB in edgesB if edgeB.inv() in edgesA]
         if len(possibleEdgesB) == 0:
             continue

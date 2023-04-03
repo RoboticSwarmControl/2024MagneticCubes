@@ -16,6 +16,7 @@ class PlanState(Enum):
     FAILURE_INVAL_POLY = 6
     FAILURE_MAX_ITR = 7
     FAILURE_STUCK = 8
+    FAILURE_HOLE = 9
 
     def  __str__(self) -> str:
         return self.name

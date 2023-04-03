@@ -147,13 +147,8 @@ class Polyomino:
         if (neighborW != None and neighborW.type == cubeA.type) or (neighborE != None and neighborE.type == cubeA.type):
             self.__valid = False
         return True
-
-    def remove(self, cube: Cube):
-        pos = self.__cube_pos[cube]
-        # remove if polyomino doesnt break
-        return
     
-    def getOpenEdges(self, cube: Cube, onlyNS:bool=False):
+    def getFreeEdges(self, cube: Cube, onlyNS:bool=False):
         edges = [Direction(i) for i, x in enumerate(self.getConnections(cube)) if x == None]
         if onlyNS:
             if Direction.WEST in edges:
@@ -184,6 +179,12 @@ class Polyomino:
 
     def getCubes(self):
         return list(self.__cube_pos.keys())
+
+    def getCube(self, localCoords) -> Cube:
+        try:
+            return self.__pos_cube[localCoords]
+        except KeyError:
+            return None
 
     def getRoot(self):
         return self.__pos_cube[(0, 0)]

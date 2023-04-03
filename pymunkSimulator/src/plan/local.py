@@ -8,12 +8,13 @@ from sim.state import *
 from plan.plan import *
 
 
-DEBUG = True
+DEBUG = False
 
 MAX_ITR = 24
 
 CRITICAL_DISTANCE = Cube.MAG_DISTANCE_MIN
 SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 1.5
+
 IDLE_TRIES = 1
 IDLE_AMOUNT = 10
 
@@ -29,21 +30,25 @@ PWALK_ANG_SMALL = PWALK_ANG_BIG / 1.5
 PWALK_PORTION = 1/2
 
 
-
 def planCubeConnect(initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Plan:
     # single update if no poly info available
     if initial.getPolyominoes().isEmpty():
         initial = singleUpdate(initial)
-    # when already connected return successfull plan
     info = (cubeA,cubeB,edgeB)
-    if __isConnected(initial, cubeA, cubeB, edgeB):
-        return Plan(initial=initial, goal=initial, state=PlanState.SUCCESS, info=info)
     # cant connect cubes sideways if they are same type
     if edgeB in (Direction.EAST, Direction.WEST) and cubeA.type == cubeB.type:
         return Plan(initial=initial, state=PlanState.FAILURE_SAME_TYPE, info=info)
+    if __polysInvalid(initial, cubeA, cubeB, edgeB):
+        return Plan(initial=initial, state=PlanState.FAILURE_INVAL_POLY, info=info)
+    # when already connected return successfull plan
+    if __isConnected(initial, cubeA, cubeB, edgeB):
+        return Plan(initial=initial, goal=initial, state=PlanState.SUCCESS, info=info)
     # pre check if connecting the polys is even possible and valid
     if not __connectPossible(initial, cubeA, cubeB, edgeB):
         return Plan(initial=initial, state=PlanState.FAILURE_CONNECT, info=info)
+    # pre-check if connection edges are inside a hole
+    if __edgeInHole(initial, cubeA, edgeB.inv()) or __edgeInHole(initial, cubeB, edgeB):
+        return Plan(initial=initial, state=PlanState.FAILURE_HOLE, info=info)
     # pre check if polys can slide together from either east or west
     slideDirections = __slideInDirections(initial, cubeA, cubeB, edgeB)
     if len(slideDirections) == 0:
@@ -113,7 +118,7 @@ def __alignWalkRealign(data: tuple) -> Plan:
     while True:
         # check if the polys got stuck.
         #sim.renderer.pointsToDraw.clear()
-        if __arePolysStuck(config.getPosition(cubeA), posA, config.getPosition(cubeB), posB):
+        if __polysStuck(config.getPosition(cubeA), posA, config.getPosition(cubeB), posB):
             stuckTimes += 1
         else:
             stuckTimes = 0
@@ -238,7 +243,7 @@ def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction) ->
 
 def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction) -> PlanState:
     # check if config contains inValid polys
-    if config.getPolyominoes().containsInvalid():
+    if __polysInvalid(config, cubeA, cubeB, edgeB):
         return PlanState.FAILURE_INVAL_POLY
     # check if cubes are connected at edgeB
     if __isConnected(config, cubeA, cubeB, edgeB):
@@ -246,6 +251,9 @@ def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Di
     # check if you can connect the polys of A and B
     if not __connectPossible(config, cubeA, cubeB, edgeB):
         return PlanState.FAILURE_CONNECT
+    # check if connection edges are inside a hole
+    if __edgeInHole(config, cubeA, edgeB.inv()) or __edgeInHole(config, cubeB, edgeB):
+        return PlanState.FAILURE_HOLE
     # check if we cant slide in anymore
     if not slide in __slideInDirections(config, cubeA, cubeB, edgeB):
         return PlanState.FAILURE_SLIDE_IN
@@ -264,11 +272,6 @@ def __connectPossible(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Di
         return False
     return True
 
-def __arePolysStuck(newPosA: Vec2d, oldPosA: Vec2d, newPosB: Vec2d, oldPosB: Vec2d) -> bool:
-    distChangeA = newPosA.get_distance(oldPosA)
-    distChangeB = newPosB.get_distance(oldPosB)
-    return distChangeA < STUCK_OFFSET and distChangeB < STUCK_OFFSET
-
 def __slideInDirections(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> set:
     # check if poly can be connected by walking in form the east and west
     slide = set()
@@ -280,9 +283,39 @@ def __slideInDirections(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: 
         slide.add(Direction.WEST)
     return slide
 
+def __edgeInHole(config: Configuration, cube: Cube, edge: Direction) -> bool:
+    poly = config.getPolyominoes().getForCube(cube)
+    coords = poly.getLocalCoordinates(cube)
+    if edge == Direction.NORTH:
+        coordsToCheck = ((coords[0] + 1, coords[1] + 1),(coords[0] - 1, coords[1] + 1))
+    elif edge == Direction.EAST:
+        coordsToCheck = ((coords[0] + 1, coords[1] + 1),(coords[0] + 1, coords[1] - 1))
+    elif edge == Direction.SOUTH:
+        coordsToCheck = ((coords[0] + 1, coords[1] - 1),(coords[0] - 1, coords[1] - 1))
+    else:
+        coordsToCheck = ((coords[0] - 1, coords[1] + 1),(coords[0] - 1, coords[1] - 1))
+    if poly.getCube(coordsToCheck[0]) != None and poly.getCube(coordsToCheck[1]) != None:
+        return True
+    return False
+
+def __polysStuck(newPosA: Vec2d, oldPosA: Vec2d, newPosB: Vec2d, oldPosB: Vec2d) -> bool:
+    distChangeA = newPosA.get_distance(oldPosA)
+    distChangeB = newPosB.get_distance(oldPosB)
+    return distChangeA < STUCK_OFFSET and distChangeB < STUCK_OFFSET
+
+def __polysInvalid(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
+    if config.getPolyominoes().containsInvalid():
+        return True
+    polyA = config.getPolyominoes().getForCube(cubeA)
+    polyB = config.getPolyominoes().getForCube(cubeB)
+    targetPoly = polyA.connectPoly(cubeA, polyB, cubeB, edgeB)
+    if targetPoly != None and not targetPoly.isValid():
+        return True
+    return False
+
 def __faceingDirection(config: Configuration, cubeA: Cube, cubeB: Cube) -> Direction:
     """
-    returns 'direction',that cubeB is in 'direction' of cubeA.
+    returns 'direction',so that cubeB is in 'direction' of cubeA.
     Direction is either EAST or WEST
     """
     vecAB = config.getPosition(cubeB) - config.getPosition(cubeA)

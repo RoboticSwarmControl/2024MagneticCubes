@@ -33,30 +33,6 @@ A closer look on why these two options differ and how both can be established at
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.80\textwidth]{figures/holes.pdf}
-	\caption{Tree different examples for connecting polyominoes into holes. a) and b) show one-cube-deep holes (a) east-west and b) north-south). c) illustrates a two-cube-deep east-west hole. The edges to be connected are marked yellow.}
-	\label{fig:holes}
-\end{figure}
-
-\paragraph{Connecting In Holes:}
-
-Connecting two polyominoes where one of the connection-faces is located inside a hole, is a difficult task in the continuous world.
-We differentiate between east-west and north-south located holes.
-Furthermore a hole can be of a certain depth measured in multiples of $2 r_C$.
-\autoref{fig:holes} shows examples for different holes with different depths.
-
-Connecting into a hole with a depth of more than $2 r_C$ is not possible.
-For instance, when inserting the blue single cube into the polyomino in \autoref{fig:holes} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the hole.
-But even holes with depth $2 r_C$ are hard to handle.
-Inserting into a hole can be done by pivot walking, this would only work for east-west holes, or by letting magnetic forces attract the connection-faces.
-Relying on magnetic forces alone seem promising, since it would work for both hole types, but in reality not only the forces of the connection-faces are present.
-All the forces between other magnets prevent an easy slide-in.
-In our simulator the connection-face will be more attracted or repelled by faces outside the hole, then the once inside.
-Pivot walking into east-west holes, even with small values for $\alpha$, has also a high failure rate because of other magnets.
-We generally try to avoid local plans that are connecting polyominoes inside holes.  
-
-\begin{figure}
-	\centering
 	\includegraphics[width=0.90\textwidth]{figures/aligning.pdf}
 	\caption{Aligning...}
 	\label{fig:aligning}
@@ -139,7 +115,7 @@ We then only walk a portion of $n$ and re-align the cubes.
 When $c_A$ and $c_B$ are near enough for magnetic forces to act we frequently wait a short period to let magnetic attraction pull $e_A$ and $e_B$ together.
 This will automatically adjust the alignment, but for even more precision we decreased the pivot waling angle $\alpha$, when in close proximity.
 
-\section{Plan And Plan-State}
+\section{Plan And Failures}
 \label{sec:plan}
 
 A plan is a sequence of actions $a_1, ... , a_n$ that when applied to an initial configuration, leads to a goal configuration.
@@ -153,11 +129,11 @@ The cost for the plan is the sum of the costs of all its actions
 \sum_{i=1}^{n} cost(a_i) \,.
 \end{equation*}
 A local plan is successful, if the goal configuration contains a polyomino with the desired connection of $c_A$ and $c_B$ at $(e_A, e_B)$.
+There are several reasons the local planner might fail to develop a plan:
 
-\paragraph{Overlapping Connection Failure}
+\paragraph{Impossible Connection:}
 
-There ar several reasons the local planner might fail to develop a plan.
-The most common failure resolves around the fact, that it is not possible to connect the polyominoes.
+Most reasons of failure resolves around the fact, that it is not possible to connect the polyominoes.
 First of all, $e_A$ and $e_B$ need to be free, so no other cube is already connected to them, but even if that is the case other cubes then $c_A$ and $c_B$ can prevent a connection.
 By connecting two polyominoes in one local discrete coordinate-system, for all cubes $c_1$, $c_2$ with coordinates $(x_1, y_1)$, $(x_2, y_2)$: $(x_1, y_1) \neq (x_2, y_2)$ should hold true.
 If two positions are equal, we call this a overlap which prevents the connection.
@@ -166,7 +142,7 @@ Of course a connection is also not possible, if $e_A$ and $e_B$ are part of the 
 All that conditions are easy to check in a discrete way before even starting to plan, but that is not enough.
 Connection with other polyominoes during planning can invalidate those pre-checked conditions, so we need a to frequently re-check them.
 
-\paragraph{Slide-In Failure}
+\paragraph{Impossible Slide-In:}
 
 Even if a connection in a common local coordinate-system is possible you can only connect by moving in from east or west.
 Other cubes can again prevent this by blocking the way for an easy slide-in.
@@ -178,13 +154,49 @@ When pre-checking this condition we can state failure, if both directions are no
 Otherwise we can align with respect to the valid slide-in direction, or try out both, if both are possible.
 Again the condition needs to be re-checked frequently, due to changing polyominoes.
 
-\paragraph{Polyominoes Stuck Failure}
+\paragraph{Polyominoes Being Stuck:}
+
+Polyominoes can get stuck in corners or on walls of the workspace.
+In this state it is not possible anymore to decrease the distance of $A$ and $B$ by pivot walking.
+We can identify this state when the position of both cubes $c_A$ and $c_B$ did not change after a certain amount of pivot walking motions.
+
+When stuck while trying to establish a north-south connection a straight-align instead of an offset-align can solve the problem.
+It depends on the distance of the cubes after straight-aligning.
+If the distance is to big for magnetic forces to act, failure is reported, but if they are close enough the local planner waits until magnetic attraction connected $e_A$ and $e_B$.
 
 
+\begin{figure}
+	\centering
+	\includegraphics[width=0.80\textwidth]{figures/holes.pdf}
+	\caption{Tree different examples for connecting polyominoes into holes. a) and b) show one-cube-deep holes (a) east-west and b) north-south). c) illustrates a two-cube-deep east-west hole. The edges to be connected are marked yellow.}
+	\label{fig:holes}
+\end{figure}
 
-\paragraph{Other Failures}
+\paragraph{Connecting In Holes:}
 
-%invalid polys
+Connecting two polyominoes where one of the connection-faces is located inside a hole, is a difficult task in the continuous world.
+We differentiate between east-west and north-south located holes.
+Furthermore a hole can be of a certain depth measured in multiples of $2 r_C$.
+\autoref{fig:holes} shows examples for different holes with different depths.
+
+Connecting into a hole with a depth of more than $2 r_C$ is not possible.
+For instance, when inserting the blue single cube into the polyomino in \autoref{fig:holes} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the hole.
+But even holes with depth $2 r_C$ are hard to handle.
+Inserting into a hole can be done by pivot walking, this would only work for east-west holes, or by letting magnetic forces attract the connection-faces.
+Relying on magnetic forces alone seem promising, since it would work for both hole types, but in reality not only the forces of the connection-faces are present.
+All the forces between other magnets prevent an easy slide-in.
+In our simulator the connection-face will be more attracted or repelled by faces outside the hole, then the once inside.
+Pivot walking into east-west holes, even with small values for $\alpha$, has also a high failure rate because of other magnets.
+The local planner states failure immediately when polyominoes should be connected in any hole-type.
+
+\paragraph{Invalid Polyominoes:}W
+
+Because construction of invalid polyominoes is hard to handle on a global scale, we already omit plans containing them in our local planner.
+We state failure if any invalid polyominoes is created at any point during planning.
+We also pre-check and frequently re-check, if the polyomino that will be created by establishing the connection would itself be invalid. 
+
+\paragraph{Other Failures:}
+
 %max iterations
 %assembly of other polys
 

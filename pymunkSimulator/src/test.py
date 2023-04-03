@@ -220,6 +220,22 @@ def motionAnalysis():
         t1 = time.time()
         print(f"[{rot180}] Time: {round(t1 -t0, 4)}s\n")
 
+def holeConnectionTest():
+    cubeA = Cube(0)
+    cubeB = Cube(1)
+    edgeB = Direction.WEST
+    polyA = Polyomino(cubeA)
+    cube1 = Cube(1)
+    cube2 = Cube(1)
+    polyA.connect(cube1, cubeA, Direction.NORTH)
+    polyA.connect(Cube(0), cube1, Direction.EAST)
+    polyA.connect(cube2, cubeA, Direction.SOUTH)
+    polyA.connect(Cube(0), cube2, Direction.EAST)
+    polyB = Polyomino(cubeB)
+    print(polyA)
+    config = factory.randomConfigWithPolys((800,800), [polyA,polyB])
+    plan = local.planCubeConnect(config, cubeA, cubeB, edgeB)
+    print(plan)
 
 def twoCostumCubeConnect():
     c1 = Cube(1) #red
@@ -386,4 +402,4 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
             plans[inp].execute()
 
 if __name__ == "__main__":
-    twoPolyConnect_ncubes(17, 1, 10)
+    twoPolyConnect_ncubes(40,20,10)
