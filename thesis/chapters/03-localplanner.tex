@@ -87,7 +87,7 @@ Straight-aligning is always used for east-west connections, but we also use it f
 When considering north-south connections we need to align with an offset, so that the cubes can be moved together from east or west direction.
 We again define $\overrightarrow{AB} = \hat{P}_{c_B} - P_{c_A}$ with $\hat{P}_{c_B} = d_o \cdot \vec{e_B} + P_{c_B}$.
 We add an offset $d_o$ to $P_{c_B}$ in the direction of $e_B$, so $\overrightarrow{AB}$ points from $P_{c_A}$ to a position above or below $P_{c_B}$.
-In a perfect world $d_o = 2 \cdot r_C$ is exactly one cube length, but to avoid failures when moving together, we give the alignment a greater offset.
+In a perfect world $d_o = 2 \cdot r_C$ is exactly one cube length, but to avoid failures when moving together, we give the alignment a bigger offset.
 Instead of pointing $e_A$ in the same direction as $\overrightarrow{AB}$ we now have two options:
 Either solving $\angle \left( \vec{E}, \overrightarrow{AB} \right) = 0$ or $\angle \left( \vec{W}, \overrightarrow{AB} \right) = 0$, depending on if we want to move $A$ in east direction, or in the west direction towards $B$.
 
@@ -152,19 +152,41 @@ The cost for the plan is the sum of the costs of all its actions
 \begin{equation*}
 \sum_{i=1}^{n} cost(a_i) \,.
 \end{equation*}
-A local plan is successful, if the goal configuration contains a polyominoes with the desired connection of $c_A$ and $c_B$ at $(e_A, e_B)$.
+A local plan is successful, if the goal configuration contains a polyomino with the desired connection of $c_A$ and $c_B$ at $(e_A, e_B)$.
 
-\paragraph{Polyomino Connection Failure}
+\paragraph{Overlapping Connection Failure}
+
+There ar several reasons the local planner might fail to develop a plan.
+The most common failure resolves around the fact, that it is not possible to connect the polyominoes.
+First of all, $e_A$ and $e_B$ need to be free, so no other cube is already connected to them, but even if that is the case other cubes then $c_A$ and $c_B$ can prevent a connection.
+By connecting two polyominoes in one local discrete coordinate-system, for all cubes $c_1$, $c_2$ with coordinates $(x_1, y_1)$, $(x_2, y_2)$: $(x_1, y_1) \neq (x_2, y_2)$ should hold true.
+If two positions are equal, we call this a overlap which prevents the connection.
+Of course a connection is also not possible, if $e_A$ and $e_B$ are part of the same polyomino and not already connected.
+
+All that conditions are easy to check in a discrete way before even starting to plan, but that is not enough.
+Connection with other polyominoes during planning can invalidate those pre-checked conditions, so we need a to frequently re-check them.
 
 \paragraph{Slide-In Failure}
 
+Even if a connection in a common local coordinate-system is possible you can only connect by moving in from east or west.
+Other cubes can again prevent this by blocking the way for an easy slide-in.
+We can also verify both east and west slide-in in a common local coordinate system.
+This discrete check assumes exact movement from east or west direction.
+Because of different displacement directions we know this is not true, but it is a reasonable approximation.
+
+When pre-checking this condition we can state failure, if both directions are not possible.
+Otherwise we can align with respect to the valid slide-in direction, or try out both, if both are possible.
+Again the condition needs to be re-checked frequently, due to changing polyominoes.
+
 \paragraph{Polyominoes Stuck Failure}
+
+
 
 \paragraph{Other Failures}
 
 %invalid polys
 %max iterations
-%assembly of of polys
+%assembly of other polys
 
 \begin{algorithm}
 	\caption{Align-Walk-Realign}
