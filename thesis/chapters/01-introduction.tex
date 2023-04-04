@@ -1,5 +1,5 @@
 \chapter{Introduction}
-\label{chap:intro}¸
+\label{chap:intro}
 
 Self-assembling modular parts forming bigger structures is a well-known concept in nature and most functionalities of living organisms follow this principle \cite{bishop2005}.
 DNA for example has the ability to self-replicate by using differently shaped proteins, that combine themselves in various ways.
@@ -10,13 +10,12 @@ Biomedical applications could be targeted drug delivery or drug screening \cite{
 
 Designing robots at these small sizes faces challenging problems.
 Equipping each robot with its own sensors, actuation-system, connection-system and power supply seem infeasible, in terms of the miniaturization required and power-limitations \cite{white2007}.
-%Condider C-atoms
+%TODO Condider C-atoms
 Therefore, the use of external global control, effecting every robot in the workspace with the same torque and force, is a promising solution \cite{white2007}.
 Using robots with embedded permanent magnets, has all the desired effects.
 Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply and for sensing an external camera can be used \cite{saab2019}.
 
 One example for magnetically controlled robots are the magnetic modular cubes by Bhattacharjee et al. \cite{Bhattacharjee2022}, which are the subjects of this thesis.
-% state that they have discrete planning... but i am doing that in related work
 We will develop a simulation that simulates the behavior of magnetic modular cubes, without assuming discrete movement or limiting rotations to a certain amount.
 The simulation will be used for developing closed-loop planing algorithms, which provide a control sequence to assemble desired target shapes.
 For that it is necessary to develop a local planner that is able to connect structures at desired faces.
@@ -35,7 +34,7 @@ It is difficult to engineer algorithms that explore these huge configuration-spa
 A lot of research was done on motion planning and the textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
 
 When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one concept that has been successful for many robotics problem is sample-based motion planning.
-%define uncountable infinite and complete
+%TODO define uncountable infinite and complete
 By taking samples, you can reduce the planning problem from navigating a configuration space to planning on a graph, but you might lose possible solutions.
 Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point, and therefore these algorithms can be called resolution complete.
 Ways of sampling include random sampling or using a grid with a resolution that is dynamically adjustable.
@@ -49,13 +48,13 @@ One interesting idea is that single robots can connect to form bigger structures
 This is referred to as self-assembly and E. Winfree \cite{winfree1998} proposed the abstract Tile Assembly Model (aTAM) in the context of assembling DNA.
 In this model, particles can have different sets of glues and connect according to certain rules regarding the glue type.
 However, he considers this process as nondeterministic, so there is no exact instruction on how to assemble a desired structure.
-% define particles, non-derministic
+%TODO define particles, non-derministic
 
 One model more related to the magnetic modular cubes used in this thesis is the Tilt model from Becker et al. \cite{Becker2014_SP}.
 In the Tilt model, all tiles move into one of the cardinal directions until hitting an obstacle.
 Different variations of the model include moving everything only one step, or the maximally possible amount.
 It offers a solution when robots are controlled uniformly by external global control inputs.
-% solution to what
+%TODO solution to what
 In \cite{Becker2014_SP} it is shown that transforming one configuration into another, known as the reconfiguration-problem, is NP-hard.
 Following work \cite{Becker2014} also proves that finding an optimal control sequence, minimizing the number of actions, for the configuration-problem is PSPACE-complete.
 Furthermore, research is done on designing environments in which the Tilt model can be used to accomplish certain tasks.

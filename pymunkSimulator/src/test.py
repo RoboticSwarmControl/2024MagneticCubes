@@ -11,6 +11,16 @@ from plan.plan import *
 import plan.factory as factory
 from sim.motion import Rotation, PivotWalk
 
+def vecAngleTest():
+    a = Vec2d(1, 0)
+    b = Vec2d(1, 1)
+    angCross = math.asin(a.cross(b) / (a.length * b.length))
+    angDot = math.acos(a.dot(b) / (a.length * b.length))
+    angPymunk = a.get_angle_degrees_between(b)
+    print(f"Dot: {math.degrees(angDot)}")
+    print(f"Cross: {math.degrees(angCross)}")
+    print(f"Pymunk: {angPymunk}")
+
 def polyTest():
     cube0 = Cube(0)
     cube1 = Cube(1)
@@ -402,4 +412,4 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
             plans[inp].execute()
 
 if __name__ == "__main__":
-    twoPolyConnect_ncubes(40,20,10)
+    vecAngleTest()

@@ -3,8 +3,8 @@
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.65\textwidth]{figures/magnetic_cubes.pdf}
-	\caption{Simplified top-down view of the two magnetic modular cube types with their outward pointing magnet poles, illustrated as red and blue squares. Also visualizes the lengths $r_C$ and $r_M$}
+	\includegraphics[width=0.75\textwidth]{figures/magnetic_cubes.pdf}
+	\caption[Top-down view of the two magnetic modular cube types]{Simplified top-down view of the two magnetic modular cube types with their outward pointing magnet poles, illustrated as red and blue squares. Also visualizes the lengths $r_C$ and $r_M$}
 	\label{fig:magnetic_cubes}
 \end{figure}
 
@@ -33,11 +33,11 @@ $r_C$ is one half-length of a cube face and $r_M$ is the distance from the cente
 \begin{figure}
 	\centering
 	\includegraphics[width=0.53\textwidth]{figures/workspace_config.png}
-	\caption{Rectangular workspace with a configuration of four magnetic modular cubes. All cubes have the same orientation as the magnetic field, indicated by the compass in the top-left corner.}
+	\caption[Workspace with a configuration of four magnetic modular cubes]{Rectangular workspace with a configuration of four magnetic modular cubes. All cubes have the same orientation as the magnetic field, indicated by the compass in the top-left corner.}
 	\label{fig:workspace_config}
 \end{figure}
 
-\section{Workspace And Configuration}
+\section{Workspace and Configuration}
 Magnetic modular cubes could theoretical be placed and maneuvered on any 2-dimensional plane with numerous obstacles, as long as you can surround the workspace with a time varying magnetic field.
 The magnetic field should be able to point in any direction specified by angles of latitude and longitude, so that the cubes can operate in all desired motion modes.
 Because the motion planning problem of self-assembling target shapes in the special Euclidean group is hard enough without considering obstacles and arbitrary workspace shapes, we only work in a rectangular workspace with no internal obstacles.
@@ -54,7 +54,7 @@ It is irrelevant which exact physical cube is at which position as long as they 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.65\textwidth]{figures/polyominoes.pdf}
-	\caption{Examples of polyominoes and their equality. a) and d) are equal, only the magnetic field changed its orientation. a) and c) are not equal, they have the same shape but rotated. a) and c) are also not equal because of different cube types in the same shape. e) shows an invalid polyomino in its grid representation (top) and how it behaves in the simulation (bottom).}
+	\caption[Examples of Polyominoes and their equality]{Examples of polyominoes and their equality. a) and d) are equal, only the magnetic field changed its orientation. a) and c) are not equal, they have the same shape but rotated. a) and c) are also not equal because of different cube types in the same shape. e) shows an invalid polyomino in its grid representation (top) and how it behaves in the simulation (bottom).}
 	\label{fig:polyominoes}
 \end{figure}
 
@@ -82,7 +82,7 @@ The resulting polyomino in its grid representation has two east-west connections
 \begin{figure}
 	\centering
 	\includegraphics[width=0.80\textwidth]{figures/pivot_walking.pdf}
-	\caption{This Figure describes the pivot walking motion in detail. a) shows the six pivot walking steps for a single red cube. You can see the orientation of the magnetic field (bigger arrow indicates elevation). In b) an example polyomino with its pivot axis, edges and points is shown. c) illustrates the rotation of the pivot axis labeled with all the pivot walking parameters.}
+	\caption[Illustration of the pivot walking motion]{This figure describes the pivot walking motion in detail. a) shows the six pivot walking steps for a single red cube. You can see the orientation of the magnetic field (bigger arrow indicates elevation). In b) an example polyomino with its pivot axis, edges and points is shown. c) illustrates the rotation of the pivot axis labeled with all the pivot walking parameters.}
 	\label{fig:pivot_walking}
 \end{figure}
 
@@ -105,7 +105,7 @@ All these edges and points are illustrated in \autoref{fig:pivot_walking} b).
 \begin{figure}
 	\centering
 	\includegraphics[width=0.70\textwidth]{figures/displacement_pivot_walking.png}
-	\caption{All 19 four-cube polyomino shapes with their displacement vector $\vec{d}$ for one pivot walking cycle with $\alpha = \frac{\pi}{4}$. $\vec{d}$ is drawn from the center of mass (red dot). North and south pivot point are drawn as blue and brown dots.}
+	\caption[Polyomino shapes with different displacement vectors]{All 19 four-cube polyomino shapes with their displacement vector $\vec{d}$ for one pivot walking cycle with $\alpha = \frac{\pi}{4}$. $\vec{d}$ is drawn from the center of mass (red dot). North and south pivot point are drawn as blue and brown dots.}
 	\label{fig:displacement_pivot_walking}
 \end{figure}
 
@@ -122,9 +122,9 @@ After one pivot walking cycle, the polyomino has moved by a displacement vector 
 The direction and length of $\vec{d}$ changes with the shape of the polyomino.
 The movement is always perpendicular to the pivot walking axis $\vec{a}$ with $\lVert \vec{a} \rVert = a_p$, which is the vector between the north and the south pivot point, visualized in \autoref{fig:pivot_walking} b).
 $d_p$ can be calculated as
-\begin{equation*}´
+\begin{equation}
 d_p = 2 \cdot \sin\left(\frac{1}{2} \cdot \alpha \right) \cdot a_p \,.
-\end{equation*}
+\end{equation}
 To calculate $\vec{d}$ you can take the perpendicular of $\vec{a}$ and scale it to the length $d_p$.
 
 To do a pivot walk left or right, you can choose a negative or positive $\alpha$.

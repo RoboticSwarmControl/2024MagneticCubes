@@ -1,10 +1,11 @@
 \chapter{Local Planner}
 \label{chap:local}
 
+
 This chapter is about the local planner that will be used for motion planning on a global scale in \autoref{chap:global}.
-Local planning means that the planner only focuses on one concrete task.
-The task could be, to develop a plan that moves a polyomino from position $a$ to position $b$, or even simpler, to develop a plan for one pivot walk.
-Since on a global scale we consider the problem of self-assembly, we are not really interested in changing positions alone.
+Local planning means that the planner only focuses on simple motion task.
+The task could be to develop a plan that moves a polyomino from position $a$ to position $b$, or even simpler, to develop a plan for one pivot walk.
+Since on a global scale we consider the problem of self-assembly, we are not interested in changing positions alone.
 To work efficiently with local plans in the global planner, the initial and goal configuration of those plans should differ in the set of polyominoes they contain.
 The local planner takes two cubes $c_A$ and $c_B$ out of different polyominoes $A$ and $B$ and attempts to establish a connection at a valid edge-pair $(e_A, e_B)$.
 If a local plan was successful, this guaranties a change of polyominoes in the workspace.
@@ -14,7 +15,7 @@ The local planner observes the position of cubes and polyominoes and works with 
 It also works with the orientation of cube faces.
 In a real application of Magnetic Modular Cubes a camera, able to track cubes in the workspace, could to used to retrieve the necessary information. 
 
-The following sections \ref{sec:connect} to \ref{sec:plan} explain the techniques used in the local planning algorithm of \autoref{sec:local_algo}.
+The following Sections \ref{sec:connect} to \ref{sec:plan} explain the techniques used in the local planning algorithm of \autoref{sec:local_algo}.
 
 \section{Connecting Polyominoes}
 \label{sec:connect}
@@ -23,8 +24,8 @@ The two main rules that have to be considered when connecting two polyominoes $A
 First, cubes can only be connected in the way described in \autoref{sec:polys}, so we can distinguish between east-west and north-south connections
 Second, pivot walking (\autoref{sec:motion}) only allows the polyominoes to move left, in the direction on their west faces, or right, in the direction of their east faces.
 Keep in mind that a pivot walking motion is actually performed in the direction of the displacement $\vec{d}$ and not directly in $\vec{E}$ or $\vec{W}$ direction.
-We can still say that for instance a pivot walk right moves to the east, because $\angle \left( \vec{E}, \vec{d} \right) < \frac{\pi}{2}$.
-To move in any arbitrary direction it is necessary to rotate the polyomino, so that $\vec{d}$ points into the desired direction.
+We can still say that for instance a pivot walk right moves to the east, because $\left| \angle \left( \vec{E}, \vec{d} \right) \right| < \frac{\pi}{2}$.
+To move in any arbitrary direction it is necessary to rotate the polyomino $A$, so that $\vec{d_A}$ points into the desired direction.
 
 East-west connections are generally easier to handle.
 If we want to connect an east face of polyomino $A$ to a west face of polyomino $B$, $A$ has to walk into the east direction towards $B$, or the other way around.
@@ -34,7 +35,7 @@ A closer look on why these two options differ and how both can be established at
 \begin{figure}
 	\centering
 	\includegraphics[width=0.90\textwidth]{figures/aligning.pdf}
-	\caption{Aligning...}
+	\caption[Illustration of straight- and offset-aligning]{The figure shows examples for straight- and offset-aligning. The edges to be connected are marked yellow. a) shows two not aligned polyominoes (top) and the result of a straight-align (bottom). In b) you can see the two approaches for an offset-align. The cubes were aligned with their west edge (top) and with their east edge (bottom).}
 	\label{fig:aligning}
 \end{figure}
 
@@ -70,19 +71,24 @@ Either solving $\angle \left( \vec{E}, \overrightarrow{AB} \right) = 0$ or $\ang
 You can see the two options for offset-aligning in \autoref{fig:aligning} b).
 For the two polyominoes you can also see that aligning with east or west edge can make a difference when moving together.
 Establishing a connection by letting $A$ move towards $B$ in west direction is possible, but by moving in east direction other cubes of the polyominoes are blocking the way.
-In \autoref{sec:plan} we present a method for checking, if moving in from east or west is possible. 
+In \autoref{sec:plan} we present a method for checking if moving in from east or west is possible. 
 
 \paragraph{Solving Alignment:}
 
-We define a function for straight-aligning based on the rotation angle $\beta$, where both $\vec{e_A}$ and $\overrightarrow{AB}$ change according to $\beta$.
+For calculating angular difference we use the dot-product
 \begin{equation*}
-a(\beta) = \angle \left( R_\beta \vec{e_A}, \, \left( R_\beta r_B + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,.
+\angle (a,b) = \frac{a \cdot b}{\lVert a \rVert \lVert b \rVert} \,,
 \end{equation*}
+with $a,b \in \mathbb{R}^2$. This way the difference is always positive, which is beneficial in the case of alignment.
+We define a function for straight-aligning based on the rotation angle $\beta$, where both $\vec{e_A}$ and $\overrightarrow{AB}$ change according to $\beta$.
+\begin{equation}
+a(\beta) = \angle \left( R_\beta \vec{e_A}, \, \left( R_\beta r_B + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,.
+\end{equation}
 $R_\beta$ is a rotation matrix used for rotating vectors by $\beta$.
 For an offset-align the function would be
-\begin{equation*}
+\begin{equation}
 a(\beta) = \angle \left( R_\beta \vec{e}, \, \left( R_\beta \hat{r_B} + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,,
-\end{equation*}
+\end{equation}
 with $\vec{e} \in \{ \vec{E}, \vec{W}\}$ and $\hat{r_B} = \hat{P}_{c_B} - C_B$
 
 Alignment is not always possible, so instead of solving $a(\beta) = 0$, we are minimizing $a(\beta)$.
@@ -91,44 +97,51 @@ If we encounter a value close enough to zero we can return it.
 If not we return the minimum of all the calculated values.
 This way we at least get as close to an alignment as possible.
 
-\section{Moving Polyominoes Together}
-\label{sec:walk_wait}
+%TODO direct calculation of beta with tangent with two params?
+%TODO not allways minimum angle but what else should we use if aligning is not possible we cant move together
 
-Since both polyominoes $A$ and $B$ perform the same motion, due to global control, a connection will most likely happen when one polyomino walks into a wall of the workspace boundary.
-Connection can only happen in the middle of the workspace when on polyomino is faster than the other, meaning it was a greater pivot walking distance $d_P$.
+\section{Moving Polyominoes Together}
+\label{sec:walk_wait}´
+
+Since both polyominoes $A$ and $B$ perform pivot walking motions simultaneously, due to global control, a connection will most likely happen when one polyomino walks into a wall of the workspace boundary.
+Connection can only happen in the middle of the workspace when one polyomino is faster than the other, meaning it was a greater pivot walking distance $d_P$.
 At a first glance it seems easy to move polyominoes together, after the connection-cubes are aligned as described in \autoref{sec:align}.
 The two options of walking left and right determine if either $A$ is chasing $B$, or if $B$ is chasing $A$, which is of course also dependent on their initial position and orientation.
 In the end one option might be shorter or better in terms of other polyominoes interfering with $A$ and $B$, but theoretically both are able to establish the connection.
 
 In reality it becomes more difficult.
-When a polyomino is continuously walking against a wall in more or less than a 90 degree angle, the polyomino will move alongside the wall. In \cite{schmidt2020} research is done on how friction with boundary-walls under global control forces can be used to calculate the necessary motions for reaching a desired goal configuration.
+When a polyomino is continuously walking against a wall in more or less than a 90 degree angle, the polyomino will move alongside the wall.
+In \cite{schmidt2020} research is done on how friction with boundary-walls under global control forces can be used to calculate the necessary motions for reaching a desired goal configuration, but friction forces depend greatly on material choices and are stochastic.
 Another difficulty are different orientations of displacement vectors.
 It is mathematically possible to calculate the right orientation of the magnetic field to result in a collision after $n$ pivot walking cycle for both polyominoes, even at desired edges, but it is not guarantied that this collision-point is within the workspace boundaries.
 In that case the calculation of friction and displacement have to be combined together with other factors like polyominoes blocking each other or changing their shape during movement.
 This seems fairly complex and recalculating would be necessary in many situations, so we choose a simpler dynamic approach.
 
 We estimate the pivot walking cycles necessary until $c_A$ moved to the position of $c_B$ with
-\begin{equation*}
+\begin{equation}
 n = \frac{\lVert P_{c_A} - P_{c_B}\rVert}{d_{p,A}} \,.
-\end{equation*}
+\end{equation}
 We then only walk a portion of $n$ and re-align the cubes.
 When $c_A$ and $c_B$ are near enough for magnetic forces to act we frequently wait a short period to let magnetic attraction pull $e_A$ and $e_B$ together.
-This will automatically adjust the alignment, but for even more precision we decreased the pivot waling angle $\alpha$, when in close proximity.
+This will automatically adjust the alignment, but for even more precision we decreased the pivot walking angle $\alpha$, when in close proximity.
 
-\section{Plan And Failures}
+%TODO screenshots of magnet attraction in action
+%TODO plot of n steps an alpha I dont know
+
+\section{Plan and Failures}
 \label{sec:plan}
 
 A plan is a sequence of actions $a_1, ... , a_n$ that when applied to an initial configuration, leads to a goal configuration.
-Two plans can be concatenated, when the goal of the first matches with the initial configuration of the second.
+Two plans can be concatenated when the goal of the first matches with the initial configuration of the second.
 That way multiple local plans can be connected to form a global plan.
 We define a metric to compare and evaluate plans based on rotational cost of its actions only considering magnetic field rotations, not elevation.
-Let $a_i$ be a normal rotation of angle $\beta$, then $cost(a_i) = |\beta|$.
-If it is a pivot walking motion, then $cost(a_i) = |2\alpha|$.
+Let $a_i$ be a normal rotation of angle $\beta$, then $\text{cost}(a_i) = |\beta|$.
+If it is a pivot walking motion, then $\text{cost}(a_i) = |2\alpha|$.
 The cost for the plan is the sum of the costs of all its actions
-\begin{equation*}
-\sum_{i=1}^{n} cost(a_i) \,.
-\end{equation*}
-A local plan is successful, if the goal configuration contains a polyomino with the desired connection of $c_A$ and $c_B$ at $(e_A, e_B)$.
+\begin{equation}
+\sum_{i=1}^{n} \text{cost}(a_i) \,.
+\end{equation}
+A local plan is successful if the goal configuration contains a polyomino with the desired connection of $c_A$ and $c_B$ at $(e_A, e_B)$.
 There are several reasons the local planner might fail to develop a plan:
 
 \paragraph{Impossible Connection:}
@@ -154,7 +167,9 @@ When pre-checking this condition we can state failure, if both directions are no
 Otherwise we can align with respect to the valid slide-in direction, or try out both, if both are possible.
 Again the condition needs to be re-checked frequently, due to changing polyominoes.
 
-\paragraph{Polyominoes Being Stuck:}
+%TODO add citations for sliding in: Dan Halpern, Robbie Schweller, Timothy Gomez
+
+\paragraph{Polyominoes being Stuck:}
 
 Polyominoes can get stuck in corners or on walls of the workspace.
 In this state it is not possible anymore to decrease the distance of $A$ and $B$ by pivot walking.
@@ -168,28 +183,28 @@ If the distance is to big for magnetic forces to act, failure is reported, but i
 \begin{figure}
 	\centering
 	\includegraphics[width=0.80\textwidth]{figures/holes.pdf}
-	\caption{Tree different examples for connecting polyominoes into holes. a) and b) show one-cube-deep holes (a) east-west and b) north-south). c) illustrates a two-cube-deep east-west hole. The edges to be connected are marked yellow.}
+	\caption[Examples for connecting polyominoes into gaps]{Three different examples for connecting polyominoes into gaps. a) and b) show one-cube-deep gaps (a) east-west and b) north-south). c) illustrates a two-cube-deep east-west gap. The edges to be connected are marked yellow.}
 	\label{fig:holes}
 \end{figure}
 
-\paragraph{Connecting In Holes:}
+\paragraph{Connecting in Gaps:}
 
-Connecting two polyominoes where one of the connection-faces is located inside a hole, is a difficult task in the continuous world.
-We differentiate between east-west and north-south located holes.
-Furthermore a hole can be of a certain depth measured in multiples of $2 r_C$.
-\autoref{fig:holes} shows examples for different holes with different depths.
+Connecting two polyominoes where one of the connection-faces is located inside a gap is a difficult task in the continuous world.
+We differentiate between east-west and north-south located gaps.
+Furthermore a gap can be of a certain depth measured in multiples of $2 r_C$.
+\autoref{fig:holes} shows examples for different gaps and different depths.
 
-Connecting into a hole with a depth of more than $2 r_C$ is not possible.
-For instance, when inserting the blue single cube into the polyomino in \autoref{fig:holes} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the hole.
-But even holes with depth $2 r_C$ are hard to handle.
-Inserting into a hole can be done by pivot walking, this would only work for east-west holes, or by letting magnetic forces attract the connection-faces.
-Relying on magnetic forces alone seem promising, since it would work for both hole types, but in reality not only the forces of the connection-faces are present.
+Connecting into a gap with a depth of more than $2 r_C$ is not possible.
+For instance, when inserting the blue single cube into the polyomino in \autoref{fig:holes} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the gap.
+But even gaps with depth $2 r_C$ are hard to handle.
+Inserting into a gap can be done by pivot walking, this would only work for east-west gaps, or by letting magnetic forces attract the connection-faces.
+Relying on magnetic forces alone seem promising, since it would work for both gap types, but in reality not only the forces of the connection-faces are present.
 All the forces between other magnets prevent an easy slide-in.
-In our simulator the connection-face will be more attracted or repelled by faces outside the hole, then the once inside.
-Pivot walking into east-west holes, even with small values for $\alpha$, has also a high failure rate because of other magnets.
-The local planner states failure immediately when polyominoes should be connected in any hole-type.
+In our simulator the connection-face will be more attracted or repelled by faces outside the gap, then the once inside.
+Pivot walking into east-west gaps, even with small values for $\alpha$, has also a high failure rate because of other magnets.
+The local planner states failure immediately when polyominoes should be connected in any gap-type.
 
-\paragraph{Invalid Polyominoes:}W
+\paragraph{Invalid Polyominoes:}
 
 Because construction of invalid polyominoes is hard to handle on a global scale, we already omit plans containing them in our local planner.
 We state failure if any invalid polyominoes is created at any point during planning.
@@ -197,11 +212,10 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 
 \paragraph{Other Failures:}
 
-%max iterations
-%assembly of other polys
+%TODO max iterations, assembly of other polys
 
 \begin{algorithm}
-	\caption{Align-Walk-Realign}
+	\caption{\scshape Align-Walk-Realign}
 	\label{alg:local_algo}
 	\begin{algorithmic}
 		\REQUIRE Cubes $c_A$,$c_B$, Edges $e_A$,$e_B$, 
@@ -212,3 +226,4 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 
 \section{Local Planning Algorithm}
 \label{sec:local_algo}
+%TODO algorithm pseudo-code

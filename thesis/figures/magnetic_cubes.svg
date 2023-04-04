@@ -27,13 +27,13 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.4142136"
-     inkscape:cx="331.63307"
-     inkscape:cy="86.267025"
-     inkscape:window-width="2560"
-     inkscape:window-height="1355"
-     inkscape:window-x="1920"
-     inkscape:window-y="0"
+     inkscape:zoom="1"
+     inkscape:cx="329.99999"
+     inkscape:cy="152"
+     inkscape:window-width="1920"
+     inkscape:window-height="995"
+     inkscape:window-x="0"
+     inkscape:window-y="119"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
@@ -59,8 +59,8 @@
     <rect
        x="118.79394"
        y="51.004387"
-       width="211.77847"
-       height="26.276358"
+       width="236.52721"
+       height="33.347426"
        id="rect6828" />
     <marker
        style="overflow:visible"
@@ -103,14 +103,14 @@
     <rect
        x="118.79394"
        y="51.004387"
-       width="211.77847"
-       height="26.276358"
+       width="235.11299"
+       height="32.640319"
        id="rect6828-7" />
     <rect
        x="118.79394"
        y="51.004387"
-       width="211.77847"
-       height="26.276358"
+       width="255.75277"
+       height="30.518999"
        id="rect6828-7-5" />
     <rect
        x="118.79394"
@@ -151,8 +151,8 @@
     <rect
        x="118.79394"
        y="51.004387"
-       width="27.403467"
-       height="27.651358"
+       width="31.11641"
+       height="35.974961"
        id="rect6828-8-1" />
   </defs>
   <g
@@ -277,76 +277,82 @@
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-0.01333123,-1.1872341)"
        id="text6826"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="118.79297"
-         y="67.572858"
-         id="tspan6650"><tspan
+         y="72.306806"
+         id="tspan3920"><tspan
            style="fill:#010000"
-           id="tspan6648">magnetic field orientation</tspan></tspan></text>
+           id="tspan3918">magnetic field </tspan></tspan><tspan
+         x="118.79297"
+         y="105.65446"
+         id="tspan3924"><tspan
+           dx="0 12 7.9921875 6.6679688 10.652344 12 6.6679688 10.652344 6.6679688 6.6679688 12"
+           style="fill:#010000"
+           id="tspan3922">orientation</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,203.22115,7.8660927)"
        id="text6826-43"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;baseline-shift:baseline;white-space:pre;shape-inside:url(#rect6828-8);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;baseline-shift:baseline;white-space:pre;shape-inside:url(#rect6828-8);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="118.79297"
-         y="67.572858"
-         id="tspan6656"><tspan
+         y="72.306806"
+         id="tspan3930"><tspan
            style="baseline-shift:baseline;fill:#010000"
-           id="tspan6652">r</tspan><tspan
-           style="font-size:10.6667px;baseline-shift:sub;fill:#000000"
-           id="tspan6654">C</tspan></tspan></text>
+           id="tspan3926">r</tspan><tspan
+           style="font-size:18.6667px;baseline-shift:sub;fill:#000000"
+           id="tspan3928">C</tspan></tspan></text>
     <text
        xml:space="preserve"
-       transform="matrix(0.26458333,0,0,0.26458333,203.10123,33.823644)"
+       transform="matrix(0.26458333,0,0,0.26458333,201.40383,34.352811)"
        id="text6826-43-4"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;baseline-shift:baseline;white-space:pre;shape-inside:url(#rect6828-8-1);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;baseline-shift:baseline;white-space:pre;shape-inside:url(#rect6828-8-1);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="118.79297"
-         y="67.572858"
-         id="tspan6662"><tspan
+         y="72.306806"
+         id="tspan3936"><tspan
            style="fill:#000000"
-           id="tspan6658">r</tspan><tspan
-           style="font-size:10.6667px;baseline-shift:sub;fill:#000000"
-           id="tspan6660">M</tspan></tspan></text>
+           id="tspan3932">r</tspan><tspan
+           style="font-size:18.6667px;baseline-shift:sub;fill:#000000"
+           id="tspan3934">M</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,83.402235,-11.175281)"
        id="text6826-47"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828-5);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828-5);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="118.79297"
-         y="74.673825"
-         id="tspan6666"><tspan
+         y="77.040754"
+         id="tspan3940"><tspan
            style="fill:#010000"
-           id="tspan6664">red cube</tspan></tspan></text>
+           id="tspan3938">red cube</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,153.79541,-11.175281)"
        id="text6826-47-3"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:26.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828-5-4);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.3333px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828-5-4);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="118.79297"
-         y="74.673825"
-         id="tspan6670"><tspan
+         y="77.040754"
+         id="tspan3944"><tspan
            style="fill:#010000"
-           id="tspan6668">blue cube</tspan></tspan></text>
+           id="tspan3942">blue cube</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-0.01333143,19.179757)"
        id="text6826-4"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828-7);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828-7);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="118.79297"
-         y="67.572858"
-         id="tspan6674"><tspan
+         y="72.306806"
+         id="tspan3948"><tspan
            style="fill:#010000"
-           id="tspan6672">north pole pointing out</tspan></tspan></text>
+           id="tspan3946">north pole pointing out</tspan></tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-0.01333143,39.225041)"
        id="text6826-4-2"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828-7-5);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect6828-7-5);display:inline;fill:none;fill-opacity:1;stroke:none;stroke-width:0.377953;stroke-dasharray:none;stroke-opacity:1"><tspan
          x="118.79297"
-         y="67.572858"
-         id="tspan6678"><tspan
+         y="72.306806"
+         id="tspan3952"><tspan
            style="fill:#010000"
-           id="tspan6676">south pole pointing out</tspan></tspan></text>
+           id="tspan3950">south pole pointing out</tspan></tspan></text>
     <path
        style="fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.69447;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#Stop);marker-end:url(#Stop)"
        d="m 232.77514,11.146162 0.19927,27.734897"
