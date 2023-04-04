@@ -127,10 +127,13 @@ d_p = 2 \cdot \sin\left(\frac{1}{2} \cdot \alpha \right) \cdot a_p \,.
 \end{equation}
 To calculate $\vec{d}$ you can take the perpendicular of $\vec{a}$ and scale it to the length $d_p$.
 
-To do a pivot walk left or right, you can choose a negative or positive $\alpha$.
-When you choose a big $\alpha$ according to amount, $d_p$ becomes also bigger, but the polyomino needs more space to the north and south to perform the rotations.
+When a big $\alpha$ is chosen according to amount, $d_p$ becomes also bigger, but the polyomino needs more space to the north and south to perform the rotations.
 For better maneuvering smaller values of $\alpha$ are preferable.
 There is a strong deviation of length and direction of the displacement for different polyomino shapes.
-So moving a pivot walking step might not move two polyominoes in the exact same direction.
+So doing a pivot walking motion might not move two polyominoes in the same direction.
 \autoref{fig:displacement_pivot_walking} shows all 19 four-cube polyomino shapes with their displacement vectors.
+There are still two options for pivot walking, depending on a negative or positive value of $\alpha$.
+You can walk left, in the direction of the west-faces, or right, in the direction of the east-faces.
+Although the polyomino actually moves in the direction of $\vec{d}$, we can still say that for instance a pivot walk right moves to the east, because $\left| \angle \left( \vec{E}, \vec{d} \right) \right| < \frac{\pi}{2}$.
+We call these two options the pivot walking direction $\vec{w} \in \{\vec{E}, \vec{W}\}$.
 

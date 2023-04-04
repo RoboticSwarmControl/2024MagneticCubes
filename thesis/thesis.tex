@@ -6,6 +6,7 @@
 	\def\sectionautorefname{Section}
 	\def\chapterautorefname{Chapter}
 }
+
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -13,13 +14,17 @@
 \usepackage{geometry}
 \usepackage{tikz}
 \usepackage{amsthm}
+
 \usepackage{algorithmic}
 \usepackage{algorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\renewcommand{\algorithmiccomment}[1]{\hfill\textcolor{blue}{// #1}}
+
 \usepackage{float}
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{mathtools}
-\usepackage{float}
 \usepackage{comment}
 \usepackage[section]{placeins}
 

@@ -27,15 +27,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.2623761"
-     inkscape:cx="46.73726"
-     inkscape:cy="210.71375"
+     inkscape:zoom="1.7852694"
+     inkscape:cx="238.05931"
+     inkscape:cy="170.28242"
      inkscape:window-width="2560"
      inkscape:window-height="1355"
      inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g5769-2-7" />
+     inkscape:current-layer="g6699" />
   <defs
      id="defs579">
     <marker
@@ -76,8 +76,8 @@
        refY="0"
        orient="auto-start-reverse"
        inkscape:stockid="TriangleStart"
-       markerWidth="5"
-       markerHeight="5.7803469"
+       markerWidth="2"
+       markerHeight="3"
        viewBox="0 0 5.3244081 6.1553851"
        inkscape:isstock="true"
        inkscape:collect="always"
@@ -333,6 +333,25 @@
          style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
          d="M 5.77,0 -2.88,5 V -5 Z"
          id="path135-8-11" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="TriangleStart-1-3"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="TriangleStart"
+       markerWidth="2.595"
+       markerHeight="3"
+       viewBox="0 0 5.3244081 6.1553851"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path135-2-67" />
     </marker>
   </defs>
   <g
@@ -1037,13 +1056,13 @@
            cy="17.004747"
            r="6.4822917" />
         <path
-           style="fill:none;fill-opacity:1;stroke:#c30000;stroke-width:1.32985;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#TriangleStart)"
-           d="m 20.902082,12.286667 c 0,4.71808 0,4.71808 0,4.71808"
-           id="path6019" />
-        <path
            style="fill:none;fill-opacity:1;stroke:#0000c3;stroke-width:1.31451;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#TriangleStart-1)"
            d="m 20.902082,21.614603 c 0,-4.609856 0,-4.609856 0,-4.609856"
            id="path6019-7" />
+        <path
+           style="fill:#a40000;fill-opacity:1;stroke:#a40000;stroke-width:1.31451;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#TriangleStart-1-3)"
+           d="m 20.902082,12.394891 c 0,4.609856 0,4.609856 0,4.609856"
+           id="path6019-7-5" />
       </g>
       <text
          xml:space="preserve"
@@ -1236,7 +1255,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.690046"
-         id="tspan6878">a)</tspan></text>
+         id="tspan3862">a)</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-72.264004,-11.864152)"
@@ -1244,7 +1263,7 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-7);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.690046"
-         id="tspan6880">b)</tspan></text>
+         id="tspan3864">b)</tspan></text>
     <text
        xml:space="preserve"
        transform="matrix(0.26458333,0,0,0.26458333,-72.060337,34.67988)"
@@ -1252,6 +1271,6 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-1);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
          x="575.82422"
          y="24.690046"
-         id="tspan6882">c)</tspan></text>
+         id="tspan3866">c)</tspan></text>
   </g>
 </svg>

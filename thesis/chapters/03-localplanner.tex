@@ -21,16 +21,16 @@ The following Sections \ref{sec:connect} to \ref{sec:plan} explain the technique
 \label{sec:connect}
 
 The two main rules that have to be considered when connecting two polyominoes $A$ and $B$ are:
-First, cubes can only be connected in the way described in \autoref{sec:polys}, so we can distinguish between east-west and north-south connections
-Second, pivot walking (\autoref{sec:motion}) only allows the polyominoes to move left, in the direction on their west faces, or right, in the direction of their east faces.
-Keep in mind that a pivot walking motion is actually performed in the direction of the displacement $\vec{d}$ and not directly in $\vec{E}$ or $\vec{W}$ direction.
-We can still say that for instance a pivot walk right moves to the east, because $\left| \angle \left( \vec{E}, \vec{d} \right) \right| < \frac{\pi}{2}$.
+First, cubes can only be connected in the way described in \autoref{sec:polys}, so we can distinguish between east-west and north-south connections.
+Second, pivot walking (\autoref{sec:motion}) only allows the polyominoes to move left or right with $\vec{w}$.
+Keep in mind that a pivot walking motion is actually performed in the direction of the displacement $\vec{d}$ and not directly in direction of $\vec{w}$.
 To move in any arbitrary direction it is necessary to rotate the polyomino $A$, so that $\vec{d_A}$ points into the desired direction.
 
 East-west connections are generally easier to handle.
 If we want to connect an east face of polyomino $A$ to a west face of polyomino $B$, $A$ has to walk into the east direction towards $B$, or the other way around.
 When $A$ should be connected at an south face of $B$, $A$ can now walk into east or west direction towards $B$, or $B$ could again do the opposite.
 A closer look on why these two options differ and how both can be established at any position is taken in \autoref{sec:align}.
+We call this the slide-in direction $\vec{m} \in \{\vec{E}, \vec{W}\}$, which states that $B$ is positioned in direction $\vec{m}$ of $A$.
 
 \begin{figure}
 	\centering
@@ -131,7 +131,7 @@ This will automatically adjust the alignment, but for even more precision we dec
 \section{Plan and Failures}
 \label{sec:plan}
 
-A plan is a sequence of actions $a_1, ... , a_n$ that when applied to an initial configuration, leads to a goal configuration.
+A plan is a sequence of actions $A = a_1, ... , a_n$ that when applied to an initial configuration $g_{init}$, leads to a goal configuration $g_{goal}$.
 Two plans can be concatenated when the goal of the first matches with the initial configuration of the second.
 That way multiple local plans can be connected to form a global plan.
 We define a metric to compare and evaluate plans based on rotational cost of its actions only considering magnetic field rotations, not elevation.
@@ -141,7 +141,8 @@ The cost for the plan is the sum of the costs of all its actions
 \begin{equation}
 \sum_{i=1}^{n} \text{cost}(a_i) \,.
 \end{equation}
-A local plan is successful if the goal configuration contains a polyomino with the desired connection of $c_A$ and $c_B$ at $(e_A, e_B)$.
+A local plan is successful if $g_{goal}$ contains a polyomino with the desired connection of $c_A$ and $c_B$ at $(e_A, e_B)$.
+If a plan is successful or not is described by the plan-state $s$.
 There are several reasons the local planner might fail to develop a plan:
 
 \paragraph{Impossible Connection:}
@@ -218,12 +219,44 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 	\caption{\scshape Align-Walk-Realign}
 	\label{alg:local_algo}
 	\begin{algorithmic}
-		\REQUIRE Cubes $c_A$,$c_B$, Edges $e_A$,$e_B$, 
-		\ENSURE Plan for connecting $c_A$ and $c_B$ at $e_A$ and $e_B$
-		\STATE $a \gets$ Foo(a,b)
+		\REQUIRE $c_A$, $c_B$, $e_A$, $e_B$, $\vec{w}$, $\vec{m}$, $g_{init}$ 
+		\ENSURE $s$, $g_{goal}$, $A$
+		\STATE $s \gets \text{undefined}$
+		\STATE $g_{goal} \gets g_{init}$
+		\STATE $A \gets \{\}$
+		\STATE $\text{wait} \gets$ \TRUE
+		\LOOP
+			\STATE $\text{stuck} \gets \text{\scshape Stuck}(c_A, c_B)$
+			\IF{$e_A \in \{E,W\}$ \OR $\text{stuck}$}
+				\STATE $a \gets \text{\scshape Align-Straight}(c_A, c_B, e_A)$
+			\ELSE
+				\STATE $a \gets \text{\scshape Align-Offset}(c_A, c_B, \vec{m}, e_B)$
+			\ENDIF
+			\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+			\STATE $A \gets \text{\scshape Append}(A, a)$
+			\STATE $s \gets \text{\scshape Update-State}(g_{goal}, c_A, c_B, e_A, \vec{m})$
+			\IF{$s \neq \text{undefined}$}
+				\RETURN $s, g_{goal}, A$
+			\ENDIF
+			\IF{stuck}
+				\STATE $a \gets \text{\scshape Wait-Until-Connected}(c_A, c_B, e_A)$
+			\ELSIF{$\text{\scshape Critical-Distance}(c_A, c_B)$ \AND wait}
+				\STATE $a \gets \text{\scshape Wait}()$
+				\STATE $\text{wait} \gets$ \FALSE
+			\ELSE
+				\STATE $a \gets \text{\scshape Walk-Approximate}(c_A, c_B, \vec{w})$
+				\STATE $\text{wait} \gets$ \TRUE
+			\ENDIF
+			\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+			\STATE $A \gets \text{\scshape Append}(A, a)$
+			\STATE $s \gets \text{\scshape Update-State}(g_{goal}, c_A, c_B, e_A, \vec{m})$
+			\IF{$s \neq \text{undefined}$}
+				\RETURN $s, g_{goal}, A$
+			\ENDIF
+		\ENDLOOP 
 	\end{algorithmic}
 \end{algorithm}
 
 \section{Local Planning Algorithm}
 \label{sec:local_algo}
-%TODO algorithm pseudo-code
+%TODO describe code
