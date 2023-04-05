@@ -119,7 +119,7 @@ This seems fairly complex and recalculating would be necessary in many situation
 
 We estimate the pivot walking cycles necessary until $c_A$ moved to the position of $c_B$ with
 \begin{equation}
-n = \frac{\lVert P_{c_A} - P_{c_B}\rVert}{d_{p,A}} \,.
+n = \left\lceil \frac{\lVert P_{c_A} - P_{c_B}\rVert}{d_{p,A}} \right\rceil \,.
 \end{equation}
 We then only walk a portion of $n$ and re-align the cubes.
 When $c_A$ and $c_B$ are near enough for magnetic forces to act we frequently wait a short period to let magnetic attraction pull $e_A$ and $e_B$ together.
@@ -217,7 +217,7 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 
 \begin{algorithm}
 	\caption{\scshape Align-Walk-Realign}
-	\label{alg:local_algo}
+	\label{algo:local_algo}
 	\begin{algorithmic}
 		\REQUIRE $c_A$, $c_B$, $e_A$, $e_B$, $\vec{w}$, $\vec{m}$, $g_{init}$ 
 		\ENSURE $s$, $g_{goal}$, $A$
@@ -239,16 +239,22 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 				\RETURN $s, g_{goal}, A$
 			\ENDIF
 			\IF{stuck}
-				\STATE $a \gets \text{\scshape Wait-Until-Connected}(c_A, c_B, e_A)$
-			\ELSIF{$\text{\scshape Critical-Distance}(c_A, c_B)$ \AND wait}
-				\STATE $a \gets \text{\scshape Wait}()$
-				\STATE $\text{wait} \gets$ \FALSE
+				\WHILE{\NOT $\text{\scshape Stuck}(c_A, c_B)$}
+					\STATE $a \gets \text{\scshape Wait}()$
+					\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+					\STATE $A \gets \text{\scshape Append}(A, a)$
+				\ENDWHILE
 			\ELSE
-				\STATE $a \gets \text{\scshape Walk-Approximate}(c_A, c_B, \vec{w})$
-				\STATE $\text{wait} \gets$ \TRUE
+				\IF{$\text{\scshape Critical-Distance}(c_A, c_B)$ \AND wait}
+					\STATE $a \gets \text{\scshape Wait}()$
+					\STATE $\text{wait} \gets$ \FALSE
+				\ELSE
+					\STATE $a \gets \text{\scshape Walk}(c_A, c_B, \vec{w})$
+					\STATE $\text{wait} \gets$ \TRUE
+				\ENDIF
+				\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+				\STATE $A \gets \text{\scshape Append}(A, a)$
 			\ENDIF
-			\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
-			\STATE $A \gets \text{\scshape Append}(A, a)$
 			\STATE $s \gets \text{\scshape Update-State}(g_{goal}, c_A, c_B, e_A, \vec{m})$
 			\IF{$s \neq \text{undefined}$}
 				\RETURN $s, g_{goal}, A$
@@ -259,4 +265,42 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 
 \section{Local Planning Algorithm}
 \label{sec:local_algo}
-%TODO describe code
+
+Before executing the algorithm presented in \autoref{algo:local_algo} we evaluate all the failure conditions that can be checked in advance, so no simulation-time is wasted on a plan that is bound to fail from the start.
+While doing that the possible slide-in directions are also determined and \autoref{algo:local_algo} is executed with both pivot walking directions $\vec{w}$ for each possible $\vec{m}$.
+This means for an east-west connection, we always develop two plans and for an north-south connection two or four, depending on the slide-in directions.
+
+In the end the successful plan with the lowest costs is returned.
+Even if all plans fail we still determine the best failure.
+Again plans with lower costs are preferable, but we favor impossible connection and slide-in failures.
+These failures just state that we cant establish a specific connection, but a global planner could continue to plan based on the goal configuration the local planner ended in.
+Polyominoes being stuck is not a good configuration to continue planning with, but invalid polyominoes or polyominoes with gaps will definitely be omitted on a global scale.
+
+The different plans are developed in parallel and if one process finishes with a successful plan, the execution of all other plans can be canceled.
+This saves a lot of computation time, although we might not return the optimal plan, since fastest computation does not automatically mean lowest costs.
+Generally speaking a low computation time can be linked with low rotational cost, because the local planner spends the majority of time, about $98\%$, on simulating the actions.
+
+\paragraph{Align-Walk-Realign:}
+
+\autoref{algo:local_algo} takes the connection-cubes and edges $c_A$, $c_B$, $e_A$, $e_B$ along with $\vec{w}$, $\vec{m}$ and an initial configuration $g_{init}$ as inputs and returns a plan-state $s$ along with the configuration $g_{goal}$ the algorithm ended in after applying the sequence of actions $A$.
+The algorithm runs in a loop until $s$ changes to success or one of the failure condition.
+The failure and success conditions are evaluated twice per iteration with {\scshape Update-State}.
+Once after aligning, and once after walking or waiting.
+That way the planner avoids to simulate unnecessary actions.
+$g_{goal}$ is updated by simulating the determined actions with {\scshape Simulate}.
+The actions are appended to $A$ after simulation.
+We perform either a straight or offset-align depending on $e_A$ and $e_B$ and if the polyominoes are stuck or not.
+The offset-align is done with the direction of $\vec{m}$.
+The stuck condition is evaluated at the beginning of the loop with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
+After aligning, the algorithm either walks or waits.
+When a stuck condition was determined in the beginning the algorithm waits as long as this changes the stuck condition.
+Otherwise we walk the estimated amount of pivot walking cycles (\autoref{sec:walk_wait}) in direction $\vec{w}$ with {\scshape Walk}, or we wait with {\scshape Wait}, if $c_A$ and $c_B$ are in close proximity, determined by {\scshape Critical-Distance}.
+If we waited in the previous iteration, we walk in the current one and oppositely.
+This behavior is toggled by the variable $wait$. 
+
+
+
+
+
+
+
