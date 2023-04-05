@@ -412,4 +412,4 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
             plans[inp].execute()
 
 if __name__ == "__main__":
-    vecAngleTest()
+    twoPolyConnect_ncubes(50, 50, 10)

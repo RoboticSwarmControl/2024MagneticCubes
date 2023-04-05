@@ -10,8 +10,6 @@ from plan.plan import *
 
 DEBUG = False
 
-MAX_ITR = 24
-
 CRITICAL_DISTANCE = Cube.MAG_DISTANCE_MIN
 SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 1.5
 
@@ -109,6 +107,9 @@ def __alignWalkRealign(data: tuple) -> Plan:
     sim.loadConfig(config)
     sim.renderer.markedCubes.add(cubeA)
     sim.renderer.markedCubes.add(cubeB)
+    MAX_WALKING_DIST = 4 * (config.boardSize[0] + config.boardSize[1])
+    if DEBUG: print(f"Max walking distance: {MAX_WALKING_DIST}")
+    distWalked = 0
     itr = 0
     idleTry = 0
     stuckTimes = 0
@@ -158,12 +159,14 @@ def __alignWalkRealign(data: tuple) -> Plan:
                 idleTry += 1
             else:
                 # if not walk into direction
-                motions = __walkDynamic(config, cubeA, cubeB, direction)
+                motions, dw = __walkDynamic(config, cubeA, cubeB, direction)
+                distWalked += dw
                 idleTry = 0 
             executeMotions(sim, motions)
             if DEBUG: print(f"{len(motions)} x {motions[0]}")
             plan.actions.extend(motions)
             config = sim.saveConfig()
+        if DEBUG: print(f"Walked: {round(distWalked)}")
         # update the planstate. Check failure and success conditions
         plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide)
         if plan.state != PlanState.UNDEFINED:
@@ -172,8 +175,8 @@ def __alignWalkRealign(data: tuple) -> Plan:
         if stuckTimes >= STUCK_TIMES_MAX:
             plan.state = PlanState.FAILURE_STUCK
             break
-        # if we cant conect after a lot of iterations report failure
-        if itr >= MAX_ITR:
+        # if we cant conect after walking a lot
+        if distWalked >= MAX_WALKING_DIST:
             plan.state = PlanState.FAILURE_MAX_ITR
             break
         itr += 1
@@ -222,9 +225,11 @@ def __calcAlignRotation(comA: Vec2d, posA: Vec2d, comB: Vec2d, posB: Vec2d, edge
         #print(f"angleBetween: {round(math.degrees(angDiff),2)}, rotation: {round(math.degrees(rotAng),2)}")
     return Rotation(minRotAng)
 
-def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction) -> list:
+def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction):
     posA = config.getPosition(cubeA)
     posB = config.getPosition(cubeB)
+    polyA = config.getPolyominoes().getForCube(cubeA)
+    polyB = config.getPolyominoes().getForCube(cubeB)
     vecBA = posA - posB
     distance = vecBA.length
     # take eith big or small pivot angle depending on distance
@@ -234,12 +239,13 @@ def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction) ->
         pivotAng = PWALK_ANG_BIG
     # determin which poly is chasing which
     if bool(__faceingDirection(config, cubeA, cubeB) == Direction.EAST) ^ bool(direction == PivotWalk.LEFT):
-        chasingPoly = config.getPolyominoes().getForCube(cubeA)
+        chasingPoly = polyA
     else:
-        chasingPoly = config.getPolyominoes().getForCube(cubeB)
+        chasingPoly = polyB
     # estimate the pivot steps neccessary for the chasing poly to reach the other. Only take half.
     pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) * PWALK_PORTION)
-    return [PivotWalk(direction, pivotAng)] * pivotSteps
+    dw = pivotSteps * (config.getPivotWalkingDistance(polyA, pivotAng) + config.getPivotWalkingDistance(polyB, pivotAng))
+    return ([PivotWalk(direction, pivotAng)] * pivotSteps, dw)
 
 def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction) -> PlanState:
     # check if config contains inValid polys
