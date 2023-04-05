@@ -213,9 +213,13 @@ Because construction of invalid polyominoes is hard to handle on a global scale,
 We state failure if any invalid polyominoes is created at any point during planning.
 We also pre-check and frequently re-check, if the polyomino that will be created by establishing the connection would itself be invalid. 
 
-\paragraph{Other Failures:}
+\paragraph{Maximum Movement Capacity:}
 
-%TODO max iterations, assembly of other polys
+As a worst-case failure we limit the amount of movement $A$ and $B$ are able to do.
+Whenever a pivot walking motion is done, we sum up the distances $c_A$ and $c_B$ moved together.
+Let $(w,h)$ be the size of the workspace.
+We define a maximum movement capacity of $2\cdot(w+h)$.
+This capacity gives the polyominoes enough movement, so that both can move along a horizontal and vertical workspace boundary, which should definitely be sufficient to establish a connection.
 
 \begin{algorithm}
 	\caption{\scshape Align-Walk-Realign}
@@ -228,8 +232,7 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 		\STATE $A \gets \{\}$
 		\STATE $\text{wait} \gets$ \TRUE
 		\LOOP
-			\STATE $\text{stuck} \gets \text{\scshape Stuck}(c_A, c_B)$
-			\IF{$e_A \in \{E,W\}$ \OR $\text{stuck}$}
+			\IF{$e_A \in \{E,W\}$}
 				\STATE $a \gets \text{\scshape Align-Straight}(c_A, c_B, e_A)$
 			\ELSE
 				\STATE $a \gets \text{\scshape Align-Offset}(c_A, c_B, \vec{m}, e_B)$
@@ -240,22 +243,24 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 			\IF{$s \neq \text{undefined}$}
 				\RETURN $s, g_{goal}, A$
 			\ENDIF
-			\IF{stuck}
+			\IF{$\text{\scshape Critical-Distance}(c_A, c_B)$ \AND wait}
+				\STATE $a \gets \text{\scshape Wait}()$
+				\STATE $\text{wait} \gets$ \FALSE
+			\ELSE
+				\STATE $a \gets \text{\scshape Walk}(c_A, c_B, \vec{w})$
+				\STATE $\text{wait} \gets$ \TRUE
+			\ENDIF
+			\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+			\STATE $A \gets \text{\scshape Append}(A, a)$
+			\IF{$\text{\scshape Stuck}(c_A, c_B)$}
+				\STATE $a \gets \text{\scshape Align-Straight}(c_A, c_B, e_A)$
+				\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+				\STATE $A \gets \text{\scshape Append}(A, a)$
 				\WHILE{\NOT $\text{\scshape Stuck}(c_A, c_B)$}
 					\STATE $a \gets \text{\scshape Wait}()$
 					\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
 					\STATE $A \gets \text{\scshape Append}(A, a)$
 				\ENDWHILE
-			\ELSE
-				\IF{$\text{\scshape Critical-Distance}(c_A, c_B)$ \AND wait}
-					\STATE $a \gets \text{\scshape Wait}()$
-					\STATE $\text{wait} \gets$ \FALSE
-				\ELSE
-					\STATE $a \gets \text{\scshape Walk}(c_A, c_B, \vec{w})$
-					\STATE $\text{wait} \gets$ \TRUE
-				\ENDIF
-				\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
-				\STATE $A \gets \text{\scshape Append}(A, a)$
 			\ENDIF
 			\STATE $s \gets \text{\scshape Update-State}(g_{goal}, c_A, c_B, e_A, \vec{m})$
 			\IF{$s \neq \text{undefined}$}
@@ -276,7 +281,7 @@ In the end the successful plan with the lowest costs is returned.
 Even if all plans fail we still determine the best failure.
 Again plans with lower costs are preferable, but we favor impossible connection and slide-in failures.
 These failures just state that we cant establish a specific connection, but a global planner could continue to plan based on the goal configuration the local planner ended in.
-Polyominoes being stuck is not a good configuration to continue planning with, but invalid polyominoes or polyominoes with gaps will definitely be omitted on a global scale.
+A configuration when the polyominoes are stuck, or the maximum movement capacity is reached, are not good for further planning, but invalid polyominoes or polyominoes with gaps will definitely be omitted on a global scale.
 
 The different plans are developed in parallel and if one process finishes with a successful plan, the execution of all other plans can be canceled.
 This saves a lot of computation time, although we might not return the optimal plan, since fastest computation does not automatically mean lowest costs.
@@ -287,18 +292,18 @@ Generally speaking a low computation time can be linked with low rotational cost
 \autoref{algo:local_algo} takes the connection-cubes and edges $c_A$, $c_B$, $e_A$, $e_B$ along with $\vec{w}$, $\vec{m}$ and an initial configuration $g_{init}$ as inputs and returns a plan-state $s$ along with the configuration $g_{goal}$ the algorithm ended in after applying the sequence of actions $A$.
 The algorithm runs in a loop until $s$ changes to success or one of the failure condition.
 The failure and success conditions are evaluated twice per iteration with {\scshape Update-State}.
-Once after aligning, and once after walking or waiting.
+Once after aligning, and once at the end of the loop.
 That way the planner avoids to simulate unnecessary actions.
 $g_{goal}$ is updated by simulating the determined actions with {\scshape Simulate}.
 The actions are appended to $A$ after simulation.
-We perform either a straight or offset-align depending on $e_A$ and $e_B$ and if the polyominoes are stuck or not.
+We perform either a straight or offset-align depending on $e_A$ and $e_B$.
 The offset-align is done with the direction of $\vec{m}$.
-The stuck condition is evaluated at the beginning of the loop with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
-After aligning, the algorithm either walks or waits.
-When a stuck condition was determined in the beginning the algorithm waits as long as this changes the stuck condition.
-Otherwise we walk the estimated amount of pivot walking cycles (\autoref{sec:walk_wait}) in direction $\vec{w}$ with {\scshape Walk}, or we wait with {\scshape Wait}, if $c_A$ and $c_B$ are in close proximity, determined by {\scshape Critical-Distance}.
+After aligning we walk the estimated amount of pivot walking cycles (\autoref{sec:walk_wait}) in direction $\vec{w}$ with {\scshape Walk}, or we wait with {\scshape Wait}, if $c_A$ and $c_B$ are in close proximity, determined by {\scshape Critical-Distance}.
 If we waited in the previous iteration, we walk in the current one and oppositely.
 This behavior is toggled by the variable $wait$. 
+The stuck condition is evaluated with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
+When the polyominoes are stuck the algorithm performs a straight-align and waits as long as this changes the stuck condition.
+
 
 
 

@@ -13,12 +13,11 @@ DEBUG = False
 CRITICAL_DISTANCE = Cube.MAG_DISTANCE_MIN
 SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 1.5
 
-IDLE_TRIES = 1
 IDLE_AMOUNT = 10
-
-STUCK_TIMES_MAX = IDLE_TRIES + 1
-STUCK_OFFSET = Cube.RAD / 6
 IDLE_STUCK_AMOUNT = 60
+
+STUCK_TIMES_MAX = 3
+STUCK_OFFSET = Cube.RAD / 6
 
 NS_ALIGN_OFFSET = 3 * Cube.RAD
 ALIGNED_THRESHOLD = math.radians(4)
@@ -96,94 +95,103 @@ def __planSequential(data) -> Plan:
     return optPlan
         
 def __alignWalkRealign(data: tuple) -> Plan:
+    # unpack data
     config = data[0]
     cubeA = data[1]
     cubeB  = data[2]
     edgeB = data[3]
     direction = data[4]
     slide = data[5]
+    # init plan and simulation
     plan = Plan(initial=config, info=(cubeA,cubeB,edgeB))
     sim = Simulation(DEBUG, False)
     sim.loadConfig(config)
     sim.renderer.markedCubes.add(cubeA)
     sim.renderer.markedCubes.add(cubeB)
-    MAX_WALKING_DIST = 4 * (config.boardSize[0] + config.boardSize[1])
-    if DEBUG: print(f"Max walking distance: {MAX_WALKING_DIST}")
-    distWalked = 0
-    itr = 0
-    idleTry = 0
+    # init varables
+    MAX_MOVING_DIST = 2 * (config.boardSize[0] + config.boardSize[1])
+    if DEBUG: print(f"Max walking distance: {MAX_MOVING_DIST}")
+    distMoved = 0
     stuckTimes = 0
-    # not a mistake this insures that initial stuck check is false
-    posA = config.getPosition(cubeB)
-    posB = config.getPosition(cubeA)
+    itr = 0
+    wait = True
     while True:
-        # check if the polys got stuck.
-        #sim.renderer.pointsToDraw.clear()
-        if __polysStuck(config.getPosition(cubeA), posA, config.getPosition(cubeB), posB):
-            stuckTimes += 1
-        else:
-            stuckTimes = 0
-        if DEBUG: print(f"Itr: {itr}, {stuckTimes} times stuck.")
-        posA = config.getPosition(cubeA)
-        posB = config.getPosition(cubeB)
-        #sim.renderer.pointsToDraw.append((Renderer.BLUE, posA, 3))
-        #sim.renderer.pointsToDraw.append((Renderer.RED, posB, 3))
-        # aligne the cubes. If they are stuck force straight align
-        rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide, stuckTimes >= STUCK_TIMES_MAX)
+        # aligne the cubes.
+        rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide)
         executeMotions(sim, [rotation])
+        if DEBUG: print(rotation)
         plan.actions.append(rotation)
         config = sim.saveConfig()
-        if DEBUG: print(rotation)
         # update the planstate. Check failure and success conditions
         plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide)
         if plan.state != PlanState.UNDEFINED:
             break
-        # determine next actions based on distance anf stucktimes
-        distance = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
+        # determine next actions based on distance
+        distAB = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
+        if distAB < CRITICAL_DISTANCE and wait:
+            # if in critical distance wait short time
+            idle = Idle(IDLE_AMOUNT)
+            executeMotions(sim, [idle])
+            if DEBUG: print(idle)
+            plan.actions.append(idle)
+            config = sim.saveConfig()
+            wait = False
+        else:
+            # if not walk into direction
+            pA0 = config.getPosition(cubeA)
+            pB0 = config.getPosition(cubeB)
+            pWalks = __walkDynamic(config, cubeA, cubeB, direction)
+            executeMotions(sim, pWalks)
+            if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
+            plan.actions.extend(pWalks)
+            config = sim.saveConfig()
+            # determine how distance changes after pivot walking
+            distChangeA = config.getPosition(cubeA).get_distance(pA0)
+            distChangeB = config.getPosition(cubeB).get_distance(pB0)
+            distMoved += distChangeA + distChangeB
+            # if both A and B did not move increase stuck
+            if distChangeA < STUCK_OFFSET and distChangeB < STUCK_OFFSET:
+                stuckTimes += 1
+            else:
+                stuckTimes = 0
+            wait = True
+        # if stuck condition is reached
         if stuckTimes >= STUCK_TIMES_MAX:
-            # if stuck wait as long as their positions change
+            # force a straight align
+            rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide, True)
+            executeMotions(sim, [rotation])
+            if DEBUG: print(rotation)
+            plan.actions.append(rotation)
+            config = sim.saveConfig()
+            # wait as long as their positions change
+            distAB = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
             while True:
                 idle = Idle(IDLE_STUCK_AMOUNT)
                 executeMotions(sim, [idle])
                 if DEBUG: print(f"{idle} because stuck.")
                 plan.actions.append(idle)
                 config = sim.saveConfig()
-                newDist = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
-                if distance - newDist < STUCK_OFFSET / 2:
+                newDistAB = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
+                if distAB - newDistAB < STUCK_OFFSET / 2:
                     break
-                distance = newDist
-        else:
-            if distance < CRITICAL_DISTANCE and idleTry < IDLE_TRIES:
-                # if in critical distance wait short time
-                motions = [Idle(IDLE_AMOUNT)]
-                idleTry += 1
-            else:
-                # if not walk into direction
-                motions, dw = __walkDynamic(config, cubeA, cubeB, direction)
-                distWalked += dw
-                idleTry = 0 
-            executeMotions(sim, motions)
-            if DEBUG: print(f"{len(motions)} x {motions[0]}")
-            plan.actions.extend(motions)
-            config = sim.saveConfig()
-        if DEBUG: print(f"Walked: {round(distWalked)}")
+                distAB = newDistAB
         # update the planstate. Check failure and success conditions
         plan.state = __updatePlanState(config, cubeA, cubeB, edgeB, slide)
         if plan.state != PlanState.UNDEFINED:
             break
-        # if the polys got stuck and the straight align didnt fix report failure
+        # if the polys got stuck and the straight align didnt fix state failure
         if stuckTimes >= STUCK_TIMES_MAX:
             plan.state = PlanState.FAILURE_STUCK
             break
-        # if we cant conect after walking a lot
-        if distWalked >= MAX_WALKING_DIST:
+        # if we cant connect after moving max walking distance state failure
+        if distMoved >= MAX_MOVING_DIST:
             plan.state = PlanState.FAILURE_MAX_ITR
             break
+        if DEBUG: print(f"Itr: {itr}, {stuckTimes} times stuck.")
         itr += 1
+    # terminate sim and return plan
     sim.terminate()
     plan.goal = config
-    #print(f"itrations: {itr}")
-    #sim.stateHandler.timer.printTimeStats()
     return plan
 
 def __alignCubes(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction, forceStraight: bool=False):
@@ -228,8 +236,6 @@ def __calcAlignRotation(comA: Vec2d, posA: Vec2d, comB: Vec2d, posB: Vec2d, edge
 def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction):
     posA = config.getPosition(cubeA)
     posB = config.getPosition(cubeB)
-    polyA = config.getPolyominoes().getForCube(cubeA)
-    polyB = config.getPolyominoes().getForCube(cubeB)
     vecBA = posA - posB
     distance = vecBA.length
     # take eith big or small pivot angle depending on distance
@@ -239,13 +245,12 @@ def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction):
         pivotAng = PWALK_ANG_BIG
     # determin which poly is chasing which
     if bool(__faceingDirection(config, cubeA, cubeB) == Direction.EAST) ^ bool(direction == PivotWalk.LEFT):
-        chasingPoly = polyA
+        chasingPoly = config.getPolyominoes().getForCube(cubeA)
     else:
-        chasingPoly = polyB
+        chasingPoly = config.getPolyominoes().getForCube(cubeB)
     # estimate the pivot steps neccessary for the chasing poly to reach the other. Only take half.
     pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) * PWALK_PORTION)
-    dw = pivotSteps * (config.getPivotWalkingDistance(polyA, pivotAng) + config.getPivotWalkingDistance(polyB, pivotAng))
-    return ([PivotWalk(direction, pivotAng)] * pivotSteps, dw)
+    return [PivotWalk(direction, pivotAng)] * pivotSteps
 
 def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction) -> PlanState:
     # check if config contains inValid polys
@@ -303,11 +308,6 @@ def __edgeInHole(config: Configuration, cube: Cube, edge: Direction) -> bool:
     if poly.getCube(coordsToCheck[0]) != None and poly.getCube(coordsToCheck[1]) != None:
         return True
     return False
-
-def __polysStuck(newPosA: Vec2d, oldPosA: Vec2d, newPosB: Vec2d, oldPosB: Vec2d) -> bool:
-    distChangeA = newPosA.get_distance(oldPosA)
-    distChangeB = newPosB.get_distance(oldPosB)
-    return distChangeA < STUCK_OFFSET and distChangeB < STUCK_OFFSET
 
 def __polysInvalid(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
     if config.getPolyominoes().containsInvalid():
