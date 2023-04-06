@@ -97,8 +97,8 @@ If we encounter a value close enough to zero we can return it.
 If not we return the minimum of all the calculated values.
 This way we at least get as close to an alignment as possible.
 
-%TODO direct calculation of beta with tangent with two params?
-%TODO not allways minimum angle but what else should we use if aligning is not possible we cant move together
+%TODO Plot of a(beta) and beta for one example where it gets zero and one where it doesnt
+%TODO rename a
 
 \section{Moving Polyominoes Together}
 \label{sec:walk_wait}
@@ -124,9 +124,6 @@ n = \left\lceil \frac{\lVert P_{c_A} - P_{c_B}\rVert}{d_{p,A}} \right\rceil \,.
 We then only walk a portion of $n$ and re-align the cubes.
 When $c_A$ and $c_B$ are near enough for magnetic forces to act we frequently wait a short period to let magnetic attraction pull $e_A$ and $e_B$ together.
 This will automatically adjust the alignment, but for even more precision we decreased the pivot walking angle $\alpha$, when in close proximity.
-
-%TODO screenshots of magnet attraction in action
-%TODO plot of n steps an alpha I dont know
 
 \section{Plan and Failures}
 \label{sec:plan}
@@ -206,6 +203,7 @@ Pivot walking into east-west gaps, even with small values for $\alpha$, has also
 The local planner states failure immediately when polyominoes should be connected in any gap-type.
 
 %TODO clarify more than one-wide gaps. also cant insert 2 wide poly in 2 wide gap
+%TODO rename to caves
 
 \paragraph{Invalid Polyominoes:}
 
@@ -304,7 +302,7 @@ This behavior is toggled by the variable $wait$.
 The stuck condition is evaluated with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
 When the polyominoes are stuck the algorithm performs a straight-align and waits as long as this changes the stuck condition.
 
-
+%TODO comic sequence of the algorithm
 
 
 
