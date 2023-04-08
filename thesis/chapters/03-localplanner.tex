@@ -98,7 +98,7 @@ If not we return the minimum of all the calculated values.
 This way we at least get as close to an alignment as possible.
 
 %TODO Plot of a(beta) and beta for one example where it gets zero and one where it doesnt
-%TODO rename a
+%TODO rename a()
 
 \section{Moving Polyominoes Together}
 \label{sec:walk_wait}
@@ -147,11 +147,11 @@ There are several reasons the local planner might fail to develop a plan:
 Most reasons of failure resolves around the fact, that it is not possible to connect the polyominoes.
 First of all, $e_A$ and $e_B$ need to be free, so no other cube is already connected to them, but even if that is the case other cubes then $c_A$ and $c_B$ can prevent a connection.
 By connecting two polyominoes in one local discrete coordinate-system, for all cubes $c_1$, $c_2$ with coordinates $(x_1, y_1)$, $(x_2, y_2)$: $(x_1, y_1) \neq (x_2, y_2)$ should hold true.
-If two positions are equal, we call this a overlap which prevents the connection.
-Of course a connection is also not possible, if $e_A$ and $e_B$ are part of the same polyomino and not already connected.
+If two positions are equal, we call this an overlap, which prevents the connection.
+Of course, a connection is also not possible, if $e_A$ and $e_B$ are part of the same polyomino and not already connected.
 
 All that conditions are easy to check in a discrete way before even starting to plan, but that is not enough.
-Connection with other polyominoes during planning can invalidate those pre-checked conditions, so we need a to frequently re-check them.
+Connection with other polyominoes during planning can invalidate those pre-checked conditions, so we need to frequently re-check them.
 
 \paragraph{Impossible Slide-In:}
 
@@ -159,11 +159,11 @@ Even if a connection in a common local coordinate-system is possible you can onl
 Other cubes can again prevent this by blocking the way for an easy slide-in.
 We can also verify both east and west slide-in in a common local coordinate system.
 This discrete check assumes exact movement from east or west direction.
-Because of different displacement directions we know this is not true, but it is a reasonable approximation.
+Because of different displacement directions, we know this is not true, but it is a reasonable approximation.
 
-When pre-checking this condition we can state failure, if both directions are not possible.
-Otherwise we can align with respect to the valid slide-in direction, or try out both, if both are possible.
-Again the condition needs to be re-checked frequently, due to changing polyominoes.
+When pre-checking this condition, we can state failure, if both directions are not possible.
+Otherwise, we can align with respect to the valid slide-in direction, or try out both, if both are possible.
+Again, the condition needs to be re-checked frequently, due to changing polyominoes.
 
 %TODO add citations for sliding in: Dan Halpern, Robbie Schweller, Timothy Gomez
 
@@ -173,37 +173,36 @@ Polyominoes can get stuck in corners or on walls of the workspace.
 In this state it is not possible anymore to decrease the distance of $A$ and $B$ by pivot walking.
 We can identify this state when the position of both cubes $c_A$ and $c_B$ did not change after a certain amount of pivot walking motions.
 
-When stuck while trying to establish a north-south connection a straight-align instead of an offset-align can solve the problem.
+When stuck while trying to establish a north-south connection, a straight-align instead of an offset-align can solve the problem.
 It depends on the distance of the cubes after straight-aligning.
-If the distance is to big for magnetic forces to act, failure is reported, but if they are close enough the local planner waits until magnetic attraction connected $e_A$ and $e_B$.
+If the distance is too big for magnetic forces to act, failure is reported, but if they are close enough the local planner waits until magnetic attraction connected $e_A$ and $e_B$.
 
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.80\textwidth]{figures/holes.pdf}
-	\caption[Examples for connecting polyominoes into gaps]{Three different examples for connecting polyominoes into gaps. a) and b) show one-cube-deep gaps (a) east-west and b) north-south). c) illustrates a two-cube-deep east-west gap. The edges to be connected are marked yellow.}
+	\caption[Examples for connecting polyominoes into caves]{Three different examples for connecting polyominoes into caves. a) and b) show one-cube-deep caves (a) east-west and b) north-south). c) illustrates a two-cube-deep east-west cave. The edges to be connected are marked yellow.}
 	\label{fig:holes}
 \end{figure}
 
-\paragraph{Connecting in Gaps:}
+\paragraph{Connecting in Caves:}
 
-Connecting two polyominoes where one of the connection-faces is located inside a gap is a difficult task in the continuous world.
-We differentiate between east-west and north-south located gaps.
-Furthermore a gap can be of a certain depth measured in multiples of $2 r_C$.
-\autoref{fig:holes} shows examples for different gaps and different depths.
+Connecting two polyominoes where one of the connection-faces is located inside a cave is a difficult task in the continuous world.
+We differentiate between east-west and north-south located caves.
+Furthermore a cave can be of a certain depth measured in multiples of $2 r_C$.
+\autoref{fig:holes} shows examples for different caves and different depths.
 
-Connecting into a gap with a depth of more than $2 r_C$ is not possible.
-For instance, when inserting the blue single cube into the polyomino in \autoref{fig:holes} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the gap.
-But even gaps with depth $2 r_C$ are hard to handle.
-Inserting into a gap can be done by pivot walking, this would only work for east-west gaps, or by letting magnetic forces attract the connection-faces.
-Relying on magnetic forces alone seem promising, since it would work for both gap types, but in reality not only the forces of the connection-faces are present.
+Connecting into a cave with a depth of more than $2 r_C$ is not possible.
+For instance, when inserting the blue single cube into the polyomino in \autoref{fig:holes} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the cave.
+But even caves with depth $2 r_C$ are hard to handle.
+Inserting into a cave can be done by pivot walking, this would only work for east-west caves, or by letting magnetic forces attract the connection-faces.
+Relying on magnetic forces alone seem promising, since it would work for both cave types, but in reality not only the forces of the connection-faces are present.
 All the forces between other magnets prevent an easy slide-in.
-In our simulator the connection-face will be more attracted or repelled by faces outside the gap, then the once inside.
-Pivot walking into east-west gaps, even with small values for $\alpha$, has also a high failure rate because of other magnets.
-The local planner states failure immediately when polyominoes should be connected in any gap-type.
+In our simulator the connection-face will be more attracted or repelled by faces outside the cave, then the once inside.
+Pivot walking into east-west caves, even with small values for $\alpha$, has also a high failure rate because of other magnets.
+The local planner states failure immediately when polyominoes should be connected in any cave-type.
 
 %TODO clarify more than one-wide gaps. also cant insert 2 wide poly in 2 wide gap
-%TODO rename to caves
 
 \paragraph{Invalid Polyominoes:}
 
@@ -213,7 +212,7 @@ We also pre-check and frequently re-check, if the polyomino that will be created
 
 \paragraph{Maximum Movement Capacity:}
 
-As a worst-case failure we limit the amount of movement $A$ and $B$ are able to do.
+As a worst-case failure, we limit the amount of movement $A$ and $B$ are able to do.
 Whenever a pivot walking motion is done, we sum up the distances $c_A$ and $c_B$ moved together.
 Let $(w,h)$ be the size of the workspace.
 We define a maximum movement capacity of $2\cdot(w+h)$.
@@ -272,14 +271,14 @@ This capacity gives the polyominoes enough movement, so that both can move along
 \label{sec:local_algo}
 
 Before executing the algorithm presented in \autoref{algo:local_algo} we evaluate all the failure conditions that can be checked in advance, so no simulation-time is wasted on a plan that is bound to fail from the start.
-While doing that the possible slide-in directions are also determined and \autoref{algo:local_algo} is executed with both pivot walking directions $\vec{w}$ for each possible $\vec{m}$.
-This means for an east-west connection, we always develop two plans and for an north-south connection two or four, depending on the slide-in directions.
+While doing so, the possible slide-in directions are also determined and \autoref{algo:local_algo} is executed with both pivot walking directions $\vec{w}$ for each possible $\vec{m}$.
+This means for an east-west connection, we always develop two plans and for a north-south connection two or four, depending on the slide-in directions.
 
-In the end the successful plan with the lowest costs is returned.
-Even if all plans fail we still determine the best failure.
-Again plans with lower costs are preferable, but we favor impossible connection and slide-in failures.
-These failures just state that we cant establish a specific connection, but a global planner could continue to plan based on the goal configuration the local planner ended in.
-A configuration when the polyominoes are stuck, or the maximum movement capacity is reached, are not good for further planning, but invalid polyominoes or polyominoes with gaps will definitely be omitted on a global scale.
+In the end, the successful plan with the lowest costs is returned.
+Even if all plans fail, we still determine the best failure.
+Again, plans with lower costs are preferable, but we favor impossible connection and slide-in failures.
+These failures just state that we can not establish a specific connection, but a global planner could continue to plan based on the goal configuration the local planner ended in.
+A configuration when the polyominoes are stuck, or the maximum movement capacity is reached, is not good for further planning, but invalid polyominoes or polyominoes with gaps will definitely be omitted on a global scale.
 
 The different plans are developed in parallel and if one process finishes with a successful plan, the execution of all other plans can be canceled.
 This saves a lot of computation time, although we might not return the optimal plan, since fastest computation does not automatically mean lowest costs.
@@ -291,16 +290,16 @@ Generally speaking a low computation time can be linked with low rotational cost
 The algorithm runs in a loop until $s$ changes to success or one of the failure condition.
 The failure and success conditions are evaluated twice per iteration with {\scshape Update-State}.
 Once after aligning, and once at the end of the loop.
-That way the planner avoids to simulate unnecessary actions.
+That way, the planner avoids simulating unnecessary actions.
 $g_{goal}$ is updated by simulating the determined actions with {\scshape Simulate}.
 The actions are appended to $A$ after simulation.
-We perform either a straight or offset-align depending on $e_A$ and $e_B$.
+We perform either a straight or offset-align, depending on $e_A$ and $e_B$.
 The offset-align is done with the direction of $\vec{m}$.
 After aligning we walk the estimated amount of pivot walking cycles (\autoref{sec:walk_wait}) in direction $\vec{w}$ with {\scshape Walk}, or we wait with {\scshape Wait}, if $c_A$ and $c_B$ are in close proximity, determined by {\scshape Critical-Distance}.
 If we waited in the previous iteration, we walk in the current one and oppositely.
 This behavior is toggled by the variable $wait$. 
 The stuck condition is evaluated with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
-When the polyominoes are stuck the algorithm performs a straight-align and waits as long as this changes the stuck condition.
+When the polyominoes are stuck, the algorithm performs a straight-align and waits as long as this changes the stuck condition.
 
 %TODO comic sequence of the algorithm
 

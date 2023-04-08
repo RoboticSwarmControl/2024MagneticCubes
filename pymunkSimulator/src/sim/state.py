@@ -41,6 +41,10 @@ class Direction(Enum):
             return Vec2d(math.sin(magAngle), -math.cos(magAngle))
         else:
             return Vec2d(-math.sin(magAngle), math.cos(magAngle))
+        
+    @staticmethod    
+    def list():
+        return [Direction(i) for i in range(4)]
 
 class Cube:
     """
@@ -231,6 +235,61 @@ class Polyomino:
     def bounds(self):
         return (self.__xmax - self.__xmin + 1, self.__ymax - self.__ymin + 1)
 
+    def connectionMap(self):
+        map = {}
+        for cube in self.getCubes():
+            map[cube] = self.getConnections(cube)
+        return map
+
+    def connectPoly(self, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction):
+        if ((not self.contains(cubeA)) or (not polyB.contains(cubeB))):
+            return
+        poly = polyB.clone()
+        if not poly.connect(cubeA, cubeB, edgeB):
+            return None
+        done = set()
+        next = Queue()
+        done.add(cubeA)
+        next.put(cubeA)
+        while not next.empty():
+            current = next.get()
+            for i, adj in enumerate(self.getConnections(current)):
+                if (adj == None) or (adj in done):
+                    continue
+                if not poly.connect(adj, current, Direction(i)):
+                    return None
+                done.add(adj)
+                next.put(adj)
+        return poly
+    
+    def connectPolyPossible(self, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction, direction: Direction, target=None) -> bool:
+        # check if connecting the polys creates a vaild target
+        if target == None:
+            target = self.connectPoly(cubeA, polyB, cubeB, edgeB)
+        if target == None:
+            return False
+        # if we walk in from east then edgeB has to be west ang the other way around
+        if edgeB == direction:
+            return False
+        if direction == Direction.EAST:
+            end = target.__xmin - 1
+            step = -1
+        elif direction == Direction.WEST:
+            end = target.__xmax + 1
+            step = 1
+        else:
+            return False
+        for cube in self.getCubes():
+            posInTar = target.__cube_pos[cube]
+            for x in range(posInTar[0], end, step):
+                try:
+                    cubeInTar = target.__pos_cube[(x,posInTar[1])]
+                except KeyError:
+                    continue
+                if not self.contains(cubeInTar):
+                    return False
+        return True
+
     def clone(self):
         clone = Polyomino(self.getRoot())
         for cube, pos in self.__cube_pos.items():
@@ -288,55 +347,6 @@ class Polyomino:
 
     def __repr__(self) -> str:
         return f"Polyomino{self.id}[{self.getCubes()}]"
-    
-    def connectPoly(self, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction):
-        if ((not self.contains(cubeA)) or (not polyB.contains(cubeB))):
-            return
-        poly = polyB.clone()
-        if not poly.connect(cubeA, cubeB, edgeB):
-            return None
-        done = set()
-        next = Queue()
-        done.add(cubeA)
-        next.put(cubeA)
-        while not next.empty():
-            current = next.get()
-            for i, adj in enumerate(self.getConnections(current)):
-                if (adj == None) or (adj in done):
-                    continue
-                if not poly.connect(adj, current, Direction(i)):
-                    return None
-                done.add(adj)
-                next.put(adj)
-        return poly
-    
-    def connectPolyPossible(self, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction, direction: Direction, target=None) -> bool:
-        # check if connecting the polys creates a vaild target
-        if target == None:
-            target = self.connectPoly(cubeA, polyB, cubeB, edgeB)
-        if target == None:
-            return False
-        # if we walk in from east then edgeB has to be west ang the other way around
-        if edgeB == direction:
-            return False
-        if direction == Direction.EAST:
-            end = target.__xmin - 1
-            step = -1
-        elif direction == Direction.WEST:
-            end = target.__xmax + 1
-            step = 1
-        else:
-            return False
-        for cube in self.getCubes():
-            posInTar = target.__cube_pos[cube]
-            for x in range(posInTar[0], end, step):
-                try:
-                    cubeInTar = target.__pos_cube[(x,posInTar[1])]
-                except KeyError:
-                    continue
-                if not self.contains(cubeInTar):
-                    return False
-        return True
 
 
    
@@ -424,6 +434,12 @@ class PolyCollection:
         self.__polyType_polys.clear()
         self.__cube_poly.clear()
 
+    def polyCount(self):
+        count = 0
+        for value in self.__polyType_polys.values():
+            count += len(value)
+        return count
+
     def __contains__(self, key):
         return key in self.__polyType_polys
     
@@ -448,7 +464,7 @@ class PolyCollection:
         for i in range(self.maxWidth):
             line += "-"
         line += "\n"
-        string = line
+        string = "PolyCollection:\n" + line
         for type, polys in self.__polyType_polys.items():
             string += str(len(polys)) + " x:\n\n" + str(type) + line
         return string

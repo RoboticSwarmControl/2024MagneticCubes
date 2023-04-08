@@ -74,46 +74,35 @@ def randomConfigWithPolys(size, polyominoes: list):
             config.addCube(cube, pos)
     return config
 
-
-def linePolyVert(ncubes, nred=None):
-    conEdge = Direction.NORTH
-    poly = None
-    lastCube = None
-    for i in range(ncubes):
-        # create random cube
-        newCube = randomCube(ncubes, nred)
-        ncubes -= 1
-        if newCube.type == Cube.TYPE_RED and nred != None:
-            nred -= 1
-        # if first iteration create a poly
-        if poly == None:
-            poly = Polyomino(newCube)
-            lastCube = newCube
-            continue
-        poly.connect(newCube, lastCube, conEdge)
-        lastCube = newCube
-    return poly
-
-
-def linePolyHori(ncubes, firstType=None):
-    if firstType == None:
-        firstType = generator.randint(0,1)
-    conEdge = Direction.EAST
-    poly = None
-    lastCube = None
-    for i in range(ncubes):
-        # create cube
-        newCube = Cube(firstType)
-        firstType = (firstType + 1) % 2
-        # if first iteration create a poly
-        if poly == None:
-            poly = Polyomino(newCube)
-            lastCube = newCube
-            continue
-        poly.connect(newCube, lastCube, conEdge)
-        lastCube = newCube
-    return poly
+def randomCube(ncubes=None, nred=None):
+    if nred == None:
+        return Cube(generator.randint(0, 1))
+    rnd = generator.randint(1, ncubes)
+    if rnd <= nred:
+        return Cube(Cube.TYPE_RED)
+    else:
+        return Cube(Cube.TYPE_BLUE)
     
+def randomConnection(polyA: Polyomino, polyB: Polyomino, connectPoss:bool, onlyValid:bool):
+    itr = 0 
+    while itr < 256:
+        itr += 1
+        cubeA = generator.choice(polyA.getCubes())
+        cubeB = generator.choice(polyB.getCubes())
+        edgesA = polyA.getFreeEdges(cubeA, cubeA.type == cubeB.type)
+        edgesB = polyB.getFreeEdges(cubeB, cubeA.type == cubeB.type)
+        possibleEdgesB = [edgeB for edgeB in edgesB if edgeB.inv() in edgesA]
+        if len(possibleEdgesB) == 0:
+            continue
+        edgeB = generator.choice(possibleEdgesB)
+        if connectPoss:
+            target = polyA.connectPoly(cubeA, polyB, cubeB, edgeB)
+            if target == None:
+                continue
+            if onlyValid and not target.isValid():
+                continue
+        return cubeA, cubeB, edgeB
+    return None, None, None
 
 def randomPoly(ncubes, nred=None):
     poly = None
@@ -155,35 +144,82 @@ def randomPoly(ncubes, nred=None):
                     poly = save
     return poly
 
-
-def randomCube(ncubes=None, nred=None):
-    if nred == None:
-        return Cube(generator.randint(0, 1))
-    rnd = generator.randint(1, ncubes)
-    if rnd <= nred:
-        return Cube(Cube.TYPE_RED)
-    else:
-        return Cube(Cube.TYPE_BLUE)
-    
-
-def randomConnection(polyA: Polyomino, polyB: Polyomino, connectPoss:bool, onlyValid:bool):
-    itr = 0 
-    while itr < 256:
-        itr += 1
-        cubeA = generator.choice(polyA.getCubes())
-        cubeB = generator.choice(polyB.getCubes())
-        edgesA = polyA.getFreeEdges(cubeA, cubeA.type == cubeB.type)
-        edgesB = polyB.getFreeEdges(cubeB, cubeA.type == cubeB.type)
-        possibleEdgesB = [edgeB for edgeB in edgesB if edgeB.inv() in edgesA]
-        if len(possibleEdgesB) == 0:
+def linePolyVert(ncubes, nred=None):
+    conEdge = Direction.NORTH
+    poly = None
+    lastCube = None
+    for i in range(ncubes):
+        # create random cube
+        newCube = randomCube(ncubes, nred)
+        ncubes -= 1
+        if newCube.type == Cube.TYPE_RED and nred != None:
+            nred -= 1
+        # if first iteration create a poly
+        if poly == None:
+            poly = Polyomino(newCube)
+            lastCube = newCube
             continue
-        edgeB = generator.choice(possibleEdgesB)
-        if connectPoss:
-            target = polyA.connectPoly(cubeA, polyB, cubeB, edgeB)
-            if target == None:
-                continue
-            if onlyValid and not target.isValid():
-                continue
-        return cubeA, cubeB, edgeB
-    return None, None, None
+        poly.connect(newCube, lastCube, conEdge)
+        lastCube = newCube
+    return poly
+
+
+def linePolyHori(ncubes, firstType=None):
+    if firstType == None:
+        firstType = generator.randint(0,1)
+    conEdge = Direction.EAST
+    poly = None
+    lastCube = None
+    for i in range(ncubes):
+        # create cube
+        newCube = Cube(firstType)
+        firstType = (firstType + 1) % 2
+        # if first iteration create a poly
+        if poly == None:
+            poly = Polyomino(newCube)
+            lastCube = newCube
+            continue
+        poly.connect(newCube, lastCube, conEdge)
+        lastCube = newCube
+    return poly
+
+def threeByThree() -> Polyomino:
+    m = Cube(0)
+    l = Cube(1)
+    r = Cube(1)
+    p = Polyomino(m)
+    p.connect(l, m, Direction.WEST)
+    p.connect(r, m, Direction.EAST)
+    p.connect(Cube(1), m, Direction.NORTH)
+    p.connect(Cube(1), m, Direction.SOUTH)
+    p.connect(Cube(0), l, Direction.NORTH)
+    p.connect(Cube(0), l, Direction.SOUTH)
+    p.connect(Cube(0), r, Direction.NORTH)
+    p.connect(Cube(0), r, Direction.SOUTH)
+    return p
+
+def threeByThreeRing() -> Polyomino:
+    c = Cube(0)
+    cnew = Cube(1)
+    p = Polyomino(c)
+    p.connect(cnew, c, Direction.EAST)
+    c = cnew
+    cnew = Cube(0)
+    p.connect(cnew, c, Direction.EAST)
+    c = cnew
+    cnew = Cube(1)
+    p.connect(cnew, c, Direction.SOUTH)
+    c = cnew
+    cnew = Cube(0)
+    p.connect(cnew, c, Direction.SOUTH)
+    c = cnew
+    cnew = Cube(1)
+    p.connect(cnew, c, Direction.WEST)
+    c = cnew
+    cnew = Cube(0)
+    p.connect(cnew, c, Direction.WEST)
+    c = cnew
+    cnew = Cube(1)
+    p.connect(cnew, c, Direction.NORTH)
+    return p
         

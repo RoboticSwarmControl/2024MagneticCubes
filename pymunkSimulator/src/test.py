@@ -164,6 +164,12 @@ def randomPolyTest():
     polys = PolyCollection(polys)
     print(polys)
 
+def twoCutTest():
+    poly = factory.randomPoly(10)
+    twoCuts = twoCutSubassemblies(poly)
+    for tc in twoCuts:
+        print(tc)
+    print(f"For:\n\n{poly}\nare {len(twoCuts)} possible two-cuts.")
 
 
 #-------------------------------------------------------------------------------------------------------------------
@@ -412,4 +418,4 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
             plans[inp].execute()
 
 if __name__ == "__main__":
-    twoPolyConnect(27, 1, 6, False)
+    twoCutTest()

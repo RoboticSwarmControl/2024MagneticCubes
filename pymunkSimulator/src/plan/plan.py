@@ -1,9 +1,9 @@
 from enum import Enum
 import time
+
 from sim.motion import Idle
 from sim.simulation import Simulation
-
-from sim.state import Configuration
+from sim.state import *
 
 class PlanState(Enum):
 
@@ -137,3 +137,71 @@ def executeMotions(sim: Simulation, motions: list):
     sim.start()
     last.executed.wait()
     sim.stop()
+
+
+
+class TwoCutSubassemblyGraph():
+
+    def __init__(self, target: Polyomino) -> None:
+        poly_assemblies = {}
+        poly_assemblies[target] = twoCutSubassemblies(target)
+
+
+def twoCutSubassemblies(poly: Polyomino) -> set:
+    twoCuts = set()
+    for cube in poly.getCubes():
+        for edge in Direction.list():
+            if poly.getConnection(cube, edge) != None:
+                twoCuts.update(__monotonCutFrom(poly, cube, edge))
+    return twoCuts
+
+
+def __monotonCutFrom(poly: Polyomino, startCube: Cube, startEdge: Direction) -> list:
+    twoCuts = []
+    available = set(Direction.list())
+    nextPath = Queue()
+    nextPath.put([(startEdge, startCube, available.difference([startEdge.inv()]))])
+    while not nextPath.empty():
+        path = nextPath.get()
+        lastCon = path[len(path) - 1]
+        available = lastCon[2]
+        conToTake = __connectionsToTake(poly, lastCon[0], lastCon[1], available)
+        if len(conToTake) <= 1:
+            cut = __cutByPath(poly, path)
+            if cut.polyCount() == 2:
+                twoCuts.append(cut)
+                continue
+        for edge, cube in conToTake.items():
+            newPath = path.copy()
+            newPath.append((edge, cube, available.difference([edge.inv()])))
+            nextPath.put(newPath)
+    return twoCuts
+
+def __cutByPath(poly: Polyomino, path: list) -> PolyCollection:
+    connects = poly.connectionMap()
+    for edge, cube, _ in path:
+        conCube = poly.getConnection(cube, edge)
+        connects[cube][edge.value] = None
+        connects[conCube][edge.inv().value] = None
+    pc = PolyCollection()
+    pc.detectPolyominoes(connects)
+    return pc
+
+def __connectionsToTake(poly: Polyomino, edge: Direction, cube: Cube, availableDir:set=set(Direction.list())):
+    dir_cube = {}
+    for dir in availableDir:
+        if edge.value <= 1 and dir.value <= 1:
+            conEdge = Direction((dir.value + 1) % 2)
+        elif edge.value <= 1 and dir.value > 1:
+            conEdge = dir.inv()
+        elif edge.value > 1 and dir.value <= 1:
+            conEdge = dir.inv()
+        elif edge.value > 1 and dir.value > 1:
+            conEdge = Direction(((dir.value - 1) % 2) + 2)
+        try:
+            conCube = poly.getConnection(cube, conEdge)
+            if poly.getConnection(conCube, dir) != None:
+                dir_cube[dir] = conCube
+        except KeyError:
+            pass
+    return dir_cube
