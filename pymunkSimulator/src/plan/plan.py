@@ -138,7 +138,15 @@ def executeMotions(sim: Simulation, motions: list):
     last.executed.wait()
     sim.stop()
 
+class TwoCutSubassemblyEdge:
 
+    def __init__(self, start: PolyCollection, connection: tuple, goal: PolyCollection) -> None:
+        self.start = start
+        self.connection = connection
+        self.goal = goal
+
+    def __str__(self) -> str:
+        return f"{repr(self.start)} -{self.connection}-> {repr(self.goal)}"
 
 class TwoCutSubassemblyGraph:
 
@@ -146,7 +154,7 @@ class TwoCutSubassemblyGraph:
         self.note_edges = {}
         poly_twoCuts = {}
         polyColl = PolyCollection([target])
-        self.note_edges[polyColl] = []
+        self.note_edges[polyColl] = {}
         next = Queue()
         next.put(polyColl)
         while not next.empty():
@@ -170,34 +178,44 @@ class TwoCutSubassemblyGraph:
                     newPolys = polys.copy()
                     newPolys.extend(twoCut.getAll())
                     newPolyColl = PolyCollection(newPolys)
-                    edge = self.Edge(polyColl, connection)
+                    edge = TwoCutSubassemblyEdge(newPolyColl, connection, polyColl)
                     if newPolyColl in self.note_edges:
                         # if note is in tree append the edge
-                        self.note_edges[newPolyColl].append(edge)
+                        self.note_edges[newPolyColl][polyColl] = edge
                     else:
                        # if not put it in and add to next queue
-                       self.note_edges[newPolyColl] = [edge]
+                       self.note_edges[newPolyColl] = {polyColl: edge}
                        next.put(newPolyColl)
+
+    def getAdjacentNotes(self, polys: PolyCollection):
+        if not polys in self:
+            return None
+        return set(self.note_edges[polys].keys())
+    
+    def getTranslatedConnections(self, polys: PolyCollection, goal: PolyCollection):
+        translated = []
+        edge: TwoCutSubassemblyEdge = self.note_edges[polys][goal]
+        cubeA_graph = edge.connection[0]
+        cubeB_graph = edge.connection[1]
+        polyA_graph = edge.start.getForCube(cubeA_graph)
+        polyB_graph = edge.start.getForCube(cubeB_graph)
+        for polyA in polys.getForType(polyA_graph):
+            cubeA = polyA.getCube(polyA_graph.getLocalCoordinates(cubeA_graph))
+            for polyB in polys.getForType(polyB_graph):
+                cubeB = polyB.getCube(polyB_graph.getLocalCoordinates(cubeB_graph))
+                translated.append((cubeA, cubeB, edge.connection[2]))
+        return translated
+
+    def __contains__(self, key) -> bool:
+        return key in self.note_edges
 
     def __str__(self) -> str:
         string = ""
         for note, edges in self.note_edges.items():
             string += str(note) + "\n"
-            for edge in edges:
-                string += str(edge) + "\n"
+            for edge in edges.values():
+                string += "   " + str(edge) + "\n"
         return string
-
-    class Edge:
-
-        def __init__(self, goal: PolyCollection, connection: tuple) -> None:
-            self.connection = connection
-            self.goal = goal
-
-        def __str__(self) -> str:
-            return f"-{self.connection}->{repr(self.goal)}"
-        
-        def __repr__(self) -> str:
-            return f"-{self.connection}->{repr(self.goal)}"
 
 
 def twoCutSubassemblies(poly: Polyomino) -> dict:
@@ -224,7 +242,7 @@ def __monotonCutFrom(poly: Polyomino, startCube: Cube, startEdge: Direction) -> 
         if len(dirToTake) <= 1:
             cut = __cutAtPath(poly, path)
             if cut.polyCount() == 2:
-                twoCuts[cut] = (poly.getConnection(cube, edge), cube, edge)
+                twoCuts[cut] = __pickConnection(poly, path)
                 continue
         for edgeToTake, cubeToTake in dirToTake.items():
             newPath = path.copy()
@@ -241,6 +259,12 @@ def __cutAtPath(poly: Polyomino, path: list) -> PolyCollection:
     pc = PolyCollection()
     pc.detectPolyominoes(connects)
     return pc
+
+def __pickConnection(poly: Polyomino, path: list) -> tuple:
+    for edge, cube, _ in path:
+        if edge in (Direction.NORTH, Direction.SOUTH):
+            return (poly.getConnection(cube, edge), cube, edge)
+    return (poly.getConnection(cube, edge), cube, edge)
 
 def __directionsToTake(poly: Polyomino, edge: Direction, cube: Cube, availableDir:set=set(Direction.list())):
     dir_cube = {}
