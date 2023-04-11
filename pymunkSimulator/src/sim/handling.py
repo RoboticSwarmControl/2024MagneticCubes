@@ -155,8 +155,8 @@ class StateHandler:
         force = Vec2d(0, math.sin(ang-self.magAngle) * StateHandler.MAG_FORCE_FIELD).rotated(ang)
         shape.body.apply_force_at_local_point(-force, magPosS)
         shape.body.apply_force_at_local_point( force, magPosN)
-        self.cube_force[cube] += force
-        self.cube_force[cube] += -force
+        #self.cube_force[cube] += force
+        #self.cube_force[cube] += -force
 
     def __applyForceMagnets__(self, cubei: Cube, cubej: Cube):
         ts = time.time()
@@ -182,13 +182,13 @@ class StateHandler:
             t0 = time.time()
             shapei.body.apply_force_at_world_point(-fionj, magPosi)
             shapej.body.apply_force_at_world_point(fionj, magPosj)
-            self.cube_force[cubei] += -fionj
-            self.cube_force[cubej] += fionj
             self.timer.addToTask("mag_apply", time.time() - t0)
             # Determine magnet connections
             t0 = time.time()
             if fionj.length >= StateHandler.CONNECTION_FORCE_MIN:
                 self.__connectMagnets__(cubei, Direction(i), cubej, Direction(j))
+            #self.cube_force[cubei] += -fionj
+            #self.cube_force[cubej] += fionj
             self.timer.addToTask("mag_conn", time.time() - t0)
         self.timer.addToTask("force_mag", time.time() - ts)
 

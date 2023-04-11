@@ -1,7 +1,6 @@
 \chapter{Local Planner}
 \label{chap:local}
 
-
 This chapter is about the local planner that will be used for motion planning on a global scale in \autoref{chap:global}.
 Local planning means that the planner only focuses on simple motion task.
 The task could be to develop a plan that moves a polyomino from position $a$ to position $b$, or even simpler, to develop a plan for one pivot walk.
@@ -160,12 +159,11 @@ Other cubes can again prevent this by blocking the way for an easy slide-in.
 We can also verify both east and west slide-in in a common local coordinate system.
 This discrete check assumes exact movement from east or west direction.
 Because of different displacement directions, we know this is not true, but it is a reasonable approximation.
+Research on assembling a polyomino out of two parts by moving one part towards the other without collision, was done by Agarwal et al. \cite{agarwal2021}. 
 
 When pre-checking this condition, we can state failure, if both directions are not possible.
 Otherwise, we can align with respect to the valid slide-in direction, or try out both, if both are possible.
 Again, the condition needs to be re-checked frequently, due to changing polyominoes.
-
-%TODO add citations for sliding in: Dan Halpern, Robbie Schweller, Timothy Gomez
 
 \paragraph{Polyominoes being Stuck:}
 

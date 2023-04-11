@@ -140,15 +140,68 @@ def executeMotions(sim: Simulation, motions: list):
 
 
 
-class TwoCutSubassemblyGraph():
+class TwoCutSubassemblyGraph:
 
     def __init__(self, target: Polyomino) -> None:
-        poly_assemblies = {}
-        poly_assemblies[target] = twoCutSubassemblies(target)
+        self.note_edges = {}
+        poly_twoCuts = {}
+        polyColl = PolyCollection([target])
+        self.note_edges[polyColl] = []
+        next = Queue()
+        next.put(polyColl)
+        while not next.empty():
+            polyColl: PolyCollection = next.get()
+            # make twoCuts for all poly types
+            for poly in polyColl.getTypes():
+                # dont make twoCut for trivial
+                if poly.isTrivial():
+                    continue
+                # calculate possible twoCuts or take from dict if calculated before
+                if poly in poly_twoCuts:
+                    twoCuts = poly_twoCuts[poly]
+                else:
+                    twoCuts = twoCutSubassemblies(poly)
+                    poly_twoCuts[poly] = twoCuts
+                # list all polys and remove one of the current type 
+                polys = polyColl.getAll()
+                polys.remove(poly)
+                for twoCut, connection in twoCuts.items():
+                    # create new polyCollections for each twoCut
+                    newPolys = polys.copy()
+                    newPolys.extend(twoCut.getAll())
+                    newPolyColl = PolyCollection(newPolys)
+                    edge = self.Edge(polyColl, connection)
+                    if newPolyColl in self.note_edges:
+                        # if note is in tree append the edge
+                        self.note_edges[newPolyColl].append(edge)
+                    else:
+                       # if not put it in and add to next queue
+                       self.note_edges[newPolyColl] = [edge]
+                       next.put(newPolyColl)
+
+    def __str__(self) -> str:
+        string = ""
+        for note, edges in self.note_edges.items():
+            string += str(note) + "\n"
+            for edge in edges:
+                string += str(edge) + "\n"
+        return string
+
+    class Edge:
+
+        def __init__(self, goal: PolyCollection, connection: tuple) -> None:
+            self.connection = connection
+            self.goal = goal
+
+        def __str__(self) -> str:
+            return f"-{self.connection}->{repr(self.goal)}"
+        
+        def __repr__(self) -> str:
+            return f"-{self.connection}->{repr(self.goal)}"
 
 
-def twoCutSubassemblies(poly: Polyomino) -> set:
-    twoCuts = set()
+def twoCutSubassemblies(poly: Polyomino) -> dict:
+    twoCuts = {}
     for cube in poly.getCubes():
         for edge in Direction.list():
             if poly.getConnection(cube, edge) != None:
@@ -156,28 +209,30 @@ def twoCutSubassemblies(poly: Polyomino) -> set:
     return twoCuts
 
 
-def __monotonCutFrom(poly: Polyomino, startCube: Cube, startEdge: Direction) -> list:
-    twoCuts = []
+def __monotonCutFrom(poly: Polyomino, startCube: Cube, startEdge: Direction) -> dict:
+    twoCuts = {}
     available = set(Direction.list())
     nextPath = Queue()
     nextPath.put([(startEdge, startCube, available.difference([startEdge.inv()]))])
     while not nextPath.empty():
         path = nextPath.get()
         lastCon = path[len(path) - 1]
+        edge = lastCon[0]
+        cube = lastCon[1]
         available = lastCon[2]
-        conToTake = __connectionsToTake(poly, lastCon[0], lastCon[1], available)
-        if len(conToTake) <= 1:
-            cut = __cutByPath(poly, path)
+        dirToTake = __directionsToTake(poly, edge, cube, available)
+        if len(dirToTake) <= 1:
+            cut = __cutAtPath(poly, path)
             if cut.polyCount() == 2:
-                twoCuts.append(cut)
+                twoCuts[cut] = (poly.getConnection(cube, edge), cube, edge)
                 continue
-        for edge, cube in conToTake.items():
+        for edgeToTake, cubeToTake in dirToTake.items():
             newPath = path.copy()
-            newPath.append((edge, cube, available.difference([edge.inv()])))
+            newPath.append((edgeToTake, cubeToTake, available.difference([edgeToTake.inv()])))
             nextPath.put(newPath)
     return twoCuts
 
-def __cutByPath(poly: Polyomino, path: list) -> PolyCollection:
+def __cutAtPath(poly: Polyomino, path: list) -> PolyCollection:
     connects = poly.connectionMap()
     for edge, cube, _ in path:
         conCube = poly.getConnection(cube, edge)
@@ -187,7 +242,7 @@ def __cutByPath(poly: Polyomino, path: list) -> PolyCollection:
     pc.detectPolyominoes(connects)
     return pc
 
-def __connectionsToTake(poly: Polyomino, edge: Direction, cube: Cube, availableDir:set=set(Direction.list())):
+def __directionsToTake(poly: Polyomino, edge: Direction, cube: Cube, availableDir:set=set(Direction.list())):
     dir_cube = {}
     for dir in availableDir:
         if edge.value <= 1 and dir.value <= 1:

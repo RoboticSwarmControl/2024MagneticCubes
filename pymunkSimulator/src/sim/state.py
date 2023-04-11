@@ -352,6 +352,8 @@ class Polyomino:
    
 class PolyCollection:
 
+    nextId = 0
+
     def __init__(self, polys=None):
         self.maxWidth = 0
         self.maxHeight = 0
@@ -359,6 +361,8 @@ class PolyCollection:
         self.__valid = True
         self.__polyType_polys = {}
         self.__cube_poly  = {}
+        self.id = PolyCollection.nextId
+        PolyCollection.nextId += 1
         if polys == None:
             return
         for poly in polys:
@@ -396,6 +400,9 @@ class PolyCollection:
         if not type in self:
             return []
         return self.__polyType_polys[type]
+
+    def getTypes(self) -> list:
+        return list(self.__polyType_polys.keys())
 
     def getAll(self) -> list:
         if len(self.__polyType_polys) == 0:
@@ -464,15 +471,13 @@ class PolyCollection:
         for i in range(self.maxWidth):
             line += "-"
         line += "\n"
-        string = "PolyCollection:\n" + line
+        string = f"PolyCollection{self.id}:\n" + line
         for type, polys in self.__polyType_polys.items():
             string += str(len(polys)) + " x:\n\n" + str(type) + line
         return string
     
     def __repr__(self) -> str:
-        return repr(self.getAll())
-
-
+        return f"PolyCollection{self.id}"
 
 
 class Configuration:

@@ -222,4 +222,29 @@ def threeByThreeRing() -> Polyomino:
     cnew = Cube(1)
     p.connect(cnew, c, Direction.NORTH)
     return p
-        
+
+def fourCube_LShape():
+    c = Cube(1)
+    cnew = Cube(0)
+    p = Polyomino(c)
+    p.connect(cnew, c, Direction.WEST)
+    c = cnew
+    cnew = Cube(1)
+    p.connect(cnew, c, Direction.NORTH)
+    c = cnew
+    cnew = Cube(0)
+    p.connect(cnew, c, Direction.NORTH)
+    return p
+
+def twoByTwo():
+    c = Cube(1)
+    cnew = Cube(0)
+    p = Polyomino(c)
+    p.connect(cnew, c, Direction.NORTH)
+    c = cnew
+    cnew = Cube(1)
+    p.connect(cnew, c, Direction.EAST)
+    c = cnew
+    cnew = Cube(0)
+    p.connect(cnew, c, Direction.SOUTH)
+    return p

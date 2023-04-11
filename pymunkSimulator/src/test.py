@@ -171,9 +171,15 @@ def twoCutTest():
         print(tc)
     print(f"For:\n\n{poly}\nare {len(twoCuts)} possible two-cuts.")
 
+def twoCutGraphTest():
+    p = factory.fourCube_LShape()
+    g = TwoCutSubassemblyGraph(p)
+    print(p)
+    print(g)
+    print(len(g.note_edges))
+
 
 #-------------------------------------------------------------------------------------------------------------------
-
 
 
 def motionAnalysis():
@@ -418,4 +424,4 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
             plans[inp].execute()
 
 if __name__ == "__main__":
-    twoCutTest()
+    twoCutGraphTest()
