@@ -31,25 +31,25 @@ def planCubeConnect(initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Dir
     # single update if no poly info available
     if initial.getPolyominoes().isEmpty():
         initial = singleUpdate(initial)
-    info = (cubeA,cubeB,edgeB)
+    connection = (cubeA,cubeB,edgeB)
     # cant connect cubes sideways if they are same type
     if edgeB in (Direction.EAST, Direction.WEST) and cubeA.type == cubeB.type:
-        return Plan(initial=initial, state=PlanState.FAILURE_SAME_TYPE, info=info)
+        return Plan(initial=initial, state=PlanState.FAILURE_SAME_TYPE, connection=connection)
     if __polysInvalid(initial, cubeA, cubeB, edgeB):
-        return Plan(initial=initial, state=PlanState.FAILURE_INVAL_POLY, info=info)
+        return Plan(initial=initial, state=PlanState.FAILURE_INVAL_POLY, connection=connection)
     # when already connected return successfull plan
     if __isConnected(initial, cubeA, cubeB, edgeB):
-        return Plan(initial=initial, goal=initial, state=PlanState.SUCCESS, info=info)
+        return Plan(initial=initial, goal=initial, state=PlanState.SUCCESS, connection=connection)
     # pre check if connecting the polys is even possible and valid
     if not __connectPossible(initial, cubeA, cubeB, edgeB):
-        return Plan(initial=initial, state=PlanState.FAILURE_CONNECT, info=info)
+        return Plan(initial=initial, state=PlanState.FAILURE_CONNECT, connection=connection)
     # pre-check if connection edges are inside a hole
-    if __edgeInHole(initial, cubeA, edgeB.inv()) or __edgeInHole(initial, cubeB, edgeB):
-        return Plan(initial=initial, state=PlanState.FAILURE_HOLE, info=info)
+    if __edgeInCave(initial, cubeA, edgeB.inv()) or __edgeInCave(initial, cubeB, edgeB):
+        return Plan(initial=initial, state=PlanState.FAILURE_HOLE, connection=connection)
     # pre check if polys can slide together from either east or west
     slideDirections = __slideInDirections(initial, cubeA, cubeB, edgeB)
     if len(slideDirections) == 0:
-        return Plan(initial=initial, state=PlanState.FAILURE_SLIDE_IN, info=info)
+        return Plan(initial=initial, state=PlanState.FAILURE_SLIDE_IN, connection=connection)
     # determine which plans to execute. left and right either with or without initial flip
     plansToExec = []
     faceing = __faceingDirection(initial, cubeA, cubeB)
@@ -103,7 +103,7 @@ def __alignWalkRealign(data: tuple) -> Plan:
     direction = data[4]
     slide = data[5]
     # init plan and simulation
-    plan = Plan(initial=config, info=(cubeA,cubeB,edgeB))
+    plan = Plan(initial=config, connection=(cubeA,cubeB,edgeB))
     sim = Simulation(DEBUG, False)
     sim.loadConfig(config)
     sim.renderer.markedCubes.add(cubeA)
@@ -263,7 +263,7 @@ def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Di
     if not __connectPossible(config, cubeA, cubeB, edgeB):
         return PlanState.FAILURE_CONNECT
     # check if connection edges are inside a hole
-    if __edgeInHole(config, cubeA, edgeB.inv()) or __edgeInHole(config, cubeB, edgeB):
+    if __edgeInCave(config, cubeA, edgeB.inv()) or __edgeInCave(config, cubeB, edgeB):
         return PlanState.FAILURE_HOLE
     # check if we cant slide in anymore
     if not slide in __slideInDirections(config, cubeA, cubeB, edgeB):
@@ -294,7 +294,7 @@ def __slideInDirections(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: 
         slide.add(Direction.WEST)
     return slide
 
-def __edgeInHole(config: Configuration, cube: Cube, edge: Direction) -> bool:
+def __edgeInCave(config: Configuration, cube: Cube, edge: Direction) -> bool:
     poly = config.getPolyominoes().getForCube(cube)
     coords = poly.getLocalCoordinates(cube)
     if edge == Direction.NORTH:

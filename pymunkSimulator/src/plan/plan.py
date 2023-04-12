@@ -24,7 +24,7 @@ class PlanState(Enum):
 
 class Plan:
 
-    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED, info=None):
+    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED, connection=None):
         self.initial = initial
         self.goal = goal
         if actions == None:
@@ -32,10 +32,10 @@ class Plan:
         else:
             self.actions = actions
         self.state = state
-        self.info = info
+        self.connection = connection
 
     def __str__(self) -> str:
-        return f"{self.state}, {self.info}"
+        return f"{self.state}, {self.connection}"
 
     def cost(self):
         cost = 0
@@ -74,11 +74,8 @@ class Plan:
     def concat(self, other):
         if self.goal != other.initial:
             return None
-        if self.state != PlanState.SUCCESS or other.state != PlanState.SUCCESS:
-            return None
         ccPlan = Plan(self.initial, other.goal)
         ccPlan.actions = list(self.actions) + list(other.actions)
-        ccPlan.state = PlanState.SUCCESS
         return ccPlan
     
     def execute(self):
@@ -87,9 +84,9 @@ class Plan:
         """
         sim = Simulation(True, False)
         sim.loadConfig(self.initial)
-        if self.info != None:
-            sim.renderer.markedCubes.add(self.info[0])
-            sim.renderer.markedCubes.add(self.info[1])
+        if self.connection != None:
+            sim.renderer.markedCubes.add(self.connection[0])
+            sim.renderer.markedCubes.add(self.connection[1])
         executeMotions(sim, self.actions)
         time.sleep(1)
         sim.terminate()
@@ -105,8 +102,8 @@ class Plan:
             sim.loadConfig(self.initial)
             executeMotions(sim, self.actions)
             save = sim.saveConfig()
-        polyB = save.getPolyominoes().getForCube(self.info[1])
-        return bool(polyB.getConnection(self.info[1], self.info[2]) != self.info[0]) ^ bool(self.state == PlanState.SUCCESS)
+        polyB = save.getPolyominoes().getForCube(self.connection[1])
+        return bool(polyB.getConnection(self.connection[1], self.connection[2]) != self.connection[0]) ^ bool(self.state == PlanState.SUCCESS)
 
 
 
