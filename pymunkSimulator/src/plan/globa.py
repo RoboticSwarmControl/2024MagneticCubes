@@ -5,24 +5,24 @@ import plan.local as local
 
 DEBUG = True
 
-def planTargetAssembly(initial: Configuration, target: Polyomino) -> Plan:
+def planTargetAssembly(initial: Configuration, target: Polyomino) -> GlobalPlan:
     # single update if no poly info available
     if initial.getPolyominoes().isEmpty():
         initial = singleUpdate(initial)
     # check if target is already in initial
     if target in initial.getPolyominoes():
-        return Plan(initial=initial, goal=initial, state=PlanState.SUCCESS)
+        return GlobalPlan(initial=initial, goal=initial, state=PlanState.SUCCESS, target=target)
     globalFail = (PlanState.FAILURE_SAME_TYPE, PlanState.FAILURE_HOLE, PlanState.FAILURE_INVAL_POLY, PlanState.FAILURE_MAX_ITR, PlanState.FAILURE_STUCK)
     tcsaGraph = TwoCutSubassemblyGraph(target)
     planStack = []
     config_options = {}
     config = initial
     while True:
-        if DEBUG: print(f"------{config}------")
+        if DEBUG: print(f"------{config}------\n{len(planStack)} local plans in stack.\n{config.getPolyominoes().polyCount()} polys on board.\n")
         # Plan finished when we assembled the target
         if target in config.getPolyominoes():
             if DEBUG: print("Target successfully assembled!")
-            return __localPlansToGlobal(planStack)
+            return GlobalPlan(planStack[0].initial, planStack[len(planStack)-1].goal, planStack, PlanState.SUCCESS, target)
         # get possible conection options for this config
         if config in config_options:
             options = config_options[config]
@@ -35,7 +35,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino) -> Plan:
             if len(planStack) == 0:
                 # failure if nothing is left to fall back to
                 if DEBUG: print("Nothing to fall back to. Failure!")
-                return Plan(initial=initial, state=PlanState.FAILURE)
+                return GlobalPlan(initial=initial, state=PlanState.FAILURE, target=target)
             plan = planStack.pop()
             config = plan.initial
         else:
@@ -44,7 +44,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino) -> Plan:
                 if DEBUG: print(f"{len(options)} connections possible. Starting local planner.")
                 con = options.pop(0)
                 plan = local.planCubeConnect(config, con[0], con[1], con[2])
-                if DEBUG: plan.execute()
+                #if DEBUG: plan.execute()
                 # if plan is valid for global planning and polyCollection is in tcsaGraph, we move to the goal config
                 if not plan.state in globalFail and plan.goal != None and plan.goal.getPolyominoes() in tcsaGraph:
                     config = plan.goal
@@ -61,12 +61,5 @@ def __determineConnectOptions(config: Configuration, tcsaGraph: TwoCutSubassembl
         return conections
     for adj in adjNotes:
         conections.extend(tcsaGraph.getTranslatedConnections(polys, adj))
+    #TODO sort connections by how good they are
     return conections
-
-def __localPlansToGlobal(planStack: list) -> Plan:
-    plan: Plan = planStack[0]
-    for i in range(1, len(planStack)):
-        plan = plan.concat(planStack[i])
-    plan.connection = None
-    plan.state = PlanState.SUCCESS
-    return plan

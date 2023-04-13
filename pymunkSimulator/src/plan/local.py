@@ -27,29 +27,29 @@ PWALK_ANG_SMALL = PWALK_ANG_BIG / 1.5
 PWALK_PORTION = 1/2
 
 
-def planCubeConnect(initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> Plan:
+def planCubeConnect(initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> LocalPlan:
     # single update if no poly info available
     if initial.getPolyominoes().isEmpty():
         initial = singleUpdate(initial)
     connection = (cubeA,cubeB,edgeB)
     # cant connect cubes sideways if they are same type
     if edgeB in (Direction.EAST, Direction.WEST) and cubeA.type == cubeB.type:
-        return Plan(initial=initial, state=PlanState.FAILURE_SAME_TYPE, connection=connection)
+        return LocalPlan(initial=initial, state=PlanState.FAILURE_SAME_TYPE, connection=connection)
     if __polysInvalid(initial, cubeA, cubeB, edgeB):
-        return Plan(initial=initial, state=PlanState.FAILURE_INVAL_POLY, connection=connection)
+        return LocalPlan(initial=initial, state=PlanState.FAILURE_INVAL_POLY, connection=connection)
     # when already connected return successfull plan
     if __isConnected(initial, cubeA, cubeB, edgeB):
-        return Plan(initial=initial, goal=initial, state=PlanState.SUCCESS, connection=connection)
+        return LocalPlan(initial=initial, goal=initial, state=PlanState.SUCCESS, connection=connection)
     # pre check if connecting the polys is even possible and valid
     if not __connectPossible(initial, cubeA, cubeB, edgeB):
-        return Plan(initial=initial, state=PlanState.FAILURE_CONNECT, connection=connection)
+        return LocalPlan(initial=initial, state=PlanState.FAILURE_CONNECT, connection=connection)
     # pre-check if connection edges are inside a hole
     if __edgeInCave(initial, cubeA, edgeB.inv()) or __edgeInCave(initial, cubeB, edgeB):
-        return Plan(initial=initial, state=PlanState.FAILURE_HOLE, connection=connection)
+        return LocalPlan(initial=initial, state=PlanState.FAILURE_HOLE, connection=connection)
     # pre check if polys can slide together from either east or west
     slideDirections = __slideInDirections(initial, cubeA, cubeB, edgeB)
     if len(slideDirections) == 0:
-        return Plan(initial=initial, state=PlanState.FAILURE_SLIDE_IN, connection=connection)
+        return LocalPlan(initial=initial, state=PlanState.FAILURE_SLIDE_IN, connection=connection)
     # determine which plans to execute. left and right either with or without initial flip
     plansToExec = []
     faceing = __faceingDirection(initial, cubeA, cubeB)
@@ -65,7 +65,7 @@ def planCubeConnect(initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Dir
     else:
         return __planParallel(plansToExec)
     
-def __planParallel(data) -> Plan:
+def __planParallel(data) -> LocalPlan:
     print(f"Starting {len(data)} processes for simulation...")
     optPlan = None
     with Pool(len(data)) as pool:
@@ -83,7 +83,7 @@ def __planParallel(data) -> Plan:
         pool.terminate()
         return optPlan
 
-def __planSequential(data) -> Plan:
+def __planSequential(data) -> LocalPlan:
     optPlan = None
     for i, item in enumerate(data):
         plan = __alignWalkRealign(item)
@@ -94,7 +94,7 @@ def __planSequential(data) -> Plan:
             optPlan = optPlan.compare(plan)
     return optPlan
         
-def __alignWalkRealign(data: tuple) -> Plan:
+def __alignWalkRealign(data: tuple) -> LocalPlan:
     # unpack data
     config = data[0]
     cubeA = data[1]
@@ -103,7 +103,7 @@ def __alignWalkRealign(data: tuple) -> Plan:
     direction = data[4]
     slide = data[5]
     # init plan and simulation
-    plan = Plan(initial=config, connection=(cubeA,cubeB,edgeB))
+    plan = LocalPlan(initial=config, connection=(cubeA,cubeB,edgeB))
     sim = Simulation(DEBUG, False)
     sim.loadConfig(config)
     sim.renderer.markedCubes.add(cubeA)
@@ -118,6 +118,8 @@ def __alignWalkRealign(data: tuple) -> Plan:
     while True:
         # aligne the cubes.
         rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide)
+        sim.renderer.pointsToDraw.append((Renderer.RED, config.getPosition(cubeA), 3))
+        sim.renderer.pointsToDraw.append((Renderer.BLUE, config.getPosition(cubeB), 3))
         executeMotions(sim, [rotation])
         if DEBUG: print(rotation)
         plan.actions.append(rotation)
@@ -131,6 +133,8 @@ def __alignWalkRealign(data: tuple) -> Plan:
         if distAB < CRITICAL_DISTANCE and wait:
             # if in critical distance wait short time
             idle = Idle(IDLE_AMOUNT)
+            sim.renderer.pointsToDraw.append((Renderer.RED, config.getPosition(cubeA), 3))
+            sim.renderer.pointsToDraw.append((Renderer.BLUE, config.getPosition(cubeB), 3))
             executeMotions(sim, [idle])
             if DEBUG: print(idle)
             plan.actions.append(idle)
@@ -141,6 +145,8 @@ def __alignWalkRealign(data: tuple) -> Plan:
             pA0 = config.getPosition(cubeA)
             pB0 = config.getPosition(cubeB)
             pWalks = __walkDynamic(config, cubeA, cubeB, direction)
+            sim.renderer.pointsToDraw.append((Renderer.RED, config.getPosition(cubeA), 3))
+            sim.renderer.pointsToDraw.append((Renderer.BLUE, config.getPosition(cubeB), 3))
             executeMotions(sim, pWalks)
             if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
             plan.actions.extend(pWalks)
@@ -149,6 +155,8 @@ def __alignWalkRealign(data: tuple) -> Plan:
             distChangeA = config.getPosition(cubeA).get_distance(pA0)
             distChangeB = config.getPosition(cubeB).get_distance(pB0)
             distMoved += distChangeA + distChangeB
+            sim.renderer.linesToDraw.append((Renderer.RED, pA0, config.getPosition(cubeA), 3))
+            sim.renderer.linesToDraw.append((Renderer.BLUE, pB0, config.getPosition(cubeB), 3))
             # if both A and B did not move increase stuck
             if distChangeA < STUCK_OFFSET and distChangeB < STUCK_OFFSET:
                 stuckTimes += 1
@@ -187,11 +195,10 @@ def __alignWalkRealign(data: tuple) -> Plan:
         if distMoved >= MAX_MOVING_DIST:
             plan.state = PlanState.FAILURE_MAX_ITR
             break
-        if DEBUG: print(f"Itr: {itr}, {stuckTimes} times stuck.")
+        if DEBUG: print(f"Itr: {itr}, {stuckTimes} times stuck, {distMoved} dist moved.")
         itr += 1
-    # terminate sim and return plan
-    sim.terminate()
-    plan.goal = config
+    # terminate sim and return plan with last state sim was in as goal
+    plan.goal = sim.terminate()
     return plan
 
 def __alignCubes(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction, forceStraight: bool=False):
@@ -250,7 +257,10 @@ def __walkDynamic(config: Configuration, cubeA: Cube, cubeB: Cube, direction):
         chasingPoly = config.getPolyominoes().getForCube(cubeB)
     # estimate the pivot steps neccessary for the chasing poly to reach the other. Only take half.
     pivotSteps = math.ceil((distance / config.getPivotWalkingDistance(chasingPoly, pivotAng)) * PWALK_PORTION)
-    return [PivotWalk(direction, pivotAng)] * pivotSteps
+    pWalks = []
+    for _ in range(pivotSteps):
+        pWalks.append(PivotWalk(direction, pivotAng))
+    return pWalks
 
 def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction, slide:Direction) -> PlanState:
     # check if config contains inValid polys

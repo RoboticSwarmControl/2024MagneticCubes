@@ -43,6 +43,7 @@ class Simulation:
         self.renderer = Renderer(self.stateHandler)
         self.fps = 64
         self.updatePerFrame = 1
+        self.update = 0
 
         self.motionsToExecute = Queue()
         self.currentMotion = None
@@ -184,7 +185,6 @@ class Simulation:
         # initialisation
         if self.drawingActive:
             self.renderer.pygameInit()
-        update = 0
         self.started.set()
         # Simulation loop
         while self.started.isSet():
@@ -193,9 +193,9 @@ class Simulation:
             step = self.__nextStep__()
             self.stateHandler.update(
                 step.angChange, step.elevation, Simulation.STEP_TIME)
-            if self.drawingActive and (update % self.updatePerFrame == 0 or not self.started.is_set()):
+            if self.drawingActive and (self.update % self.updatePerFrame == 0 or not self.started.is_set()):
                 self.renderer.render(self.fps)
-            update += 1
+            self.update += 1
         self.stopped.set()
         sys.exit()
 

@@ -55,7 +55,7 @@ def twoCubeConnect(seed = 0, samples = 10):
         dt = t1 -t0
         globalTime += dt
         plans[seed] = plan
-        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}\ns")
         #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
         seed += 1
     fails = []
@@ -90,7 +90,7 @@ def twoPolyConnect(seed = 0, samples = 1, polyMaxSize = 4 ,forceMaxSize = True):
         dt = t1 -t0
         globalTime += dt
         plans[seed] = plan
-        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s\n")
         #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
         seed += 1
     fails = []
@@ -125,7 +125,7 @@ def twoPolyConnect_othersOnBoard(seed = 0, samples = 1, polyMaxSize = 4 , others
         dt = t1 -t0
         globalTime += dt
         plans[seed] = plan
-        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s\n")
         #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
         seed += 1
     fails = []
@@ -164,7 +164,7 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
         dt = t1 -t0
         globalTime += dt
         plans[seed] = plan
-        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s")
+        print(f"[{seed}] {plan}: {round(plan.cost(),2)}rad in {round(dt, 2)}s\n")
         #print(f"{c1.type} at {config.getPosition(c1)} --{ed}-> {c2.type} at {config.getPosition(c2)}. Ang={round(math.degrees(config.magAngle))}")
         seed += 1
     fails = []
@@ -187,4 +187,4 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
 
 
 if __name__ == "__main__":
-    twoPolyConnect_ncubes()
+    twoPolyConnect_ncubes(0,20,10)

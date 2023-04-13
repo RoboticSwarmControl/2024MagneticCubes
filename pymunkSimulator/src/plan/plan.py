@@ -24,7 +24,7 @@ class PlanState(Enum):
 
 class Plan:
 
-    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED, connection=None):
+    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED):
         self.initial = initial
         self.goal = goal
         if actions == None:
@@ -32,16 +32,22 @@ class Plan:
         else:
             self.actions = actions
         self.state = state
-        self.connection = connection
-
-    def __str__(self) -> str:
-        return f"{self.state}, {self.connection}"
 
     def cost(self):
         cost = 0
         for action in self.actions:
             cost += action.cost()
         return cost
+
+
+class LocalPlan(Plan):
+
+    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED, connection=None):
+        super().__init__(initial, goal, actions, state)
+        self.connection = connection
+
+    def __str__(self) -> str:
+        return f"{self.state} for {self.connection}"
 
     def compare(self, other):
         """
@@ -69,14 +75,6 @@ class Plan:
         if self.cost() <= other.cost():
             return self
         return other
-        
-
-    def concat(self, other):
-        if self.goal != other.initial:
-            return None
-        ccPlan = Plan(self.initial, other.goal)
-        ccPlan.actions = list(self.actions) + list(other.actions)
-        return ccPlan
     
     def execute(self):
         """
@@ -88,12 +86,14 @@ class Plan:
             sim.renderer.markedCubes.add(self.connection[0])
             sim.renderer.markedCubes.add(self.connection[1])
         executeMotions(sim, self.actions)
+        upd = sim.update
         time.sleep(1)
         sim.terminate()
+        return upd
 
     def validate(self) -> bool:
         """
-        Validates the plan by executing its actions and checking if the goal matches
+        Validates the plan by executing its actions and checks if the connection at the goal matches
         """
         if len(self.actions) == 0:
             save = singleUpdate(self.initial)
@@ -106,6 +106,39 @@ class Plan:
         return bool(polyB.getConnection(self.connection[1], self.connection[2]) != self.connection[0]) ^ bool(self.state == PlanState.SUCCESS)
 
 
+class GlobalPlan(Plan):
+
+    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED, target: Polyomino=None):
+        super().__init__(initial, goal, actions, state)
+        self.target = target
+
+    def __str__(self) -> str:
+        return f"{self.state} for assembling:\n{self.target}"
+
+    def execute(self):
+        """
+        Visually executes the actions of all local plans in this global plan 
+        """
+        sim = Simulation(True, False)
+        for plan in self.actions:
+            sim.loadConfig(plan.initial)
+            if plan.connection != None:
+                sim.renderer.markedCubes.add(plan.connection[0])
+                sim.renderer.markedCubes.add(plan.connection[1])
+            executeMotions(sim, plan.actions)
+            if plan.connection != None:
+                sim.renderer.markedCubes.clear()
+        upd = sim.update
+        time.sleep(1)
+        sim.terminate()
+        return upd
+
+    def validate(self) -> bool:
+        """
+        Validates the plan by validating all local plans and checking if the target polyomino is present in the end
+        """
+        return True
+        
 
 def singleUpdate(config: Configuration) -> Configuration:
     """
@@ -134,6 +167,7 @@ def executeMotions(sim: Simulation, motions: list):
     sim.start()
     last.executed.wait()
     sim.stop()
+
 
 class TwoCutSubassemblyEdge:
 

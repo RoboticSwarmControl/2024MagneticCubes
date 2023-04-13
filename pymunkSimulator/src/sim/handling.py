@@ -31,20 +31,7 @@ class StateHandler:
     DEFAULT_CONFIG = Configuration(DEFAULT_BOARDSIZE, math.radians(90), {})
 
     def __init__(self):
-        self.space = pymunk.Space()
-        self.space.gravity = (0, 0)  # gravity doesn't exist
-        self.space.damping = 1.0
-        # simulate top-down gravity with damping  was 0.2.  0 makes things not move.  1.0 they bounce forever.
-        # A value of 0.9 means that each body will lose 10% of its velocity per second. Defaults to 1. Like gravity, it can be overridden on a per body basis.
-        cHandler = self.space.add_collision_handler(
-            StateHandler.SENSOR_CTYPE, StateHandler.SENSOR_CTYPE)
-
-        def sensorCollision(arbiter: pymunk.Arbiter, space, data): 
-            cubei = self.sensor_cube[arbiter.shapes[0]]
-            cubej = self.sensor_cube[arbiter.shapes[1]]
-            self.__applyForceMagnets__(cubei, cubej)
-            return False
-        cHandler.pre_solve = sensorCollision
+        self.space: pymunk.Space = None
 
         self.boardSize = StateHandler.DEFAULT_BOARDSIZE
         self.bounds = []
@@ -81,6 +68,7 @@ class StateHandler:
 
     def loadConfig(self, newConfig: Configuration):
         self.boardSize = newConfig.boardSize
+        self.polyominoes = PolyCollection(newConfig.getPolyominoes().getAll())
         self.configToLoad = newConfig
 
     def saveConfig(self) -> Configuration:
@@ -139,13 +127,6 @@ class StateHandler:
         self.updateLock.release()
         self.timer.addToTotal(time.time() - ts)
 
-    def applyAllForces(self):
-        for cube, forces in self.cube_force.items():
-            shape = self.getCubeShape(cube)
-            for force, pos in forces:
-                shape.body.apply_force_at_world_point(force, pos)
-            self.cube_force[cube].clear()
-
     def __applyForceField__(self, cube: Cube):
         shape = self.getCubeShape(cube)
         ang = shape.body.angle
@@ -157,6 +138,12 @@ class StateHandler:
         shape.body.apply_force_at_local_point( force, magPosN)
         #self.cube_force[cube] += force
         #self.cube_force[cube] += -force
+
+    def __sensorCollision__(self, arbiter: pymunk.Arbiter, space, data): 
+            cubei = self.sensor_cube[arbiter.shapes[0]]
+            cubej = self.sensor_cube[arbiter.shapes[1]]
+            self.__applyForceMagnets__(cubei, cubej)
+            return False
 
     def __applyForceMagnets__(self, cubei: Cube, cubej: Cube):
         ts = time.time()
@@ -282,12 +269,10 @@ class StateHandler:
         shape.body.angular_velocity *= StateHandler.ANG_VEL_DAMP
 
     def __loadConfig__(self):
-        # clear space
         # JOINTS
         # self.__removeConnectJoints__()
-        self.__removeBoundaries__()
-        for cube in self.getCubes():
-            self.__removeCube__(cube)
+        # clear space
+        self.__resetSpace__()
         # grab values from configToLoad
         self.magAngle = self.configToLoad.magAngle
         self.magElevation = self.configToLoad.magElevation
@@ -301,15 +286,23 @@ class StateHandler:
         # reset the loading flag
         self.configToLoad = None
 
-    def __removeCube__(self, cube: Cube):
-        if not cube in self.cube_shapes:
-            return
-        shapes = self.cube_shapes[cube]
-        self.space.remove(shapes[0].body, shapes[0], shapes[1])
-        del self.cube_shapes[cube]
-        del self.magConnect[cube]
-        del self.sensor_cube[shapes[1]]
-        del self.cube_force[cube]
+    def __resetSpace__(self):
+        # delete space and all dicts
+        del self.space
+        self.bounds.clear()
+        self.cube_shapes.clear()
+        self.sensor_cube.clear()
+        self.cube_force.clear()
+        self.magConnect.clear()
+        # setup new space
+        self.space = pymunk.Space()
+        self.space.gravity = (0, 0)  # gravity doesn't exist
+        self.space.damping = 1.0
+        # simulate top-down gravity with damping  was 0.2.  0 makes things not move.  1.0 they bounce forever.
+        # A value of 0.9 means that each body will lose 10% of its velocity per second. Defaults to 1. Like gravity, it can be overridden on a per body basis.
+        cHandler = self.space.add_collision_handler(
+            StateHandler.SENSOR_CTYPE, StateHandler.SENSOR_CTYPE)
+        cHandler.pre_solve = self.__sensorCollision__
 
     def __addCube__(self, cube: Cube, pos, ang, vel):
         if cube in self.cube_shapes:
@@ -350,11 +343,6 @@ class StateHandler:
             wall.elasticity = 0.4
             wall.friction = 0.5
             self.space.add(wall)
-
-    def __removeBoundaries__(self):
-        for wall in self.bounds:
-            self.space.remove(wall)
-        self.bounds.clear()
 
 # ------------------------------------DEPRECATED----------------------------------------------
     # def __updatePivotPiont__(self, poly: Polyomino):

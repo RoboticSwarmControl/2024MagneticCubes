@@ -346,7 +346,7 @@ class Polyomino:
         return string
 
     def __repr__(self) -> str:
-        return f"Polyomino{self.id}[{self.getCubes()}]"
+        return f"Polyomino{self.id}"
 
 
    
