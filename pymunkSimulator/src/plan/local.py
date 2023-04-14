@@ -282,7 +282,7 @@ def __updatePlanState(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Di
 
 def __isConnected(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
     polyB = config.getPolyominoes().getForCube(cubeB)
-    return polyB.getConnection(cubeB, edgeB) == cubeA
+    return polyB.getConnectedAt(cubeB, edgeB) == cubeA
 
 def __connectPossible(config: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> bool:
     polyA = config.getPolyominoes().getForCube(cubeA)

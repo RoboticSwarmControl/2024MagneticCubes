@@ -145,11 +145,12 @@ def twoCutTest():
     print(f"For:\n\n{poly}\nare {len(twoCuts)} possible two-cuts.")
 
 def twoCutGraphTest():
-    polys = PolyCollection([Polyomino(Cube(0)),Polyomino(Cube(0)),Polyomino(Cube(1)),Polyomino(Cube(1))])
-    p = factory.fourCube_LShape()
+    polys = PolyCollection([Polyomino(Cube(1)),Polyomino(Cube(1)),Polyomino(Cube(1)),Polyomino(Cube(1))])
+    p = factory.linePolyVert(4, 0)
     g = TwoCutSubassemblyGraph(p)
     print(g)
-    notes = g.getAdjacentNotes(polys)
+    notes = g.getNextCollections(polys)
+    print(g.note_edges)
     for adj in notes:
         print(f"How to get to {repr(adj)}:")
         print(f"{g.getTranslatedConnections(polys, adj)}\n")
@@ -216,4 +217,4 @@ def motionAnalysis():
 
 
 if __name__ == "__main__":
-    motionAnalysis()
+    twoCutGraphTest()

@@ -18,7 +18,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino) -> GlobalPlan:
     config_options = {}
     config = initial
     while True:
-        if DEBUG: print(f"------{config}------\n{len(planStack)} local plans in stack.\n{config.getPolyominoes().polyCount()} polys on board.\n")
+        if DEBUG: print(f"------{repr(config)}------\n{len(planStack)} local plans in stack.\n{config.getPolyominoes()}\n")
         # Plan finished when we assembled the target
         if target in config.getPolyominoes():
             if DEBUG: print("Target successfully assembled!")
@@ -29,37 +29,39 @@ def planTargetAssembly(initial: Configuration, target: Polyomino) -> GlobalPlan:
         else:
             options = __determineConnectOptions(config, tcsaGraph)
             config_options[config] = options
-        if len(options) == 0:
-            # if no options are left fall back to last initial-config in planStack
-            if DEBUG: print("No connections left. Fall back to last config.")
+        # else try out options until a valid one is found
+        valid = False
+        while len(options) > 0:
+            optPossible = len(options)
+            con = options.pop(0)
+            if DEBUG: print(f"{optPossible} connections possible. Starting local planner for {con}.")
+            plan = local.planCubeConnect(config, con.cubeA, con.cubeB, con.edgeB)
+            #if DEBUG: plan.execute()
+            if not plan.state in globalFail and plan.goal != None and plan.goal.getPolyominoes() in tcsaGraph:
+                valid = True
+                config = plan.goal
+                planStack.append(plan)
+                if DEBUG:print(f"Valid local plan. Continue with {repr(config)}!\n")
+                break
+            if DEBUG:print(f"Invalid local plan. Try next connection.\n")
+        if not valid:
+            # if all options failed, fall back to last initial-config in planStack
             if len(planStack) == 0:
                 # failure if nothing is left to fall back to
-                if DEBUG: print("Nothing to fall back to. Failure!")
+                if DEBUG: print("Nothing to fall back to. Failure!\n")
                 return GlobalPlan(initial=initial, state=PlanState.FAILURE, target=target)
-            plan = planStack.pop()
-            config = plan.initial
-        else:
-            # else try out options
-            while len(options) > 0:
-                if DEBUG: print(f"{len(options)} connections possible. Starting local planner.")
-                con = options.pop(0)
-                plan = local.planCubeConnect(config, con[0], con[1], con[2])
-                #if DEBUG: plan.execute()
-                # if plan is valid for global planning and polyCollection is in tcsaGraph, we move to the goal config
-                if not plan.state in globalFail and plan.goal != None and plan.goal.getPolyominoes() in tcsaGraph:
-                    config = plan.goal
-                    planStack.append(plan)
-                    if DEBUG:print(f"Valid local plan. Continue with goal!\n")
-                    break
-                if DEBUG:print(f"Invalid local plan. Try next connection.\n")
+            lastPlan = planStack.pop()
+            config = lastPlan.initial
+            if DEBUG: print(f"No connections left. Fall back to {repr(config)}.\n")
         
 def __determineConnectOptions(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph) -> list:
-    conections = []
+    connections = []
     polys = config.getPolyominoes()
-    adjNotes = tcsaGraph.getAdjacentNotes(polys)
+    adjNotes = tcsaGraph.getNextCollections(polys)
     if adjNotes == None:
-        return conections
+        return connections
     for adj in adjNotes:
-        conections.extend(tcsaGraph.getTranslatedConnections(polys, adj))
-    #TODO sort connections by how good they are
-    return conections
+        con = tcsaGraph.getTranslatedConnections(polys, adj)
+        connections.extend(con)
+    connections.sort(key=lambda con: config.getPosition(con.cubeA).get_distance(config.getPosition(con.cubeB)))
+    return connections

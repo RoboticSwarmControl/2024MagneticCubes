@@ -470,7 +470,7 @@ class Renderer:
         # polyomino drawing
         for i, poly in enumerate(self.__stateHandler.polyominoes.getAll()):
             for cube in poly.getCubes():
-                connects = poly.getConnections(cube)
+                connects = poly.getConnected(cube)
                 for cubeCon in connects:
                     if cubeCon == None:
                         continue

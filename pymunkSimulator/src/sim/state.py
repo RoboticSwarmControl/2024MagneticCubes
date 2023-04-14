@@ -76,6 +76,11 @@ class Cube:
     def __repr__(self):
         return f"Cube{self.id}[{self.type}]"
 
+    def __eq__(self, __o: object) -> bool:
+        if not type(__o) is Cube:
+            return False
+        return self.id == __o.id
+
     def __hash__(self) -> int:
         return hash(self.id)
 
@@ -98,6 +103,32 @@ class Cube:
         # print(repr(f) )
         return f
 
+
+class Connection:
+
+    def __init__(self, cubeA: Cube, cubeB: Cube, edgeB: Direction) -> None:
+        self.cubeA = cubeA
+        self.cubeB = cubeB
+        self.edgeB = edgeB
+
+    def __eq__(self, __o: object) -> bool:
+        if not type(__o) is Connection:
+            return False
+        tup = (self.cubeA, self.cubeB, self.edgeB)
+        return tup == (__o.cubeA, __o.cubeB, __o.edgeB) or tup == (__o.cubeB, __o.cubeA, __o.edgeB.inv())
+    
+    def __hash__(self) -> int:
+        if self.edgeB in (Direction.WEST, Direction.SOUTH):
+            tup = (self.cubeB, self.cubeA, self.edgeB.inv())
+        else:
+            tup = (self.cubeA, self.cubeB, self.edgeB)
+        return hash(tup)
+    
+    def __str__(self) -> str:
+        return str((self.cubeA,self.cubeB,self.edgeB))
+    
+    def __repr__(self) -> str:
+        return str((self.cubeA,self.cubeB,self.edgeB))
 
 
 class Polyomino:
@@ -146,14 +177,14 @@ class Polyomino:
         if posA[0] < 0 or (posA[0] == 0 and posA[1] < 0):
             self.__updateCoordinates__(cubeA)
         # check for illegal side connection
-        neighborW = self.getConnection(cubeA, Direction.WEST)
-        neighborE = self.getConnection(cubeA, Direction.EAST)
+        neighborW = self.getConnectedAt(cubeA, Direction.WEST)
+        neighborE = self.getConnectedAt(cubeA, Direction.EAST)
         if (neighborW != None and neighborW.type == cubeA.type) or (neighborE != None and neighborE.type == cubeA.type):
             self.__valid = False
         return True
     
     def getFreeEdges(self, cube: Cube, onlyNS:bool=False):
-        edges = [Direction(i) for i, x in enumerate(self.getConnections(cube)) if x == None]
+        edges = [Direction(i) for i, x in enumerate(self.getConnected(cube)) if x == None]
         if onlyNS:
             if Direction.WEST in edges:
                 edges.remove(Direction.WEST)
@@ -161,13 +192,13 @@ class Polyomino:
                 edges.remove(Direction.EAST)
         return edges
 
-    def getConnections(self, cube: Cube):
+    def getConnected(self, cube: Cube):
         connects = []
         for i in range(4):
-            connects.append(self.getConnection(cube, Direction(i)))
+            connects.append(self.getConnectedAt(cube, Direction(i)))
         return connects
 
-    def getConnection(self, cube: Cube, edge: Direction) -> Cube:
+    def getConnectedAt(self, cube: Cube, edge: Direction) -> Cube:
         pos = self.__cube_pos[cube]
         if edge.value % 2 == 0:
             dx = 0
@@ -181,6 +212,12 @@ class Polyomino:
             adj = None
         return adj
 
+    def getConnectionMap(self):
+        map = {}
+        for cube in self.getCubes():
+            map[cube] = self.getConnected(cube)
+        return map
+
     def getCubes(self):
         return list(self.__cube_pos.keys())
 
@@ -191,7 +228,7 @@ class Polyomino:
             return None
 
     def getRoot(self):
-        return self.__pos_cube[(0, 0)]
+        return self.getCube((0,0))
 
     def getLocalCoordinates(self, cube) -> Vec2d:
         return self.__cube_pos[cube]
@@ -228,18 +265,19 @@ class Polyomino:
 
     def size(self) -> int:
         return len(self.__cube_pos)
+    
+    def nred(self) -> int:
+        nred = 0
+        for cube in self.__pos_cube.values():
+            if cube.type == Cube.TYPE_RED:
+                nred += 1
+        return nred
 
     def contains(self, cube: Cube):
         return cube in self.__cube_pos
 
     def bounds(self):
         return (self.__xmax - self.__xmin + 1, self.__ymax - self.__ymin + 1)
-
-    def connectionMap(self):
-        map = {}
-        for cube in self.getCubes():
-            map[cube] = self.getConnections(cube)
-        return map
 
     def connectPoly(self, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction):
         if ((not self.contains(cubeA)) or (not polyB.contains(cubeB))):
@@ -253,7 +291,7 @@ class Polyomino:
         next.put(cubeA)
         while not next.empty():
             current = next.get()
-            for i, adj in enumerate(self.getConnections(current)):
+            for i, adj in enumerate(self.getConnected(current)):
                 if (adj == None) or (adj in done):
                     continue
                 if not poly.connect(adj, current, Direction(i)):
@@ -352,17 +390,13 @@ class Polyomino:
    
 class PolyCollection:
 
-    nextId = 0
-
     def __init__(self, polys=None):
         self.maxWidth = 0
         self.maxHeight = 0
         self.maxSize = 0
         self.__valid = True
         self.__polyType_polys = {}
-        self.__cube_poly  = {}
-        self.id = PolyCollection.nextId
-        PolyCollection.nextId += 1
+        self.cube_poly = {}
         if polys == None:
             return
         for poly in polys:
@@ -394,7 +428,7 @@ class PolyCollection:
             self.__add__(poly)
 
     def getForCube(self, cube: Cube)-> Polyomino:
-        return self.__cube_poly[cube]
+        return self.cube_poly[cube]
 
     def getForType(self, type: Polyomino) -> list:
         if not type in self:
@@ -431,7 +465,7 @@ class PolyCollection:
         else:
             self.__polyType_polys[poly] = [poly]
         for cube in poly.getCubes():
-            self.__cube_poly[cube] = poly
+            self.cube_poly[cube] = poly
 
     def __clear__(self):
         self.maxWidth = 0
@@ -439,7 +473,7 @@ class PolyCollection:
         self.maxSize = 0
         self.__valid = True
         self.__polyType_polys.clear()
-        self.__cube_poly.clear()
+        self.cube_poly.clear()
 
     def polyCount(self):
         count = 0
@@ -463,7 +497,7 @@ class PolyCollection:
     
     def __hash__(self) -> int:
         toHash = [(hash(k), len(v)) for k, v in self.__polyType_polys.items()]
-        toHash.sort(key=lambda t: t[0])
+        toHash.sort()
         return hash(tuple(toHash))
 
     def __str__(self) -> str: 
@@ -471,13 +505,13 @@ class PolyCollection:
         for i in range(self.maxWidth):
             line += "-"
         line += "\n"
-        string = f"PolyCollection{self.id}:\n" + line
+        string = f"PolyCollection{hex(id(self))}:\n" + line
         for type, polys in self.__polyType_polys.items():
             string += str(len(polys)) + " x:\n\n" + str(type) + line
         return string
     
     def __repr__(self) -> str:
-        return f"PolyCollection{self.id}"
+        return f"PolyCollection{hex(id(self))}"
 
 
 class Configuration:
@@ -602,6 +636,17 @@ class Configuration:
         toHash.append(self.magAngle)
         return hash(tuple(toHash))
     
+    def __str__(self) -> str:
+        string = "{"
+        for cube in self.getCubes():
+            pos = self.getPosition(cube)
+            pos = (round(pos.x), round(pos.y))
+            string += f"{cube}: {pos},"
+        return string + "}"
+    
+    def __repr__(self) -> str:
+        return f"Config{hex(id(self))}"
+
     def addCube(self, cube, pos, ang=None, vel=(0,0)):
         if ang == None:
             ang = self.magAngle
