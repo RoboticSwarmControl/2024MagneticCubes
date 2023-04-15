@@ -505,13 +505,15 @@ class PolyCollection:
         for i in range(self.maxWidth):
             line += "-"
         line += "\n"
-        string = f"PolyCollection{hex(id(self))}:\n" + line
+        strId = str(hex(id(self)))[-4:]
+        string = f"PolyCollection{strId}:\n" + line
         for type, polys in self.__polyType_polys.items():
             string += str(len(polys)) + " x:\n\n" + str(type) + line
         return string
     
     def __repr__(self) -> str:
-        return f"PolyCollection{hex(id(self))}"
+        strId = str(hex(id(self)))[-4:]
+        return f"PolyCollection{strId}"
 
 
 class Configuration:
@@ -637,15 +639,17 @@ class Configuration:
         return hash(tuple(toHash))
     
     def __str__(self) -> str:
-        string = "{"
+        strId = str(hex(id(self)))[-4:]
+        string = f"Config{strId}("
         for cube in self.getCubes():
             pos = self.getPosition(cube)
             pos = (round(pos.x), round(pos.y))
-            string += f"{cube}: {pos},"
-        return string + "}"
+            string += f"{cube}: {pos}, "
+        return string + ")"
     
     def __repr__(self) -> str:
-        return f"Config{hex(id(self))}"
+        strId = str(hex(id(self)))[-4:]
+        return f"Config{strId}"
 
     def addCube(self, cube, pos, ang=None, vel=(0,0)):
         if ang == None:

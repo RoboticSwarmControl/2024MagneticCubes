@@ -54,4 +54,4 @@ def randomTargetAssembly(ncubes, seed=0, samples=1):
         plans[int(inp)].execute()
 
 if __name__ == "__main__":
-    customTargetAssembly(factory.threeByThree(), 1, 1)
+    customTargetAssembly(factory.threeByThreeRing(), 1, 1)

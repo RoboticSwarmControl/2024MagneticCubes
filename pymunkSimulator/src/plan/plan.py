@@ -16,7 +16,8 @@ class PlanState(Enum):
     FAILURE_INVAL_POLY = 6
     FAILURE_MAX_ITR = 7
     FAILURE_STUCK = 8
-    FAILURE_HOLE = 9
+    FAILURE_CAVE = 9
+    FAILURE_ALLOWED_POLYS = 10
 
     def  __str__(self) -> str:
         return self.name
@@ -221,6 +222,9 @@ class TwoCutSubassemblyGraph:
                             # if not put it in and add to next queue
                             self.note_edges[newPolyColl] = [edge]
                             next.put(newPolyColl)
+
+    def getAllCollections(self) -> set:
+        return set(self.note_edges.keys())
 
     def getNextCollections(self, polys: PolyCollection):
         if not polys in self.note_edges:
