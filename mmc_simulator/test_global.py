@@ -1,9 +1,9 @@
 import time
 
-from sim.state import *
+from com.state import *
 from plan.plan import *
-import plan.factory as factory
-import plan.globa as globa
+import com.factory as factory
+import plan.globalp as globalp
 
 def customTargetAssembly(target: Polyomino, seed=0, samples=1):
     plans = {}
@@ -12,7 +12,7 @@ def customTargetAssembly(target: Polyomino, seed=0, samples=1):
         factory.generator.seed(seed)
         config = factory.randomConfigWithCubes((800,800), target.size(), target.nred())
         t0 = time.time()
-        plan = globa.planTargetAssembly(config, target)
+        plan = globalp.planTargetAssembly(config, target)
         t1 = time.time()
         dt = t1 -t0
         globalTime += dt
@@ -40,7 +40,7 @@ def randomTargetAssembly(ncubes, seed=0, samples=1, halfRed=False):
         print(f"Polyomino to assemble:\n{target}")
         config = factory.randomConfigWithCubes((800,800), target.size(), target.nred())
         t0 = time.time()
-        plan = globa.planTargetAssembly(config, target)
+        plan = globalp.planTargetAssembly(config, target)
         t1 = time.time()
         dt = t1 -t0
         globalTime += dt

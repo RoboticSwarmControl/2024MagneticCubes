@@ -2,10 +2,11 @@ import time
 from pymunk import Vec2d
 
 from sim.simulation import Simulation
-from sim.state import *
+from com.state import *
 from plan.plan import *
-import plan.factory as factory
-from sim.motion import Rotation, PivotWalk
+from plan.globalp import *
+import com.factory as factory
+from com.motion import Rotation, PivotWalk
 
 def vecAngleTest():
     a = Vec2d(1, 0)

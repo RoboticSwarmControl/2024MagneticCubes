@@ -1,7 +1,8 @@
+from queue import Queue
 
-from sim.state import *
+from com.state import Configuration, PolyCollection, Polyomino, Connection, Direction, Cube
 from plan.plan import *
-import plan.local as local
+import plan.localp as local
 
 DEBUG = True
 PLAY_LOCALS = False

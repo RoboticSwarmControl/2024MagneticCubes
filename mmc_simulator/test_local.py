@@ -1,9 +1,9 @@
 import time
 
-from sim.state import *
-import plan.local as local
+from com.state import *
+import plan.localp as local
 from plan.plan import *
-import plan.factory as factory
+import com.factory as factory
 
 
 def holeConnectionTest():

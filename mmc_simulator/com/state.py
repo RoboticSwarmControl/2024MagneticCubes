@@ -8,7 +8,7 @@ from enum import Enum
 from queue import Queue
 from pymunk import Vec2d
 
-from sim.motion import PivotWalk, Tilt
+from com.motion import PivotWalk, Tilt
 
 
 class Direction(Enum):

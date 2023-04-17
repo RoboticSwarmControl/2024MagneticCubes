@@ -6,11 +6,13 @@ Holds the Simulation class
 import sys
 import pygame
 import math
+from queue import Queue
 from threading import Thread, Event
 
-from sim.state import Configuration, Cube
-from sim.motion import *
-from sim.handling import *
+from com.state import Configuration, Cube
+from com.motion import PivotWalk, Rotation, Motion, Step, Tilt
+from sim.handling import StateHandler
+from sim.rendering import Renderer
 
 DEBUG = False
 

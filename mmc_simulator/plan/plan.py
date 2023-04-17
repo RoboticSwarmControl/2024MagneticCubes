@@ -1,9 +1,9 @@
 from enum import Enum
 import time
 
-from sim.motion import Idle
+from com.motion import Idle
 from sim.simulation import Simulation
-from sim.state import *
+from com.state import Configuration, Polyomino
 
 class PlanState(Enum):
 

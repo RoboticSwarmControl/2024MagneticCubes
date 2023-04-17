@@ -1,6 +1,6 @@
 import math
 import random
-from sim.state import *
+from com.state import *
 
 
 generator = random.Random()
