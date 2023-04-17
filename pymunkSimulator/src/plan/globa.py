@@ -36,7 +36,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino) -> GlobalPlan:
         if config in config_options:
             options = config_options[config]
         else:
-            options = __determineConnectOptions(config, tcsaGraph)
+            options = __determineOptions_minDist(config, tcsaGraph)
             config_options[config] = options
         # else try out options until a valid one is found
         valid = False
@@ -64,7 +64,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino) -> GlobalPlan:
             config = lastPlan.initial
             if DEBUG: print(f"No connections left. Fall back to {repr(config)}.\n")
         
-def __determineConnectOptions(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph) -> list:
+def __determineOptions_minDist(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph) -> list:
     connections = []
     polys = config.getPolyominoes()
     adjNotes = tcsaGraph.getNextCollections(polys)

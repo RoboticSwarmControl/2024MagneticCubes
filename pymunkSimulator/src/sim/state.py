@@ -71,10 +71,14 @@ class Cube:
         Cube.nextid += 1
 
     def __str__(self):
-        return f"Cube{self.id}[{self.type}]"
+        if self.type == Cube.TYPE_BLUE:
+            typeChar = 'b'
+        else:
+            typeChar = 'r'
+        return f"[{typeChar}]"
 
     def __repr__(self):
-        return f"Cube{self.id}[{self.type}]"
+        return f"Cube{self.id}"
 
     def __eq__(self, __o: object) -> bool:
         if not type(__o) is Cube:
@@ -377,9 +381,9 @@ class Polyomino:
         for y in range(self.__ymax, self.__ymin - 1, -1):
             for x in range(self.__xmin, self.__xmax + 1):
                 try:
-                    string += str(self.__pos_cube[(x,y)].type)
+                    string += str(self.__pos_cube[(x,y)])
                 except KeyError:
-                    string += " "
+                    string += "   "
             string += "\n"
         return string
 
@@ -501,14 +505,10 @@ class PolyCollection:
         return hash(tuple(toHash))
 
     def __str__(self) -> str: 
-        line = ""
-        for i in range(self.maxWidth):
-            line += "-"
-        line += "\n"
         strId = str(hex(id(self)))[-4:]
-        string = f"PolyCollection{strId}:\n" + line
+        string = f"PolyCollection{strId}:\n"
         for type, polys in self.__polyType_polys.items():
-            string += str(len(polys)) + " x:\n\n" + str(type) + line
+            string += f"--------{len(polys)}x--------\n{type}\n"
         return string
     
     def __repr__(self) -> str:

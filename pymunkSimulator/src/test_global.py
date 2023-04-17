@@ -28,12 +28,15 @@ def customTargetAssembly(target: Polyomino, seed=0, samples=1):
         inp = input("Select seed to play:")
         plans[int(inp)].execute()
         
-def randomTargetAssembly(ncubes, seed=0, samples=1):
+def randomTargetAssembly(ncubes, seed=0, samples=1, halfRed=False):
     plans = {}
     globalTime = 0
     for _ in range(samples):
         factory.generator.seed(seed)
-        target = factory.randomPoly(ncubes)
+        if halfRed:
+            target = factory.randomPoly(ncubes, round(ncubes / 2))
+        else:
+            target = factory.randomPoly(ncubes)
         print(f"Polyomino to assemble:\n{target}")
         config = factory.randomConfigWithCubes((800,800), target.size(), target.nred())
         t0 = time.time()
@@ -54,4 +57,4 @@ def randomTargetAssembly(ncubes, seed=0, samples=1):
         plans[int(inp)].execute()
 
 if __name__ == "__main__":
-    customTargetAssembly(factory.threeByThreeRing(), 1, 1)
+    randomTargetAssembly(10, 1, 1, True)
