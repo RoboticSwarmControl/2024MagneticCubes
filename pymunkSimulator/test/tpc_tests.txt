@@ -22,3 +22,19 @@ seed 56 size 6 !sameSize:
 
 seed 61 size 6 !sameSize:
     max itr failure hunt in circle
+
+
+valid for illustration:
+    seed 15 size 8 !sameSize
+    seed 27 size 6 !sameSize
+        Stuck
+    seed 9 size 6 !sameSize
+        wall slide
+        offset align
+    seed 10 size 6 !sameSize
+        big offset align
+        
+
+    
+
+    

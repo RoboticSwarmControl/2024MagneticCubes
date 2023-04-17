@@ -55,7 +55,7 @@ class Cube:
     TYPE_RED = 0
     TYPE_BLUE = 1
 
-    MAG_FORCE = 25000000  # force of the magnets
+    MAG_FORCE = 25000000 # force of the magnets
     MRAD = 15  # distance of magnet from center of cube
     RAD = 20  # half length of side of cube
     MAG_DISTANCE_MIN = 5 * RAD

@@ -1,8 +1,7 @@
-
 import math
 import random
-from sim.motion import Tilt
 from sim.state import *
+
 
 generator = random.Random()
 

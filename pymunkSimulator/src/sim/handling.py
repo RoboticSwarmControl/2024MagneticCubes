@@ -180,7 +180,7 @@ class StateHandler:
         self.timer.addToTask("force_mag", time.time() - ts)
 
     def __magPairMinDist__(self, cubei: Cube, cubej: Cube) -> list:
-        # determine the magnetpair with the smallest distance. Only on pair is returned
+        # determine the magnetpair with the smallest distance. Only one pair is returned
         shapei = self.getCubeShape(cubei)
         shapej = self.getCubeShape(cubej)
         dismin = math.inf
