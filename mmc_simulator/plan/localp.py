@@ -32,39 +32,39 @@ def planCubeConnect(initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Dir
     # single update if no poly info available
     if initial.getPolyominoes().isEmpty():
         initial = singleUpdate(initial)
-    connection = (cubeA,cubeB,edgeB)
+    connection = Connection(cubeA,cubeB,edgeB)
     # cant connect cubes sideways if they are same type
     if edgeB in (Direction.EAST, Direction.WEST) and cubeA.type == cubeB.type:
-        return LocalPlan(initial=initial, state=PlanState.FAILURE_SAME_TYPE, connection=connection)
+        return LocalPlan(connection, initial, state=PlanState.FAILURE_SAME_TYPE)
     # check if the current poly set is allowed
     if not __polysAllowed(initial, allowedPolyColls):
-        return LocalPlan(initial=initial, state=PlanState.FAILURE_ALLOWED_POLYS, connection=connection)
+        return LocalPlan(connection, initial, state=PlanState.FAILURE_ALLOWED_POLYS)
     # check if config contains invalid polys
     if __polysInvalid(initial, cubeA, cubeB, edgeB):
-        return LocalPlan(initial=initial, state=PlanState.FAILURE_INVAL_POLY, connection=connection)
+        return LocalPlan(connection, initial, state=PlanState.FAILURE_INVAL_POLY)
     # when already connected return successfull plan
     if __isConnected(initial, cubeA, cubeB, edgeB):
-        return LocalPlan(initial=initial, goal=initial, state=PlanState.SUCCESS, connection=connection)
+        return LocalPlan(connection, initial, goal=initial, state=PlanState.SUCCESS)
     # pre check if connecting the polys is even possible and valid
     if not __connectPossible(initial, cubeA, cubeB, edgeB):
-        return LocalPlan(initial=initial, state=PlanState.FAILURE_CONNECT, connection=connection)
+        return LocalPlan(connection, initial, state=PlanState.FAILURE_CONNECT)
     # pre-check if connection edges are inside a hole
     if __edgeInCave(initial, cubeA, edgeB.inv()) or __edgeInCave(initial, cubeB, edgeB):
-        return LocalPlan(initial=initial, state=PlanState.FAILURE_CAVE, connection=connection)
+        return LocalPlan(connection, initial, state=PlanState.FAILURE_CAVE)
     # pre check if polys can slide together from either east or west
     slideDirections = __slideInDirections(initial, cubeA, cubeB, edgeB)
     if len(slideDirections) == 0:
-        return LocalPlan(initial=initial, state=PlanState.FAILURE_SLIDE_IN, connection=connection)
+        return LocalPlan(connection, initial, state=PlanState.FAILURE_SLIDE_IN)
     # determine which plans to execute. left and right either with or without initial flip
     plansToExec = []
     faceing = __faceingDirection(initial, cubeA, cubeB)
     facingInv = faceing.inv()
     if faceing in slideDirections:
-        plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, faceing, allowedPolyColls))
-        plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, faceing, allowedPolyColls))
+        plansToExec.append((initial, connection, PivotWalk.LEFT, faceing, allowedPolyColls))
+        plansToExec.append((initial, connection, PivotWalk.RIGHT, faceing, allowedPolyColls))
     if facingInv  in slideDirections:
-        plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.LEFT, facingInv, allowedPolyColls))
-        plansToExec.append((initial, cubeA, cubeB, edgeB, PivotWalk.RIGHT, facingInv, allowedPolyColls))
+        plansToExec.append((initial, connection, PivotWalk.LEFT, facingInv, allowedPolyColls))
+        plansToExec.append((initial, connection, PivotWalk.RIGHT, facingInv, allowedPolyColls))
     if DEBUG:
         return __planSequential(plansToExec)
     else:
@@ -102,14 +102,15 @@ def __planSequential(data) -> LocalPlan:
 def __alignWalkRealign(data: tuple) -> LocalPlan:
     # unpack data
     config: Configuration = data[0]
-    cubeA: Cube = data[1]
-    cubeB: Cube  = data[2]
-    edgeB: Direction = data[3]
-    direction = data[4]
-    slide: Direction = data[5]
-    allowed: set = data[6]
+    con: Connection = data[1]
+    cubeA = con.cubeA
+    cubeB = con.cubeB
+    edgeB = con.edgeB
+    direction = data[2]
+    slide: Direction = data[3]
+    allowed: set = data[4]
     # init plan and simulation
-    plan = LocalPlan(initial=config, connection=(cubeA,cubeB,edgeB))
+    plan = LocalPlan(con, config)
     sim = Simulation(DEBUG, False)
     sim.loadConfig(config)
     sim.renderer.markedCubes.add(cubeA)

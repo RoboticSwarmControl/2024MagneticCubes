@@ -1,5 +1,6 @@
 import time
 from pymunk import Vec2d
+import json
 
 from sim.simulation import Simulation
 from com.state import *
@@ -7,6 +8,35 @@ from plan.plan import *
 from plan.globalp import *
 import com.factory as factory
 from com.motion import Rotation, PivotWalk
+
+
+def jsonTest():
+    data = {
+        "results": [
+            {
+                "seed": 0,
+                "time": 12.3,
+                "pos": (2,3)
+            },
+            {
+                "seed": 1,
+                "time": 112.3
+            },
+            {
+                "seed": 2,
+                "time": 10.5
+            }
+        ]
+    }
+    with open('../results/json_data.json', 'w') as outfile:
+        json.dump(data, outfile, indent=4)
+
+    with open('../results/json_data.json', 'r') as openfile:
+        json_dict = json.load(openfile)
+    print(type(json_dict))
+    print(json_dict)
+    
+
 
 def vecAngleTest():
     a = Vec2d(1, 0)
@@ -151,7 +181,7 @@ def twoCutGraphTest():
     g = TwoCutSubassemblyGraph(p)
     print(g)
     notes = g.getNextCollections(polys)
-    print(g.note_edges)
+    print(g.__note_edges)
     for adj in notes:
         print(f"How to get to {repr(adj)}:")
         print(f"{g.getTranslatedConnections(polys, adj)}\n")
@@ -218,4 +248,4 @@ def motionAnalysis():
 
 
 if __name__ == "__main__":
-    twoCutGraphTest()
+    jsonTest()

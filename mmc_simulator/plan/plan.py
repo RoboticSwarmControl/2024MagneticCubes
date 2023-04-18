@@ -3,7 +3,7 @@ import time
 
 from com.motion import Idle
 from sim.simulation import Simulation
-from com.state import Configuration, Polyomino
+from com.state import Configuration, Connection, Polyomino
 
 class PlanState(Enum):
 
@@ -23,9 +23,14 @@ class PlanState(Enum):
         return self.name
 
 
+class PlanOption(Enum):
+
+    MIN_DIST = 0
+
+
 class Plan:
 
-    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED):
+    def __init__(self, initial: Configuration, actions=None, goal: Configuration=None,  state=PlanState.UNDEFINED):
         self.initial = initial
         self.goal = goal
         if actions == None:
@@ -43,8 +48,8 @@ class Plan:
 
 class LocalPlan(Plan):
 
-    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED, connection=None):
-        super().__init__(initial, goal, actions, state)
+    def __init__(self, connection: Connection, initial: Configuration, actions:list=None, goal: Configuration=None, state=PlanState.UNDEFINED):
+        super().__init__(initial, actions, goal, state)
         self.connection = connection
 
     def __str__(self) -> str:
@@ -86,8 +91,8 @@ class LocalPlan(Plan):
         sim = Simulation(True, False)
         sim.loadConfig(self.initial)
         if self.connection != None:
-            sim.renderer.markedCubes.add(self.connection[0])
-            sim.renderer.markedCubes.add(self.connection[1])
+            sim.renderer.markedCubes.add(self.connection.cubeA)
+            sim.renderer.markedCubes.add(self.connection.cubeB)
         executeMotions(sim, self.actions)
         upd = sim.update
         time.sleep(1)
@@ -105,15 +110,18 @@ class LocalPlan(Plan):
             sim.loadConfig(self.initial)
             executeMotions(sim, self.actions)
             save = sim.saveConfig()
-        polyB = save.getPolyominoes().getForCube(self.connection[1])
-        return bool(polyB.getConnectedAt(self.connection[1], self.connection[2]) != self.connection[0]) ^ bool(self.state == PlanState.SUCCESS)
+        polyB = save.getPolyominoes().getForCube(self.connection.cubeB)
+        return bool(polyB.getConnectedAt(self.connection.cubeB, self.connection.edgeB) != self.connection.cubeA) ^ bool(self.state == PlanState.SUCCESS)
 
 
 class GlobalPlan(Plan):
 
-    def __init__(self, initial: Configuration=None, goal: Configuration=None, actions=None, state=PlanState.UNDEFINED, target: Polyomino=None):
-        super().__init__(initial, goal, actions, state)
+    def __init__(self, target: Polyomino, initial: Configuration, actions:list=None, goal: Configuration=None, state=PlanState.UNDEFINED, nconfig=1, nlocal=0, ntcsa=0):
+        super().__init__(initial, actions, goal, state)
         self.target = target
+        self.nconfig = nconfig
+        self.nlocal = nlocal
+        self.ntcsa = ntcsa
 
     def __str__(self) -> str:
         return f"{self.state} for {repr(self.initial)} --> {repr(self.goal)} assembling:\n{self.target}"
@@ -126,8 +134,8 @@ class GlobalPlan(Plan):
         for plan in self.actions:
             sim.loadConfig(plan.initial)
             if plan.connection != None:
-                sim.renderer.markedCubes.add(plan.connection[0])
-                sim.renderer.markedCubes.add(plan.connection[1])
+                sim.renderer.markedCubes.add(plan.connection.cubeA)
+                sim.renderer.markedCubes.add(plan.connection.cubeB)
             executeMotions(sim, plan.actions)
             if plan.connection != None:
                 sim.renderer.markedCubes.clear()
