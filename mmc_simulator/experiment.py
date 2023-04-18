@@ -85,7 +85,7 @@ def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, pl
                     success = False
                 planData = PlanData(seed, success, dt, plan.cost(), plan.nconfig, plan.nlocal, plan.ntcsa, len(plan.actions))
                 expData.planData.append(planData)
-            writeExperiment(expData, os.path.join(dirPath, f"{ncubes}-{optVal.name}.json"))
+            writeExperiment(expData, os.path.join(dirPath, f"{ncubes}-{planOption.name}.json"))
 
 
 if __name__ == "__main__":
