@@ -11,7 +11,7 @@ slurminade.update_default_configuration(
 def hardWork(n, text):
     with open("../results/slurm_test.txt", "w") as file:
         for i in range(n):
-            file.write(f"{i} time writing '{text}'")
+            file.write(f"{i} time writing '{text}'\n")
     print("Done!")
 
 if __name__ == "__main__":
