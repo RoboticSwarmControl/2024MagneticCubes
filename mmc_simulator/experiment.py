@@ -2,12 +2,21 @@ import json
 import math
 import os
 from datetime import datetime
+from threading import Event, Thread
 import time
+import slurminade
 
 from com.state import *
 from plan.plan import *
 import com.factory as factory
 import plan.globalp as globalp
+
+slurminade.update_default_configuration(
+    partition="alg",
+    constraint="alggen03",
+    mail_user="k.keune@tu-braunschweig.de",
+    mail_type="ALL",
+)
 
 RESULT_DIR = "../results"
 
@@ -52,10 +61,10 @@ def loadExperiment(path) -> ExperimentData:
     return ExperimentData(**data)
 
 
-
-def __batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, planOptions):
+@slurminade.slurmify()
+def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, planOptions):
     dateTime = datetime.now()
-    dirPath = os.path.join(RESULT_DIR, dateTime.strftime("%y-%m-%d-%H-%M-%S") + "TAFS")
+    dirPath = os.path.join(RESULT_DIR, dateTime.strftime("%m-%d-%H-%M-%S") + "-TAFS")
     os.mkdir(dirPath)
     boardSize = (1000,1000)
     for ncubes in range(startSize, endSize + 1):
@@ -79,4 +88,4 @@ def __batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, 
 
 
 if __name__ == "__main__":
-    __batchTargetAssemblyForSize(0, 8, 8, 10, [PlanOption.MIN_DIST])
+    batchTargetAssemblyForSize.distribute(0, 5, 10, 10, [PlanOption.MIN_DIST])

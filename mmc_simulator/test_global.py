@@ -56,5 +56,19 @@ def randomTargetAssembly(ncubes, seed=0, samples=1, halfRed=False):
         inp = input("Select seed to play:")
         plans[int(inp)].execute()
 
+
+def singleTargetAssembly(seed, ncubes, nred, boardSize, planOption):
+    factory.generator.seed(seed)
+    target = factory.randomPoly(ncubes, nred)
+    initial = factory.randomConfigWithCubes(boardSize, ncubes, nred)
+    t0 = time.time()
+    plan = globalp.planTargetAssembly(initial, target, planOption)
+    dt = time.time() - t0
+    print(f"{plan}with {round(plan.cost(),2)}rad in {round(dt, 2)}s\n")
+    while True:
+        input("Play plan:")
+        plan.execute()
+
+
 if __name__ == "__main__":
-    randomTargetAssembly(10, 1, 1, True)
+    singleTargetAssembly(6, 5 ,2, (1000,1000), PlanOption.MIN_DIST)

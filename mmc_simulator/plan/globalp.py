@@ -4,8 +4,10 @@ from com.state import Configuration, PolyCollection, Polyomino, Connection, Dire
 from plan.plan import *
 import plan.localp as local
 
-DEBUG = True
+DEBUG = False
 PLAY_LOCALS = False
+
+TIMEOUT = 600
 
 class TwoCutSubassemblyEdge:
 
@@ -123,14 +125,21 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, planOption: Pl
     config_options = {}
     config = initial
     nlocalPlans = 0
+    t0 = time.time()
     while True:
         if DEBUG: 
             print(f"----------------{repr(config)}----------------\n")
             print(f"{len(planStack)} local plans in stack.\n{config.getPolyominoes()}")
+        # failure when planning takes to long
+        if (time.time() - t0) >= TIMEOUT:
+            if DEBUG: print(f"Timeout -> Failure!\n{len(config_options)} configs, {nlocalPlans} local plans in total.\n")
+            return GlobalPlan(target, initial, state=PlanState.FAILURE, nconfig=len(config_options),
+                              nlocal=nlocalPlans, ntcsa=tcsaGraph.noteCount())
         # Plan finished when we assembled the target
         if target in config.getPolyominoes():
             if DEBUG: print(f"Target successfully assembled with {len(planStack)} local plans!\n{len(config_options)} configs, {nlocalPlans} local plans in total.\n")
-            return GlobalPlan(target, initial, planStack, config, PlanState.SUCCESS, len(config_options), nlocalPlans, tcsaGraph.noteCount())
+            return GlobalPlan(target, initial, planStack, config, PlanState.SUCCESS, len(config_options),
+                              nlocalPlans, tcsaGraph.noteCount())
         # get possible conection options for this config
         if config in config_options:
             options = config_options[config]
@@ -158,7 +167,8 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, planOption: Pl
             if len(planStack) == 0:
                 # failure if nothing is left to fall back to
                 if DEBUG: print(f"Nothing to fall back to -> Failure!\n{len(config_options)} configs, {nlocalPlans} local plans in total.\n")
-                return GlobalPlan(target, initial, state=PlanState.FAILURE, ncofig=len(config_options), nlocal=nlocalPlans, ntcsa=tcsaGraph.noteCount())
+                return GlobalPlan(target, initial, state=PlanState.FAILURE, nconfig=len(config_options),
+                                  nlocal=nlocalPlans, ntcsa=tcsaGraph.noteCount())
             lastPlan = planStack.pop()
             config = lastPlan.initial
             if DEBUG: print(f"No connections left. Fall back to {repr(config)}.\n")
