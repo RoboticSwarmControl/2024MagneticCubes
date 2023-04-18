@@ -69,14 +69,15 @@ def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, pl
     boardSize = (1000,1000)
     for ncubes in range(startSize, endSize + 1):
         nred = math.floor(ncubes / 2)
-        for option in planOptions:
-            expData = ExperimentData(ncubes, nred, "random", boardSize, option.name)
+        for optVal in planOptions:
+            planOption = PlanOption(optVal)
+            expData = ExperimentData(ncubes, nred, "random", boardSize, planOption.name)
             for seed in range(startSeed, startSeed + samplesPerSize):
                 factory.generator.seed(seed)
                 target = factory.randomPoly(ncubes, nred)
                 initial = factory.randomConfigWithCubes(boardSize, ncubes, nred)
                 t0 = time.time()
-                plan = globalp.planTargetAssembly(initial, target, option)
+                plan = globalp.planTargetAssembly(initial, target, planOption)
                 dt = time.time() - t0
                 if plan.state == PlanState.SUCCESS:
                     success = True
@@ -84,8 +85,8 @@ def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, pl
                     success = False
                 planData = PlanData(seed, success, dt, plan.cost(), plan.nconfig, plan.nlocal, plan.ntcsa, len(plan.actions))
                 expData.planData.append(planData)
-            writeExperiment(expData, os.path.join(dirPath, f"{ncubes}-{option.name}.json"))
+            writeExperiment(expData, os.path.join(dirPath, f"{ncubes}-{optVal.name}.json"))
 
 
 if __name__ == "__main__":
-    batchTargetAssemblyForSize.distribute(0, 5, 10, 10, [PlanOption.MIN_DIST])
+    batchTargetAssemblyForSize.distribute(0, 5, 10, 10, [PlanOption.MIN_DIST.value])
