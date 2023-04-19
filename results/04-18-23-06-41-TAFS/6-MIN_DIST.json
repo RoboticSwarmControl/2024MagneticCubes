@@ -1,0 +1,112 @@
+{
+    "targetSize": 6,
+    "targetNred": 3,
+    "targetShape": "random",
+    "boardSize": [
+        1000,
+        1000
+    ],
+    "planOption": "MIN_DIST",
+    "planData": [
+        {
+            "seed": 0,
+            "success": true,
+            "time": 7.685946941375732,
+            "cost": 128.23515790819718,
+            "nconfig": 8,
+            "nlocal": 11,
+            "ntcsa": 37,
+            "localsToGoal": 5
+        },
+        {
+            "seed": 1,
+            "success": true,
+            "time": 1.8604023456573486,
+            "cost": 84.47393579652572,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 31,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 2,
+            "success": true,
+            "time": 1.800743818283081,
+            "cost": 78.16747943265287,
+            "nconfig": 5,
+            "nlocal": 5,
+            "ntcsa": 30,
+            "localsToGoal": 5
+        },
+        {
+            "seed": 3,
+            "success": true,
+            "time": 3.6508169174194336,
+            "cost": 98.79727119122613,
+            "nconfig": 5,
+            "nlocal": 6,
+            "ntcsa": 64,
+            "localsToGoal": 5
+        },
+        {
+            "seed": 4,
+            "success": true,
+            "time": 13.196521282196045,
+            "cost": 95.95820227464863,
+            "nconfig": 7,
+            "nlocal": 22,
+            "ntcsa": 32,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 5,
+            "success": true,
+            "time": 2.3014514446258545,
+            "cost": 90.04735387456087,
+            "nconfig": 5,
+            "nlocal": 5,
+            "ntcsa": 29,
+            "localsToGoal": 5
+        },
+        {
+            "seed": 6,
+            "success": true,
+            "time": 3.1770339012145996,
+            "cost": 86.05636765166732,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 45,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 7,
+            "success": true,
+            "time": 36.786553144454956,
+            "cost": 97.48245648805697,
+            "nconfig": 15,
+            "nlocal": 52,
+            "ntcsa": 44,
+            "localsToGoal": 5
+        },
+        {
+            "seed": 8,
+            "success": true,
+            "time": 3.8512256145477295,
+            "cost": 64.50736915371056,
+            "nconfig": 6,
+            "nlocal": 7,
+            "ntcsa": 31,
+            "localsToGoal": 5
+        },
+        {
+            "seed": 9,
+            "success": true,
+            "time": 1.691720962524414,
+            "cost": 68.7427014718836,
+            "nconfig": 5,
+            "nlocal": 5,
+            "ntcsa": 37,
+            "localsToGoal": 5
+        }
+    ]
+}
