@@ -26,6 +26,8 @@ class PlanState(Enum):
 class OptionSorting(Enum):
 
     MIN_DIST = 0
+    GROW_LARGEST = 1
+    GROW_SMALLEST = 2
 
 
 class Plan:

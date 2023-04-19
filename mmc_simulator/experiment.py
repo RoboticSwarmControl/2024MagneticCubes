@@ -76,9 +76,9 @@ def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, op
                 factory.generator.seed(seed)
                 target = factory.randomPoly(ncubes, nred)
                 initial = factory.randomConfigWithCubes(boardSize, ncubes, nred)
-                t0 = time.time()
+                t0 = time.monotonic()
                 plan = globalp.planTargetAssembly(initial, target, sorting)
-                dt = time.time() - t0
+                dt = time.monotonic() - t0
                 if plan.state == PlanState.SUCCESS:
                     success = True
                 else:
@@ -89,4 +89,4 @@ def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, op
 
 
 if __name__ == "__main__":
-    batchTargetAssemblyForSize.distribute(3, 10, 10, 1, [OptionSorting.MIN_DIST.value])
+    batchTargetAssemblyForSize.distribute(0, 6, 8, 2, [0, 1, 2])

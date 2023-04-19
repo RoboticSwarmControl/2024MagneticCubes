@@ -11,9 +11,9 @@ def customTargetAssembly(target: Polyomino, seed=0, samples=1):
     for _ in range(samples):
         factory.generator.seed(seed)
         config = factory.randomConfigWithCubes((800,800), target.size(), target.nred())
-        t0 = time.time()
+        t0 = time.monotonic()
         plan = globalp.planTargetAssembly(config, target)
-        t1 = time.time()
+        t1 = time.monotonic()
         dt = t1 -t0
         globalTime += dt
         plans[seed] = plan
@@ -39,9 +39,9 @@ def randomTargetAssembly(ncubes, seed=0, samples=1, halfRed=False):
             target = factory.randomPoly(ncubes)
         print(f"Polyomino to assemble:\n{target}")
         config = factory.randomConfigWithCubes((800,800), target.size(), target.nred())
-        t0 = time.time()
+        t0 = time.monotonic()
         plan = globalp.planTargetAssembly(config, target)
-        t1 = time.time()
+        t1 = time.monotonic()
         dt = t1 -t0
         globalTime += dt
         plans[seed] = plan
@@ -62,9 +62,9 @@ def singleTargetAssembly(seed, ncubes, nred, boardSize, sorting: OptionSorting):
     target = factory.randomPoly(ncubes, nred)
     initial = factory.randomConfigWithCubes(boardSize, ncubes, nred)
     print(f"Target to assemble:\n{target}\n")
-    t0 = time.time()
+    t0 = time.monotonic()
     plan = globalp.planTargetAssembly(initial, target, sorting)
-    dt = time.time() - t0
+    dt = time.monotonic() - t0
     print(f"{plan}with {round(plan.cost(),2)}rad in {round(dt, 2)}s\n")
     while True:
         input("Play plan:")
@@ -72,4 +72,4 @@ def singleTargetAssembly(seed, ncubes, nred, boardSize, sorting: OptionSorting):
 
 
 if __name__ == "__main__":
-    singleTargetAssembly(3, 10 ,5, (1000,1000), OptionSorting.MIN_DIST)
+    singleTargetAssembly(1, 10 ,5, (1000,1000), OptionSorting.GROW_SMALLEST)

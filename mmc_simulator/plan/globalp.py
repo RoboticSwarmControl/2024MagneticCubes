@@ -4,10 +4,10 @@ from com.state import Configuration, PolyCollection, Polyomino, Connection, Dire
 from plan.plan import *
 import plan.localp as local
 
-DEBUG = False
+DEBUG = True
 PLAY_LOCALS = False
 
-TIMEOUT = 1800
+TIMEOUT = 600
 
 class TwoCutSubassemblyEdge:
 
@@ -68,9 +68,9 @@ class TwoCutSubassemblyGraph:
     def getNextCollections(self, polys: PolyCollection):
         if not polys in self.__note_edges:
             return None
-        next = set()
+        next = []
         for edge in self.__note_edges[polys]:
-            next.add(edge.end)
+            next.append(edge.end)
         return next
     
     def getTranslatedConnections(self, polys: PolyCollection, next: PolyCollection):
@@ -125,13 +125,13 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: Optio
     config_options = {}
     config = initial
     nlocalPlans = 0
-    t0 = time.time()
+    t0 = time.monotonic()
     while True:
         if DEBUG: 
             print(f"----------------{repr(config)}----------------\n")
             print(f"{len(planStack)} local plans in stack.\n{config.getPolyominoes()}")
         # failure when planning takes to long
-        if (time.time() - t0) >= TIMEOUT:
+        if (time.monotonic() - t0) >= TIMEOUT:
             if DEBUG: print(f"Timeout -> Failure!\n{len(config_options)} configs, {nlocalPlans} local plans in total.\n")
             return GlobalPlan(target, initial, state=PlanState.FAILURE, nconfig=len(config_options),
                               nlocal=nlocalPlans, ntcsa=tcsaGraph.noteCount())
@@ -175,19 +175,29 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: Optio
 
 
 def __determineOptions(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph, sorting: OptionSorting) -> list:
-    if sorting == OptionSorting.MIN_DIST:
-        return __optionsMinDist(config, tcsaGraph)
-
-def __optionsMinDist(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph) -> list:
     connections = []
     polys = config.getPolyominoes()
     adjNotes = tcsaGraph.getNextCollections(polys)
-    if adjNotes == None:
+    # return no options if polys not in graph or if it has no options
+    if adjNotes == None or len(adjNotes) == 0:
         return connections
+    # Sort for minimal distance with no respect to the notes
+    if sorting == OptionSorting.MIN_DIST:
+        for adj in adjNotes:
+            conAdj = tcsaGraph.getTranslatedConnections(polys, adj)
+            connections.extend(conAdj)
+        connections.sort(key=lambda con: config.getPosition(con.cubeA).get_distance(config.getPosition(con.cubeB)))
+        return connections
+    # Sort the notes by maxSize either ascending or descending
+    if sorting == OptionSorting.GROW_LARGEST:
+        adjNotes.sort(reverse=True, key=lambda pColl: pColl.maxSize)
+    elif sorting == OptionSorting.GROW_SMALLEST:
+        adjNotes.sort(reverse=False, key=lambda pColl: pColl.maxSize)
+    # Sort for minimal distance per sorted note
     for adj in adjNotes:
-        con = tcsaGraph.getTranslatedConnections(polys, adj)
-        connections.extend(con)
-    connections.sort(key=lambda con: config.getPosition(con.cubeA).get_distance(config.getPosition(con.cubeB)))
+        conAdj = tcsaGraph.getTranslatedConnections(polys, adj)
+        conAdj.sort(key=lambda con: config.getPosition(con.cubeA).get_distance(config.getPosition(con.cubeB)))
+        connections.extend(conAdj)
     return connections
 
 

@@ -1,0 +1,32 @@
+{
+    "targetSize": 8,
+    "targetNred": 4,
+    "targetShape": "random",
+    "boardSize": [
+        1000,
+        1000
+    ],
+    "planOption": "MIN_DIST",
+    "planData": [
+        {
+            "seed": 0,
+            "success": true,
+            "time": 16.66895079612732,
+            "cost": 79.38920990904919,
+            "nconfig": 8,
+            "nlocal": 9,
+            "ntcsa": 400,
+            "localsToGoal": 7
+        },
+        {
+            "seed": 1,
+            "success": true,
+            "time": 6.6581504344940186,
+            "cost": 106.72106599528027,
+            "nconfig": 7,
+            "nlocal": 7,
+            "ntcsa": 110,
+            "localsToGoal": 7
+        }
+    ]
+}
