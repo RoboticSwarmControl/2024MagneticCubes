@@ -1,2 +1,113 @@
 \chapter{Global Planner}
 \label{chap:global}
+
+%what is global plan, target assembly
+%we want to simulate as little as possible, RRT and other bfs approaches bad
+%we need to make good decisionen for that building-plan
+%one tile at a time -> building sequence backwards from target
+%subassembly is hard to prevent we need to considere then
+% structure further sections
+
+
+
+
+\section{Two-Cutting Polyominoes}
+
+% define two cut for us, talk about other definitions of two-cuts state difference
+% take about monoton two cuts they ensure cave and hole free sub-polyominoes
+% how do we calc. two cuts from starting connection
+% how calc. all two-cuts for a polyomino
+% FIGURE example graphic for two cuts monoton/non-monoton. possibilities for 3x3
+
+
+
+
+\section{Two-Cut-Subassembly-Graph}
+
+% short TCSA-Graph
+% purpes of this -> building sequence to target
+% considering sets of polyominoes no positions in workspace
+% notes are polysets edges connect polysets with (cube, cube, edge) conection as weigth. directiong from twocut to connected
+
+\paragraph{Building TCSA-Graph}
+
+% provide algorithm
+% explain procedure with special cases
+% - endup at all trivial
+% - depth of graph n
+% - common predecessor
+% - multiple edges for same notes -> example FIGURE 3x1 + 1x1 = 4x1
+% big example FIGURE of TCSA graph should include all special cases
+
+\paragraph{Complexity}
+
+% sterling numbers second kind as upper bound: find literatur
+% connectivity cuts notes, monotonie cuts notes
+% Access to graph in O(1) due to hash comparing.
+% Creation complex but worth it -> minimize sim-time
+% show practical data for tcsa-notes per size. Box-Whisker PLOT
+
+
+
+
+\section{Global Planning Algorithm}
+
+% provide algorith
+% use of tcsa-graph
+% limit number of cubes to target size
+% check inclusion of poly set from config in tcsa-graph
+% example early failure if initial is not in tcsa
+
+
+\subsection{Connection Options}
+
+% talk about options per note all edges to neighboring notes
+% now consider position pairwise for all physical of poly types. example FIGURE
+% taking a option with local planner
+% - due to subassembly might not end in desired poly set
+% - even local failure -> continue planning if poly set in graph
+% - add allowed-poly failure to local planner to check this runtime
+% - failure type that are not valid for further planning
+
+
+\subsection{Option Sorting}
+
+% there can be alot options
+% we need smart decisions to pick best
+
+\paragraph{Minimal Distance}
+
+\paragraph{Grow Largest Component}
+% this resembles one tile at a time with subassemblys still possible
+
+\paragraph{Grow Smallest Component}
+
+
+
+\subsection{Graph Traversal}
+
+% DFS traversal. try to get to target as fast as possible
+% Fall back if all options tried
+% note that we not traverse tcsa graph we actually traverse configurations.
+% When 2 configs with same polyset occure still try all options for both, because position differs
+
+\paragraph{Complexity}
+
+% best case 1 local plan. realistic best case n-1
+% we are not limited by notes in tcsa, because n configs for 1 note
+% for each note there is a constant number of options and depth smaller n-1.
+% we wont run infinitly, but worst case is still bad. state example each note 50 options
+
+\paragraph{Discretize Configurations}
+
+% dont know if I wil actually implement, but talk about benefits or why not that neccessary
+
+
+
+
+\section{More Cubes than Target}
+
+% bigger tcsa with multiple end notes
+% same tcsa
+% - no simple hash check. check for set inclusion
+% - a poly set can be included in multiple tcsa-notes -> increasing options per config

@@ -7,7 +7,7 @@ import plan.localp as local
 DEBUG = False
 PLAY_LOCALS = False
 
-TIMEOUT = 600
+TIMEOUT = 1800
 
 class TwoCutSubassemblyEdge:
 
@@ -107,7 +107,7 @@ class TwoCutSubassemblyGraph:
         return string
 
 
-def planTargetAssembly(initial: Configuration, target: Polyomino, planOption: PlanOption=PlanOption.MIN_DIST) -> GlobalPlan:
+def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: OptionSorting=OptionSorting.MIN_DIST) -> GlobalPlan:
     # single update if no poly info available
     if initial.getPolyominoes().isEmpty():
         initial = singleUpdate(initial)
@@ -144,7 +144,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, planOption: Pl
         if config in config_options:
             options = config_options[config]
         else:
-            options = __determineOptions(config, tcsaGraph, planOption)
+            options = __determineOptions(config, tcsaGraph, sorting)
             config_options[config] = options
         # else try out options until a valid one is found
         valid = False
@@ -174,8 +174,8 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, planOption: Pl
             if DEBUG: print(f"No connections left. Fall back to {repr(config)}.\n")
 
 
-def __determineOptions(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph, planOption: PlanOption) -> list:
-    if planOption == PlanOption.MIN_DIST:
+def __determineOptions(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph, sorting: OptionSorting) -> list:
+    if sorting == OptionSorting.MIN_DIST:
         return __optionsMinDist(config, tcsaGraph)
 
 def __optionsMinDist(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph) -> list:

@@ -62,22 +62,22 @@ def loadExperiment(path) -> ExperimentData:
 
 
 @slurminade.slurmify()
-def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, planOptions):
+def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, optionSortings: list):
     dateTime = datetime.now()
     dirPath = os.path.join(RESULT_DIR, dateTime.strftime("%m-%d-%H-%M-%S") + "-TAFS")
     os.mkdir(dirPath)
     boardSize = (1000,1000)
     for ncubes in range(startSize, endSize + 1):
         nred = math.floor(ncubes / 2)
-        for optVal in planOptions:
-            planOption = PlanOption(optVal)
-            expData = ExperimentData(ncubes, nred, "random", boardSize, planOption.name)
+        for optVal in optionSortings:
+            sorting = OptionSorting(optVal)
+            expData = ExperimentData(ncubes, nred, "random", boardSize, sorting.name)
             for seed in range(startSeed, startSeed + samplesPerSize):
                 factory.generator.seed(seed)
                 target = factory.randomPoly(ncubes, nred)
                 initial = factory.randomConfigWithCubes(boardSize, ncubes, nred)
                 t0 = time.time()
-                plan = globalp.planTargetAssembly(initial, target, planOption)
+                plan = globalp.planTargetAssembly(initial, target, sorting)
                 dt = time.time() - t0
                 if plan.state == PlanState.SUCCESS:
                     success = True
@@ -85,8 +85,8 @@ def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, pl
                     success = False
                 planData = PlanData(seed, success, dt, plan.cost(), plan.nconfig, plan.nlocal, plan.ntcsa, len(plan.actions))
                 expData.planData.append(planData)
-            writeExperiment(expData, os.path.join(dirPath, f"{ncubes}-{planOption.name}.json"))
+            writeExperiment(expData, os.path.join(dirPath, f"{ncubes}-{sorting.name}.json"))
 
 
 if __name__ == "__main__":
-    batchTargetAssemblyForSize.distribute(0, 5, 10, 10, [PlanOption.MIN_DIST.value])
+    batchTargetAssemblyForSize.distribute(3, 10, 10, 1, [OptionSorting.MIN_DIST.value])

@@ -57,12 +57,13 @@ def randomTargetAssembly(ncubes, seed=0, samples=1, halfRed=False):
         plans[int(inp)].execute()
 
 
-def singleTargetAssembly(seed, ncubes, nred, boardSize, planOption):
+def singleTargetAssembly(seed, ncubes, nred, boardSize, sorting: OptionSorting):
     factory.generator.seed(seed)
     target = factory.randomPoly(ncubes, nred)
     initial = factory.randomConfigWithCubes(boardSize, ncubes, nred)
+    print(f"Target to assemble:\n{target}\n")
     t0 = time.time()
-    plan = globalp.planTargetAssembly(initial, target, planOption)
+    plan = globalp.planTargetAssembly(initial, target, sorting)
     dt = time.time() - t0
     print(f"{plan}with {round(plan.cost(),2)}rad in {round(dt, 2)}s\n")
     while True:
@@ -71,4 +72,4 @@ def singleTargetAssembly(seed, ncubes, nred, boardSize, planOption):
 
 
 if __name__ == "__main__":
-    singleTargetAssembly(6, 5 ,2, (1000,1000), PlanOption.MIN_DIST)
+    singleTargetAssembly(3, 10 ,5, (1000,1000), OptionSorting.MIN_DIST)

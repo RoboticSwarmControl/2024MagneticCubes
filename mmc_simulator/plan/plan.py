@@ -23,7 +23,7 @@ class PlanState(Enum):
         return self.name
 
 
-class PlanOption(Enum):
+class OptionSorting(Enum):
 
     MIN_DIST = 0
 
