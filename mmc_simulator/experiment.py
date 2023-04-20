@@ -34,12 +34,12 @@ class PlanData:
 
 class ExperimentData:
      
-    def __init__(self, targetSize, targetNred, targetShape, boardSize, planOption, planData=None) -> None:
+    def __init__(self, targetSize, targetNred, targetShape, boardSize, optionSorting, planData=None) -> None:
         self.targetSize = targetSize
         self.targetNred = targetNred
         self.targetShape = targetShape
         self.boardSize = boardSize
-        self.planOption = planOption
+        self.optionSorting = optionSorting
         if planData == None:
             self.planData = []
         else:
@@ -62,20 +62,24 @@ def loadExperiment(path) -> ExperimentData:
 
 
 @slurminade.slurmify()
-def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, optionSortings: list):
-    dateTime = datetime.now()
-    dirPath = os.path.join(RESULT_DIR, dateTime.strftime("%m-%d-%H-%M-%S") + "-TAFS")
-    os.mkdir(dirPath)
+def batchTargetAssemblyForSize(dirPath, startSeed, samplesPerSize, startSize, endSize, optionSortings: list):
     boardSize = (1000,1000)
     for ncubes in range(startSize, endSize + 1):
         nred = math.floor(ncubes / 2)
         for optVal in optionSortings:
             sorting = OptionSorting(optVal)
-            expData = ExperimentData(ncubes, nred, "random", boardSize, sorting.name)
-            for seed in range(startSeed, startSeed + samplesPerSize):
+            print(f"size:{ncubes}, sorting={sorting.name}")
+            filePath = os.path.join(dirPath, f"TAFS-{ncubes}-{sorting.name}.json")
+            if os.path.exists(filePath):
+                expData = loadExperiment(filePath)
+            else:
+                expData = ExperimentData(ncubes, nred, "random", boardSize, sorting.name)
+            endSeed = startSeed + samplesPerSize - 1
+            for seed in range(startSeed, endSeed + 1):
                 factory.generator.seed(seed)
                 target = factory.randomPoly(ncubes, nred)
                 initial = factory.randomConfigWithCubes(boardSize, ncubes, nred)
+                print(f"  seed:{seed}")
                 t0 = time.monotonic()
                 plan = globalp.planTargetAssembly(initial, target, sorting)
                 dt = time.monotonic() - t0
@@ -85,8 +89,21 @@ def batchTargetAssemblyForSize(startSeed, startSize, endSize, samplesPerSize, op
                     success = False
                 planData = PlanData(seed, success, dt, plan.cost(), plan.nconfig, plan.nlocal, plan.ntcsa, len(plan.actions))
                 expData.planData.append(planData)
-            writeExperiment(expData, os.path.join(dirPath, f"{ncubes}-{sorting.name}.json"))
+                # wirte results every 5 seeds
+                if (seed - startSeed + 1) % 5 == 0 or seed == endSeed:
+                    writeExperiment(expData, filePath)
+            print("\n")
 
+
+def main():
+    dateTime = datetime.now()
+    path = os.path.join(RESULT_DIR, dateTime.strftime("%m-%d-%H-%M-%S"))
+    os.mkdir(path)
+    batchTargetAssemblyForSize.distribute(path, 100, 50, 5, 7, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 100, 25, 8, 9, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 125, 25, 8, 9, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 100, 25, 10, 10, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 125, 25, 10, 10, [0, 1, 2])
 
 if __name__ == "__main__":
-    batchTargetAssemblyForSize.distribute(0, 6, 8, 2, [0, 1, 2])
+    main()

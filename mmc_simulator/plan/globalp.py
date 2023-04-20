@@ -4,7 +4,7 @@ from com.state import Configuration, PolyCollection, Polyomino, Connection, Dire
 from plan.plan import *
 import plan.localp as local
 
-DEBUG = True
+DEBUG = False
 PLAY_LOCALS = False
 
 TIMEOUT = 600
