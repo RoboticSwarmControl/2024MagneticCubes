@@ -1,0 +1,512 @@
+{
+    "targetSize": 5,
+    "targetNred": 2,
+    "targetShape": "random",
+    "boardSize": [
+        1000,
+        1000
+    ],
+    "optionSorting": "MIN_DIST",
+    "planData": [
+        {
+            "seed": 150,
+            "success": true,
+            "time": 1.1976567700039595,
+            "cost": 65.9501746686925,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 24,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 151,
+            "success": true,
+            "time": 1.1659779259935021,
+            "cost": 51.40576423540645,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 152,
+            "success": true,
+            "time": 1.575460337975528,
+            "cost": 81.0996325760032,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 153,
+            "success": true,
+            "time": 5.777056991995778,
+            "cost": 60.93526195129554,
+            "nconfig": 5,
+            "nlocal": 6,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 154,
+            "success": true,
+            "time": 2.3232234710012563,
+            "cost": 96.62142739040618,
+            "nconfig": 4,
+            "nlocal": 5,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 155,
+            "success": true,
+            "time": 1.5230935250292532,
+            "cost": 56.74647174650895,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 20,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 156,
+            "success": true,
+            "time": 1.1830145450076088,
+            "cost": 77.24827269326924,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 157,
+            "success": true,
+            "time": 1.7041862769983709,
+            "cost": 71.59340591680753,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 158,
+            "success": true,
+            "time": 5.0493960149469785,
+            "cost": 69.39429105929491,
+            "nconfig": 6,
+            "nlocal": 9,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 159,
+            "success": true,
+            "time": 0.9642788400524296,
+            "cost": 59.60881171977974,
+            "nconfig": 3,
+            "nlocal": 3,
+            "ntcsa": 20,
+            "localsToGoal": 3
+        },
+        {
+            "seed": 160,
+            "success": true,
+            "time": 0.7957518040202558,
+            "cost": 63.6230689993666,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 161,
+            "success": true,
+            "time": 0.9053166520316154,
+            "cost": 55.85053606381884,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 162,
+            "success": true,
+            "time": 1.2264316270011477,
+            "cost": 81.77449322010774,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 163,
+            "success": true,
+            "time": 1.3616550950100645,
+            "cost": 77.38789903342891,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 20,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 164,
+            "success": true,
+            "time": 1.5638311569928192,
+            "cost": 70.86036763097005,
+            "nconfig": 3,
+            "nlocal": 3,
+            "ntcsa": 15,
+            "localsToGoal": 3
+        },
+        {
+            "seed": 165,
+            "success": true,
+            "time": 4.698100253008306,
+            "cost": 56.24614402760429,
+            "nconfig": 6,
+            "nlocal": 8,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 166,
+            "success": true,
+            "time": 2.264639770030044,
+            "cost": 30.915598816992947,
+            "nconfig": 5,
+            "nlocal": 7,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 167,
+            "success": true,
+            "time": 2.1393687840318307,
+            "cost": 79.9709863263805,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 168,
+            "success": true,
+            "time": 1.4854881420033053,
+            "cost": 68.3238224514047,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 169,
+            "success": true,
+            "time": 1.1151396989589557,
+            "cost": 67.63732627895394,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 170,
+            "success": true,
+            "time": 5.541744304995518,
+            "cost": 68.54489748999053,
+            "nconfig": 5,
+            "nlocal": 6,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 171,
+            "success": true,
+            "time": 4.530697044974659,
+            "cost": 76.9108423712169,
+            "nconfig": 5,
+            "nlocal": 6,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 172,
+            "success": true,
+            "time": 3.7352200919995084,
+            "cost": 100.55423597156692,
+            "nconfig": 5,
+            "nlocal": 8,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 173,
+            "success": true,
+            "time": 1.154992857016623,
+            "cost": 54.628805587422605,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 174,
+            "success": true,
+            "time": 0.9952735860133544,
+            "cost": 40.38691889114907,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 175,
+            "success": true,
+            "time": 1.4644834650098346,
+            "cost": 90.57095265015923,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 176,
+            "success": true,
+            "time": 5.842431408003904,
+            "cost": 60.9236264229488,
+            "nconfig": 6,
+            "nlocal": 9,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 177,
+            "success": true,
+            "time": 6.271249754994642,
+            "cost": 94.30595724942721,
+            "nconfig": 6,
+            "nlocal": 9,
+            "ntcsa": 20,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 178,
+            "success": true,
+            "time": 0.7431323930504732,
+            "cost": 41.07341506360029,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 14,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 179,
+            "success": true,
+            "time": 0.8947889620321803,
+            "cost": 61.08652381980155,
+            "nconfig": 3,
+            "nlocal": 3,
+            "ntcsa": 23,
+            "localsToGoal": 3
+        },
+        {
+            "seed": 180,
+            "success": true,
+            "time": 1.2412535470211878,
+            "cost": 73.85069841605336,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 181,
+            "success": true,
+            "time": 1.391510313958861,
+            "cost": 71.73303225696708,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 182,
+            "success": true,
+            "time": 1.0420786989852786,
+            "cost": 51.603568217299156,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 183,
+            "success": true,
+            "time": 1.0244413900072686,
+            "cost": 72.62896793965737,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 184,
+            "success": true,
+            "time": 8.568506554001942,
+            "cost": 79.83135998622083,
+            "nconfig": 7,
+            "nlocal": 11,
+            "ntcsa": 23,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 185,
+            "success": true,
+            "time": 5.921845846052747,
+            "cost": 104.52195113776705,
+            "nconfig": 3,
+            "nlocal": 7,
+            "ntcsa": 15,
+            "localsToGoal": 3
+        },
+        {
+            "seed": 186,
+            "success": true,
+            "time": 1.406667903997004,
+            "cost": 83.34528954690296,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 187,
+            "success": true,
+            "time": 1.6856865200097673,
+            "cost": 74.0950445113326,
+            "nconfig": 3,
+            "nlocal": 3,
+            "ntcsa": 15,
+            "localsToGoal": 3
+        },
+        {
+            "seed": 188,
+            "success": true,
+            "time": 2.663970730965957,
+            "cost": 107.32611346930497,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 189,
+            "success": true,
+            "time": 1.2208774109603837,
+            "cost": 73.28055752706891,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 20,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 190,
+            "success": true,
+            "time": 4.96005380799761,
+            "cost": 73.08275354517603,
+            "nconfig": 5,
+            "nlocal": 6,
+            "ntcsa": 16,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 191,
+            "success": true,
+            "time": 1.4309741759789176,
+            "cost": 53.058009260628054,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 192,
+            "success": true,
+            "time": 2.6409419330302626,
+            "cost": 109.7346678370572,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 193,
+            "success": true,
+            "time": 13.99718170997221,
+            "cost": 71.09307819790243,
+            "nconfig": 8,
+            "nlocal": 20,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 194,
+            "success": true,
+            "time": 1.597655474964995,
+            "cost": 84.41575815479246,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 195,
+            "success": true,
+            "time": 1.060064051009249,
+            "cost": 65.34512719466775,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 196,
+            "success": true,
+            "time": 2.879256814951077,
+            "cost": 75.38658815780882,
+            "nconfig": 5,
+            "nlocal": 6,
+            "ntcsa": 24,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 197,
+            "success": true,
+            "time": 1.6089696799754165,
+            "cost": 65.93853914034582,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 198,
+            "success": true,
+            "time": 15.487484218960162,
+            "cost": 40.317105721069495,
+            "nconfig": 11,
+            "nlocal": 22,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        },
+        {
+            "seed": 199,
+            "success": true,
+            "time": 1.4920880200224929,
+            "cost": 84.0666923043937,
+            "nconfig": 4,
+            "nlocal": 4,
+            "ntcsa": 15,
+            "localsToGoal": 4
+        }
+    ]
+}
