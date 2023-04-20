@@ -99,11 +99,19 @@ def main():
     dateTime = datetime.now()
     path = os.path.join(RESULT_DIR, dateTime.strftime("%m-%d-%H-%M-%S"))
     os.mkdir(path)
+    
     batchTargetAssemblyForSize.distribute(path, 100, 50, 5, 7, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 150, 50, 5, 7, [0, 1, 2])
+
     batchTargetAssemblyForSize.distribute(path, 100, 25, 8, 9, [0, 1, 2])
     batchTargetAssemblyForSize.distribute(path, 125, 25, 8, 9, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 150, 25, 8, 9, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 175, 25, 8, 9, [0, 1, 2])
+
     batchTargetAssemblyForSize.distribute(path, 100, 25, 10, 10, [0, 1, 2])
     batchTargetAssemblyForSize.distribute(path, 125, 25, 10, 10, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 150, 25, 10, 10, [0, 1, 2])
+    batchTargetAssemblyForSize.distribute(path, 175, 25, 10, 10, [0, 1, 2])
 
 if __name__ == "__main__":
     main()
