@@ -20,7 +20,7 @@ slurminade.update_default_configuration(
 )
 
 RESULT_DIR = "../results"
-BATCH_MAX_SIZE = 5
+BATCH_MAX_SIZE = 50
 
 class PlanData:
      
@@ -95,6 +95,8 @@ def randomTargetAssembly(path, seed, ncubes, nred, boardSize, sorting):
 
 def targetAssemblyForSize(path, startSeed, samplesPerSize, startSize, endSize, optionSortings: list):
     boardSize = (1000,1000)
+    assemblies = 0
+    skipped = 0
     with slurminade.Batch(BATCH_MAX_SIZE):
         for ncubes in range(startSize, endSize + 1):
             nred = math.floor(ncubes / 2)
@@ -107,11 +109,13 @@ def targetAssemblyForSize(path, startSeed, samplesPerSize, startSize, endSize, o
                 # distribute the planning samples
                 endSeed = startSeed + samplesPerSize - 1
                 for seed in range(startSeed, endSeed + 1):
+                    assemblies += 1
                     filePath = os.path.join(dataPath, f"seed-{seed}.json")
                     if os.path.exists(filePath):
-                        print(f"ncubes={ncubes}, sorting={sorting.name}, seed={seed}, will be skipped!")
+                        skipped += 1
                         continue
                     randomTargetAssembly.distribute(filePath, seed, ncubes, nred, boardSize, sorting.value)
+    print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
 
 
 def main():
@@ -126,7 +130,7 @@ def main():
     if not os.path.exists(path):
         os.mkdir(path)
     # Put the experiments to execute here
-    targetAssemblyForSize(path, 0, 3, 5, 6, [OptionSorting.MIN_DIST, OptionSorting.GROW_LARGEST])
+    targetAssemblyForSize(path, 100, 100, 5, 9, [OptionSorting.MIN_DIST, OptionSorting.GROW_LARGEST, OptionSorting.GROW_SMALLEST])
 
 
 if __name__ == "__main__":
