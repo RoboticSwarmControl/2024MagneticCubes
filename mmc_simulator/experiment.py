@@ -130,7 +130,7 @@ def main():
     if not os.path.exists(path):
         os.mkdir(path)
     # Put the experiments to execute here
-    targetAssemblyForSize(path, 150, 50, 10, 10, [OptionSorting.MIN_DIST, OptionSorting.GROW_LARGEST, OptionSorting.GROW_SMALLEST])
+    targetAssemblyForSize(path, 100, 100, 11, 11, [OptionSorting.MIN_DIST, OptionSorting.GROW_LARGEST, OptionSorting.GROW_SMALLEST])
 
 
 if __name__ == "__main__":
