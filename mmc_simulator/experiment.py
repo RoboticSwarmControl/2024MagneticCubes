@@ -20,7 +20,7 @@ slurminade.update_default_configuration(
 )
 
 RESULT_DIR = "../results"
-BATCH_MAX_SIZE = 50
+BATCH_MAX_SIZE = 35
 
 class PlanData:
      
@@ -130,7 +130,7 @@ def main():
     if not os.path.exists(path):
         os.mkdir(path)
     # Put the experiments to execute here
-    targetAssemblyForSize(path, 100, 100, 5, 9, [OptionSorting.MIN_DIST, OptionSorting.GROW_LARGEST, OptionSorting.GROW_SMALLEST])
+    targetAssemblyForSize(path, 100, 50, 10, 10, [OptionSorting.MIN_DIST, OptionSorting.GROW_LARGEST, OptionSorting.GROW_SMALLEST])
 
 
 if __name__ == "__main__":
