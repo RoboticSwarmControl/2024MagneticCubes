@@ -1,17 +1,31 @@
 \chapter{Global Planner}
 \label{chap:global}
 
-%what is global plan, target assembly
-%we want to simulate as little as possible, RRT and other bfs approaches bad
-%we need to make good decisionen for that building-plan
-%one tile at a time -> building sequence backwards from target
-%subassembly is hard to prevent we need to considere then
-% structure further sections
+The task of the global planner is to assemble a specified target polyomino $T$ given an initial configuration $g_{init}$.
+The configuration-space is explored by executing local plans developed by the local planner from \autoref{chap:local}.
+That way, the part of the configuration-space we can actually explore, is limited to configurations were a connection attempt between two cubes was made.
+Compared to $SE(2)$ this part is manageable in size and only contains configurations which are interesting for self-assembly.
+
+The question still remains, how these configurations are explored.
+Using rapidly-exploring random trees (RRTs) \cite{lavalle1998} yields good results in a lot of cases, since the space gets evenly explored without the problematic of determining what decisions are promising for the end goal.
+But, it also means the exploration of many configurations, which are not neccessary for reaching the goal.
+For us this approach is not reasonable. 
+Because of the high fidelity simulation we are working with, the computation time for a local plan is huge, so planning the assembly of $T$ with as less local plans as possible is the aim for our global planner.
+
+We need to make well though-through connection decisions, that are valid for assembling $T$, meaning some sort of building plan for a polyomino is needed.
+Creating a building sequences by removing one tile at a time from the target was done by Becker et al. \cite{Becker2020}.
+However, this does not consider sub-assemblies, so all cubes that are not to be connected, have to stay separated at any time and occurring sub-assemblies would lead to immediate failure.
+
+It is hard to prevent sub-assemblies, so our approach uses an enumeration of cutting a polyomino into two pieces (\autoref{sec:twocutting}), which will be used for generating a so called two-cut-sub-assembly graph (\autoref{sec:tcsa}).
+In \autoref{sec:global_algo} that graph will be used as a building instruction along side the exploration of the configuration-space.
+For this technique the number of cubes in the workspace is limited to the size of $T$.
+A take on why is this done and why the problem becomes more complex when working with extra cubes, is done in \autoref{sec:more_cubes}.
 
 
 
 
 \section{Two-Cutting Polyominoes}
+\label{sec:twocutting}
 
 % define two cut for us, talk about other definitions of two-cuts state difference
 % take about monoton two cuts they ensure cave and hole free sub-polyominoes
@@ -22,7 +36,8 @@
 
 
 
-\section{Two-Cut-Subassembly-Graph}
+\section{Two-Cut-Sub-Assembly Graph}
+\label{sec:tcsa}
 
 % short TCSA-Graph
 % purpes of this -> building sequence to target
@@ -51,6 +66,7 @@
 
 
 \section{Global Planning Algorithm}
+\label{sec:global_algo}
 
 % provide algorith
 % use of tcsa-graph
@@ -106,6 +122,7 @@
 
 
 \section{More Cubes than Target}
+\label{sec:more_cubes}
 
 % bigger tcsa with multiple end notes
 % same tcsa

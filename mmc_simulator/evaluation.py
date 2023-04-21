@@ -11,7 +11,7 @@ def plot_pivotAngleDistance():
         d_p = 2 * np.sin(0.5 * alpha) * a_p
         plt.plot(alpha, d_p)
     plt.xlabel('pivot walking angle')
-    plt.ylabel('pvot walking distance')
+    plt.ylabel('pivot walking distance')
     plt.show()
     
 
