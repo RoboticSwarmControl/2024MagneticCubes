@@ -105,6 +105,13 @@ All these edges and points are illustrated in \autoref{fig:pivot_walking} b).
 
 \begin{figure}
 	\centering
+	\includegraphics[width=0.70\textwidth]{figures/plots/pivot_walking_angle.pdf}
+	\caption[Functions of $d_p$ based on $\alpha$ for different $a_p$]{Functions of the pivot walking distance $d_p$ based on pivot walking angle $\alpha$ for different pivot walking axes with length $a_p$. Length are giveen in multiples of cube radius $r_C$.}
+	\label{fig:pw_angle_plot}
+\end{figure}
+
+\begin{figure}
+	\centering
 	\includegraphics[width=0.70\textwidth]{figures/displacement_pivot_walking.png}
 	\caption[Polyomino shapes with different displacement vectors]{All 19 four-cube polyomino shapes with their displacement vector $\vec{d}$ for one pivot walking cycle with $\alpha = \frac{\pi}{4}$. $\vec{d}$ is drawn from the center of mass (red dot). North and south pivot point are drawn as blue and brown dots.}
 	\label{fig:displacement_pivot_walking}
@@ -126,6 +133,7 @@ $d_p$ can be calculated as
 \begin{equation}
 d_p = 2 \cdot \sin\left(\frac{1}{2} \cdot \alpha \right) \cdot a_p \,.
 \end{equation}
+\autoref{fig:pw_angle_plot} shows functions for this equation based on $\alpha$ for different $a_p$.
 To calculate $\vec{d}$ you can take the perpendicular of $\vec{a}$ and scale it to the length $d_p$.
 
 When a big $\alpha$ is chosen according to amount, $d_p$ becomes also bigger, but the polyomino needs more space to the north and south to perform the rotations.
@@ -137,5 +145,3 @@ There are still two options for pivot walking, depending on a negative or positi
 You can walk left, in the direction of the west-faces, or right, in the direction of the east-faces.
 Although the polyomino actually moves in the direction of $\vec{d}$, we can still say that for instance a pivot walk right moves to the east, because $\left| \angle \left( \vec{E}, \vec{d} \right) \right| < \frac{\pi}{2}$.
 We call these two options the pivot walking direction $\vec{w} \in \{\vec{E}, \vec{W}\}$.
-
-%TODO PLOT for d_p based on alpha

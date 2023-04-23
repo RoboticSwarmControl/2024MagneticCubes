@@ -81,23 +81,22 @@ For calculating angular difference we use the dot-product
 with $a,b \in \mathbb{R}^2$. This way the difference is always positive, which is beneficial in the case of alignment.
 We define a function for straight-aligning based on the rotation angle $\beta$, where both $\vec{e_A}$ and $\overrightarrow{AB}$ change according to $\beta$.
 \begin{equation}
-a(\beta) = \angle \left( R_\beta \vec{e_A}, \, \left( R_\beta r_B + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,.
+\delta(\beta) = \angle \left( R_\beta \vec{e_A}, \, \left( R_\beta r_B + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,.
 \end{equation}
 $R_\beta$ is a rotation matrix used for rotating vectors by $\beta$.
 For an offset-align the function would be
 \begin{equation}
-a(\beta) = \angle \left( R_\beta \vec{e}, \, \left( R_\beta \hat{r_B} + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,,
+\delta(\beta) = \angle \left( R_\beta \vec{e}, \, \left( R_\beta \hat{r_B} + C_B \right) - \left( R_\beta r_A + C_A \right)\right) \,,
 \end{equation}
 with $\vec{e} \in \{ \vec{E}, \vec{W}\}$ and $\hat{r_B} = \hat{P}_{c_B} - C_B$
 
-Alignment is not always possible, so instead of solving $a(\beta) = 0$, we are minimizing $a(\beta)$.
+Alignment is not always possible, so instead of solving $\delta(\beta) = 0$, we are minimizing $\delta(\beta)$.
 Because $-\pi < \beta \leq \pi$ we can iterate through increasing values of $\beta$.
 If we encounter a value close enough to zero we can return it.
 If not we return the minimum of all the calculated values.
 This way we at least get as close to an alignment as possible.
 
-%TODO PLOT of a(beta) and beta for one example where it gets zero and one where it doesnt
-%TODO rename a()
+%TODO PLOT of delta(beta) and beta for one example where it gets zero and one where it doesnt
 
 \section{Moving Polyominoes Together}
 \label{sec:walk_wait}
@@ -178,20 +177,21 @@ If the distance is too big for magnetic forces to act, failure is reported, but 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.80\textwidth]{figures/holes.pdf}
-	\caption[Examples for connecting polyominoes into caves]{Three different examples for connecting polyominoes into caves. a) and b) show one-cube-deep caves (a) east-west and b) north-south). c) illustrates a two-cube-deep east-west cave. The edges to be connected are marked yellow.}
-	\label{fig:holes}
+	\includegraphics[width=0.80\textwidth]{figures/caves.pdf}
+	\caption[Examples for connecting polyominoes into caves]{Three different examples for connecting polyominoes into caves. a) and b) show one-cube-deep caves (a) east-west and b) two-cube-wide north-south). c) illustrates a two-cube-deep east-west cave. The edges to be connected are marked yellow.}
+	\label{fig:caves}
 \end{figure}
 
 \paragraph{Connecting in Caves:}
 
 Connecting two polyominoes where one of the connection-faces is located inside a cave is a difficult task in the continuous world.
 We differentiate between east-west and north-south located caves.
-Furthermore a cave can be of a certain depth measured in multiples of $2 r_C$.
-\autoref{fig:holes} shows examples for different caves and different depths.
+Furthermore a cave can be of a certain depth and width measured in multiples of $2 r_C$.
+\autoref{fig:caves} shows examples for caves with varying depths and widths.
 
+Caves only become problematic, when the polyomino to be inserted has the same width as the cave, shown in \autoref{fig:caves} b).
 Connecting into a cave with a depth of more than $2 r_C$ is not possible.
-For instance, when inserting the blue single cube into the polyomino in \autoref{fig:holes} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the cave.
+For instance, when inserting the blue single cube into the polyomino in \autoref{fig:caves} c), the blue cube would connect with north and south faces of the polyomino before even reaching the full depth of the cave.
 But even caves with depth $2 r_C$ are hard to handle.
 Inserting into a cave can be done by pivot walking, this would only work for east-west caves, or by letting magnetic forces attract the connection-faces.
 Relying on magnetic forces alone seem promising, since it would work for both cave types, but in reality not only the forces of the connection-faces are present.
@@ -199,8 +199,6 @@ All the forces between other magnets prevent an easy slide-in.
 In our simulator the connection-face will be more attracted or repelled by faces outside the cave, then the once inside.
 Pivot walking into east-west caves, even with small values for $\alpha$, has also a high failure rate because of other magnets.
 The local planner states failure immediately when polyominoes should be connected in any cave-type.
-
-%TODO clarify more than one-wide gaps. also cant insert 2 wide poly in 2 wide gap
 
 \paragraph{Invalid Polyominoes:}
 
