@@ -18,7 +18,8 @@ AXIS_LABELS = {
     "nconfig": "number of explored configurations",
     "nlocal": "number of local plans",
     "ntcsa": "number of nodes in TCSA graph",
-    "localsToGoal": "number of local plans to goal"
+    "localsToGoal": "number of local plans to goal",
+    "timeout": "fraction timed out"
 }
 
 FONTSCALE = 2
@@ -40,6 +41,39 @@ def plot_pivotAngleDistance():
     ax.xaxis.set_major_locator(tck.MultipleLocator(base=0.25))
     ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $r_C$'))
     ax.yaxis.set_major_locator(tck.MultipleLocator(base=1.0))
+    plt.show()
+
+
+def barplot_multipleSorting(expPath, xaxis, yaxis):
+    exp_plan_data = loadExperimentSet(expPath)
+    xaxisLabel = AXIS_LABELS[xaxis]
+    yaxisLabel = AXIS_LABELS[yaxis]
+    # each sorting option gets a dataframe
+    sorting_data = {}
+    for sorting in OptionSorting.list():
+        data = {}
+        data[xaxisLabel] = []
+        data[yaxisLabel] = []
+        data["option sorting"] = []
+        sorting_data[sorting.name] = data
+    # fil in the data form the experiment set
+    for exp, plans in exp_plan_data.items():
+        data = sorting_data[exp.optionSorting]
+        timedout = 0
+        for plan in plans:
+            if not plan.success and plan.time > 600:
+                timedout += 1
+            data[xaxisLabel].append(exp.__dict__[xaxis])
+            data["option sorting"].append(exp.optionSorting)
+        if yaxis == "timeout":
+            data[yaxisLabel].extend([timedout / len(plans)] * len(plans))
+    # create pandas dataframe
+    dataFrame = pd.concat([pd.DataFrame(data=d) for d in sorting_data.values()])
+    # plot catplot bars
+    seaborn.set(font_scale=FONTSCALE)
+    seaborn.catplot(data=dataFrame, kind="bar", x=xaxisLabel, y=yaxisLabel, hue="option sorting",
+                    errorbar='sd', legend_out=False)
+    plt.legend(loc="upper left", prop={'size': LEGEND_SIZE})
     plt.show()
 
 
@@ -77,8 +111,9 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, onlySuccess=False):
         
 def main():
     folder = "04-20-11-40-22"
-    plot_pivotAngleDistance()
-    #boxplot_multipleSortings(os.path.join(RESULT_DIR, folder), "targetSize", "cost", True)
+    #plot_pivotAngleDistance()
+    #oxplot_multipleSortings(os.path.join(RESULT_DIR, folder), "targetSize", "time")
+    barplot_multipleSorting(os.path.join(RESULT_DIR, folder), "targetSize", "timeout")
 
 if __name__ == "__main__":
     main()
