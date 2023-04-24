@@ -59,6 +59,20 @@ def loadExperimentData(path) -> ExperimentData:
     data["boardSize"] = tuple(data["boardSize"])
     return ExperimentData(**data)
 
+def loadExperimentSet(path) -> dict:
+    exp_plan_data = {}
+    for fn1 in os.listdir(path):
+        filePath = os.path.join(path, fn1)
+        if not os.path.isfile(filePath):
+            continue
+        exp = loadExperimentData(filePath)
+        exp_plan_data[exp] = []
+        dataPath = os.path.join(path, os.path.splitext(fn1)[0])
+        for fn2 in os.listdir(dataPath):
+            exp_plan_data[exp].append(loadPlanData(os.path.join(dataPath, fn2)))
+    return exp_plan_data
+
+
 @slurminade.slurmify()
 def targetAssembly(path, seed, target: Polyomino, boardSize, sorting):
     factory.generator.seed(seed)

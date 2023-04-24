@@ -29,6 +29,10 @@ class OptionSorting(Enum):
     GROW_LARGEST = 1
     GROW_SMALLEST = 2
 
+    @staticmethod
+    def list() -> list:
+        return [OptionSorting(i) for i in range(3)]
+
 
 class Plan:
 
