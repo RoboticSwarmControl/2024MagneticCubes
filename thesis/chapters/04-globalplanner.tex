@@ -30,16 +30,29 @@ A take on why is this done and why the problem becomes more complex when working
 \begin{figure}
 	\centering
 	\includegraphics[width=0.7\textwidth]{figures/twocuts.pdf}
-	\caption[Different two-cuts for polyomino shapes]{long caption...}
+	\caption[Different cuts for polyomino shapes]{Examples for cutting polyomino shapes. The top row shows three two-cuts for a $3\times3$ shape, of which only the left one is monotone and therefor valid. The middle one creates a cave and the right one a hole. The bottom row shows cuts that do not split the polyomino into two pieces. The right one creates three sub-assemblies and the left one does not break the polyomino at all.}
 	\label{fig:twocuts}
 \end{figure}
+%TODO make red line dashed
 
-% define two cut for us, talk about other definitions of two-cuts state difference
-% take about monoton two cuts they ensure cave and hole free sub-polyominoes
-% how do we calc. two cuts from starting connection
-% how calc. all two-cuts for a polyomino
-% FIGURE example graphic for two cuts monoton/non-monoton. possibilities for 3x3
+Schmidt et al. \cite{Schmidt2018} considered straight-line two-cuts to divide polyominoes into two sub-assemblies.
+We define a two-cut as a continues path of connections through a polyomino, that divides the polyomino into two pieces, when these connections would be removed.
+For later use in \autoref{sec:tcsa} we want to enumerate all two-cuts of a polyomino that are useful for planning.
+We do not limit the cuts by only allowing straight paths like \cite{Schmidt2018}, instead we only consider monotone two-cuts.
 
+Monotone meaning, that whenever the path goes into a direction it can never go into the opposite direction again.
+\autoref{fig:twocuts} top-left shows a monotone two-cut through a $3\times3$ polyomino shape.
+The cut starts at the top of the shape and only moves down and right.
+By removing all the connections on the path, the polyomino shape is split into two pieces.
+Considering non-monotone two-cuts would create sub-assemblies with caves or holes, which could no be reassembled with our local planner.
+\autoref{fig:twocuts} top-middle shows a non-monotone two-cut creating a cave and \autoref{fig:twocuts} top-right one creating a hole.
+
+To calculate all two-cuts of a polyomino, we take all possible monotone paths from each connection as a starting point.
+A path ends when it breaks out of the polyomino or into a hole.
+After the path ended its connections are removed from the polyomino and the path is added as a two-cut, if the polyomino got split into exactly two pieces.
+The bottom row of \autoref{fig:twocuts} shows cuts that split the polyomino in less or more than two pieces.
+
+% 32 possibilities for 3x3
 
 
 

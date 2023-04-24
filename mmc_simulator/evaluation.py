@@ -25,7 +25,7 @@ FONTSCALE = 2
 LEGEND_SIZE = 20
 
 def plot_pivotAngleDistance():
-    pAxisLengths = [Cube.RAD * 2, Cube.RAD * 4, 6 * Cube.RAD]
+    pAxisLengths = [Cube.RAD * 6, Cube.RAD * 4, Cube.RAD * 2]
     alpha = np.linspace(0, np.pi, 100)
     for a_p in pAxisLengths:
         d_p = 2 * np.sin(0.5 * alpha) * a_p
@@ -77,7 +77,8 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, onlySuccess=False):
         
 def main():
     folder = "04-20-11-40-22"
-    boxplot_multipleSortings(os.path.join(RESULT_DIR, folder), "targetSize", "cost", True)
+    plot_pivotAngleDistance()
+    #boxplot_multipleSortings(os.path.join(RESULT_DIR, folder), "targetSize", "cost", True)
 
 if __name__ == "__main__":
     main()
