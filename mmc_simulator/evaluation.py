@@ -9,7 +9,7 @@ from experiment import *
 from com.state import Cube
 
 AXIS_LABELS = {
-    "targetSize": "target size",
+    "targetSize": "target size $n$",
     "targetNred": "number of red cubes in target",
     "targetShape": "target shape",
     "boardSize": "size of workspace",
@@ -77,7 +77,7 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, onlySuccess=False):
         
 def main():
     folder = "04-20-11-40-22"
-    boxplot_multipleSortings(os.path.join(RESULT_DIR, folder), "targetSize", "time", False)
+    boxplot_multipleSortings(os.path.join(RESULT_DIR, folder), "targetSize", "cost", True)
 
 if __name__ == "__main__":
     main()
