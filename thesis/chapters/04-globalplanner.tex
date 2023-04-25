@@ -24,7 +24,7 @@ A take on why is this done and why the problem becomes more complex when working
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.7\textwidth]{figures/twocuts.pdf}
+	\includegraphics[width=0.6\textwidth]{figures/twocuts.pdf}
 	\caption[Different cuts for polyomino shapes]{Examples for cutting polyomino shapes. The top row shows three two-cuts for a $3\times3$ shape, of which only the left one is monotone and therefor valid. The middle one creates a cave and the right one a hole. The bottom row shows cuts that do not split the polyomino into two pieces. The right one creates three sub-polyominoes and the left one does not break the polyomino at all.}
 	\label{fig:twocuts}
 \end{figure}
@@ -63,8 +63,8 @@ The bottom row of \autoref{fig:twocuts} shows cuts that split the polyomino in l
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1.00\textwidth]{figures/tcsa.pdf}
-	\caption[Example for a two-cut-sub-assembly graph.]{long caption...}
+	\includegraphics[width=1\textwidth]{figures/tcsa.pdf}
+	\caption[Example for a two-cut-sub-assembly graph.]{Example of an TCAS graph for a four-cube L-shape. The polyomino sets are illustrated as ellipses. If the polyominoes of a set are not numbered, there is only one occurrence of this polyomino. Otherwise the number of occurrences is placed left of the polyomino. The sets are numbered, as if the graph was produces by \autoref{algo:build_tcsa}. The weight of edges are illustrated as rectangular boxes containing the polyominoes that need to be connected at specific edges, marked in yellow.}
 	\label{fig:tcsa}
 \end{figure}
 
@@ -76,8 +76,8 @@ The TCSA graph works with sets of polyominoes as nodes.
 While a configuration $g$ holds information about orientation and position of physically distinct polyominoes, the corresponding polyomino set $S(g)$ only enumerates the polyomino types preset in $g$.
 If $g$ contain multiple polyominoes of the same type, $S(g)$ still stores the amount of the polyomino type, but does not distinguish between the actual polyominoes.
 
-Two nodes $S_0$ and $S_1$ of the TSCA graph are connected with and edge $e(S_0,S_1)$, if $S_0$ can be transformed to $S_1$ by connecting two polyominoes contained in $S_0$.
-The cube and edge information of this connection is stored as the weight of $e(S_0,S_1)$.
+Two nodes $S_0$ and $S_1$ of the TSCA graph are connected with and edge $(S_0,w,S_1)$, if $S_0$ can be transformed to $S_1$ by connecting two polyominoes contained in $S_0$.
+The cube and edge information of the connections are stored as the weight $w$.
 $S_0$ and $S_1$ can be connected by multiple edges, if there are different connections that produce the same outcome.
 The edges differ in their weights as shown in \autoref{fig:tcsa_multiedge}.
 The direction of $e(S_0,S_1)$ always goes from $S_0$ to $S_1$, but we can reverse the definition for an edge as following:
@@ -87,14 +87,58 @@ This already provides a perspective on the use of two-cuts and the way $G_{TCSA}
 We will further explain the building process along with an example of a TCSA graph provided in \autoref{fig:tcsa}.
 
 
-\paragraph{Building TCSA-Graph}
+\begin{algorithm}
+	\caption{\scshape Build-TCSA-Graph}
+	\label{algo:build_tcsa}
+	\begin{algorithmic}[1]
+		\REQUIRE $T$
+		\ENSURE $G_{TCSA}(T)$ \COMMENT{the graph is represented by nodes $V$ and edges $E$} 
+		\STATE $V \gets \{\}$
+		\STATE $E \gets \{\}$
+		\STATE $i \gets 0$
+		\STATE $V[i] \gets S_T$	\COMMENT{$S_T$ only contains $T$}
+		\WHILE[work through nodes in BFS manner]{$i < \text{\scshape Size}(V)$}
+			\STATE $S_i \gets V[i]$
+			\FOR[go through all polyomino types in $S_i$]{$\forall P \in S_i$}
+				\FOR{$\forall tc \in \text{\scshape Two-Cuts}(P)$}
+					\STATE $P_1$,$P_2 \gets \text{\scshape Cut-Polyomino}(P, tc)$
+					\STATE $S_{new} \gets S_i \setminus \{P\} \cup \{P_1, P_2\}$ \COMMENT{create $S_{new}$ by removing $P$ and adding $P_1$,$P_2$}
+					\IF{$S_{new} \notin V$}
+						\STATE $V \gets \text{\scshape Append}(V, S_{new})$
+					\ENDIF
+					\STATE $E \gets \text{\scshape Append}(E, (S_{new}, tc, S_i))$
+				\ENDFOR
+			\ENDFOR
+			\STATE $i \gets i+1$
+		\ENDWHILE
+		\RETURN $(V,E)$
+	\end{algorithmic}
+\end{algorithm}
 
-% provide algorithm
-% explain procedure with special cases
-% - endup at all trivial
-% - depth of graph n
-% - common predecessor
-% big example FIGURE of TCSA graph should include all special cases
+
+\paragraph{Building TCSA Graph}
+
+\autoref{algo:build_tcsa} describes the process of building $G_{TCSA}(T)$ for the target $T$.
+The algorithm works through each newly added node in $V$ in a breadth-first-search manner.
+The first node added to $V$ is $S_T$, which is a polyomino set only containing the target shape.
+
+New nodes and edges are determined, by two-cutting every polyomino type $P$ in the current set $S_i$ by every possible two-cut of $P$.
+This is done by enumerating the two-cuts with {\scshape Two-Cuts}, the way it was described in \autoref{sec:twocutting}, and cutting $P$ at the two-cut with {\scshape Cut-Polyomino}.
+The cutting results in the two sub-polyomino $P_1$ and $P_2$.
+$S_{new}$ contains the same polyominoes as $S_i$ with the exception, that one occurrences of $P$ got removed and replaced by one occurrence of each $P_1$ and $P_2$.
+Each $S_{new}$ is the result of cutting one polyomino of $S_i$ at a specific two-cut $tc$.
+If $S_{new}$ is not already contained in $V$, we can add it to $V$ for future iterations of the breadth-first-search.
+
+No matter if $S_{new}$ is contained in $V$ or not, an edge going from $S_{new}$ to $S_i$ with $tc$ as the weight is added to the graph edges $E$.
+This allow multiple edges, as seen in \autoref{fig:tcsa_multiedge}, and multiple out going edges to different nodes, which can be observed in \autoref{fig:tcsa}, where different connections in $S_4$ lead to either $S_1$ or $S_2$.
+
+Each two-cut applied to a polyomino set reduces its amount of polyominoes by one.
+Let $n$ be the size of $T$, then $n-1$ two-cuts applied to $S_T$ will produce a polyomino set $S_{trivial}$ containing only trivial polyominoes, as it is the case for $S_7$ in \autoref{fig:tcsa}.
+All $S_i$ will inevitably end up in this situation and the algorithm will return $(E,V)$, since trivial polyominoes can not be cut anymore.
+This means that no matter which connections are chosen along the way, $n-1$ edges will always be needed to get from $S_{trivial}$ to $S_T$.
+We describe this attribute, by giving the TCSA graph a depth of $n$.
+The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nodes matches the way they got added by \autoref{algo:build_tcsa}.
+
 
 \paragraph{Complexity}
 

@@ -3,8 +3,8 @@
 
 <svg
    width="624.37976mm"
-   height="300.6785mm"
-   viewBox="0 0 624.37976 300.67849"
+   height="297.36752mm"
+   viewBox="0 0 624.37976 297.36752"
    version="1.1"
    id="svg135"
    inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
@@ -27,9 +27,9 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.5"
-     inkscape:cx="706"
-     inkscape:cy="560"
+     inkscape:zoom="0.35355339"
+     inkscape:cx="1032.3759"
+     inkscape:cy="902.26825"
      inkscape:window-width="2560"
      inkscape:window-height="1355"
      inkscape:window-x="1920"
@@ -319,7 +319,7 @@
      inkscape:label="Ebene 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(24.491138,12.492416)">
+     transform="translate(24.491138,-19.182284)">
     <g
        id="g6790">
       <ellipse
@@ -341,7 +341,7 @@
            x="144.4863"
            y="152.26613">S<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan3025">5</tspan></tspan></text>
+   id="tspan3025">2</tspan></tspan></text>
       <g
          id="g4746-9-1-54"
          inkscape:label="polyA"
@@ -696,7 +696,7 @@
            x="146.77779"
            y="44.333569">S<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan2984">4</tspan></tspan></text>
+   id="tspan2984">1</tspan></tspan></text>
     </g>
     <g
        id="g6734">
@@ -719,7 +719,7 @@
            x="329.67688"
            y="44.931393">S<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan2984-0">1</tspan></tspan></text>
+   id="tspan2984-0">4</tspan></tspan></text>
       <g
          id="g4746-9-1-5-6"
          inkscape:label="polyA"
@@ -908,7 +908,7 @@
            x="329.09628"
            y="152.20151">S<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan2984-6">2</tspan></tspan></text>
+   id="tspan2984-6">5</tspan></tspan></text>
       <g
          id="g4746-9-1-8-1"
          inkscape:label="polyA"
@@ -1097,7 +1097,7 @@
            x="329.78082"
            y="265.36786">S<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan2984-6-7">3</tspan></tspan></text>
+   id="tspan2984-6-7">6</tspan></tspan></text>
       <g
          id="g4746-9-1-54-6"
          inkscape:label="polyA"
@@ -1286,7 +1286,7 @@
            x="149.66991"
            y="266.21744">S<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan2984-9">6</tspan></tspan></text>
+   id="tspan2984-9">3</tspan></tspan></text>
       <g
          id="g4746-9-1-8"
          inkscape:label="polyA"
@@ -1744,7 +1744,7 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect8939);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:4.13858;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="2105.5879"
              y="575.90115"
-             id="tspan11938">2x</tspan></text>
+             id="tspan1979">2x</tspan></text>
         <text
            xml:space="preserve"
            transform="matrix(0.36825377,0,0,0.36825377,-752.39308,-149.50069)"
@@ -1752,7 +1752,7 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.6667px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect8939-2);display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:4.13858;stroke-dasharray:none;stroke-opacity:1"><tspan
              x="2105.5879"
              y="575.90115"
-             id="tspan11940">2x</tspan></text>
+             id="tspan1981">2x</tspan></text>
       </g>
       <text
          xml:space="preserve"
@@ -1766,7 +1766,7 @@
            x="517.52014"
            y="151.67082">S<tspan
    style="font-size:65%;baseline-shift:sub"
-   id="tspan2984-6-0">0</tspan></tspan></text>
+   id="tspan2984-6-0">7</tspan></tspan></text>
     </g>
     <g
        id="g7377"
@@ -2642,19 +2642,23 @@
     </g>
     <path
        style="fill:none;fill-opacity:1;stroke:#888888;stroke-width:1.8;stroke-dasharray:none;stroke-opacity:1;marker-start:url(#marker5760);marker-end:url(#Stop)"
-       d="M 550.89863,7.853603 27.715468,7.5729699"
+       d="M 548.14106,299.91708 24.9579,299.90103"
        id="path3743"
        sodipodi:nodetypes="cc" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.7556px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#888888;fill-opacity:1;stroke:none;stroke-width:1.8;stroke-dasharray:none;stroke-opacity:1"
-       x="242.30621"
-       y="1.2246073"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.8077px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#888888;fill-opacity:1;stroke:none;stroke-width:1.44029;stroke-dasharray:none;stroke-opacity:1"
+       x="248.67393"
+       y="313.16907"
        id="text6246"><tspan
          sodipodi:role="line"
          id="tspan6244"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:19.7556px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#888888;fill-opacity:1;stroke:none;stroke-width:1.8"
-         x="242.30621"
-         y="1.2246073">depth n</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:15.8077px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#888888;fill-opacity:1;stroke:none;stroke-width:1.44029"
+         x="248.67393"
+         y="313.16907">depth <tspan
+   style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman,  Italic'"
+   id="tspan1562">n</tspan><tspan
+   id="tspan1566"
+   style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, '">=4</tspan></tspan></text>
   </g>
 </svg>
