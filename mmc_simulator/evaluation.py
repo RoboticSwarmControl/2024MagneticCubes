@@ -13,11 +13,11 @@ AXIS_LABELS = {
     "targetNred": "number of red cubes in target",
     "targetShape": "target shape",
     "boardSize": "size of workspace",
-    "time": "time [s]",
+    "time": "planning time [s]",
     "cost": "plan cost [rad]",
     "nconfig": "number of explored configurations",
     "nlocal": "number of local plans",
-    "ntcsa": "number of nodes in TCSA graph",
+    "ntcsa": "number of TCSA nodes",
     "localsToGoal": "number of local plans to goal",
     "timeout": "fraction timed out"
 }
@@ -77,7 +77,7 @@ def barplot_multipleSorting(expPath, xaxis, yaxis):
     plt.show()
 
 
-def boxplot_multipleSortings(expPath, xaxis, yaxis, onlySuccess=False):
+def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess=False):
     exp_plan_data = loadExperimentSet(expPath)
     xaxisLabel = AXIS_LABELS[xaxis]
     yaxisLabel = AXIS_LABELS[yaxis]
@@ -104,16 +104,15 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, onlySuccess=False):
     seaborn.set(font_scale=FONTSCALE)
     seaborn.boxplot(x=xaxisLabel, y=yaxisLabel, data=dataFrame, hue="option sorting",
                     showmeans=True, meanprops={"marker": "o","markerfacecolor": "white","markeredgecolor": "black","markersize": "10"},
-                    showfliers=True, flierprops=dict(markerfacecolor='0.50', markersize=5))
+                    showfliers=showFliers, flierprops=dict(markerfacecolor='0.50', markersize=5))
     plt.legend(loc="upper left", prop={'size': LEGEND_SIZE})
     plt.show()
     
         
 def main():
-    folder = "04-20-11-40-22"
     #plot_pivotAngleDistance()
-    #oxplot_multipleSortings(os.path.join(RESULT_DIR, folder), "targetSize", "time")
-    barplot_multipleSorting(os.path.join(RESULT_DIR, folder), "targetSize", "timeout")
+    boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "time")
+    #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "timeout")
 
 if __name__ == "__main__":
     main()
