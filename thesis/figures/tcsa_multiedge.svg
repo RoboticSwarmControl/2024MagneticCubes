@@ -27,15 +27,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="1.7852694"
-     inkscape:cx="280.06978"
-     inkscape:cy="142.27545"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="182.43355"
+     inkscape:cy="82.731493"
      inkscape:window-width="2560"
      inkscape:window-height="1355"
      inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g7377-4-7" />
+     inkscape:current-layer="g6734" />
   <defs
      id="defs6494">
     <marker
@@ -76,7 +76,7 @@
       <g
          id="g4746-9-1-54"
          inkscape:label="polyA"
-         transform="matrix(0.718481,0,0,0.718481,156.38534,124.28371)"
+         transform="matrix(0.718481,0,0,0.718481,157.88505,124.28371)"
          style="display:inline">
         <g
            id="g3873-5-36-9-7"
@@ -200,6 +200,22 @@
              y="35.040257" />
         </g>
       </g>
+      <text
+         xml:space="preserve"
+         style="font-size:12.6697px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';baseline-shift:baseline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.42698;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         x="73.706383"
+         y="63.666317"
+         id="text1641"
+         transform="translate(82.941685,87.940142)"><tspan
+           sodipodi:role="line"
+           id="tspan1639"
+           style="baseline-shift:baseline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.42698"
+           x="73.706383"
+           y="63.666317">S<tspan
+   style="baseline-shift:baseline;stroke-width:1.42698"
+   id="tspan1901"><tspan
+     style="font-size:8.23528px;baseline-shift:sub;stroke-width:1.42698"
+     id="tspan1903">1</tspan></tspan></tspan></text>
     </g>
     <g
        id="g6734"
@@ -214,7 +230,7 @@
       <g
          id="g4746-9-1-5-6"
          inkscape:label="polyA"
-         transform="matrix(0.71848099,0,0,0.71848099,323.3875,-0.73877649)"
+         transform="matrix(0.71848099,0,0,0.71848099,327.62083,-0.73877574)"
          style="display:inline">
         <g
            id="g3873-5-36-9-0-7"
@@ -338,6 +354,20 @@
              y="35.040257" />
         </g>
       </g>
+      <text
+         xml:space="preserve"
+         style="font-size:12.6697px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';baseline-shift:baseline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.42698;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+         x="195.1778"
+         y="63.706963"
+         id="text1641-3"
+         transform="translate(143.04151,-25.050695)"><tspan
+           sodipodi:role="line"
+           id="tspan1639-6"
+           style="baseline-shift:baseline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.42698"
+           x="195.1778"
+           y="63.706963">S<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan1958">0</tspan></tspan></text>
     </g>
     <g
        id="g7377-4-7"

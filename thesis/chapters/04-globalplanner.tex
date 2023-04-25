@@ -22,29 +22,29 @@ For this technique the number of cubes in the workspace is limited to the size o
 A take on why is this done and why the problem becomes more complex when working with extra cubes, is done in \autoref{sec:more_cubes}.
 
 
-
-
-\section{Two-Cutting Polyominoes}
-\label{sec:twocutting}
-
 \begin{figure}
 	\centering
 	\includegraphics[width=0.7\textwidth]{figures/twocuts.pdf}
-	\caption[Different cuts for polyomino shapes]{Examples for cutting polyomino shapes. The top row shows three two-cuts for a $3\times3$ shape, of which only the left one is monotone and therefor valid. The middle one creates a cave and the right one a hole. The bottom row shows cuts that do not split the polyomino into two pieces. The right one creates three sub-assemblies and the left one does not break the polyomino at all.}
+	\caption[Different cuts for polyomino shapes]{Examples for cutting polyomino shapes. The top row shows three two-cuts for a $3\times3$ shape, of which only the left one is monotone and therefor valid. The middle one creates a cave and the right one a hole. The bottom row shows cuts that do not split the polyomino into two pieces. The right one creates three sub-polyominoes and the left one does not break the polyomino at all.}
 	\label{fig:twocuts}
 \end{figure}
 %TODO make red line dashed
 
-Schmidt et al. \cite{Schmidt2018} considered straight-line two-cuts to divide polyominoes into two sub-assemblies.
-We define a two-cut as a continues path of connections through a polyomino, that divides the polyomino into two pieces, when these connections would be removed.
+\section{Two-Cutting Polyominoes}
+\label{sec:twocutting}
+
+Schmidt et al. \cite{Schmidt2018} made use of straight-line two-cuts, to handle the construction of a polyomino with more than trivial sub-assemblies.
+
+We define a two-cut as a continues path of connections through a polyomino, that divides the polyomino into two sub-polyominoes, when these connections would be removed.
 For later use in \autoref{sec:tcsa} we want to enumerate all two-cuts of a polyomino that are useful for planning.
 We do not limit the cuts by only allowing straight paths like \cite{Schmidt2018}, instead we only consider monotone two-cuts.
 
-Monotone meaning, that whenever the path goes into a direction it can never go into the opposite direction again.
+Monotone means, that whenever the path goes into a direction it can never go into the opposite direction again.
 \autoref{fig:twocuts} top-left shows a monotone two-cut through a $3\times3$ polyomino shape.
-The cut starts at the top of the shape and only moves down and right.
+The cut starts at the top of the shape and only moves down and right.s
 By removing all the connections on the path, the polyomino shape is split into two pieces.
 Considering non-monotone two-cuts would create sub-assemblies with caves or holes, which could no be reassembled with our local planner.
+This is the reason why they are omitted on a global scale in advance.
 \autoref{fig:twocuts} top-middle shows a non-monotone two-cut creating a cave and \autoref{fig:twocuts} top-right one creating a hole.
 
 To calculate all two-cuts of a polyomino, we take all possible monotone paths from each connection as a starting point.
@@ -54,10 +54,12 @@ The bottom row of \autoref{fig:twocuts} shows cuts that split the polyomino in l
 
 % 32 possibilities for 3x3
 
-
-
-\section{Two-Cut-Sub-Assembly Graph}
-\label{sec:tcsa}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.45\textwidth]{figures/tcsa_multiedge.pdf}
+	\caption[Two TCSA nodes connected with multiple edges.]{Two TCSA edges connecting the polyomino sets $S_0$ and $S_1$. The weights of the edges differ, since there are two ways to connect the $2\times1$ with the $1\times1$ to create a $3\times1$ polyomino. The connections are illustrated in rectangular boxes places on the edges.}
+	\label{fig:tcsa_multiedge}
+\end{figure}
 
 \begin{figure}
 	\centering
@@ -66,26 +68,32 @@ The bottom row of \autoref{fig:twocuts} shows cuts that split the polyomino in l
 	\label{fig:tcsa}
 \end{figure}
 
-% short TCSA-Graph
-% purpes of this -> building sequence to target
-% considering sets of polyominoes no positions in workspace
-% notes are polysets edges connect polysets with (cube, cube, edge) conection as weigth. directiong from twocut to connected
+\section{Two-Cut-Sub-Assembly Graph}
+\label{sec:tcsa}
+
+The two-cut-sub-assembly graph, short TCSA graph, functions as a building instruction for a specific target polyomino, we will call it $G_{TCSA}(T)$.
+The TCSA graph works with sets of polyominoes as nodes.
+While a configuration $g$ holds information about orientation and position of physically distinct polyominoes, the corresponding polyomino set $S(g)$ only enumerates the polyomino types preset in $g$.
+If $g$ contain multiple polyominoes of the same type, $S(g)$ still stores the amount of the polyomino type, but does not distinguish between the actual polyominoes.
+
+Two nodes $S_0$ and $S_1$ of the TSCA graph are connected with and edge $e(S_0,S_1)$, if $S_0$ can be transformed to $S_1$ by connecting two polyominoes contained in $S_0$.
+The cube and edge information of this connection is stored as the weight of $e(S_0,S_1)$.
+$S_0$ and $S_1$ can be connected by multiple edges, if there are different connections that produce the same outcome.
+The edges differ in their weights as shown in \autoref{fig:tcsa_multiedge}.
+The direction of $e(S_0,S_1)$ always goes from $S_0$ to $S_1$, but we can reverse the definition for an edge as following:
+
+Two nodes $S_0$ and $S_1$ are connected, if one polyomino contained in $S_1$ can be two-cut, so that the resulting polyomino set equals $S_0$.
+This already provides a perspective on the use of two-cuts and the way $G_{TCSA}(T)$ is build purely based on $T$.
+We will further explain the building process along with an example of a TCSA graph provided in \autoref{fig:tcsa}.
+
 
 \paragraph{Building TCSA-Graph}
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.6\textwidth]{figures/tcsa_multiedge.pdf}
-	\caption[Two TCSA nodes with multiple edges.]{long caption...}
-	\label{fig:tcsa_multiedge}
-\end{figure}
 
 % provide algorithm
 % explain procedure with special cases
 % - endup at all trivial
 % - depth of graph n
 % - common predecessor
-% - multiple edges for same notes -> example FIGURE 3x1 + 1x1 = 4x1
 % big example FIGURE of TCSA graph should include all special cases
 
 \paragraph{Complexity}
