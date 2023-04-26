@@ -95,6 +95,35 @@ def loadExperimentSet(path) -> dict:
     return exp_plan_data
 
 
+def TCSA_analysis(path, startSeed, samplesPerSize, startSize, endSize):
+    filePath = os.path.join(path, "TCSA.json")
+    if os.path.exists(filePath):   
+        with open(filePath, 'r') as file:
+            data = json.load(file)
+            print("Data loaded")
+    else:
+        data = {}
+    t0 = time.monotonic()
+    for ncubes in range(startSize, endSize + 1):
+        print(f"targetSize = {ncubes}")
+        endSeed = startSeed + samplesPerSize - 1
+        nred = math.floor(ncubes / 2)
+        if not str(ncubes) in data:
+            data[str(ncubes)] = {}
+        for seed in range(startSeed, endSeed + 1):
+            if str(seed) in data[str(ncubes)]:
+                print(f"skipping seed = {seed}")
+                continue
+            factory.generator.seed(seed)
+            poly = factory.randomPoly(ncubes, nred)
+            tcsa = globalp.TwoCutSubassemblyGraph(poly)
+            data[str(ncubes)][str(seed)] = {"nodes": tcsa.nodeCount(), "edges": tcsa.edgeCount()}
+    dt = time.monotonic() - t0
+    print(f"execution time: {round(dt, 2)}s")
+    with open(filePath, 'w') as file:
+        json.dump(data, file, indent=4)  
+
+
 @slurminade.slurmify()
 def targetAssembly(path, seed, shapeName, boardSize, sorting):
     target = SHAPES[shapeName]
@@ -222,8 +251,9 @@ def main():
         os.mkdir(path)
     # Put the experiments to execute here
     #assemblyForTargetSize(path, 225, 25, 5, 11, OptionSorting.list())
-    assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.MIN_DIST])
+    #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.MIN_DIST])
     #assemblyForTargetShape(path, 0, 2, ["3x3","9x1"], [OptionSorting.MIN_DIST])
+    TCSA_analysis(path, 0, 200, 5, 12)
 
 
 if __name__ == "__main__":

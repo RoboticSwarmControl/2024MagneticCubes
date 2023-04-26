@@ -181,7 +181,7 @@ def twoCutGraphTest():
     g = TwoCutSubassemblyGraph(p)
     print(g)
     notes = g.getNextCollections(polys)
-    print(g.__note_edges)
+    print(g.__node_edges)
     for adj in notes:
         print(f"How to get to {repr(adj)}:")
         print(f"{g.getTranslatedConnections(polys, adj)}\n")

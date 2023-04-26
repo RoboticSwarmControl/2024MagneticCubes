@@ -25,10 +25,10 @@ class TwoCutSubassemblyEdge:
 class TwoCutSubassemblyGraph:
 
     def __init__(self, target: Polyomino) -> None:
-        self.__note_edges = {}
+        self.__node_edges = {}
         poly_twoCuts = {}
         polyColl = PolyCollection([target])
-        self.__note_edges[polyColl] = []
+        self.__node_edges[polyColl] = []
         next = Queue()
         next.put(polyColl)
         while not next.empty():
@@ -54,28 +54,28 @@ class TwoCutSubassemblyGraph:
                     newPolyColl = PolyCollection(newPolys)
                     for con in connections:
                         edge = TwoCutSubassemblyEdge(newPolyColl, con, polyColl)
-                        if newPolyColl in self.__note_edges:
+                        if newPolyColl in self.__node_edges:
                             # if note is in tree append the edge
-                            self.__note_edges[newPolyColl].append(edge)
+                            self.__node_edges[newPolyColl].append(edge)
                         else:
                             # if not put it in and add to next queue
-                            self.__note_edges[newPolyColl] = [edge]
+                            self.__node_edges[newPolyColl] = [edge]
                             next.put(newPolyColl)
 
     def getAllCollections(self) -> set:
-        return set(self.__note_edges.keys())
+        return set(self.__node_edges.keys())
 
     def getNextCollections(self, polys: PolyCollection):
-        if not polys in self.__note_edges:
+        if not polys in self.__node_edges:
             return None
         next = []
-        for edge in self.__note_edges[polys]:
+        for edge in self.__node_edges[polys]:
             next.append(edge.end)
         return next
     
     def getTranslatedConnections(self, polys: PolyCollection, next: PolyCollection):
         translated = []
-        for edge in self.__note_edges[polys]:
+        for edge in self.__node_edges[polys]:
             if edge.end != next:
                 continue
             cubeA_graph = edge.connection.cubeA
@@ -91,15 +91,21 @@ class TwoCutSubassemblyGraph:
                         translated.append(Connection(cubeA, cubeB, edgeB))
         return translated
 
-    def noteCount(self):
-        return len(self.__note_edges)
+    def nodeCount(self):
+        return len(self.__node_edges)
+
+    def edgeCount(self):
+        count = 0
+        for edges in self.__node_edges.values():
+            count += len(edges)
+        return count
 
     def __contains__(self, key) -> bool:
-        return key in self.__note_edges
+        return key in self.__node_edges
 
     def __str__(self) -> str:
         string = ""
-        for note, edges in self.__note_edges.items():
+        for note, edges in self.__node_edges.items():
             string += str(note) + "\n"
             for edge in edges:
                 string += "   " + str(edge) + "\n"
@@ -114,10 +120,10 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: Optio
     # check if target is already in initial
     tcsaGraph = TwoCutSubassemblyGraph(target)
     if target in initial.getPolyominoes():
-        return GlobalPlan(target, initial, goal=initial, state=PlanState.SUCCESS, ntcsa=tcsaGraph.noteCount())
+        return GlobalPlan(target, initial, goal=initial, state=PlanState.SUCCESS, ntcsa=tcsaGraph.nodeCount())
     # check if initial is in tsca tree
     if not initial.getPolyominoes() in tcsaGraph:
-        return GlobalPlan(target, initial, state=PlanState.FAILURE, ntcsa=tcsaGraph.noteCount())
+        return GlobalPlan(target, initial, state=PlanState.FAILURE, ntcsa=tcsaGraph.nodeCount())
     # init varialbes
     globalFails = set((PlanState.FAILURE_ALLOWED_POLYS, PlanState.FAILURE_MAX_ITR, PlanState.FAILURE_STUCK,
                         PlanState.FAILURE_CAVE, PlanState.FAILURE_INVAL_POLY, PlanState.FAILURE_SAME_TYPE))
@@ -134,12 +140,12 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: Optio
         if (time.monotonic() - t0) >= TIMEOUT:
             if DEBUG: print(f"Timeout -> Failure!\n{len(config_options)} configs, {nlocalPlans} local plans in total.\n")
             return GlobalPlan(target, initial, state=PlanState.FAILURE, nconfig=len(config_options),
-                              nlocal=nlocalPlans, ntcsa=tcsaGraph.noteCount())
+                              nlocal=nlocalPlans, ntcsa=tcsaGraph.nodeCount())
         # Plan finished when we assembled the target
         if target in config.getPolyominoes():
             if DEBUG: print(f"Target successfully assembled with {len(planStack)} local plans!\n{len(config_options)} configs, {nlocalPlans} local plans in total.\n")
             return GlobalPlan(target, initial, planStack, config, PlanState.SUCCESS, len(config_options),
-                              nlocalPlans, tcsaGraph.noteCount())
+                              nlocalPlans, tcsaGraph.nodeCount())
         # get possible conection options for this config
         if config in config_options:
             options = config_options[config]
@@ -168,7 +174,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: Optio
                 # failure if nothing is left to fall back to
                 if DEBUG: print(f"Nothing to fall back to -> Failure!\n{len(config_options)} configs, {nlocalPlans} local plans in total.\n")
                 return GlobalPlan(target, initial, state=PlanState.FAILURE, nconfig=len(config_options),
-                                  nlocal=nlocalPlans, ntcsa=tcsaGraph.noteCount())
+                                  nlocal=nlocalPlans, ntcsa=tcsaGraph.nodeCount())
             lastPlan = planStack.pop()
             config = lastPlan.initial
             if DEBUG: print(f"No connections left. Fall back to {repr(config)}.\n")
