@@ -22,7 +22,22 @@ slurminade.update_default_configuration(
 RESULT_DIR = "../results"
 BATCH_MAX_SIZE = 40
 
-NAME_SHAPE = {
+BOARDSIZES = [
+    # 1:1, A =~ 0.5M, 1M, 1.5M
+    (700,700),
+    (1000,1000),
+    (1300,1300),
+    # 2:1, A =~ 0.5M, 1M, 1.5M
+    (1000,500),
+    (1400,700),
+    (1800,900)
+    # 3:1, A =~ 0.5M, 1M, 1.5M
+    #(1200,400),
+    #(1800,600),
+    #(2100,700)
+]
+
+SHAPES = {
     "3x3": factory.threeByThree(),
     "3x3_Ring": factory.threeByThreeRing(),
     "9x1": factory.linePolyVert(9,9),
@@ -82,7 +97,7 @@ def loadExperimentSet(path) -> dict:
 
 @slurminade.slurmify()
 def targetAssembly(path, seed, shapeName, boardSize, sorting):
-    target = NAME_SHAPE[shapeName]
+    target = SHAPES[shapeName]
     sorting = OptionSorting(sorting)
     boardSize = tuple(boardSize)
     factory.generator.seed(seed)
@@ -123,7 +138,7 @@ def assemblyForTargetShape(path, startSeed, samplesPerSize, shapes: list, option
     skipped = 0
     with slurminade.Batch(BATCH_MAX_SIZE):
         for shapeName in shapes:
-            target = NAME_SHAPE[shapeName]
+            target = SHAPES[shapeName]
             ncubes = target.size()
             nred = target.nred()
             for sorting in optionSortings:
@@ -206,9 +221,9 @@ def main():
     if not os.path.exists(path):
         os.mkdir(path)
     # Put the experiments to execute here
+    #assemblyForTargetSize(path, 225, 25, 5, 11, OptionSorting.list())
+    assemblyForBoardSize(path, 100, 50, BOARDSIZES, [OptionSorting.MIN_DIST])
     #assemblyForTargetShape(path, 0, 2, ["3x3","9x1"], [OptionSorting.MIN_DIST])
-    #assemblyForBoardSize(path, 0, 2, [(800, 800),(1200,600)], [OptionSorting.MIN_DIST])
-    assemblyForTargetSize(path, 225, 25, 5, 11, [OptionSorting.MIN_DIST, OptionSorting.GROW_LARGEST, OptionSorting.GROW_SMALLEST])
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ Runtime user interaction is also possible. Look in simulation.py method __userIn
 
 @author: Aaron T Becker, Kjell Keune
 """
+from com.state import Configuration
 from sim.simulation import Simulation
 
 def sandbox_onMac():
@@ -15,6 +16,7 @@ def sandbox_onMac():
 
 def sandbox():
     sim1 = Simulation()
+    sim1.loadConfig(Configuration((1000,1000), 0, {}))
     sim1.start()
 
 if __name__ == "__main__":
