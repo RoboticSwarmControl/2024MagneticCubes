@@ -222,7 +222,7 @@ def main():
         os.mkdir(path)
     # Put the experiments to execute here
     #assemblyForTargetSize(path, 225, 25, 5, 11, OptionSorting.list())
-    assemblyForBoardSize(path, 100, 50, BOARDSIZES, [OptionSorting.MIN_DIST])
+    assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.MIN_DIST])
     #assemblyForTargetShape(path, 0, 2, ["3x3","9x1"], [OptionSorting.MIN_DIST])
 
 
