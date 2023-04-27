@@ -6,6 +6,64 @@ from plan.plan import *
 import com.factory as factory
 
 
+def connectionOptions():
+    a = Cube(0)
+    b = Cube(1)
+    c = Cube(1)
+    d = Cube(0)
+    config = Configuration((350,350), math.radians(90), {a: (70,70), b:(280,70), d:(280, 190), c:(70,280)})
+    # load initial
+    sim = Simulation()
+    print("inital config")
+    sim.loadConfig(config)
+    sim.start()
+    time.sleep(0.1)
+    sim.stop()
+    input()
+    sim.terminate()
+    # 1 local plan
+    p1 = local.planCubeConnect(config, a, b, Direction.WEST)
+    print(f"after plan {p1}")
+    sim = Simulation()
+    sim.loadConfig(p1.goal)
+    sim.start()
+    time.sleep(0.1)
+    sim.stop()
+    input()
+    sim.terminate()
+    # 2 local plan
+    p2 = local.planCubeConnect(config, a, c, Direction.WEST)
+    print(f"after plan {p2}")
+    sim = Simulation()
+    sim.loadConfig(p2.goal)
+    sim.start()
+    time.sleep(0.1)
+    sim.stop()
+    input()
+    sim.terminate()
+    # 3 local plan
+    p3 = local.planCubeConnect(config, d, b, Direction.WEST)
+    print(f"after plan {p3}")
+    sim = Simulation()
+    sim.loadConfig(p3.goal)
+    sim.start()
+    time.sleep(0.1)
+    sim.stop()
+    input()
+    sim.terminate()
+    # 4 local plan
+    p4 = local.planCubeConnect(config, d, c, Direction.WEST)
+    print(f"after plan {p4}")
+    sim = Simulation()
+    sim.loadConfig(p4.goal)
+    sim.start()
+    time.sleep(0.1)
+    sim.stop()
+    input()
+    sim.terminate()
+
+
+
 def holeConnectionTest():
     cubeA = Cube(0)
     cubeB = Cube(1)
@@ -185,6 +243,5 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
             plans[inp].execute()
 
 
-
 if __name__ == "__main__":
-    twoPolyConnect(0, 30, 5, True)
+    connectionOptions()

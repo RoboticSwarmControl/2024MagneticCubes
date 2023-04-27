@@ -139,6 +139,13 @@ This means that no matter which connections are chosen along the way, $n-1$ edge
 We describe this attribute, by giving the TCSA graph a depth of $n$.
 The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nodes matches the way they got added by \autoref{algo:build_tcsa}.
 
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{figures/plots/tcsa_nodes_edges.pdf}
+	\caption[Average TCSA nodes and edges for target size $n$.]{Average number of nodes (left) and edges (right) of a TCSA graph for different target sizes $n$.
+	For each target size $200$ samples of randomly generated polyominoes were taken.}
+	\label{fig:tcsa_plot}
+\end{figure}
 
 \paragraph{Complexity}
 
@@ -154,12 +161,17 @@ The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nod
 \section{Global Planning Algorithm}
 \label{sec:global_algo}
 
-% provide algorith
 % use of tcsa-graph
 % limit number of cubes to target size
 % check inclusion of poly set from config in tcsa-graph
 % example early failure if initial is not in tcsa
 
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{figures/connect_options.pdf}
+	\caption[Example of different connection options for one TCSA edge]{long caption...}
+	\label{fig:connect_options}
+\end{figure}
 
 \subsection{Connection Options}
 
@@ -188,6 +200,7 @@ The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nod
 
 \subsection{Graph Traversal}
 
+% provide algorith
 % DFS traversal. try to get to target as fast as possible
 % Fall back if all options tried
 % note that we not traverse tcsa graph we actually traverse configurations.

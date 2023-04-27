@@ -45,27 +45,33 @@ def plot_pivotAngleDistance():
     ax.yaxis.set_major_locator(tck.MultipleLocator(base=1.0))
     plt.show()
 
-def boxplot_TCSA(path, yaxis):
+def boxplot_TCSA(path):
     filePath = os.path.join(path, "TCSA.json")
     with open(filePath, 'r') as file:
         exp_data = json.load(file)
     xaxisLabel = "target size $n$"
-    yaxisLabel = AXIS_LABELS[yaxis]
+    yaxisLabel1 = AXIS_LABELS["nodes"]
+    yaxisLabel2 = AXIS_LABELS["edges"]
     data = {}
     data[xaxisLabel] = []
-    data[yaxisLabel] = []
+    data[yaxisLabel1] = []
+    data[yaxisLabel2] = []
     for n, seeds in exp_data.items():
         if int(n) > 11:
             continue
         for seed in seeds.values():
             data[xaxisLabel].append(n)
-            data[yaxisLabel].append(seed[yaxis])
+            data[yaxisLabel1].append(seed["nodes"])
+            data[yaxisLabel2].append(seed["edges"])
     dataFrame = pd.DataFrame(data=data)
-    seaborn.set(font_scale=FONTSCALE)
-    seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel, errorbar=None, color='b')
-    # seaborn.boxplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel,
-    #                 showmeans=True, meanprops={"marker": "o","markerfacecolor": "white","markeredgecolor": "black","markersize": "10"},
-    #                 showfliers=False, flierprops=dict(markerfacecolor='0.50', markersize=5))
+    seaborn.set(font_scale=2)
+    plt.subplot(1,2,1)
+    seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel1, errorbar=None,
+                    color='darkorange', width=0.65)
+    plt.subplot(1,2,2)
+    seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel2, errorbar=None,
+                    color='green', width=0.65)
+    #plt.tight_layout()
     plt.show()
 
 
@@ -139,7 +145,7 @@ def main():
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "time")
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "timeout")
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time")
-    boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"), "edges")
+    boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
 
 if __name__ == "__main__":
     main()
