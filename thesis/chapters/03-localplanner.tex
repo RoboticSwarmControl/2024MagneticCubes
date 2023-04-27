@@ -274,7 +274,7 @@ In the end, the successful plan with the lowest costs is returned.
 Even if all plans fail, we still determine the best failure.
 Again, plans with lower costs are preferable, but we favor impossible connection and slide-in failures.
 These failures just state that we can not establish a specific connection, but a global planner could continue to plan based on the goal configuration the local planner ended in.
-A configuration when the polyominoes are stuck, or the maximum movement capacity is reached, is not good for further planning, but invalid polyominoes or polyominoes with gaps will definitely be omitted on a global scale.
+A configuration when the polyominoes are stuck, or the maximum movement capacity is reached, is not good for further planning, but invalid polyominoes or polyominoes with caves will definitely be omitted on a global scale.
 
 The different plans are developed in parallel and if one process finishes with a successful plan, the execution of all other plans can be canceled.
 This saves a lot of computation time, although we might not return the optimal plan, since fastest computation does not automatically mean lowest costs.
