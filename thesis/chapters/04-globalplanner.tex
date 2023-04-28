@@ -98,13 +98,13 @@ We will further explain the building process along with an example of a TCSA gra
 		\STATE $V \gets \{\}$
 		\STATE $E \gets \{\}$
 		\STATE $i \gets 0$
-		\STATE $V[i] \gets S_T$	\COMMENT{$S_T$ only contains $T$}
+		\STATE $V[i] \gets S_T$
 		\WHILE[work through nodes in BFS manner]{$i < \text{\scshape Size}(V)$}
 			\STATE $S_i \gets V[i]$
-			\FOR[go through all polyomino types in $S_i$]{$\forall P \in S_i$}
+			\FOR[go through all polyomino types in $S_i$]{$\forall A \in S_i$}
 				\FOR{$\forall tc \in \text{\scshape Two-Cuts}(P)$}
-					\STATE $P_1$,$P_2 \gets \text{\scshape Cut-Polyomino}(P, tc)$
-					\STATE $S_{new} \gets S_i \setminus \{P\} \cup \{P_1, P_2\}$ \COMMENT{create $S_{new}$ by removing $P$ and adding $P_1$,$P_2$}
+					\STATE $A_1$,$A_2 \gets \text{\scshape Cut-Polyomino}(A, tc)$
+					\STATE $S_{new} \gets S_i \setminus \{A\} \cup \{A_1, A_2\}$
 					\IF{$S_{new} \notin V$}
 						\STATE $V \gets \text{\scshape Append}(V, S_{new})$
 					\ENDIF
@@ -239,7 +239,48 @@ The local planner might even fail to establish the desired connection.
 If the resulting polyomio set is contained in $G_{TCSA}(T)$, global planning can continue, but there are certain failure types that are not valid for further planning.
 Polyomino sets with invalid polyominoes, or where connections in caves are necessary, should not be present in the TCSA graph anyway, but we also do not continue planning with a failure due to maximum movement capacity or polyominoes being stuck.
 
-
+\begin{algorithm}
+	\caption{\scshape Assemble-Target}
+	\label{algo:global_algo}
+	\begin{algorithmic}[1]
+		\REQUIRE $T$, $g_{init}$
+		\ENSURE $s$, $P$ \COMMENT{state of global plan $s$ and plan stack $P$ containing local plans}
+		\STATE $G_{TCSA}(T) \gets \text{\scshape Build-TCSA-Graph}(T)$
+		\STATE $s \gets \text{undefined}$
+		\STATE $P \gets \{\}$ 
+		\STATE $g \gets g_{init}$ \COMMENT{current configuration $g$}
+		\LOOP
+			\IF{$\text{\scshape Timeout}()$}
+				\STATE $s \gets \text{timeout}$
+				\RETURN $s$, $P$
+			\ENDIF
+			\STATE $O \gets \text{\scshape Connection-Options}(g, G_{TCSA}(T))$
+			\STATE valid $\gets$ \FALSE
+			\WHILE[try options until local plan is valid]{\NOT $\text{\scshape Empty}(O)$ \AND \NOT valid}
+				\STATE $(c_A, c_B, e_A, e_B) \gets \text{\scshape Pop}(O)$
+				\STATE $p_{new} \gets \text{\scshape Local-Planner}(g, (c_A, c_B, e_A, e_B), G_{TCSA}(T))$
+				\IF{$\text{\scshape Valid-Plan}(p_{new})$}
+					\STATE valid $\gets$ \TRUE
+				\ENDIF
+			\ENDWHILE
+			\IF{valid}
+				\STATE $P \gets \text{\scshape Push}(P, p_{new})$ \COMMENT{add new plan to plan stack}
+				\STATE $g \gets g_{goal}$ of new local plan $p_{new}$ \COMMENT{move to new goal configuration}
+				\IF[target got assembled]{$T \in S(g)$}
+					\STATE $s \gets \text{success}$
+					\RETURN $s$, $P$
+				\ENDIF
+			\ELSE
+				\IF[no configuration to fall back to]{$\text{\scshape Empty}(P)$}
+					\STATE $s \gets \text{failure}$
+					\RETURN $s$, $P$
+				\ENDIF
+				\STATE $p_{pre} \gets \text{\scshape Pop}(P)$ \COMMENT{remove last plan form plan stack}
+				\STATE $g \gets g_{init}$ of last local plan $p_{pre}$ \COMMENT{fall back to last initial configuration}
+			\ENDIF
+		\ENDLOOP
+	\end{algorithmic}
+\end{algorithm}
 
 
 \section{Global Planning Algorithm}
