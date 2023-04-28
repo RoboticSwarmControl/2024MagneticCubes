@@ -190,24 +190,45 @@ We examined three sorting strategies for these options, to provide an order of b
 
 \paragraph{Minimal Distance}
 
+The minimal distance sorting sorts connection options based on the distance between the cubes that are about to be connected.
+The idea is that a smaller distances requires less movement to connect, which means shorter simulation time and lower plan costs of the resulting plan.
+Due to sliding on walls and different pivot walking distances, this is not true in every case, but it remains a good heuristic for sorting.
+Less movement might even prevent unwanted sub-assemblies.
+
 \paragraph{Grow Largest Component}
-% this resembles one tile at a time with subassemblys still possible
+
+Another approach is to grow the largest component.
+The options are sorted into classes of maximum polyomino sizes in the resulting polyomino sets.
+We prefer TCSA edges that lead to sets containing the biggest polyominoes.
+When the options for $S_4$ in \autoref{fig:tcsa} are sorted, the one leading to $S_1$ is preferred over the one leading to $S_2$, because $S_1$ contains a polyomino of size $3$, while $S_2$ only contains polyominoes of size $2$. 
+The options within each class are sorted with the minimal distance approach.
+
+If no other sub-assemblies occur, growing the largest component behaves like one-tile-at-a-time assembly.
+The benefit is, that even if they occur the TSCA graph can provide solutions to integrate them if possible.
+Larger polyominoes generally move faster acting positive on plan costs.
 
 \paragraph{Grow Smallest Component}
 
-
+Oppositely to growing the largest component, options can be sorted by the smallest maximum size of polyominoes in polyomino sets.
+This avoids working with large polyominoes, which are faster, but also need more simulation time to perform rotations and can be hard to handle, because of sheer size.
+It wil be interesting to see how these complementary methods perform.
 
 
 \section{Use of Local Planner}
 \label{sec:local_in_global}
 
 The local planner develops plans for connections chosen from the different connection options presented in \autoref{sec:connect_options}.
+For the local planner only one connection, out of the path of connections stored in the weight of a TSCA edge, needs to be picked.
+Whenever a path consists of both north-south and east-west connections, a north-south connection is preferred.
+This is done to perform offset-aligning instead of straight-aligning (\autoref{sec:align}), for an easier slide-in.
+Besides of that, the choice of connection is irrelevant, since all connections in the path lead to the same outcome.
+
 When the local planner successfully connects the desired polyominoes, other sub-assemblies can lead to a different polyomino set than expected.
 This is not necessarily bad, as long as the resulting set is contained in $G_{TCSA}(T)$.
 In-fact, more sub-assemblies decrease the number of polyominoes in the workspace, which brings the goal of assembling $T$ even closer.
 Layers of depth were skipped in the TCSA graph, so that it might be possible to assemble $T$ with less than $n-1$ local plans.
-This can be seen in \autoref{fig:connect_options}.
-When $A_2$ and $B_2$ are connected, the resulting polyomino set matches with $S_2$ instead of $S_4$ of the nodes from \autoref{fig:tcsa}.
+This can be seen in \autoref{fig:connect_options}, where $A_2$ and $B_2$ were connected. 
+The resulting polyomino set matches with $S_2$ instead of $S_4$ of the nodes from \autoref{fig:tcsa}.
 
 Like already mentioned in \autoref{sec:connect_options}, when the resulting polyomino set is not in $G_{TCSA}(T)$, it is not possible to assemble the target from that configuration.
 This can be seen in \autoref{fig:connect_options}, when connecting $A_1$ and $B_2$.

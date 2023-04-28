@@ -4,7 +4,7 @@ from com.state import Configuration, PolyCollection, Polyomino, Connection, Dire
 from plan.plan import *
 import plan.localp as local
 
-DEBUG = False
+DEBUG = True
 PLAY_LOCALS = False
 
 TIMEOUT = 600
@@ -194,16 +194,25 @@ def __determineOptions(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph,
             connections.extend(conAdj)
         connections.sort(key=lambda con: config.getPosition(con.cubeA).get_distance(config.getPosition(con.cubeB)))
         return connections
-    # Sort the notes by maxSize either ascending or descending
-    if sorting == OptionSorting.GROW_LARGEST:
-        adjNotes.sort(reverse=True, key=lambda pColl: pColl.maxSize)
-    elif sorting == OptionSorting.GROW_SMALLEST:
-        adjNotes.sort(reverse=False, key=lambda pColl: pColl.maxSize)
-    # Sort for minimal distance per sorted note
+    # Add connections to classes of the maxSize
+    maxSize_connects = {}
     for adj in adjNotes:
         conAdj = tcsaGraph.getTranslatedConnections(polys, adj)
-        conAdj.sort(key=lambda con: config.getPosition(con.cubeA).get_distance(config.getPosition(con.cubeB)))
-        connections.extend(conAdj)
+        if adj.maxSize in maxSize_connects:
+            maxSize_connects[adj.maxSize].extend(conAdj)
+        else:
+            maxSize_connects[adj.maxSize] = conAdj
+    # Sort the classes either ascending or descending
+    sizes = list(maxSize_connects.keys())
+    if sorting == OptionSorting.GROW_LARGEST:
+        sizes.sort(reverse=True)
+    elif sorting == OptionSorting.GROW_SMALLEST:
+        sizes.sort(reverse=False)
+    # extend connects of the classes sorted by minimal distance
+    for maxSize in sizes:
+        connects: list = maxSize_connects[maxSize]
+        connects.sort(key=lambda con: config.getPosition(con.cubeA).get_distance(config.getPosition(con.cubeB)))
+        connections.extend(connects)
     return connections
 
 
