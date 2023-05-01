@@ -219,13 +219,13 @@ This capacity gives the polyominoes enough movement, so that both can move along
 	\label{algo:local_algo}
 	\begin{algorithmic}[1]
 		\REQUIRE $c_A$, $c_B$, $e_A$, $e_B$, $\vec{w}$, $\vec{m}$, $g_{init}$ 
-		\ENSURE $s$, $g_{goal}$, $A$
+		\ENSURE $s$, $g_{goal}$, $A$ \COMMENT{state $s$ and actions $A$ leading to configuration $g_{goal}$}
 		\STATE $s \gets \text{undefined}$
 		\STATE $g_{goal} \gets g_{init}$
 		\STATE $A \gets \{\}$
 		\STATE $\text{wait} \gets$ \TRUE
 		\LOOP
-			\IF{$e_A \in \{E,W\}$}
+			\IF[aligning straight or with offset]{$e_A \in \{E,W\}$}
 				\STATE $a \gets \text{\scshape Align-Straight}(c_A, c_B, e_A)$
 			\ELSE
 				\STATE $a \gets \text{\scshape Align-Offset}(c_A, c_B, \vec{m}, e_B)$
@@ -233,30 +233,30 @@ This capacity gives the polyominoes enough movement, so that both can move along
 			\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
 			\STATE $A \gets \text{\scshape Append}(A, a)$
 			\STATE $s \gets \text{\scshape Update-State}(g_{goal}, c_A, c_B, e_A, \vec{m})$
-			\IF{$s \neq \text{undefined}$}
+			\IF[first time checking for failure or success]{$s \neq \text{undefined}$}
 				\RETURN $s, g_{goal}, A$
 			\ENDIF
-			\IF{$\text{\scshape Critical-Distance}(c_A, c_B)$ \AND wait}
+			\IF[wait or walk]{$\text{\scshape Critical-Distance}(c_A, c_B)$ \AND wait}
 				\STATE $a \gets \text{\scshape Wait}()$
 				\STATE $\text{wait} \gets$ \FALSE
 			\ELSE
-				\STATE $a \gets \text{\scshape Walk}(c_A, c_B, \vec{w})$
+				\STATE $a \gets \text{\scshape Walk}(c_A, c_B, \vec{w})$ \COMMENT{$a$ can be multiple walking steps (\autoref{sec:walk_wait})}
 				\STATE $\text{wait} \gets$ \TRUE
 			\ENDIF
 			\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
 			\STATE $A \gets \text{\scshape Append}(A, a)$
-			\IF{$\text{\scshape Stuck}(c_A, c_B)$}
-				\STATE $a \gets \text{\scshape Align-Straight}(c_A, c_B, e_A)$
+			\IF[handle stuck condition]{$\text{\scshape Stuck}(c_A, c_B)$}
+				\STATE $a \gets \text{\scshape Align-Straight}(c_A, c_B, e_A)$ \COMMENT{do a straight aligne}
 				\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
 				\STATE $A \gets \text{\scshape Append}(A, a)$
-				\WHILE{\NOT $\text{\scshape Stuck}(c_A, c_B)$}
+				\WHILE[let magnets attract until stuck again]{\NOT $\text{\scshape Stuck}(c_A, c_B)$}
 					\STATE $a \gets \text{\scshape Wait}()$
 					\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
 					\STATE $A \gets \text{\scshape Append}(A, a)$
 				\ENDWHILE
 			\ENDIF
 			\STATE $s \gets \text{\scshape Update-State}(g_{goal}, c_A, c_B, e_A, \vec{m})$
-			\IF{$s \neq \text{undefined}$}
+			\IF[second time checking for failure or success]{$s \neq \text{undefined}$}
 				\RETURN $s, g_{goal}, A$
 			\ENDIF
 		\ENDLOOP 
