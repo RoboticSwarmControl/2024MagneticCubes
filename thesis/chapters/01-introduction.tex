@@ -1,10 +1,11 @@
 \chapter{Introduction}
 \label{chap:intro}
 
-Self-assembling modular parts forming bigger structures is a well-known concept in nature and most functionalities of living organisms follow this principle \cite{bishop2005}.
-DNA for example has the ability to self-replicate by using differently shaped proteins, that combine themselves in various ways.
-At larger sizes, these cells can be combined to assemble things like tissue, organs and even whole organisms.
-Complex structures can be assembled and disassembled depending on the task they should accomplish at a given point in time. 
+Self-assembling modular parts forming bigger structures is a well-known concept in nature.
+Most functionalities of living organisms follow this principle \cite{bishop2005}.
+DNA, for example, has the ability to self-replicate by using differently shaped proteins that combine themselves in various ways.
+At larger sizes, these cells can be combined to assemble tissue, organs and even whole organisms.
+Complex structures, like proteins, can be assembled and disassembled depending on the task they should accomplish at a given point in time. 
 Using self-reconfiguring robot swarms in such a way has promising applications in the future.
 Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or a robot swarm could be used for milliscale and microscale manufacturing \cite{pelrine2016}.
 
@@ -20,28 +21,31 @@ We will develop a simulation that simulates the behavior of magnetic modular cub
 The simulation will be used for developing closed-loop planing algorithms, which provide a control sequence to assemble desired target shapes.
 For that it is necessary to develop a local planner that is able to connect structures at desired faces.
 We will look at the difficulties and problems that occur, when working with magnetic modular cubes in the 2-dimensional special Euclidean group \(SE(2)\), the space of rigid movements in a 2-dimensional plane.
-
+%TODO cite bhattacharjees dissertation. Arons wants to provide
 
 \section{Related Work}
 
-Continues motion planning is a crucial subject in the field of robotics.
+Continuous motion planning is a crucial subject in the field of robotics.
 The goal is to find a path from the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
-The movement may result in collision with static obstacles and with other robots.
+The movement may result in collision with static obstacles and with other robots, but the objects may not overlap.
 The state of the system is also called a configuration.
 All possible configurations one or multiple robots can be in is defined as the configuration-space.
-Increasing the dimension of the configuration-space gains rapidly in complexity by increasing the number of robots and possible actions.
+Motion planning complexity is often exponential in the dimension of the configuration space \cite{LaValle2006}.
+Increasing the number of robots and/or possible actions, increases the dimension of the configuration space.
 It is difficult to engineer algorithms that explore these huge configuration-spaces and provide continuous path from the initial to the goal configuration, or report failure, if the goal is not reachable.
-A lot of research was done on motion planning and the textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
+Decades of research has been done on motion planning.
+The textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
 
 When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one concept that has been successful for many robotics problem is sample-based motion planning.
 %TODO define uncountable infinite and complete
 By taking samples, you can reduce the planning problem from navigating a configuration space to planning on a graph, but you might lose possible solutions.
 Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point, and therefore these algorithms can be called resolution complete.
+%TODO grid is resolution complete, random sampling probabalistically complete
 Ways of sampling include random sampling or using a grid with a resolution that is dynamically adjustable.
 After sampling, conventional discrete planning algorithms can be applied \cite{LaValle2006}.
 
-One state-of-the-art sampling-based approach are algorithms that use rapidly-exploring random trees (RRT).
-This method tries to grow a tree-shaped graph in the configuration space by moving into the direction of randomly chosen samples from already explored configuration. That way the space gets explored uniformly without being too fixated on the goal configuration \cite{lavalle1998,lavalle2001}.
+One state-of-the-art sampling-based approach uses rapidly-exploring random trees (RRT).
+This method tries to grow a tree-shaped graph in the configuration space by moving into the direction of randomly chosen samples from already explored configurations. That way the space gets explored uniformly without being too fixated on the goal configuration \cite{lavalle1998,lavalle2001}.
 
 When working with multiple robots, the interaction of robots with each other becomes important.
 One interesting idea is that single robots can connect to form bigger structures.
@@ -79,7 +83,7 @@ An enumeration was done on the amount of possible polyominoes that can be create
 
 By limiting the controls to only 90 degree turns and assuming a uniform pivot walking distance for all structures per step, magnetic modular cubes follow rules similar to the Tilt model.
 Following these limitations, a simple discrete motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Bhattacharjee2022}.
-One interesting paper from Blumenberg et al. \cite{blumenberg2023} explores the assembly of polyominoes in arbitrary environments, when cubes obey the tilt model.
+One interesting paper from Blumenberg et al.\ \cite{blumenberg2023} explores the assembly of polyominoes in arbitrary environments, when cubes obey the tilt model.
 He provides different algorithmic approaches using various distance heuristics and even a solution making use of RRTs.
 For that he follows the rules of Tilt in a discrete setting.
 
