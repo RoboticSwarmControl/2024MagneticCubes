@@ -31,7 +31,7 @@ A take on why is this done and why the problem becomes more complex when working
 	\label{fig:twocuts}
 \end{figure}
 %TODO make red line dashed
-%TODO twocuts for rings are fucked up. Redo two cut algorithm
+
 
 \section{Two-Cutting Polyominoes}
 \label{sec:twocutting}
@@ -144,13 +144,11 @@ The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nod
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.9\textwidth]{figures/plots/tcsa_nodes_edges.pdf}
+	\includegraphics[width=0.8\textwidth]{figures/plots/tcsa_nodes_edges.pdf}
 	\caption[Average two-cut-sub-assembly nodes and edges for target size $n$.]{Average number of nodes (left) and edges (right) of a TCSA graph for different target sizes $n$.
 	For each target size $200$ samples of randomly generated polyominoes were taken.}
 	\label{fig:tcsa_plot}
 \end{figure}
-
-%TODO bigger font
 
 \subsection{Complexity}
 
@@ -289,7 +287,7 @@ Polyomino sets with invalid polyominoes, or where connections in caves are neces
 The global planning algorithm provided in \autoref{algo:global_algo} takes the initial configuration $g_{init}$ and the target $T$ as inputs and returns the state of the global plan $s$ and a plan stack $P$ as outputs.
 For a successful plan, $P$ contains the local plans leading to the assembly of $T$.
 When concatenating the actions of all the plans in $P$, this creates a sequence of actions, that could be considered as a global plan.
-Because a TCSA graph was used to create the local plans, $|P| < n$ holds true (\autoref{sec:local_in_global}).
+Because a the local plans were created along the use of a TCSA graph, $|P| < n$ holds true (\autoref{sec:local_in_global}).
 The reason for $P$ being called a stack, is the way it is used in \autoref{algo:global_algo}.
 The algorithm explores the configuration-space along $G_{TCSA}(T)$ in a depth-first-search manner, which is done in the attempt to get closer to assembling $T$ each iteration.
 
@@ -324,14 +322,55 @@ Furthermore a timeout failure is added to \autoref{algo:global_algo}, in case pl
  
 \subsection{Complexity}
 
+\paragraph{Optimality}
+
+Given that the local planner does not produce optimal solution for the connection of two polyominoes, the global planner will not reach optimality as well.
+Even if the local planner provides only optimal solutions, our depth-first-search approach would not explore the configuration space in a way that best sequence of local plans would be picked.
+\autoref{algo:global_algo} is greedily moving along the depth of the TCSA graph to assemble target as fast as possible.
+The option sorting strategies provide reasonable heuristics for picking a connection option per individual TCSA node, but cannot ensure the optimal decision let alone the optimal decision for the whole path of connection options taken.
+Optimal solutions would need broad exploration and comparison of different paths to the target, which is infeasible due to high simulation time of local plans.
+
+\paragraph{Completeness}
+
+The same as with optimality, the local planner prevents the completeness of the global planner.
+Assuming completeness of the local planner, the global planner could be certain of the existence or non-existence of a solution for assembling $T$.
+\autoref{algo:global_algo} will always return success or failure in finite time.
+This is due to the finite number of connection options per configuration and the depth $n$ of the TCSA graph.
+Each local plan in the plan stack is certain to connect at least two polyominoes, so after $n-1$ local plans the workspace contains only one $n$-size polyomino.
+This polyomino is not necessarily $T$, but no further connections can be made, which makes the algorithm fall back to the last configuration.
+Together with the finite number of options per configuration, the algorithm will eventually explore all paths of connection options that are possible and can therefore verify the existence or non existence of a solution.
+Remember that this completeness is based purely on the strong assumption of a complete local planer, which is challenging to archive in the special Euclidean group.
+
+\paragraph{Efficiency}
+
+We have to differentiate between local plans in the plan stack and local plans created during planning $\#local$.
+Even though $|P| < n$, the global planner might have created more local plans, which were either invalid or had to be removed, because they lead to a dead end.
+In a best case only one local plan could lead to the assembly of $T$.
+This is highly unrealistic, but theoretically possible, since layer of depth in the TCSA graph can be skipped.
+A more realistic best case would be $n-1$ local plans created during planning. 
+This would assume, that all local plans created were valid and lead directly to the target with no layer skipping.
+
+In a worst case all paths of connection options have to be explored before stating failure.
+In this worst case ``all'' means that each connection options at each configuration produces a valid local plan with no other sub-assemblies leading to a unique new configuration.
+The only invalid local plans are the once that lead to a configuration with one $n$-size polyomino that is not $T$.
+It is not possible to state the exact amount of worst case local plans, since the number of connection options per configuration differs.
+By taking the average number of connection options per TCSA node $o_\mu$, we can define an estimate
+\begin{equation}
+\#local_{worst} = \sum_{i=1}^{n-1} {o_\mu}^i \, .
+\end{equation} 
+For $n = 10$ and $o_\mu = 20$ this results in $\#local_{worst} \approx 5 \cdot 10^{11}$.
+
+It is impossible to simulate that many local plans in a reasonable time.
+For that reason the timeout failure was added.
+\autoref{chap:results} will provide experimental data on the number of $\#local$ and what percentage of global plans time out.
+The number of configurations explored $\#config$ is also examined in the experiments to better portray the number of dead ends during planning.
+
 % best case 1 local plan. realistic best case n-1
-% we are not limited by notes in tcsa, because n configs for 1 note
-% for each note there is a constant number of options and depth smaller n-1.
-% we wont run infinitly, but worst case is still bad. state example each note 50 options
+% worst case is still bad. state example each note 50 options
 
-\subsection{Discretize Configurations}
 
-% dont know if I wil actually implement, but talk about benefits or why not that neccessary
+%\subsection{Discretize Configurations}
+%TODO dont know if I wil actually implement, but talk about benefits or why not that neccessary
 
 
 

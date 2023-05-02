@@ -28,6 +28,7 @@ FONTSCALE = 2
 LEGEND_SIZE = 20
 
 def plot_pivotAngleDistance():
+    plt.rc('font', size=14)
     pAxisLengths = [Cube.RAD * 6, Cube.RAD * 4, Cube.RAD * 2]
     alpha = np.linspace(0, np.pi, 100)
     for a_p in pAxisLengths:
@@ -43,6 +44,7 @@ def plot_pivotAngleDistance():
     ax.xaxis.set_major_locator(tck.MultipleLocator(base=0.25))
     ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $r_C$'))
     ax.yaxis.set_major_locator(tck.MultipleLocator(base=1.0))
+    plt.tight_layout()
     plt.show()
 
 def boxplot_TCSA(path):
@@ -64,14 +66,15 @@ def boxplot_TCSA(path):
             data[yaxisLabel1].append(seed["nodes"])
             data[yaxisLabel2].append(seed["edges"])
     dataFrame = pd.DataFrame(data=data)
-    seaborn.set(font_scale=2)
+    seaborn.set(font_scale=4)
     plt.subplot(1,2,1)
     seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel1, errorbar=None,
                     color='darkorange', width=0.65)
     plt.subplot(1,2,2)
     seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel2, errorbar=None,
                     color='green', width=0.65)
-    #plt.tight_layout()
+    #plt.tight_layout(pad=15)
+    plt.subplots_adjust(wspace=0.5)
     plt.show()
 
 
@@ -141,11 +144,11 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess
     
         
 def main():
-    #plot_pivotAngleDistance()
+    plot_pivotAngleDistance()
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "time")
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "timeout")
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time")
-    boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
+    #boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
 
 if __name__ == "__main__":
     main()

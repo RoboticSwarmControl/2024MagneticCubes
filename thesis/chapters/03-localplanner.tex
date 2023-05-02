@@ -280,7 +280,7 @@ These failures just state that we can not establish a specific connection, but a
 A configuration when the polyominoes are stuck, or the maximum movement capacity is reached, is not good for further planning, but invalid polyominoes or polyominoes with caves will definitely be omitted on a global scale.
 
 The different plans are developed in parallel and if one process finishes with a successful plan, the execution of all other plans can be canceled.
-This saves a lot of computation time, although we might not return the optimal plan, since fastest computation does not automatically mean lowest costs.
+This saves a lot of computation time, although we might not return the best plan, since fastest computation does not automatically mean lowest costs.
 Generally speaking a low computation time can be linked with low rotational cost, because the local planner spends the majority of time, about $98\%$, on simulating the actions.
 
 \paragraph{Align-Walk-Realign:}
@@ -299,6 +299,29 @@ If we waited in the previous iteration, we walk in the current one and oppositel
 This behavior is toggled by the variable $wait$. 
 The stuck condition is evaluated with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
 When the polyominoes are stuck, the algorithm performs a straight-align and waits as long as this changes the stuck condition.
+
+\subsection{Complexity}
+\label{sec:local_complex}
+
+\paragraph{Optimality}
+
+In our case the optimal plan for connecting two polyominoes is the one establishing the connection with the lowest rotational cost, as defined in \autoref{sec:plan}.
+We use this metric, because it is strongly linked with computation time, but can also be interpreted in a real word application of modular magnetic cubes.
+Even if the local planner would not calculate plans in parallel, our dynamic approach of realigning does not produce optimal solutions.
+It therefore simulates only the actions that are included in the final plan, which minimizes simulation time.
+
+Optimality could be archived, when sliding on walls and different polyomino displacements, as described in \autoref{sec:walk_wait}, are not existent.
+It is easy to see that after aligning, both pivot walking directions produce plans that move the polyominoes together in a straight path.
+The plan with the shorter path would be optimal is this theoretical case.
+But these factors have to be considered, and even if they were by a local planner it is hard to say, if that would be enough to actually prove optimality.
+
+\paragraph{Completeness}
+
+The local planner is also no complete.
+Just because the up to four plans it evaluates fail, does not prove the non existence of a action sequence that would establish the desired connection.
+If other polyominoes are blocking the way of $A$ and $B$, complex movements around these polyominoes, instead of the more or less straight path we are taking, could create solutions where our planner fails.
+The reason we choose this simple approach is again to avoid simulation as much as possible. 
+
 
 %TODO comic sequence FIGURE of the algorithm
 
