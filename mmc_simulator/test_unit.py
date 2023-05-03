@@ -169,10 +169,10 @@ def randomPolyTest():
     print(polys)
 
 def twoCutTest():
-    poly = factory.randomPoly(10)
+    poly = factory.threeByThreeRing()
     twoCuts = twoCutSubassemblies(poly)
-    for tc in twoCuts:
-        print(tc)
+    for cut ,cons in twoCuts.items():
+        print(f"{cut}With {cons}\n")
     print(f"For:\n\n{poly}\nare {len(twoCuts)} possible two-cuts.")
 
 def twoCutGraphTest():
@@ -248,4 +248,4 @@ def motionAnalysis():
 
 
 if __name__ == "__main__":
-    jsonTest()
+    twoCutTest()

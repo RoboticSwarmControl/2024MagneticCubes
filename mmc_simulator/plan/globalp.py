@@ -3,11 +3,112 @@ from queue import Queue
 from com.state import Configuration, PolyCollection, Polyomino, Connection, Direction, Cube
 from plan.plan import *
 import plan.localp as local
+import copy
 
-DEBUG = True
-PLAY_LOCALS = False
 
-TIMEOUT = 600
+class MonotoneCuttingPath:
+
+    def __init__(self, poly: Polyomino, cube: Cube, edge: Direction, edgeOri: Direction) -> None:
+        self.__poly = poly
+        self.__path = [(cube, edge, edgeOri)]
+        self.__oriAvailable = set(Direction.list())
+        self.__oriAvailable.difference_update([edgeOri.inv()])
+
+    def cutPoly(self) -> PolyCollection:
+        connects = self.__poly.getConnectionMap()
+        for cube, edge, ori in self.__path:
+            conCube = self.__poly.getConnectedAt(cube, edge)
+            if conCube != None:
+                connects[cube][edge.value] = None
+                connects[conCube][edge.inv().value] = None
+        pc = PolyCollection()
+        pc.detectPolyominoes(connects)
+        return pc
+
+    def pickConnection(self) -> Connection:
+        connections = []
+        for cube, edge, ori in self.__path:
+            conCube = self.__poly.getConnectedAt(cube, edge)
+            if conCube != None:
+                connections.append(Connection(conCube, cube, edge))
+        connections.sort(key=lambda con: hash(con))
+        # north-south conections are preferred for planning
+        for con in connections:
+            if con.edgeB in (Direction.NORTH, Direction.SOUTH):
+                return con
+        return con
+
+    def extendedPaths(self):
+        lastCube, lastEdge, lastOri = self.__path[len(self.__path) - 1]
+        # determine the 3 cubes relevant for extention
+        cEdge = self.__poly.getConnectedAt(lastCube, lastEdge)
+        cOri = self.__poly.getConnectedAt(lastCube, lastOri)
+        if cOri != None:
+            cDiag = self.__poly.getConnectedAt(cOri, lastEdge)
+        elif cEdge != None:
+            cDiag = self.__poly.getConnectedAt(cEdge, lastOri)
+        else:
+            cDiag = None
+        # find valid path extentions in up to 3 directions
+        ext = []
+        if lastEdge.inv() in self.__oriAvailable:
+            ext.append((lastCube, lastOri, lastEdge.inv()))
+        if lastEdge in self.__oriAvailable:
+            if cEdge != None:
+                ext.append((cEdge, lastOri, lastEdge))
+            elif cDiag != None:
+                ext.append((cDiag, lastOri.inv(), lastEdge))
+        if lastOri in self.__oriAvailable:
+            if cOri != None:
+                ext.append((cOri, lastEdge, lastOri))
+            elif cDiag != None:
+                ext.append((cDiag, lastEdge.inv(), lastOri))
+        # create new paths with the valid extentions
+        extPaths = []
+        for n in ext:
+            new = copy.deepcopy(self)
+            new.extend(n[0], n[1], n[2])
+            extPaths.append(new)
+        return extPaths
+    
+    def extend(self, cube: Cube, edge: Direction, edgeOri: Direction):
+        self.__path.append((cube, edge, edgeOri))
+        self.__oriAvailable.difference_update([edgeOri.inv()])
+
+
+def twoCutSubassemblies(poly: Polyomino) -> dict:
+    twoCuts = {}
+    for cube in poly.getCubes():
+        for edge in Direction.list():
+            if poly.getConnectedAt(cube, edge) == None:
+                continue
+            ori = Direction((edge.value + 1) % 4)
+            for cut, cons in __monotonCutsFrom(poly, cube, edge, ori).items():
+                if not cut in twoCuts:
+                    twoCuts[cut] = cons
+                else:
+                    twoCuts[cut].update(cons)
+    return twoCuts
+
+def __monotonCutsFrom(poly: Polyomino, startCube: Cube, startEdge: Direction, startOri: Direction) -> dict:
+    twoCuts = {}
+    next = Queue()
+    next.put(MonotoneCuttingPath(poly, startCube, startEdge, startOri))
+    while not next.empty():
+        path: MonotoneCuttingPath = next.get()
+        extPaths = path.extendedPaths()
+        if len(extPaths) == 0:
+            cut = path.cutPoly()
+            if cut.polyCount() == 2:
+                if not cut in twoCuts:
+                    twoCuts[cut] = set([path.pickConnection()])
+                else:
+                    twoCuts[cut].add(path.pickConnection())
+        else:
+            for ep in extPaths:
+                next.put(ep)
+    return twoCuts
+
 
 class TwoCutSubassemblyEdge:
 
@@ -113,6 +214,10 @@ class TwoCutSubassemblyGraph:
         return string
 
 
+DEBUG = True
+PLAY_LOCALS = False
+TIMEOUT = 600
+
 def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: OptionSorting=OptionSorting.MIN_DIST) -> GlobalPlan:
     # single update if no poly info available
     if initial.getPolyominoes().isEmpty():
@@ -214,79 +319,3 @@ def __determineOptions(config: Configuration, tcsaGraph: TwoCutSubassemblyGraph,
         connects.sort(key=lambda con: config.getPosition(con.cubeA).get_distance(config.getPosition(con.cubeB)))
         connections.extend(connects)
     return connections
-
-
-def twoCutSubassemblies(poly: Polyomino) -> dict:
-    twoCuts = {}
-    for cube in poly.getCubes():
-        for edge in Direction.list():
-            if poly.getConnectedAt(cube, edge) != None:
-                for cut, con in __monotonCutsFrom(poly, cube, edge).items():
-                    if cut in twoCuts:
-                        twoCuts[cut].add(con)
-                    else:
-                        twoCuts[cut] = set([con])
-    return twoCuts
-
-def __monotonCutsFrom(poly: Polyomino, startCube: Cube, startEdge: Direction) -> dict:
-    twoCuts = {}
-    available = set(Direction.list())
-    nextPath = Queue()
-    nextPath.put([(startEdge, startCube, available.difference([startEdge.inv()]))])
-    while not nextPath.empty():
-        path = nextPath.get()
-        lastCon = path[len(path) - 1]
-        edge = lastCon[0]
-        cube = lastCon[1]
-        available = lastCon[2]
-        dirToTake = __directionsToTake(poly, edge, cube, available)
-        if len(dirToTake) <= 1:
-            cut = __cutAtPath(poly, path)
-            if cut.polyCount() == 2:
-                twoCuts[cut] = __pickConnection(poly, path)
-                continue
-        for edgeToTake, cubeToTake in dirToTake.items():
-            newPath = path.copy()
-            newPath.append((edgeToTake, cubeToTake, available.difference([edgeToTake.inv()])))
-            nextPath.put(newPath)
-    return twoCuts
-
-def __cutAtPath(poly: Polyomino, path: list) -> PolyCollection:
-    connects = poly.getConnectionMap()
-    for edge, cube, _ in path:
-        conCube = poly.getConnectedAt(cube, edge)
-        connects[cube][edge.value] = None
-        connects[conCube][edge.inv().value] = None
-    pc = PolyCollection()
-    pc.detectPolyominoes(connects)
-    return pc
-
-def __pickConnection(poly: Polyomino, path: list) -> Connection:
-    connections = []
-    for edge, cube, _ in path:
-        connections.append(Connection(poly.getConnectedAt(cube, edge), cube, edge))
-    connections.sort(key=lambda con: hash(con))
-    # north-south conections are preferred for planning
-    for con in connections:
-        if con.edgeB in (Direction.NORTH, Direction.SOUTH):
-            return con
-    return con
-
-def __directionsToTake(poly: Polyomino, edge: Direction, cube: Cube, availableDir:set=set(Direction.list())):
-    dir_cube = {}
-    for dir in availableDir:
-        if edge.value <= 1 and dir.value <= 1:
-            conEdge = Direction((dir.value + 1) % 2)
-        elif edge.value <= 1 and dir.value > 1:
-            conEdge = dir.inv()
-        elif edge.value > 1 and dir.value <= 1:
-            conEdge = dir.inv()
-        elif edge.value > 1 and dir.value > 1:
-            conEdge = Direction(((dir.value - 1) % 2) + 2)
-        try:
-            conCube = poly.getConnectedAt(cube, conEdge)
-            if poly.getConnectedAt(conCube, dir) != None:
-                dir_cube[dir] = conCube
-        except KeyError:
-            pass
-    return dir_cube
