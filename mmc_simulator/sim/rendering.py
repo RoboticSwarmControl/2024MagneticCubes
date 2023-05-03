@@ -81,18 +81,18 @@ class Renderer:
                 pygame.draw.circle(
                     self.__window, magcolor, shape.body.local_to_world(magP), 4)
             # draw frictino points
-            if shape in self.__stateHandler.frictionpoints:
-                pygame.draw.circle(self.__window, Renderer.PURPLE,
-                                   self.__stateHandler.frictionpoints[shape], 3)
+            # if shape in self.__stateHandler.frictionpoints:
+            #     pygame.draw.circle(self.__window, Renderer.PURPLE,
+            #                        self.__stateHandler.frictionpoints[shape], 3)
         # polyomino drawing
-        for i, poly in enumerate(self.__stateHandler.polyominoes.getAll()):
-            for cube in poly.getCubes():
-                connects = poly.getConnected(cube)
-                for cubeCon in connects:
-                    if cubeCon == None:
-                        continue
-                    pygame.draw.line(self.__window, Renderer.PURPLE, self.__stateHandler.getCubeShape(cube).body.local_to_world(
-                        (0, 0)), self.__stateHandler.getCubeShape(cubeCon).body.local_to_world((0, 0)), 4)
+        # for i, poly in enumerate(self.__stateHandler.polyominoes.getAll()):
+        #     for cube in poly.getCubes():
+        #         connects = poly.getConnected(cube)
+        #         for cubeCon in connects:
+        #             if cubeCon == None:
+        #                 continue
+        #             pygame.draw.line(self.__window, Renderer.PURPLE, self.__stateHandler.getCubeShape(cube).body.local_to_world(
+        #                 (0, 0)), self.__stateHandler.getCubeShape(cubeCon).body.local_to_world((0, 0)), 4)
         # draw user points and lines
         for point in self.pointsToDraw:
             pygame.draw.circle(self.__window, point[0], point[1], point[2])

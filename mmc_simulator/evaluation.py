@@ -27,6 +27,80 @@ AXIS_LABELS = {
 FONTSCALE = 2
 LEGEND_SIZE = 20
 
+def plot_alignFunctions():
+    plt.rc('font', size=14)
+    # example a)
+    pa = factory.fourCube_LShape()
+    ca = pa.getCube((1,0))
+    pb = factory.linePolyHori(2, 0)
+    cb = pb.getCube((0,0))
+    eb = Direction.WEST
+    config = factory.configWithPolys((350,350), math.radians(90), [pa,pb], [(100, 260),(220, 120)])
+    sim = Simulation()
+    #sim.renderer.markedCubes.add(ca)
+    #sim.renderer.markedCubes.add(cb)
+    sim.loadConfig(config)
+    sim.start()
+    time.sleep(0.1)
+    sim.stop()
+    input()
+    config = sim.terminate()
+    pa = config.getPolyominoes().getForCube(ca)
+    pb = config.getPolyominoes().getForCube(cb)
+    __alignFunction(config.getCOM(pa), config.getPosition(ca), config.getCOM(pb), config.getPosition(cb), eb, config.magAngle, "a)")
+    # example b)
+    pa = factory.linePolyVert(3, 3)
+    ca = pa.getCube((0,2))
+    pb = factory.linePolyVert(3,0)
+    cb = pb.getCube((0,0))
+    eb = Direction.WEST
+    config = factory.configWithPolys((350,350), math.radians(90), [pa,pb], [(140, 190),(210, 210)])
+    sim = Simulation()
+    sim.loadConfig(config)
+    #sim.renderer.markedCubes.add(ca)
+    #sim.renderer.markedCubes.add(cb)
+    sim.start()
+    time.sleep(0.1)
+    sim.stop()
+    input()
+    config = sim.terminate()
+    pa = config.getPolyominoes().getForCube(ca)
+    pb = config.getPolyominoes().getForCube(cb)
+    __alignFunction(config.getCOM(pa), config.getPosition(ca), config.getCOM(pb), config.getPosition(cb), eb, config.magAngle, "b)")
+    # plot 
+    plt.xlabel(r"rotation angle $\beta$")
+    plt.ylabel(r"aligning function $\delta(\beta)$")
+    ax = plt.subplot()
+    plt.xlim(xmin=-1, xmax=1)
+    plt.ylim(ymin=0, ymax=1)
+    ax.legend()
+    ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.xaxis.set_major_locator(tck.MultipleLocator(base=1.0))
+    ax.yaxis.set_major_formatter(tck.FormatStrFormatter('%g $\pi$'))
+    ax.yaxis.set_major_locator(tck.MultipleLocator(base=0.25))
+    plt.tight_layout()
+    plt.show()
+
+def __alignFunction(comA: Vec2d, posA: Vec2d, comB: Vec2d, posB: Vec2d, edgeB: Direction, magAngle, label):
+    step = math.radians(2)
+    ang = magAngle - math.pi
+    x = []
+    y = []
+    while ang < (magAngle + math.pi):
+        rotAng = ang - magAngle
+        if abs(rotAng) > math.pi:
+            rotAng = -1 * (2 * math.pi - rotAng)
+        rA = (posA - comA).rotated(rotAng)
+        rB = (posB - comB).rotated(rotAng)
+        vecBA = (comA + rA) - (comB + rB)
+        vecEdgeB = edgeB.vec(ang)
+        angDiff = abs(vecEdgeB.get_angle_between(vecBA))
+        ang += step
+        x.append(rotAng / math.pi)
+        y.append(angDiff / math.pi)
+    plt.plot(x, y, label=label)
+
+
 def plot_pivotAngleDistance():
     plt.rc('font', size=14)
     pAxisLengths = [Cube.RAD * 6, Cube.RAD * 4, Cube.RAD * 2]
@@ -144,7 +218,8 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess
     
         
 def main():
-    plot_pivotAngleDistance()
+    plot_alignFunctions()
+    #plot_pivotAngleDistance()
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "time")
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "timeout")
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time")
