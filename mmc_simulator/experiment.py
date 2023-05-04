@@ -20,7 +20,7 @@ slurminade.update_default_configuration(
 )
 
 RESULT_DIR = "../results"
-BATCH_MAX_SIZE = 40
+BATCH_MAX_SIZE = 100
 
 BOARDSIZES = [
     # 1:1, A =~ 0.5M, 1M, 1.5M
@@ -250,10 +250,10 @@ def main():
     if not os.path.exists(path):
         os.mkdir(path)
     # Put the experiments to execute here
-    #assemblyForTargetSize(path, 225, 25, 5, 11, OptionSorting.list())
+    assemblyForTargetSize(path, 100, 150, 5, 11, OptionSorting.list())
     #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.MIN_DIST])
     #assemblyForTargetShape(path, 0, 2, ["3x3","9x1"], [OptionSorting.MIN_DIST])
-    TCSA_analysis(path, 0, 200, 5, 12)
+    #TCSA_analysis(path, 0, 200, 5, 12)
 
 
 if __name__ == "__main__":
