@@ -151,12 +151,31 @@ The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nod
 
 \subsection{Complexity}
 
-% sterling numbers second kind as upper bound: find literatur
-% connectivity cuts notes, monotonie cuts notes
-% Access to graph in O(1) due to hash comparing.
-% Creation complex but worth it -> minimize sim-time
-% show practical data for tcsa-notes per size.
-% analyse grow trend. ie. exponenziell
+The Stirling numbers of second kind provide an upper bound for the number of nodes in a TCSA graph.
+The Stirling numbers of second kind
+\begin{equation}
+\bracenom{n}{k} = \sum_{i=1}^{k} \frac{(-1)^{k-i} \, i^{n-1}}{(i-1)! \, (k-1)!}
+\end{equation}
+describe the possibilities of sorting a set with $n$ objects into $k$ partitions \cite{jelliss1991}.
+In our case $n$ equals the target size $n$ and the number of partitions $k$ is the number of polyominoes, the $n$ cubes belong to.
+Different layers of depth account for different $\bracenom{n}{k}$.
+$S_T$ is the only polyomino set with $k=1$, so $\bracenom{n}{1} = 1$.
+$S_{trival}$ is the only set containing $k=n$ polyominoes, so $\bracenom{n}{n} = 1$.
+For the maximum number of nodes possible all layers of the TCSA graph have to be summed up
+\begin{equation}
+\#nodes_{worst} = \sum_{k=1}^{n} \bracenom{n}{k} \, ,
+\end{equation}
+which is also referred to as the Bell number \cite{jelliss1991}.
+
+It is not necessary or even valid to group any cubes into certain partitions.
+The only way of creating partitions is by monotonously two-cutting existing polyominoes, which drastically lowers the number of $\#nodes_{worst}$.
+In \autoref{fig:tcsa_plot} statistical data shows the average number of nodes and edges a TCSA graph consists of for varying target sizes $n$.
+%TODO analyse grow trend. ie. exponenziell
+
+Our implementation of $G_{TCSA}(T)$ stores nodes in a hash-table.
+Accessing nodes and connected edges, or checking if a polyomino set is contained in $G_{TCSA}(T)$, can be done in  $\mathcal{O}(1)$.
+The creation of $G_{TCSA}(T)$ becomes more complex for increasing numbers of $n$, but it provides an easily accessible building instruction that drastically cuts the number of unnecessary local plans simulated.
+Lowering simulation time make a complex data-structure like the TCSA graph worth it.
 
 
 \begin{figure}
@@ -325,9 +344,9 @@ Furthermore a timeout failure is added to \autoref{algo:global_algo}, in case pl
 
 Given that the local planner does not produce optimal solution for the connection of two polyominoes, the global planner will not reach optimality as well.
 Even if the local planner provides only optimal solutions, our depth-first-search approach would not explore the configuration space in a way that best sequence of local plans would be picked.
-\autoref{algo:global_algo} is greedily moving along the depth of the TCSA graph to assemble target as fast as possible.
+\autoref{algo:global_algo} is greedily moving along the depth of the TCSA graph to assemble the target as fast as possible.
 The option sorting strategies provide reasonable heuristics for picking a connection option per individual TCSA node, but cannot ensure the optimal decision let alone the optimal decision for the whole path of connection options taken.
-Optimal solutions would need broad exploration and comparison of different paths to the target, which is infeasible due to high simulation time of local plans.
+Optimal solutions would need broad exploration and comparison of different paths to the target, which is infeasible in our case due to high simulation time of local plans.
 
 \paragraph{Completeness}
 
@@ -350,9 +369,9 @@ A more realistic best case would be $n-1$ local plans created during planning.
 This would assume, that all local plans created were valid and lead directly to the target with no layer skipping.
 
 In a worst case all paths of connection options have to be explored before stating failure.
-In this worst case ``all'' means that each connection options at each configuration produces a valid local plan with no other sub-assemblies leading to a unique new configuration.
+In this worst case ``all'' means that each connection option at each configuration produces a valid local plan with no other sub-assemblies leading to a unique new configuration.
 The only invalid local plans are the once that lead to a configuration with one $n$-size polyomino that is not $T$.
-It is not possible to state the exact amount of worst case local plans, since the number of connection options per configuration differs.
+It is not possible to state the exact amount of worst case local plans, since the number of connection options per configuration varies.
 By taking the average number of connection options per TCSA node $o_\mu$, we can define an estimate
 \begin{equation}
 \#local_{worst} = \sum_{i=1}^{n-1} {o_\mu}^i \, .
@@ -360,12 +379,9 @@ By taking the average number of connection options per TCSA node $o_\mu$, we can
 For $n = 10$ and $o_\mu = 20$ this results in $\#local_{worst} \approx 5 \cdot 10^{11}$.
 
 It is impossible to simulate that many local plans in a reasonable time.
-For that reason the timeout failure was added.
+For that reason a timeout failure was added.
 \autoref{chap:results} will provide experimental data on the number of $\#local$ and what percentage of global plans time out.
 The number of configurations explored $\#config$ is also examined in the experiments to better portray the number of dead ends during planning.
-
-% best case 1 local plan. realistic best case n-1
-% worst case is still bad. state example each note 50 options
 
 
 %\subsection{Discretize Configurations}
