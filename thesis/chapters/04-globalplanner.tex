@@ -163,12 +163,12 @@ $S_T$ is the only polyomino set with $k=1$, so $\bracenom{n}{1} = 1$.
 $S_{trival}$ is the only set containing $k=n$ polyominoes, so $\bracenom{n}{n} = 1$.
 For the maximum number of nodes possible all layers of the TCSA graph have to be summed up
 \begin{equation}
-\#nodes_{worst} = \sum_{k=1}^{n} \bracenom{n}{k} \, ,
+\#\textit{nodes}_\textit{worst} = \sum_{k=1}^{n} \bracenom{n}{k} \, ,
 \end{equation}
 which is also referred to as the Bell number \cite{jelliss1991}.
 
 It is not necessary or even valid to group any cubes into certain partitions.
-The only way of creating partitions is by monotonously two-cutting existing polyominoes, which drastically lowers the number of $\#nodes_{worst}$.
+The only way of creating partitions is by monotonously two-cutting existing polyominoes, which drastically lowers the number of $\#\textit{nodes}_\textit{worst}$.
 In \autoref{fig:tcsa_plot} statistical data shows the average number of nodes and edges a TCSA graph consists of for varying target sizes $n$.
 %TODO analyse grow trend. ie. exponenziell
 
@@ -190,8 +190,9 @@ Lowering simulation time make a complex data-structure like the TCSA graph worth
 \label{sec:connect_options}
 
 In each configuration $g$ the global planner encounters, $G_{TCSA}(T)$ will be used to determine the next connection, that the local planner should try to establish.
-$G_{TCSA}(T)$ wil be searched for the node that is the polyomino set $S(g)$.
+$G_{TCSA}(T)$ will be searched for the node that is the polyomino set $S(g)$.
 If $S(g) \notin G_{TCSA}(T)$, $g$ cannot be used to assemble $T$.
+This also allows the global planner to state failure immediately, when a initial configuration already contains sub-assemblies that are not usable for assembling $T$  
 With the exception of $S_T$ all nodes have out-going edges in a TCSA graph.
 All out-going edges of $S(g)$ provide connections for the local planner that bring the global planner closer to assembling $T$.
 
@@ -361,7 +362,7 @@ Remember that this completeness is based purely on the strong assumption of a co
 
 \paragraph{Efficiency}
 
-We have to differentiate between local plans in the plan stack and local plans created during planning $\#local$.
+We have to differentiate between local plans in the plan stack and local plans created during planning $\#\textit{local}$.
 Even though $|P| < n$, the global planner might have created more local plans, which were either invalid or had to be removed, because they lead to a dead end.
 In a best case only one local plan could lead to the assembly of $T$.
 This is highly unrealistic, but theoretically possible, since layer of depth in the TCSA graph can be skipped.
@@ -373,15 +374,16 @@ In this worst case ``all'' means that each connection option at each configurati
 The only invalid local plans are the once that lead to a configuration with one $n$-size polyomino that is not $T$.
 It is not possible to state the exact amount of worst case local plans, since the number of connection options per configuration varies.
 By taking the average number of connection options per TCSA node $o_\mu$, we can define an estimate
+
 \begin{equation}
-\#local_{worst} = \sum_{i=1}^{n-1} {o_\mu}^i \, .
+\#\textit{local}_\textit{worst} = \sum_{i=1}^{n-1} {o_\mu}^i \, .
 \end{equation} 
-For $n = 10$ and $o_\mu = 20$ this results in $\#local_{worst} \approx 5 \cdot 10^{11}$.
+For $n = 10$ and $o_\mu = 20$ this results in $\#\textit{local}_\textit{worst} \approx 5 \cdot 10^{11}$.
 
 It is impossible to simulate that many local plans in a reasonable time.
 For that reason a timeout failure was added.
-\autoref{chap:results} will provide experimental data on the number of $\#local$ and what percentage of global plans time out.
-The number of configurations explored $\#config$ is also examined in the experiments to better portray the number of dead ends during planning.
+\autoref{chap:results} will provide experimental data on the number of $\#\textit{local}$ and what percentage of global plans time out.
+The number of configurations explored $\#\textit{config}$ is also examined in the experiments to better portray the number of dead ends during planning.
 
 
 %\subsection{Discretize Configurations}
@@ -392,7 +394,19 @@ The number of configurations explored $\#config$ is also examined in the experim
 \section{More Cubes than Target}
 \label{sec:more_cubes}
 
-% bigger tcsa with multiple end notes
-% same tcsa
-% - no simple hash check. check for set inclusion
-% - a poly set can be included in multiple tcsa-notes -> increasing options per config
+The number of cubes in the workspace is limited to the target size $n$ for the global planner to work.
+The reason for this is linked with the use of TCSA graphs. 
+Using a hash-table to find a TCSA node $S_{TCSA}$ and check for equality with the configurations polyomino set $S(g)$ is simple and fast.
+If a configuration holds more cubes then the TCSA nodes hold, we need to check if $S_{TCSA} \subseteq S(g)$.
+This cannot be done by hash comparing, so all nodes of the graph need to be checked, which would be very costly.
+In addition to that, multiple nodes can be included in $S(g)$.
+The global planner could handle this by summing up the connection options of all the nodes, but again this makes planning more complex and costly.
+
+After assembling $T$ all the left over cubes could assemble various polyominoes.
+We could enumerate all possible left over polyomino sets $S_l$ and remove all of them separately from $S(g)$ to check for $S_{TCSA} = S(g) \setminus S_l$.
+This would again result in multiple nodes and summed up connection options, but with the ability to hash compare for equality.
+The number of $S_l$ can become huge for increasing numbers of left over cubes leading to a less efficient global planner.
+
+
+
+
