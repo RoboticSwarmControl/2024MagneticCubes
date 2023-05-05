@@ -218,12 +218,15 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess
     
         
 def main():
+    #---Thesis plots---
     #plot_alignFunctions()
     #plot_pivotAngleDistance()
-    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "time")
-    barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments"), "targetSize", "timeout")
-    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time")
     #boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
+    #---Result Plots---
+    #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
+    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "time", onlySuccess=False)
+    #barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
+    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "cost", onlySuccess=False)
 
 if __name__ == "__main__":
     main()

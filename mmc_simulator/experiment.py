@@ -12,15 +12,7 @@ from plan.plan import *
 import com.factory as factory
 import plan.globalp as globalp
 
-slurminade.update_default_configuration(
-    partition="alg",
-    constraint="alggen03",
-    mail_user="k.keune@tu-braunschweig.de",
-    mail_type="ALL",
-)
-
 RESULT_DIR = "../results"
-BATCH_MAX_SIZE = 50
 
 BOARDSIZES = [
     # 1:1, A =~ 0.5M, 1M, 1.5M
@@ -43,6 +35,17 @@ SHAPES = {
     "9x1": factory.linePolyVert(9,9),
     "1x9": factory.linePolyHori(9,0)
 }
+
+
+slurminade.update_default_configuration(
+    partition="alg",
+    constraint="alggen03",
+    mail_user="k.keune@tu-braunschweig.de",
+    mail_type="ALL",
+)
+
+BATCH_MAX_SIZE = 50
+
 
 class PlanData:
      
