@@ -12,16 +12,28 @@ AXIS_LABELS = {
     "targetSize": "target size $n$",
     "targetNred": "number of red cubes in target",
     "targetShape": "target shape",
-    "boardSize": "size of workspace",
+    "boardSize": "size of workspace [px$^2$, aspect]",
     "time": "planning time [s]",
     "cost": "plan cost [rad]",
-    "nconfig": "number of explored configurations",
-    "nlocal": "number of local plans",
-    "ntcsa": "number of TCSA nodes",
-    "localsToGoal": "number of local plans to goal",
+    "nconfig": "number of explored configurations #config",
+    "nlocal": "number of local plans #locals",
+    "ntcsa": "number of TCSA nodes #nodes$",
+    "localsToGoal": "number of local plans in stack $|P|$",
     "timeout": "fraction timed out",
     "nodes": "number of TCSA nodes",
     "edges": "number of TCSA edges"
+}
+
+BOARDSIZES_LABELS = {
+    (700,700): "0.5M, 1:1",
+    (1000,1000): "1.0M, 1:1",
+    (1300,1300): "1.5M, 1:1",
+    (1000,500): "0.5M, 2:1",
+    (1400,700): "1.0M, 2:1",
+    (1800,900): "1.5M, 2:1",
+    (1200,400): "0.5M, 3:1",
+    (1800,600): "1.0M, 3:1",
+    (2100,700): "1.5M, 3:1"
 }
 
 FONTSCALE = 2
@@ -165,13 +177,19 @@ def barplot_multipleSorting(expPath, xaxis, yaxis):
         data["option sorting"] = []
         sorting_data[sorting.name] = data
     # fil in the data form the experiment set
-    for exp, plans in exp_plan_data.items():
+    exp_plan_items = exp_plan_data.items()
+    if xaxis == "boardSize":
+        exp_plan_items = sorted(exp_plan_items, key=lambda t: BOARDSIZES_LABELS[t[0].boardSize])
+    for exp, plans in exp_plan_items:
         data = sorting_data[exp.optionSorting]
         timedout = 0
         for plan in plans:
             if not plan.success and plan.time > 600:
                 timedout += 1
-            data[xaxisLabel].append(exp.__dict__[xaxis])
+            if xaxis == "boardSize":
+                data[xaxisLabel].append(BOARDSIZES_LABELS[exp.boardSize])
+            else:
+                data[xaxisLabel].append(exp.__dict__[xaxis])
             data["option sorting"].append(exp.optionSorting)
         if yaxis == "timeout":
             data[yaxisLabel].extend([timedout / len(plans)] * len(plans))
@@ -197,13 +215,19 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess
         data[yaxisLabel] = []
         data["option sorting"] = []
         sorting_data[sorting.name] = data
-    # fil in the data form the experiment set
-    for exp, plans in exp_plan_data.items():
+    # fill in the data form the experiment set
+    exp_plan_items = exp_plan_data.items()
+    if xaxis == "boardSize":
+        exp_plan_items = sorted(exp_plan_items, key=lambda t: BOARDSIZES_LABELS[t[0].boardSize])
+    for exp, plans in exp_plan_items:
         data = sorting_data[exp.optionSorting]
         for plan in plans:
             if onlySuccess and not plan.success:
                 continue
-            data[xaxisLabel].append(exp.__dict__[xaxis])
+            if xaxis == "boardSize":
+                data[xaxisLabel].append(BOARDSIZES_LABELS[exp.boardSize])
+            else:
+                data[xaxisLabel].append(exp.__dict__[xaxis])
             data[yaxisLabel].append(plan.__dict__[yaxis])
             data["option sorting"].append(exp.optionSorting)
     # create pandas dataframe
@@ -226,7 +250,7 @@ def main():
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "time", onlySuccess=False)
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
-    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "cost", onlySuccess=False)
+    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
 
 if __name__ == "__main__":
     main()

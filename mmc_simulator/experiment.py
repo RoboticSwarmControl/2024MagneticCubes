@@ -254,7 +254,7 @@ def main():
         os.mkdir(path)
     # Put the experiments to execute here
     #assemblyForTargetSize(path, 100, 150, 5, 11, OptionSorting.list())
-    assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.MIN_DIST])
+    assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_LARGEST])
     #assemblyForTargetShape(path, 0, 2, ["3x3","9x1"], [OptionSorting.MIN_DIST])
     #TCSA_analysis(path, 0, 200, 5, 12)
 
