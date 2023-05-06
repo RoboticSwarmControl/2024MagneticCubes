@@ -11,20 +11,27 @@
 Our simulator used for modeling the behavior of magnetic modular cubes uses the 2d physics library Pymunk\footnote{Pymunk: \url{https://www.pymunk.org/}}.
 This library is build for the Python 3 and Python 2 environment based on the 2d physics library Chipmunk\footnote{Chipmunk: \url{http://chipmunk-physics.net/}}.
 We used Pymunk, since it can be easily integrated and customized in a Python implementation.
-Furthermore it is light-weight and capable of running headless, but also offers an interface for Pygame\footnote{Pygame: \url{https://www.pygame.org/}}, which we use to visualize developed plans and allow user control.
+Furthermore it is light-weight and capable of running headless, but also offers an interface for Pygame\footnote{Pygame: \url{https://www.pygame.org/}}, which we use to visualize developed plans and allowing user controls.
 As a disadvantage, we are challenge with the simulation of 3d movement in a 2d environment.
-That way we trade simulation accuracy for faster simulation time, which is necessary to develop global plans in reasonable time.
+That way we trade simulation accuracy for faster simulation time, which is necessary to develop global plans in a reasonable time.
 
 \autoref{fig:simulator} shows a flow chart diagram of the simulators simulation loop.
 The diagram provides the control flow of our simulator, where individual steps are explained in this and following sections.
 
-Any control program, in example a local planner or a ``sandbox mode'' for visually controlling magnetic modular cubes with keyboard inputs, can interact with the top-level interface of the simulator.
-The interface provides functionalities like, starting and stopping the simulation process, loading custom configurations and retrieving the current workspace state (\autoref{sec:motion_control}), queuing in motions for simulation (\autoref{sec:workspace_state}), or controlling the drawing with Pygame.
-The Pymunk-Step is a library function, responsible for updating the Pymunk-Space by a certain time step.
-The duration of a time step is a parameter that also allows the adjustment between simulation accuracy and simulation time.
-Inside the Pymunk-Step forces are applied to the cubes and collision with workspace boundaries and between cubes is handled.
-%force calculation
-%friction for 3d 
+Any control program, in example a local planner or a ``sandbox program'' for visually controlling magnetic modular cubes with keyboard inputs, can interact with the top-level interface of the simulator.
+The interface provides functionalities like, starting and stopping the simulation process, controlling the drawing with Pygame, or loading custom configurations and retrieving the current workspace state (\autoref{sec:workspace_state}).
+Another crucial functionality is queuing in motions for simulation and notifying the control program, when a motion is done simulating.
+After handling the motion control, further explained in \autoref{sec:motion_control}, the simulator enters the Pymunk-step.
+
+The Pymunk-step is a library function, responsible for updating the simulation environment by a certain time step.
+The duration of a time step is a parameter that allows adjustment between simulation accuracy and simulation time. 
+Inside the Pymunk-step forces are applied to the cubes and collision with workspace boundaries and between cubes is handled (\autoref{sec:coll_handling}).
+
+After the Pymunk-step the magnetic forces between permanent magnets of cubes are calculated, which also determines connections of cube faces used to retrieve information about the polyominoes present in the workspace (\autoref{sec:force_magnet}).
+Polyominoes are necessary to calculate the force of the magnetic field acting on cubes (\autoref{sec:force_field}) and friction forces, on which we heavily rely to simulate 3d movement like pivoting on pivot edges (\autoref{sec:force_friction}).
+All the calculated forces will be applied in the Pymunk-step in the next iteration of the simulation loop.
+
+When drawing is enabled the Pygame-rendering of the workspace is the last step before beginning the next iteration.
 
 % plot of time use for simulation
 
@@ -47,7 +54,7 @@ Inside the Pymunk-Step forces are applied to the cubes and collision with worksp
 % loading saving configs 
 
 \section{Collision Handling}
-
+\label{sec:coll_handling}
 % pymunks colison detection for cubes and walls -> Bounding volume hirachie
 % used to determine range for magnetic forces
 
@@ -56,6 +63,7 @@ Inside the Pymunk-Step forces are applied to the cubes and collision with worksp
 % apply with pymunk
 
 \subsection{Magnet Forces}
+\label{sec:force_magnet}
 
 % pull cubes together
 % provide equation
@@ -65,6 +73,7 @@ Inside the Pymunk-Step forces are applied to the cubes and collision with worksp
 % minDist, minDists, all
 
 \subsection{Magnetic Field Forces}
+\label{sec:force_field}
 
 % applied to top bottom each indivial cube
 % as long as orientation doenst match
@@ -73,6 +82,7 @@ Inside the Pymunk-Step forces are applied to the cubes and collision with worksp
 
 
 \subsection{Friction Forces}
+\label{sec:force_friction}
 
 % force to let poly rotate around pivot point
 % splitt friction on cubes on pivot edge
