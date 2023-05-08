@@ -47,7 +47,8 @@ More on that in \autoref{sec:force_friction}.
 
 A change of elevation is executed in a single iteration, but the angle of a rotation will be simulated by multiple longitude changes in a linear ramp with a rotational velocity we choose to set to $\frac{\pi}{8} \, \text{rad}/\text{s}$.
 Each motion will be simulated by applying its sequence of updates.
-After that, the control program is notified to make closed loop control possible, by waiting until motions are done.
+After that, the control program is notified.
+This makes closed loop control possible by waiting until motions are done.
 
 These updates control the magnetic field orientation and not magnetic modular cubes directly.
 Cubes will orient themselves by magnetic field forces we further explain in \autoref{sec:force_field}.
@@ -84,7 +85,15 @@ We set the critical-distance to be $5 r_C$.
 
 \section{Simulating Forces}
 
+
 % apply with pymunk
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\textwidth]{figures/plots/magnet_force.pdf}
+	\caption[Force between magnets of two cubes for distance.]{long caption...}
+	\label{fig:magnet_force}
+\end{figure}
 
 \subsection{Magnet Forces}
 \label{sec:force_magnet}
