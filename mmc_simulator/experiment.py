@@ -44,8 +44,7 @@ slurminade.update_default_configuration(
     mail_type="ALL",
 )
 
-BATCH_MAX_SIZE = 50
-
+BATCH_MAX_SIZE = 40
 
 class PlanData:
      
@@ -253,8 +252,8 @@ def main():
     if not os.path.exists(path):
         os.mkdir(path)
     # Put the experiments to execute here
-    #assemblyForTargetSize(path, 100, 150, 5, 11, OptionSorting.list())
-    assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
+    assemblyForTargetSize(path, 100, 150, 12, 12, OptionSorting.list())
+    #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
     #assemblyForTargetShape(path, 0, 2, ["3x3","9x1"], [OptionSorting.MIN_DIST])
     #TCSA_analysis(path, 0, 200, 5, 12)
 
