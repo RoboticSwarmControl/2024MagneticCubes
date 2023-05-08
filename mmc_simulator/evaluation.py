@@ -142,16 +142,19 @@ def plot_magnetForce():
     for ydis in distance:
         f = Cube.magForce1on2(Vec2d(0,0 + Cube.MRAD), Vec2d(0, ydis - Cube.MRAD), (1,0), (1,0))
         force.append(f.length)
+    max_force = max(force)
+    for i in range(len(force)):
+        force[i] /= max_force
     plt.plot(distance/Cube.RAD, force)
     ax = plt.subplot()
     ax.xaxis.set_major_formatter(tck.FormatStrFormatter('%g $r_C$'))
     ax.xaxis.set_major_locator(tck.MultipleLocator(base=1))
     plt.xlabel('distance of cubes')
-    plt.ylabel('magnetic force')
+    plt.ylabel('fraction of maximum force')
     plt.xlim(xmin=xmin/Cube.RAD, xmax=xmax/Cube.RAD)
-    plt.ylim(ymin=0, ymax=2500)
+    plt.ylim(ymin=0, ymax=max(force))
     plt.axvline(x=5, color='r')
-    plt.text(4.8, 750, 'critical-distance', rotation=90, color="r")
+    plt.text(4.8, 0.28, 'critical-distance', rotation=90, color="r")
     plt.tight_layout()
     plt.show()
     
@@ -268,11 +271,11 @@ def main():
     #---Thesis plots---s
     #plot_alignFunctions()
     #plot_pivotAngleDistance()
-    #plot_magnetForce()
+    plot_magnetForce()
     #boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
     #---Result Plots---
-    barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
-    boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "time", onlySuccess=False)
+    #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
+    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "time", onlySuccess=False)
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
 
