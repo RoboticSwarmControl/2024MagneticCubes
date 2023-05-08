@@ -35,28 +35,52 @@ When drawing is enabled the Pygame-rendering of the workspace is the last step b
 
 % plot of time use for simulation
 
-
 \section{Motion Control}
 \label{sec:motion_control}
 
-% rotaion linear ramp
-% step sequence for motions
-% handling elevation in 2D with friction
-% waiting on motions to finish
+The motion control manages the queued in motions from the control program and determines an update of the magnetic field for each iteration of the simulation loop.
+This update consists of the longitude change in radians and the latitude change called the elevation.
+In our simulator the elevation just states if the magnetic north points up, the magnetic south points up, or the magnetic field latitude lays in a neutral position within the workspace plane.
+We do not specify a angular value of the latitude, since we cannot model it in the 2d-environment anyway.
+The elevation just indicates the simulator to simulate pivoting of polyominoes.
+More on that in \autoref{sec:force_friction}.
+
+A change of elevation is executed in a single iteration, but the angle of a rotation will be simulated by multiple longitude changes in a linear ramp with a rotational velocity we choose to set to $\frac{\pi}{8} \, \text{rad}/\text{s}$.
+Each motion will be simulated by applying its sequence of updates.
+After that, the control program is notified to make closed loop control possible, by waiting until motions are done.
+
+These updates control the magnetic field orientation and not magnetic modular cubes directly.
+Cubes will orient themselves by magnetic field forces we further explain in \autoref{sec:force_field}.
+The larger a polyomino is, the more time it needs to align with the magnetic field, which can take longer than rotating the magnetic field itself.
+A certain amount of zero-updates is appended to a rotations update sequence depending on the size of the larges polyomino in the workspace.
+That way the control program will not be notified until all polyominoes are aligned with the magnetic field.
+For this reason simulating larger polyominoes requires more simulation time due to more iterations of the simulation loop.
 
 \section{Workspace State}
 \label{sec:workspace_state}
 
-% what configuration consists of.
-% cube info, poly info.
-% polycollection functions as set and lists for polys
-% everything hashable
-% loading saving configs 
+The state of the workspace is stored and updated within the Pymunk-space.
+By saving a configuration of the workspace, relevant attributes like position, orientation and velocity of cubes are copied from the Pymunk-space.
+These Pymunkt-space attributes will be manipulated when loading in a configuration.
+
+Furthermore a configuration stores magnetic field orientation and the polyominoes, together with their center of mass and pivot points, that got detected by our polyomino detection method elaborated in \autoref{sec:force_magnet}.
+Polyominoes are stored in a custom data structure that functions both as a list of physical polyominoes and a polyomino set for the use in two-cut-sub-assembly graphs (\autoref{sec:tcsa}).
+The data structure and the polyominoes themselves are hashable for fast equality and inclusion checks.
+
+Individual orientation and velocities of cubes will not be used for planning, but they ensure a correct loading of a workspace configuration that got saved while in motion or when cubes where not or not yet aligned with the magnetic field.
+The alignment can be prevented by walls or other cubes, even though we assume perfect alignment with the magnetic field during planning.
 
 \section{Collision Handling}
 \label{sec:coll_handling}
-% pymunks colison detection for cubes and walls -> Bounding volume hirachie
-% used to determine range for magnetic forces
+
+Collision is detected and resolved by Pymunk during the Pymunk-step.
+For the collision detection Pymunk uses a bounding volume hierarchy of objects in the Pymunk-space.
+We also use this efficient collision detection for determining cube pairs in critical-distance.
+For that, each cube is surrounded by a circular sensor with half the critical-distance as the radius.
+Cubes are in critical-distance if two sensors collide.
+Cubes not in critical-distance are to far away to significantly affect each other with magnetic forces of their permanent magnets.
+We only calculate magnet forces for cube pairs in critical-distance to speed up simulation.
+We set the critical-distance to be $5 r_C$.
 
 \section{Simulating Forces}
 
