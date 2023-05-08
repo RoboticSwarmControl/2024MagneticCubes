@@ -12,7 +12,7 @@ AXIS_LABELS = {
     "targetSize": "target size $n$",
     "targetNred": "number of red cubes in target",
     "targetShape": "target shape",
-    "boardSize": "size of workspace [px$^2$, aspect]",
+    "boardSize": "workspace area [px$^2$], aspect ratio",
     "time": "planning time [s]",
     "cost": "plan cost [rad]",
     "nconfig": "number of explored configurations #config",
@@ -242,7 +242,7 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess
     
         
 def main():
-    #---Thesis plots---
+    #---Thesis plots---s
     #plot_alignFunctions()
     #plot_pivotAngleDistance()
     #boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
