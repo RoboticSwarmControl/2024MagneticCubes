@@ -31,9 +31,11 @@ BOARDSIZES = [
 
 SHAPES = {
     "3x3": factory.threeByThree(),
-    "3x3_Ring": factory.threeByThreeRing(),
-    "9x1": factory.linePolyVert(9,9),
-    "1x9": factory.linePolyHori(9,0)
+    "5x2": factory.fiveByTwo(),
+    "2x5": factory.twoByFive(),
+    "10x1": factory.linePolyVert(10,10),
+    "1x10": factory.linePolyHori(10,0)
+    #"3x3_Ring": factory.threeByThreeRing()
 }
 
 
@@ -252,9 +254,9 @@ def main():
     if not os.path.exists(path):
         os.mkdir(path)
     # Put the experiments to execute here
-    assemblyForTargetSize(path, 100, 150, 12, 12, OptionSorting.list())
+    #assemblyForTargetSize(path, 100, 150, 12, 12, OptionSorting.list())
     #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
-    #assemblyForTargetShape(path, 0, 2, ["3x3","9x1"], [OptionSorting.MIN_DIST])
+    assemblyForTargetShape(path, 100, 2, SHAPES.keys(), [OptionSorting.MIN_DIST])
     #TCSA_analysis(path, 0, 200, 5, 12)
 
 

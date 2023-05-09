@@ -12,12 +12,12 @@ AXIS_LABELS = {
     "targetSize": "target size $n$",
     "targetNred": "number of red cubes in target",
     "targetShape": "target shape",
-    "boardSize": "workspace area [px$^2$], aspect ratio",
+    "boardSize": "workspace area [Mpx], aspect ratio",
     "time": "planning time [s]",
     "cost": "plan cost [rad]",
     "nconfig": "number of explored configurations #config",
     "nlocal": "number of local plans #locals",
-    "ntcsa": "number of TCSA nodes #nodes$",
+    "ntcsa": "number of TCSA nodes #nodes",
     "localsToGoal": "number of local plans in stack $|P|$",
     "timeout": "fraction timed out",
     "nodes": "number of TCSA nodes",
@@ -25,15 +25,15 @@ AXIS_LABELS = {
 }
 
 BOARDSIZES_LABELS = {
-    (700,700): "0.5M, 1:1",
-    (1000,1000): "1.0M, 1:1",
-    (1300,1300): "1.5M, 1:1",
-    (1000,500): "0.5M, 2:1",
-    (1400,700): "1.0M, 2:1",
-    (1800,900): "1.5M, 2:1",
-    (1200,400): "0.5M, 3:1",
-    (1800,600): "1.0M, 3:1",
-    (2100,700): "1.5M, 3:1"
+    (700,700): "0.5, 1:1",
+    (1000,1000): "1.0, 1:1",
+    (1300,1300): "1.5, 1:1",
+    (1000,500): "0.5, 2:1",
+    (1400,700): "1.0, 2:1",
+    (1800,900): "1.5, 2:1",
+    (1200,400): "0.5, 3:1",
+    (1800,600): "1.0, 3:1",
+    (2100,700): "1.5, 3:1"
 }
 
 FONTSCALE = 2
@@ -271,13 +271,13 @@ def main():
     #---Thesis plots---s
     #plot_alignFunctions()
     #plot_pivotAngleDistance()
-    plot_magnetForce()
+    #plot_magnetForce()
     #boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
     #---Result Plots---
-    #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "time", onlySuccess=False)
-    #barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
-    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
+    #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
+    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
+    barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
 
 if __name__ == "__main__":
     main()

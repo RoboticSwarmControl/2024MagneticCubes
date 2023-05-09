@@ -247,3 +247,17 @@ def twoByTwo():
     cnew = Cube(0)
     p.connect(cnew, c, Direction.SOUTH)
     return p
+
+def fiveByTwo():
+    pR = linePolyVert(5,5)
+    pL = linePolyVert(5,0)
+    cR = pR.getCube((0,0))
+    cL = pL.getCube((0,0))
+    return pR.connectPoly(cR, pL, cL, Direction.WEST)
+
+def twoByFive():
+    pT = linePolyHori(5,0)
+    pB = linePolyHori(5,0)
+    cT = pT.getCube((0,0))
+    cB = pB.getCube((0,0))
+    return pT.connectPoly(cT, pB, cB, Direction.NORTH)

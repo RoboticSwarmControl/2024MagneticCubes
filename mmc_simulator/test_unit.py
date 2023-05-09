@@ -2,6 +2,7 @@ import time
 from pymunk import Vec2d
 import json
 
+from experiment import SHAPES
 from sim.simulation import Simulation
 from com.state import *
 from plan.plan import *
@@ -246,6 +247,9 @@ def motionAnalysis():
         t1 = time.time()
         print(f"[{rot180}] Time: {round(t1 -t0, 4)}s\n")
 
+def polyShapes():
+    for poly in SHAPES.values():
+        print(poly)
 
 if __name__ == "__main__":
-    twoCutTest()
+    polyShapes()
