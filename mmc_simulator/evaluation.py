@@ -159,6 +159,38 @@ def plot_magnetForce():
     plt.show()
     
 
+def pieplot_timeUse(filePath):
+    with open(filePath, 'r') as file:
+        data = json.load(file)
+    task_time: dict = data["tasks"]
+    del task_time["Force Calculation"]
+    del task_time["Polyomino Detection"]
+    del task_time["Load Configuration"]
+    del task_time["Save Configuration"]
+    task_time["Pymunk-Step"] -= task_time["Calculate Magnet Forces"]
+    timeOthers = data["total"]
+    for time in task_time.values():
+        timeOthers -= time
+    task_time["Other"] = timeOthers
+    task_time = {k: v for k, v in sorted(task_time.items(), key=lambda item: item[1], reverse=False)}
+    task_colors = {
+        "Load Configuration": "limegreen",
+        "Pymunk-Step": "tab:blue",
+        "Polyomino Detection": "coral",
+        "Save Configuration": "forestgreen",
+        "Calculate Magnetic Field Forces": "indianred",
+        "Calculate Friction Forces": "lightcoral",
+        "Calculate Magnet Forces": "tab:red",
+        "Other": "tab:gray"
+    }
+    #plot
+    plt.rc('font', size=14)
+    ax = plt.subplot()
+    ax.pie(task_time.values(), labels=task_time.keys(), colors=[task_colors[t] for t in task_time.keys()], autopct='%1.1f%%')
+    plt.tight_layout()
+    plt.show()
+
+
 def boxplot_TCSA(path):
     filePath = os.path.join(path, "TCSA.json")
     with open(filePath, 'r') as file:
@@ -268,16 +300,19 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess
     
         
 def main():
-    #---Thesis plots---s
+    #---Thesis plots---
     #plot_alignFunctions()
     #plot_pivotAngleDistance()
     #plot_magnetForce()
+    #pieplot_timeUse(os.path.join(RESULT_DIR, "Simulator-Time/time-stats.json"))
     #boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
     #---Result Plots---
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "time", onlySuccess=False)
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
-    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
-    barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
+    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
+    #barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
+    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "time", onlySuccess=False)
+    barplot_multipleSorting(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "timeout")
 
 if __name__ == "__main__":
     main()

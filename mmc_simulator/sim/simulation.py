@@ -4,6 +4,7 @@ Holds the Simulation class
 @author: Aaron T Becker, Kjell Keune
 """
 import sys
+import time
 import pygame
 import math
 from queue import Queue
@@ -190,11 +191,13 @@ class Simulation:
         self.started.set()
         # Simulation loop
         while self.started.isSet():
+            tt = time.time()
             if self.drawingActive:
                 self.__userInputs__()
             step = self.__nextStep__()
             self.stateHandler.update(
                 step.angChange, step.elevation, Simulation.STEP_TIME)
+            self.stateHandler.timer.addToTotal(time.time() - tt)
             if self.drawingActive and (self.update % self.updatePerFrame == 0 or not self.started.is_set()):
                 self.renderer.render(self.fps)
             self.update += 1
@@ -278,12 +281,12 @@ class Simulation:
     
     def __info__(self):
         config = self.stateHandler.saveConfig()
-        #self.stateHandler.timer.printTimeStats()
-        self.renderer.pointsToDraw.clear()
-        for poly in config.getPolyominoes().getAll():
-            self.renderer.pointsToDraw.append((Renderer.BLUE, config.getPivotS(poly),4))
-            self.renderer.pointsToDraw.append((Renderer.RED, config.getPivotN(poly),4))
-            start = config.getCOM(poly)
-            self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
-            end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
-            self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))
+        self.stateHandler.timer.writeTimeStats("../results/Simulator-Time")
+        # self.renderer.pointsToDraw.clear()
+        # for poly in config.getPolyominoes().getAll():
+        #     self.renderer.pointsToDraw.append((Renderer.BLUE, config.getPivotS(poly),4))
+        #     self.renderer.pointsToDraw.append((Renderer.RED, config.getPivotN(poly),4))
+        #     start = config.getCOM(poly)
+        #     self.renderer.pointsToDraw.append((Renderer.BLACK, start,4))
+        #     end = start + config.getPivotWalkingVec(poly, PivotWalk.DEFAULT_PIVOT_ANG, PivotWalk.RIGHT)
+        #     self.renderer.linesToDraw.append((Renderer.BLACK, start, end, 3))
