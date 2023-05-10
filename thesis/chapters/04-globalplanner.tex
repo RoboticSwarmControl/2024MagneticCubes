@@ -37,7 +37,7 @@ A take on why is this done and why the problem becomes more complex when working
 
 Schmidt et al. \cite{Schmidt2018} made use of straight-line two-cuts, to handle the construction of a polyomino with more than trivial sub-assemblies.
 
-We define a two-cut as a continuous path of connections through a polyomino that divides the polyomino into two sub-polyominoes, when these connections would be removed.
+We define a two-cut as a continuous path of edges through a polyomino that would divide the polyomino into two sub-polyominoes, if all connections with these edges are removed.
 For later use in \autoref{sec:tcsa} we want to enumerate all two-cuts of a polyomino that are useful for planning.
 We do not limit the cuts by only allowing straight paths like \cite{Schmidt2018}, instead we only consider monotone two-cuts.
 
@@ -50,8 +50,8 @@ For this reason they are omitted on a global scale in advance.
 \autoref{fig:twocuts} top-middle shows a non-monotone two-cut creating a cave and \autoref{fig:twocuts} top-right one creating a hole.
 
 To calculate all two-cuts of a polyomino, we take all possible monotone paths from each connection as a starting point.
-A path ends when it breaks out of the polyomino or into a hole.
-After the path ended its connections are removed from the polyomino and the path is added as a two-cut, if the polyomino got split into exactly two pieces.
+A path ends when it breaks out of the polyomino.
+After the path ended the connection at its edges are removed from the polyomino and the path is added as a two-cut, if the polyomino got split into exactly two pieces.
 The bottom row of \autoref{fig:twocuts} shows cuts that split the polyomino in less or more than two pieces.
 
 % 32 possibilities for 3x3

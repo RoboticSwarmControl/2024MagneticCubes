@@ -122,33 +122,36 @@ For a more efficient simulation we further determine which magnet pairs to consi
 
 \paragraph{Determining Magnet Pairs}
 
-For a single cube pair each of the four magnets of one cube interacts with each magnet of the other cube, resulting in $16$ cube pair to consider for a physically accurate simulation.
-Magnet forces of pairs within the same cube are neglected, since they no result in any movement.
-To not calculate all $16$ pairs, determining the first $k$ pairs with minimal distance is a reasonable approach, since they should have the strongest force interaction.
-Of course $k=1$ is most efficient, but loses a lot of the real world behavior of magnetic modular cubes.
+For a single cube pair each of the four magnets of one cube interacts with each magnet of the other cube, resulting in $16$ magnet pairs to consider for a physically accurate simulation.
+Magnet forces of pairs within the same cube are neglected, since they do not result in any movement.
+Determining the first $k$ pairs with minimal distance is a reasonable approach to not calculate all $16$ pairs, since they should have the strongest force interaction.
+Of course $k=1$ is most efficient, but results in a loss of real world behavior of magnetic modular cubes.
 We choose $k=4$ to again find balance between accuracy and efficiency.
 
-\paragraph{Calculating Force}
+\paragraph{Calculating Magnet Force}
 
-Each calculated force of a magnet pair is applied at the position of both magnetic in opposite direction, resulting in either attraction or repulsion.
+Each calculated force of a magnet pair is applied at the position of both magnets in opposite direction, resulting in either attraction or repulsion.
+For two magnets with moments $m_1$ and $m_2$ and a distance of $r$ the magnet force acting from magnet 1 on magnet 2 is
+\begin{equation}
+F_\textit{magnet} = \frac{\mu_\textit{magnet}}{r^4} (m_2(m_1 \cdotp \hat{r}) + m_1(m_2 \cdotp \hat{r}) + \hat{r}(m_1 \cdotp m_2) - 5\hat{r}(m_1 \cdotp \hat{r})(m_2 \cdotp \hat{r})) \, ,s
+\end{equation}
+with $\hat{r}$ being the unit vector pointing from magnet 1 to magnet 2.
+The force acting from magnet 2 on magnet 1 is simply $-F_\textit{magnet}$.
+We set the strength of all magnets to $\mu_{magnet} = 25000000$ \cite{levitt2013}. 
 
-\begin{itemize}
-	\item Provide big boy formula for $F_\textit{magnet}$ with citation that is not wikipedia...
-	\item We have a magnet ``strength'' of  $\mu_\textit{magnet} = 25000000$. Don't know what unit and if I will ever figure that out.
-\end{itemize}
-%TODO
 
 \subsection{Magnetic Field Forces}
 \label{sec:force_field}
 
 Magnetic field forces are responsible for aligning cubes with the longitude orientation of the magnetic field.
-The forces are applied to each cube of a polyomino only at the north and south magnets in opposite direction to ensure a rotation.
-The force $F_\textit{field}$ is calculated based on the difference of cube orientation $\gamma_\textit{cube}$ and magnetic field orientation $\gamma_\textit{field}$ with
+Force is applied only at the position of north and south magnets for each cube of a polyomino.
+The forces at north and south magnets act in opposite directions to ensure a rotation.
+$F_\textit{field}$ is calculated based on the difference of cube orientation $\gamma_\textit{cube}$ and magnetic field orientation $\gamma_\textit{field}$ with
 \begin{equation}
-F_\textit{field} = \sin(\gamma_\textit{cube} - \gamma_\textit{field}) \cdot \mu_\textit{field} \, .
+F_\textit{field} = \mu_\textit{field} \begin{pmatrix} \sin(\gamma_\textit{cube} - \gamma_\textit{field}) \\ 0 \end{pmatrix} R_{\gamma_\textit{cube}} \, .
 \end{equation}
-$\mu_\textit{field} = 1000$ is the strength of the magnetic field.
-An alignment where $\gamma_\textit{cube} = \gamma_\textit{field}$ results in $F_\textit{field} = 0$.
+$\mu_\textit{field} = 1000$ is the strength of the magnetic field and $R_{\gamma_\textit{cube}}$ is the rotation matrix used for rotating the force direction by $\gamma_\textit{cube}$.
+An alignment where $\gamma_\textit{cube} = \gamma_\textit{field}$ results in $F_\textit{field} = \vec{0}$.
 
 
 \subsection{Friction Forces}
