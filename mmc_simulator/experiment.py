@@ -34,8 +34,10 @@ SHAPES = {
     "5x2": factory.fiveByTwo(),
     "2x5": factory.twoByFive(),
     "10x1": factory.linePolyVert(10,10),
-    "1x10": factory.linePolyHori(10,0)
-    #"3x3_Ring": factory.threeByThreeRing()
+    "1x10": factory.linePolyHori(10,0),
+    "letterC": factory.letterC(),
+    "letterS": factory.letterS(),
+    "letterA": factory.letterA()
 }
 
 

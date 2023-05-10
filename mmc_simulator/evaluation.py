@@ -243,6 +243,8 @@ def barplot_multipleSorting(expPath, xaxis, yaxis):
         timedout = 0
         for plan in plans:
             if not plan.success and plan.time > 600:
+                if plan.nlocal < 100:
+                    print(f"{exp.__dict__[xaxis]}-{exp.optionSorting}-{plan.seed} sus with nlocal={plan.nlocal}!")
                 timedout += 1
             if xaxis == "boardSize":
                 data[xaxisLabel].append(BOARDSIZES_LABELS[exp.boardSize])
@@ -311,7 +313,7 @@ def main():
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
-    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "time", onlySuccess=False)
+    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "nlocal", onlySuccess=False)
     barplot_multipleSorting(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "timeout")
 
 if __name__ == "__main__":
