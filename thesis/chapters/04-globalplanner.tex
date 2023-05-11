@@ -24,16 +24,15 @@ For the algorithm the number of cubes in the workspace is limited to the size of
 A take on why is this done and why the problem becomes more complex when working with extra cubes, is done in \autoref{sec:more_cubes}.
 
 
+\section{Two-Cutting Polyominoes}
+\label{sec:twocutting}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.6\textwidth]{figures/twocuts.pdf}
 	\caption[Different cuts for polyomino shapes]{Examples for cutting polyomino shapes. The top row shows three two-cuts for a $3\times3$ shape, of which only the left one is monotone and therefore valid. The middle one creates a cave and the right one a hole. The bottom row shows cuts that do not split the polyomino into two pieces. The left one does not break the polyomino at all and the right one creates three sub-polyominoes.}
 	\label{fig:twocuts}
 \end{figure}
-
-
-\section{Two-Cutting Polyominoes}
-\label{sec:twocutting}
 
 Schmidt et al. \cite{Schmidt2018} made use of straight-line two-cuts, to handle the construction of a polyomino with more than trivial sub-assemblies.
 
@@ -56,6 +55,9 @@ The bottom row of \autoref{fig:twocuts} shows cuts that split the polyomino in l
 
 % 32 possibilities for 3x3
 
+\section{Two-Cut-Sub-Assembly Graph}
+\label{sec:tcsa}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.45\textwidth]{figures/tcsa_multiedge.pdf}
@@ -69,9 +71,6 @@ The bottom row of \autoref{fig:twocuts} shows cuts that split the polyomino in l
 	\caption[Example for a two-cut-sub-assembly graph.]{Example of an two-cut-sub-assembly graph for a four-cube L-shape. The polyomino sets are illustrated as ellipses. If the polyominoes of a set are not numbered, there is only one occurrence of this polyomino. Otherwise the number of occurrences is placed left of the polyomino. The sets are numbered as if the graph was produced by \autoref{algo:build_tcsa} starting from $S_T$. The weight of edges are illustrated as rectangular boxes containing the polyominoes that need to be connected at specific edges, marked in yellow.}
 	\label{fig:tcsa}
 \end{figure}
-
-\section{Two-Cut-Sub-Assembly Graph}
-\label{sec:tcsa}
 
 The two-cut-sub-assembly graph, short TCSA graph, functions as a building instruction for a specific target polyomino, we will call it $G_{TCSA}(T)$.
 The TCSA graph works with sets of polyominoes as nodes.
@@ -88,6 +87,8 @@ Two nodes $S_0$ and $S_1$ are connected, if one polyomino contained in $S_1$ can
 This already provides a perspective on the use of two-cuts and the way $G_{TCSA}(T)$ is built starting with $T$.
 We will further explain the building process along with an example of a TCSA graph provided in \autoref{fig:tcsa}.
 
+
+\paragraph{Building a TCSA Graph}
 
 \begin{algorithm}
 	\caption{\scshape Build-TCSA-Graph}
@@ -117,9 +118,6 @@ We will further explain the building process along with an example of a TCSA gra
 	\end{algorithmic}
 \end{algorithm}
 
-
-\paragraph{Building a TCSA Graph}
-
 \autoref{algo:build_tcsa} describes the process of building $G_{TCSA}(T)$ for the target $T$.
 The algorithm works through each newly added node in $V$ in a breadth-first-search manner.
 The first node added to $V$ is $S_T$, which is a polyomino set only containing the target shape.
@@ -141,15 +139,15 @@ This means that no matter which connections are chosen along the way, $n-1$ edge
 We describe this attribute, by giving the TCSA graph a depth of $n$.
 The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nodes matches the order they were added by \autoref{algo:build_tcsa}.
 
+\subsection{Complexity}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\textwidth]{figures/plots/tcsa_nodes_edges.pdf}
 	\caption[Average two-cut-sub-assembly nodes and edges for target size $n$.]{Average number of nodes (left) and edges (right) of a TCSA graph for different target sizes $n$.
-	For each target size $200$ samples of randomly generated polyominoes were taken.}
+		For each target size $200$ samples of randomly generated polyominoes were taken.}
 	\label{fig:tcsa_plot}
 \end{figure}
-
-\subsection{Complexity}
 
 The Stirling numbers of second kind provide an upper bound for the number of nodes in a TCSA graph.
 The Stirling numbers of second kind
@@ -178,16 +176,15 @@ The creation of $G_{TCSA}(T)$ becomes more complex for increasing numbers of $n$
 Lowering simulation time make a complex data-structure like the TCSA graph worth it.
 
 
+\section{Connection Options}
+\label{sec:connect_options}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{figures/connect_options.pdf}
 	\caption[Example of connection options for one two-cut-sub-assembly edge]{All connection options when connecting a red cube at the west of a blue cube to get from $S_7$ to $S_4$. Developing a local plan for different polyomino pairs, leads to different goal configurations. $(A_1,B_1)$ and $(A_2,B_1)$ lead to the desired polyomino set $S_4$, but $(A_2,B_2)$ leads directly to $S_2$. All these sets can be found in the TCSA graph of \autoref{fig:tcsa}. The goal configuration of $(A_1, B_2)$ holds the set $S_x$, which cannot be found in \autoref{fig:tcsa}. For further global planning this set could not be used.}
 	\label{fig:connect_options}
 \end{figure}
-
-
-\section{Connection Options}
-\label{sec:connect_options}
 
 In each configuration $g$ the global planner encounters, $G_{TCSA}(T)$ will be used to determine the next connection, that the local planner should try to establish.
 $G_{TCSA}(T)$ will be searched for the node that is the polyomino set $S(g)$.
@@ -260,6 +257,9 @@ The local planner might even fail to establish the desired connection.
 If the resulting polyomino set is contained in $G_{TCSA}(T)$, global planning can continue, but there are certain failure types that are not valid for further planning.
 Polyomino sets with invalid polyominoes, or where connections in caves are necessary, should not be present in the TCSA graph anyway, but we also do not continue planning with a failure due to maximum movement capacity or polyominoes being stuck.
 
+\section{Global Planning Algorithm}
+\label{sec:global_algo}
+
 \begin{algorithm}
 	\caption{\scshape Assemble-Target}
 	\label{algo:global_algo}
@@ -298,10 +298,6 @@ Polyomino sets with invalid polyominoes, or where connections in caves are neces
 		\ENDLOOP
 	\end{algorithmic}
 \end{algorithm}
-
-
-\section{Global Planning Algorithm}
-\label{sec:global_algo}
 
 The global planning algorithm provided in \autoref{algo:global_algo} takes the initial configuration $g_{init}$ and the target $T$ as inputs and returns the state of the global plan $s$ and a plan stack $P$ as outputs.
 For a successful plan, $P$ contains the local plans leading to the assembly of $T$.
@@ -388,7 +384,6 @@ The number of configurations explored $\#\textit{config}$ is also examined in th
 
 %\subsection{Discretize Configurations}
 % dont know if I wil actually implement, but talk about benefits or why not that neccessary
-
 
 
 \section{More Cubes than Target}

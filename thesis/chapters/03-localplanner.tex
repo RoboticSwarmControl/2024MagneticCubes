@@ -31,15 +31,16 @@ When $A$ should be connected at an south face of $B$, $A$ can now walk into east
 A closer look on why these two options differ and how both can be established at any position is taken in \autoref{sec:align}.
 We call this the \textit{slide-in direction} $\vec{m} \in \{\vec{E}, \vec{W}\}$, which states that $B$ is positioned in direction $\vec{m}$ of $A$.
 
+
+\section{Aligning Cubes}
+\label{sec:align}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.90\textwidth]{figures/aligning.pdf}
 	\caption[Illustration of straight- and offset-aligning]{The figure shows examples for straight- and offset-aligning. The edges to be connected are marked yellow. a) shows two not aligned polyominoes (top) and the result of a straight-align (bottom). In b) you can see the two approaches for an offset-align. The cubes were aligned with their west edge (top) and with their east edge (bottom).}
 	\label{fig:aligning}
 \end{figure}
-
-\section{Aligning Cubes}
-\label{sec:align}
 
 To establish a connection between two polyominoes $A$ and $B$, the connection-cubes $c_A$ and $c_B$ with their connection-edges $e_A$ and $e_B$ need to be aligned in the correct way.
 When $A$ is rotated without magnetic field elevation, a cube with position $P_{c_A}$ rotates in a circle around the center of mass of its polyomino $C_A$.
@@ -72,6 +73,7 @@ For the two polyominoes you can also see that aligning with east or west edge ca
 Establishing a connection by letting $A$ move towards $B$ in west direction is possible, but by moving in east direction other cubes of the polyominoes are blocking the way.
 In \autoref{sec:plan} we present a method for checking if moving in from east or west is possible. 
 
+\paragraph{Solving Alignment:}
 
 \begin{figure}
 	\centering
@@ -84,8 +86,6 @@ In \autoref{sec:plan} we present a method for checking if moving in from east or
 		Perfect alignment is not possible, because the polyominoes are to close.}
 	\label{fig:aligning_plot}
 \end{figure}
-
-\paragraph{Solving Alignment:}
 
 For calculating angular difference we use the dot-product
 \begin{equation*}
@@ -190,16 +190,15 @@ It depends on the distance of the cubes after straight-aligning.
 If the distance is too big for magnetic forces to act, failure is reported, but if they are close enough the local planner waits until magnetic attraction connects $e_A$ and $e_B$.
 
 
+\paragraph{Connecting in Caves:}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.80\textwidth]{figures/caves.pdf}
 	\caption[Examples for connecting polyominoes into caves]{Three different examples for connecting polyominoes into caves. a) and b) show one-cube-deep caves (a) east-west and b) two-cube-wide north-south). c) illustrates a two-cube-deep east-west cave. The edges to be connected are marked yellow.}
 	\label{fig:caves}
 \end{figure}
-
 %TODO maybe show bigger caves.
-
-\paragraph{Connecting in Caves:}
 
 Connecting two polyominoes where one of the connection-faces is located inside a cave is a difficult task in the continuous world.
 We differentiate between east-west and north-south located caves.
@@ -230,6 +229,10 @@ Whenever a pivot walking motion is done, we sum up the distances $c_A$ and $c_B$
 Let $(w,h)$ be the size of the workspace.
 We define a maximum movement capacity of $2\cdot(w+h)$.
 This capacity gives the polyominoes enough movement, so that both can move along a horizontal and vertical workspace boundary, which should be sufficient to establish a connection.
+
+
+\section{Local Planning Algorithm}
+\label{sec:local_algo}
 
 \begin{algorithm}
 	\caption{\scshape Align-Walk-Realign}
@@ -279,9 +282,6 @@ This capacity gives the polyominoes enough movement, so that both can move along
 		\ENDLOOP 
 	\end{algorithmic}
 \end{algorithm}
-
-\section{Local Planning Algorithm}
-\label{sec:local_algo}
 
 Before executing the algorithm presented in \autoref{algo:local_algo} we evaluate all the failure conditions that can be checked in advance, so no simulation-time is wasted on a plan that is bound to fail from the start.
 While doing so, the possible slide-in directions are also determined and \autoref{algo:local_algo} is executed with both pivot walking directions $\vec{w}$ for each possible $\vec{m}$.

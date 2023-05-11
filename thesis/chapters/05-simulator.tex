@@ -77,12 +77,6 @@ The data structure and the polyominoes themselves are hash-able for fast equalit
 Individual orientation and velocities of cubes will not be used for planning, but they ensure a correct loading of a workspace configuration that got saved while in motion or when cubes where not or not yet aligned with the magnetic field.
 The alignment can be prevented by walls or other cubes, even though we assume perfect alignment with the magnetic field during planning.
 
-\begin{figure}
-	\centering
-	\includegraphics[width=0.6\textwidth]{figures/plots/magnet_force.pdf}
-	\caption[Declining magnetic forces with increasing cube distance.]{Decline of magnetic force between two permanent magnets with increasing distance between the cubes. We reach a maximum force at $2 r_C$, when the cube faces are in contact. With distances bigger than the critical-distance of $5 r_C$ the fraction of force is negligible.}
-	\label{fig:magnet_force}
-\end{figure}
 
 \section{Collision Handling}
 \label{sec:coll_handling}
@@ -92,7 +86,7 @@ For the collision detection Pymunk uses a bounding volume hierarchy of objects i
 We make use of this efficient collision detection for determining cube pairs in critical-distance.
 For that, each cube is surrounded by a circular sensor with a radius of half the critical-distance.
 A cube pair is in critical-distance if their sensors collide.
-The critical-distance is $5 r_C$ and illustrated in \autoref{fig:magnet_force}.
+We set the critical-distance to $5 r_C$.
 More on the use of cube pairs in critical-distance in \autoref{sec:force_magnet}.
 
 \section{Simulating Forces}
@@ -103,6 +97,13 @@ Providing forces for the appliance in the next iteration does not effect simulat
 
 \subsection{Magnet Forces}
 \label{sec:force_magnet}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.6\textwidth]{figures/plots/magnet_force.pdf}
+	\caption[Declining magnetic forces with increasing cube distance.]{Decline of magnetic force between two permanent magnets with increasing distance between the cubes. We reach a maximum force at $2 r_C$, when the cube faces are in contact. With distances bigger than the critical-distance of $5 r_C$ the fraction of force is negligible.}
+	\label{fig:magnet_force}
+\end{figure}
 
 The magnetic dipole-dipole interaction of permanent magnet is the driving force for self-assembly.
 Cubes attract and repulse each other, which results in connection of cube faces and therefore the construction of polyominoes.

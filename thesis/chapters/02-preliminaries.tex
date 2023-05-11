@@ -1,12 +1,9 @@
 \chapter{Preliminaries}
 \label{chap:prelim}
 
-\begin{figure}
-	\centering
-	\includegraphics[width=0.5\textwidth]{figures/real_mmcs.png}
-	\caption[Picture of magnetic modular cubes in real workspace]{Magnetic modular cubes with 2.8 mm edges in a real workspace. Picture was taken from a video made by A. Bhattacharjee showing the assembly of a four cube polyomino.}
-	\label{fig:real_mmcs}
-\end{figure}
+
+
+\section{Magnetic Modular Cubes}
 
 \begin{figure}
 	\centering
@@ -15,7 +12,14 @@
 	\label{fig:magnetic_cubes}
 \end{figure}
 
-\section{Magnetic Modular Cubes}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.5\textwidth]{figures/real_mmcs.png}
+	\caption[Picture of magnetic modular cubes in real workspace]{Magnetic modular cubes with 2.8 mm edges in a real workspace. Picture was taken from a video made by A. Bhattacharjee showing the assembly of a four cube polyomino.}
+	\label{fig:real_mmcs}
+\end{figure}
+
+
 The magnetic modular cubes are cube-shaped bodies embedded with permanent magnets on the four side faces.
 The magnets have different orientations of their north and south pole. 
 One pole is always pointing outward and the other straight to the center of the cube.
@@ -38,14 +42,17 @@ In \autoref{fig:real_mmcs} magnetic modular cubes with 2.8 mm edges can be seen 
 Two important lengths that we use for planning and simulating are the cube radius $r_C$ and the magnet radius $r_M$ (also illustrated in \autoref{fig:magnetic_cubes}).
 $r_C$ is one half-length of a cube face and $r_M$ is the distance from the center of the cube to the center of the magnet.
 
+
+
+\section{Workspace and Configuration}
+
 \begin{figure}
 	\centering
-	\includegraphics[width=0.53\textwidth]{figures/workspace_config.png}
+	\includegraphics[width=0.45\textwidth]{figures/workspace_config.png}
 	\caption[Workspace with a configuration of four magnetic modular cubes]{Rectangular workspace with a configuration of four magnetic modular cubes. All cubes have the same orientation as the magnetic field, indicated by the compass in the top-left corner.}
 	\label{fig:workspace_config}
 \end{figure}
 
-\section{Workspace and Configuration}
 Magnetic modular cubes could theoretically be placed and maneuvered on any 2-dimensional plane with numerous obstacles, as long as you can surround the workspace with a time varying magnetic field.
 The magnetic field should be able to point in any direction specified by angles of latitude and longitude, so that the cubes can operate in all desired motion modes.
 Because the motion planning problem of self-assembling target shapes in the special Euclidean group is hard enough without considering obstacles and arbitrary workspace shapes, this thesis limits itself to a rectangular workspace with no internal obstacles.
@@ -61,6 +68,9 @@ Future work could examine the dynamic configuration, which would enable faster m
 \autoref{fig:workspace_config} shows a configuration with four cubes in the workspace.
 It is irrelevant which exact physical cube is at which position as long as they are the same type, so switching the positions of the two red cubes in \autoref{fig:workspace_config} would lead to the same configuration as before.
 
+\section{Polyominoes}
+\label{sec:polys}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.65\textwidth]{figures/polyominoes.pdf}
@@ -68,8 +78,6 @@ It is irrelevant which exact physical cube is at which position as long as they 
 	\label{fig:polyominoes}
 \end{figure}
 
-\section{Polyominoes}
-\label{sec:polys}
 The embedded magnets not only align the cube with the magnetic field, they also allow cubes to self-assemble into polyominoes.
 Two cube faces can connect if their magnets have opposite polarities.
 Because of this and the alignment with the magnetic field, cubes can either be connected at north and south faces, or east and west faces, if the cubes are not the same type.
@@ -90,6 +98,10 @@ Although it is not possible to connect cubes of same type at east and west faces
 The connection of the bottom two cubes is strong enough to hold the structure together, even though the four blue cubes on the top repel each other.
 The resulting polyomino in its grid representation has two east-west connections between cubes the same type and is therefor marked as an invalid polyomino.
 
+
+\section{Motion Modes}
+\label{sec:motion}
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.80\textwidth]{figures/pivot_walking.pdf}
@@ -97,8 +109,6 @@ The resulting polyomino in its grid representation has two east-west connections
 	\label{fig:pivot_walking}
 \end{figure}
 
-\section{Motion Modes}
-\label{sec:motion}
 In \cite{Bhattacharjee2022} three motion modes are presented. Rotation, pivot walking, and rolling.
 
 If the magnetic field orientation lays in the plane of the workspace and rotates without any inclination the rotation is performed around the center of mass for all polyominoes and we consider this motion a normal rotation.
@@ -112,6 +122,9 @@ Pulling up the north pole does the opposite. The polyominoes will pivot on the s
 The sum of all these cube edges is called the north or south pivot-edge and by keeping the magnetic field elevated and rotating around the normal vector of the workspace plane, the polyominoes will rotate around the center point of their pivot-edge.
 This point is called the north or south pivot-point.
 All these edges and points are illustrated in \autoref{fig:pivot_walking} b).
+
+
+\paragraph{pivot walking:}
 
 \begin{figure}
 	\centering
@@ -127,7 +140,6 @@ All these edges and points are illustrated in \autoref{fig:pivot_walking} b).
 	\label{fig:displacement_pivot_walking}
 \end{figure}
 
-\paragraph{pivot walking:}
 Not rotating around the center of mass is important for pivot walking.
 In the first step of a pivot waking cycle, the magnetic field is elevated to let the polyomino pivot on its north pivot edge.
 As a second step a rotation of $-\frac{1}{2} \cdot \alpha$ is performed around the north pivot point.
