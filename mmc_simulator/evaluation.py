@@ -221,11 +221,7 @@ def boxplot_TCSA(path):
     plt.subplots_adjust(wspace=0.5)
     plt.show()
 
-
-def barplot_multipleSorting(expPath, xaxis, yaxis):
-    exp_plan_data = loadExperimentSet(expPath)
-    xaxisLabel = AXIS_LABELS[xaxis]
-    yaxisLabel = AXIS_LABELS[yaxis]
+def __emptySortingData(xaxisLabel, yaxisLabel):
     # each sorting option gets a dataframe
     sorting_data = {}
     for sorting in OptionSorting.list():
@@ -234,11 +230,24 @@ def barplot_multipleSorting(expPath, xaxis, yaxis):
         data[yaxisLabel] = []
         data["option sorting"] = []
         sorting_data[sorting.name] = data
+    return sorting_data
+
+def __expPlanData(expPath, xaxis):
     # fil in the data form the experiment set
-    exp_plan_items = exp_plan_data.items()
+    exp_plan_data = loadExperimentSet(expPath)
+    # sort the xaxis 
     if xaxis == "boardSize":
-        exp_plan_items = sorted(exp_plan_items, key=lambda t: BOARDSIZES_LABELS[t[0].boardSize])
-    for exp, plans in exp_plan_items:
+        return dict(sorted(exp_plan_data.items(), key=lambda t: BOARDSIZES.index(t[0].boardSize)))
+    if xaxis == "targetShape":
+        return dict(sorted(exp_plan_data.items(), key=lambda t: list(SHAPES.keys()).index(t[0].targetShape)))
+    return exp_plan_data
+
+def barplot_multipleSorting(expPath, xaxis, yaxis):
+    xaxisLabel = AXIS_LABELS[xaxis]
+    yaxisLabel = AXIS_LABELS[yaxis]
+    sorting_data = __emptySortingData(xaxisLabel, yaxisLabel)
+    exp_plan_data = __expPlanData(expPath, xaxis)
+    for exp, plans in exp_plan_data.items():
         data = sorting_data[exp.optionSorting]
         timedout = 0
         for plan in plans:
@@ -264,22 +273,11 @@ def barplot_multipleSorting(expPath, xaxis, yaxis):
 
 
 def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess=False):
-    exp_plan_data = loadExperimentSet(expPath)
     xaxisLabel = AXIS_LABELS[xaxis]
     yaxisLabel = AXIS_LABELS[yaxis]
-    # each sorting option gets a dataframe
-    sorting_data = {}
-    for sorting in OptionSorting.list():
-        data = {}
-        data[xaxisLabel] = []
-        data[yaxisLabel] = []
-        data["option sorting"] = []
-        sorting_data[sorting.name] = data
-    # fill in the data form the experiment set
-    exp_plan_items = exp_plan_data.items()
-    if xaxis == "boardSize":
-        exp_plan_items = sorted(exp_plan_items, key=lambda t: BOARDSIZES_LABELS[t[0].boardSize])
-    for exp, plans in exp_plan_items:
+    sorting_data = __emptySortingData(xaxisLabel, yaxisLabel)
+    exp_plan_data = __expPlanData(expPath, xaxis)
+    for exp, plans in exp_plan_data.items():
         data = sorting_data[exp.optionSorting]
         for plan in plans:
             if onlySuccess and not plan.success:
@@ -313,7 +311,7 @@ def main():
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
     #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
     #barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
-    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "nlocal", onlySuccess=False)
+    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "time", onlySuccess=False)
     barplot_multipleSorting(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "timeout")
 
 if __name__ == "__main__":
