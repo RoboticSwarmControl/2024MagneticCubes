@@ -1,4 +1,3 @@
-
 import matplotlib.ticker as tck
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -8,11 +7,13 @@ import numpy as np
 from experiment import *
 from com.state import Cube
 
+FIGURE_DIR = "../thesis/figures/plots"
+
 AXIS_LABELS = {
     "targetSize": "target size $n$",
     "targetNred": "number of red cubes in target",
     "targetShape": "target shape",
-    "boardSize": "workspace area [Mpx], aspect ratio",
+    "boardSize": "workspace area, aspect ratio",
     "time": "planning time [s]",
     "cost": "plan cost [rad]",
     "nconfig": "number of explored configurations #config",
@@ -25,19 +26,19 @@ AXIS_LABELS = {
 }
 
 BOARDSIZES_LABELS = {
-    (700,700): "0.5, 1:1",
-    (1000,1000): "1.0, 1:1",
-    (1300,1300): "1.5, 1:1",
-    (1000,500): "0.5, 2:1",
-    (1400,700): "1.0, 2:1",
-    (1800,900): "1.5, 2:1",
-    (1200,400): "0.5, 3:1",
-    (1800,600): "1.0, 3:1",
-    (2100,700): "1.5, 3:1"
+    (700,700): "S, 1:1",
+    (1000,1000): "M, 1:1",
+    (1300,1300): "L, 1:1",
+    (1000,500): "S, 2:1",
+    (1400,700): "M, 2:1",
+    (1800,900): "L, 2:1",
+    (1200,400): "S, 3:1",
+    (1800,600): "M, 3:1",
+    (2100,700): "L, 3:1"
 }
 
 FONTSCALE = 2
-LEGEND_SIZE = 20
+LEGEND_SIZE = 15
 
 def plot_alignFunctions():
     plt.rc('font', size=14)
@@ -159,7 +160,8 @@ def plot_magnetForce():
     plt.show()
     
 
-def pieplot_timeUse(filePath):
+def pieplot_timeUse(fileName):
+    filePath = os.path.join(RESULT_DIR, "Simulator-Time", fileName)
     with open(filePath, 'r') as file:
         data = json.load(file)
     task_time: dict = data["tasks"]
@@ -191,8 +193,8 @@ def pieplot_timeUse(filePath):
     plt.show()
 
 
-def boxplot_TCSA(path):
-    filePath = os.path.join(path, "TCSA.json")
+def boxplot_TCSA(expName):
+    filePath = os.path.join(RESULT_DIR, expName, "TCSA.json")
     with open(filePath, 'r') as file:
         exp_data = json.load(file)
     xaxisLabel = "target size $n$"
@@ -232,8 +234,9 @@ def __emptySortingData(xaxisLabel, yaxisLabel):
         sorting_data[sorting.name] = data
     return sorting_data
 
-def __expPlanData(expPath, xaxis):
+def __expPlanData(expName, xaxis):
     # fil in the data form the experiment set
+    expPath = os.path.join(RESULT_DIR, expName)
     exp_plan_data = loadExperimentSet(expPath)
     # sort the xaxis 
     if xaxis == "boardSize":
@@ -242,11 +245,11 @@ def __expPlanData(expPath, xaxis):
         return dict(sorted(exp_plan_data.items(), key=lambda t: list(SHAPES.keys()).index(t[0].targetShape)))
     return exp_plan_data
 
-def barplot_multipleSorting(expPath, xaxis, yaxis):
+def barplot_multipleSorting(expName, xaxis, yaxis, outFile=None):
     xaxisLabel = AXIS_LABELS[xaxis]
     yaxisLabel = AXIS_LABELS[yaxis]
     sorting_data = __emptySortingData(xaxisLabel, yaxisLabel)
-    exp_plan_data = __expPlanData(expPath, xaxis)
+    exp_plan_data = __expPlanData(expName, xaxis)
     for exp, plans in exp_plan_data.items():
         data = sorting_data[exp.optionSorting]
         timedout = 0
@@ -267,16 +270,21 @@ def barplot_multipleSorting(expPath, xaxis, yaxis):
     # plot catplot bars
     seaborn.set(font_scale=FONTSCALE)
     seaborn.catplot(data=dataFrame, kind="bar", x=xaxisLabel, y=yaxisLabel, hue="option sorting",
-                    errorbar='sd', legend_out=False)
+                    errorbar=None, legend_out=False)
     plt.legend(loc="upper left", prop={'size': LEGEND_SIZE})
-    plt.show()
+    if outFile == None:
+        plt.show()
+    else:
+        figure = plt.gcf()
+        figure.set_size_inches(16*1.15 ,9*1.15)
+        plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
+    plt.close()
 
-
-def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess=False):
+def boxplot_multipleSortings(expName, xaxis, yaxis, outFile=None, showFliers=True, onlySuccess=False):
     xaxisLabel = AXIS_LABELS[xaxis]
     yaxisLabel = AXIS_LABELS[yaxis]
     sorting_data = __emptySortingData(xaxisLabel, yaxisLabel)
-    exp_plan_data = __expPlanData(expPath, xaxis)
+    exp_plan_data = __expPlanData(expName, xaxis)
     for exp, plans in exp_plan_data.items():
         data = sorting_data[exp.optionSorting]
         for plan in plans:
@@ -296,23 +304,47 @@ def boxplot_multipleSortings(expPath, xaxis, yaxis, showFliers=True, onlySuccess
                     showmeans=True, meanprops={"marker": "o","markerfacecolor": "white","markeredgecolor": "black","markersize": "10"},
                     showfliers=showFliers, flierprops=dict(markerfacecolor='0.50', markersize=5))
     plt.legend(loc="upper left", prop={'size': LEGEND_SIZE})
-    plt.show()
-    
+    if outFile == None:
+        plt.show()
+    else:
+        figure = plt.gcf()
+        figure.set_size_inches(16, 9)
+        plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
+    plt.close()
         
+def createFigures():
+    #TAFS
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "cost", "AFN_cost.pdf", onlySuccess=True)
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nlocal", "AFN_nlocal.pdf")
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nconfig", "AFN_nconfig.pdf")
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "localsToGoal", "AFN_ltg.pdf", onlySuccess=True)
+    barplot_multipleSorting("TAFS-experiments-2", "targetSize", "timeout", "AFN_timeout.pdf")
+    #AFTS
+    boxplot_multipleSortings("AFTS-experiments", "targetShape", "time", "AFTS_time.pdf", onlySuccess=True)
+    barplot_multipleSorting("AFTS-experiments", "targetShape", "timeout", "AFTS_timeout.pdf")
+    #AFBS
+    boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", "AFBS_time.pdf", onlySuccess=True)  
+    barplot_multipleSorting("AFBS-experiments", "boardSize", "timeout", "AFBS_timeout.pdf")
+    boxplot_multipleSortings("AFBS-experiments", "boardSize", "cost", "AFBS_cost.pdf", onlySuccess=True)
+
+
 def main():
     #---Thesis plots---
     #plot_alignFunctions()
     #plot_pivotAngleDistance()
     #plot_magnetForce()
-    #pieplot_timeUse(os.path.join(RESULT_DIR, "Simulator-Time/time-stats.json"))
-    #boxplot_TCSA(os.path.join(RESULT_DIR, "TCSA-experiments"))
+    #pieplot_timeUse("time-stats.json")
+    #boxplot_TCSA("TCSA-experiments")
     #---Result Plots---
-    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "time", onlySuccess=False)
-    #barplot_multipleSorting(os.path.join(RESULT_DIR, "TAFS-experiments-2"), "targetSize", "timeout")
-    #boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "time", onlySuccess=False)
-    #barplot_multipleSorting(os.path.join(RESULT_DIR, "AFBS-experiments"), "boardSize", "timeout")
-    boxplot_multipleSortings(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "time", onlySuccess=False)
-    barplot_multipleSorting(os.path.join(RESULT_DIR, "AFTS-experiments"), "targetShape", "timeout")
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "localsToGoal", onlySuccess=True)
+    #barplot_multipleSorting("TAFS-experiments-2", "targetSize", "timeout")
+    #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=False)
+    #barplot_multipleSorting("AFBS-experiments", "boardSize", "timeout")
+    #boxplot_multipleSortings("AFTS-experiments", "targetShape", "time", onlySuccess=False)
+    #barplot_multipleSorting("AFTS-experiments", "targetShape", "timeout")
+    #---Create Figures---
+    createFigures()
 
 if __name__ == "__main__":
     main()
