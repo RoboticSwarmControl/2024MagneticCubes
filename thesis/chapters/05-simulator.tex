@@ -47,7 +47,7 @@ When drawing is enabled, the Pygame-rendering of the workspace is the last step 
 
 The motion control manages the queued-in motions from the control program and determines a change of the magnetic field for each iteration of the simulation loop.
 This change consists of the longitude change in radians and the latitude change called the elevation.
-In our simulator the elevation states if the magnetic field lays in the workspace plane or if the magnetic north or south is pointing up.
+In our simulator the elevation states if the magnetic field lays in the workspace plane, referred to as neutral, or if the magnetic north or south is pointing up.
 We do not specify an angular value of the latitude.
 The elevation just indicates if polyominoes are pivoting or not.
 More on that in \autoref{sec:force_friction}.
@@ -134,11 +134,11 @@ We choose $k=4$ to again find balance between accuracy and efficiency.
 Each calculated force of a magnet pair is applied at the position of both magnets in opposite direction, resulting in either attraction or repulsion.
 For two magnets with moments $m_1$ and $m_2$ and a distance of $r$ the magnet force acting from magnet 1 on magnet 2 is
 \begin{equation}
-F_\textit{magnet} = \frac{\mu_\textit{magnet}}{r^4} (m_2(m_1 \cdotp \hat{r}) + m_1(m_2 \cdotp \hat{r}) + \hat{r}(m_1 \cdotp m_2) - 5\hat{r}(m_1 \cdotp \hat{r})(m_2 \cdotp \hat{r})) \, ,s
+F_\textit{mag} = \frac{\mu_\textit{mag}}{r^4} (m_2(m_1 \cdotp \hat{r}) + m_1(m_2 \cdotp \hat{r}) + \hat{r}(m_1 \cdotp m_2) - 5\hat{r}(m_1 \cdotp \hat{r})(m_2 \cdotp \hat{r})) \, ,s
 \end{equation}
 with $\hat{r}$ being the unit vector pointing from magnet 1 to magnet 2.
-The force acting from magnet 2 on magnet 1 is simply $-F_\textit{magnet}$.
-We set the strength of all magnets to $\mu_{magnet} = 25000000$ \cite{levitt2013}. 
+The force acting from magnet 2 on magnet 1 is simply $-F_\textit{mag}$.
+We set the strength of all magnets to $\mu_{mag} = 25000000$ \cite{levitt2013}. 
 
 
 \subsection{Magnetic Field Forces}
@@ -158,8 +158,27 @@ An alignment where $\gamma_\textit{cube} = \gamma_\textit{field}$ results in $F_
 \subsection{Friction Forces}
 \label{sec:force_friction}
 
-% force to let poly rotate around pivot point
-% splitt friction on cubes on pivot edge
-% nominal friction to prevent breaking
+Since we are working with a 2d-simulation, a workaround is needed to simulate pivoting of polyominoes.
+In the simulator a pivoting polyomino changes its center of rotation from the center of mass to either the north or the south pivot point.
+To archive this, friction forces are applied at different points depending on the three states of magnetic field elevation specified in \autoref{sec:motion_control}.
+
+Friction forces are applied per cube at a friction-point $p_\textit{fric}$, but polyomino information is still necessary to determine cubes that are in contact with the ground, called friction-cubes.
+In case of a neutral elevation, all cubes of the polyomino are friction-cubes and $p_\textit{fric}$ is the cube center.
+If the magnetic north is pointing up, all cube along the south pivot-edge become friction-cubes and $p_\textit{fric}$ becomes the position of the south magnet.
+If the magnetic south is pointing up, all cube along the north pivot-edge are friction-cubes with $p_\textit{fric}$ being the position of the north magnet.
+The force applied for friction-cubes is dependent on the velocity at the friction-point $v_{p_\textit{fric}}$ and the mass of a cube $m_C$
+\begin{equation}
+F_\textit{fric} = -v_{p_\textit{fric}} m_C \frac{n}{n_\textit{fric}} \, .
+\end{equation}
+$n$ is the size of the polyomino and $n_\textit{fric}$ the number of friction cubes.
+The force is divided by $n_\textit{fric}$, so that $F_\textit{fric}$ is distributed equally on each friction-cube.
+Multiplying by $n$ accounts for the mass of all cubes in the polyomino, which is carried by the friction-cubes.
+
+To ensure a more stable simulator, we apply a nominal friction force
+\begin{equation}
+F_\textit{nom} = -v_{p_\textit{fric}} m_C w_\textit{nom}
+\end{equation}
+to all non friction-cubes.
+We control the fraction of this force by $w_\textit{nom} = 0.35$.
 
 
