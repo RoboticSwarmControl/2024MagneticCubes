@@ -16,10 +16,10 @@ AXIS_LABELS = {
     "boardSize": "workspace area, aspect ratio",
     "time": "planning time [s]",
     "cost": "plan cost [rad]",
-    "nconfig": "number of explored configurations #config",
-    "nlocal": "number of local plans #locals",
+    "nconfig": "#config",
+    "nlocal": "#local",
     "ntcsa": "number of TCSA nodes #nodes",
-    "localsToGoal": "number of local plans in stack $|P|$",
+    "localsToGoal": "$|P|$",
     "timeout": "fraction timed out",
     "nodes": "number of TCSA nodes",
     "edges": "number of TCSA edges"
