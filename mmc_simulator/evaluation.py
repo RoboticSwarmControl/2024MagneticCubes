@@ -10,9 +10,9 @@ from com.state import Cube
 FIGURE_DIR = "../thesis/figures/plots"
 
 AXIS_LABELS = {
-    "targetSize": "target size $n$",
+    "targetSize": "target polyomino size $n$",
     "targetNred": "number of red cubes in target",
-    "targetShape": "target shape",
+    "targetShape": "target polyomino shape",
     "boardSize": "workspace area, aspect ratio",
     "time": "planning time [s]",
     "cost": "plan cost [rad]",
@@ -280,7 +280,7 @@ def barplot_multipleSorting(expName, xaxis, yaxis, outFile=None):
         plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
     plt.close()
 
-def boxplot_multipleSortings(expName, xaxis, yaxis, outFile=None, showFliers=True, onlySuccess=False):
+def boxplot_multipleSortings(expName, xaxis, yaxis, outFile=None, showFliers=True, onlySuccess=False, onlyTimeout=False):
     xaxisLabel = AXIS_LABELS[xaxis]
     yaxisLabel = AXIS_LABELS[yaxis]
     sorting_data = __emptySortingData(xaxisLabel, yaxisLabel)
@@ -288,7 +288,7 @@ def boxplot_multipleSortings(expName, xaxis, yaxis, outFile=None, showFliers=Tru
     for exp, plans in exp_plan_data.items():
         data = sorting_data[exp.optionSorting]
         for plan in plans:
-            if onlySuccess and not plan.success:
+            if (onlySuccess and not plan.success) or (onlyTimeout and (plan.time < 600 or plan.success)):
                 continue
             if xaxis == "boardSize":
                 data[xaxisLabel].append(BOARDSIZES_LABELS[exp.boardSize])
@@ -315,9 +315,9 @@ def boxplot_multipleSortings(expName, xaxis, yaxis, outFile=None, showFliers=Tru
 def createFigures():
     #TAFS
     boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "cost", "AFN_cost.pdf", onlySuccess=True)
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nlocal", "AFN_nlocal.pdf")
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nconfig", "AFN_nconfig.pdf")
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "cost", "AFN_cost.pdf", onlySuccess=True, showFliers=False)
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nlocal", "AFN_nlocal.pdf", onlySuccess=True, showFliers=False)
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nconfig", "AFN_nconfig.pdf", onlySuccess=True, showFliers=False)
     boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "localsToGoal", "AFN_ltg.pdf", onlySuccess=True)
     barplot_multipleSorting("TAFS-experiments-2", "targetSize", "timeout", "AFN_timeout.pdf")
     #AFTS
@@ -326,7 +326,7 @@ def createFigures():
     #AFBS
     boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", "AFBS_time.pdf", onlySuccess=True)  
     barplot_multipleSorting("AFBS-experiments", "boardSize", "timeout", "AFBS_timeout.pdf")
-    boxplot_multipleSortings("AFBS-experiments", "boardSize", "cost", "AFBS_cost.pdf", onlySuccess=True)
+    boxplot_multipleSortings("AFBS-experiments", "boardSize", "cost", "AFBS_cost.pdf", onlySuccess=True, showFliers=False)
 
 
 def main():
@@ -337,7 +337,7 @@ def main():
     #pieplot_timeUse("time-stats.json")
     #boxplot_TCSA("TCSA-experiments")
     #---Result Plots---
-    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "localsToGoal", onlySuccess=True)
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", onlySuccess=True)
     #barplot_multipleSorting("TAFS-experiments-2", "targetSize", "timeout")
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=False)
     #barplot_multipleSorting("AFBS-experiments", "boardSize", "timeout")

@@ -19,6 +19,7 @@ For the creation of random polyominoes and initial configurations we used a seed
 That way the option sorting strategies are applied to the same set of seeds to make the results comparable.
 The global planner states a timeout failure after a planning time of $600$ seconds.
 
+%TODO key legende fuer box-whisker plots
 
 \section{Assembly for Target Size}
 \label{sec:AFN}
@@ -28,7 +29,7 @@ To maximize the variety of possible polyomino-shapes the number of red cubes is 
 Because of the variety, this experiment is well-suited for not only analyzing planning time and rotational-cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
 We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each target size $150$ samples were taken.
 
-\paragraph{Time and Failure Analysis}
+\paragraph{Planning Time}
 
 \begin{figure}
 	\centering
@@ -49,20 +50,35 @@ We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each t
 	\label{fig:AFN_timestats}
 \end{figure}
 
+\autoref{fig:AFBS_time} shows distribution of planning time and \autoref{fig:AFN_timeout} plots the fraction of timeouts during this experiment.
+The construction of target polyominoes with sizes $5$ to $7$ can be planned in under $30$ seconds with just a few outliers exceeding this time.
+Note the all instances could be solved within the timeout.
+
+For target sizes above $7$ timeout failures first appear with roughly $5\%$ for $n = 8$
+The fraction of timeouts increases to $20\%$ for $n=12$.
+The planning time for $n = 12$ increases to $150$ seconds on average with a median of $100$ seconds.
+With increasing $n$, a wider spread of planning time can be seen.
+Outliers can reach planning times close to the timeout of $600$ seconds.
+
+In terms of planning time the option sorting strategies make no noticeable difference.
+For the fraction of timeouts, growing the largest component often exceeds the other two strategies clearly visible for $n=11$, where grow largest is at $20\%$ and the others under $10\%$ of plans timed out.
 
 
-\paragraph{Cost Analysis}
+\paragraph{Plan Cost}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFN_cost.pdf}
-	\caption[Plan cost for different target sizes]{Plan cost of successful plans for different target sizes $n$. All option sorting strategies are compared.}
+	\caption[Plan cost for different target sizes]{Plan cost in radians of successful plans for different target sizes $n$. All option sorting strategies are compared.}
 	\label{fig:AFN_cost}
 \end{figure}
 
+\autoref{fig:AFN_cost} shows the rotational cost of the resulting plans that successfully assembled the target.
+The costs increase slightly for bigger polyominoes, but the gradient increases gently and seems to be flatting out for sizes $11$ and $12$.
+Plan cost is generally in a range of $50$ to $150$ radians, which is the equivalent of $8$ to $24$ full longitude rotations of the magnetic field.
+The different options sorting strategies do not impact the cost of a plan.
 
-
-\paragraph{Planning Analysis}
+\paragraph{Planning Attributes}
 
 \begin{figure}
 	\centering
@@ -79,7 +95,7 @@ We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each t
 		\caption{Number of explored configurations}
 		\label{fig:AFN_nconfig}
 	\end{subfigure}
-	\caption[$\#\textit{config}$ and $\#\textit{config}$ for different target sizes]{Number of simulated local plans $\#\textit{local}$ and number of explored configurations $\#\textit{config}$ for different target sizes $n$. All option sorting strategies are compared.}
+	\caption[$\#\textit{config}$ and $\#\textit{config}$ for different target sizes]{Number of simulated local plans $\#\textit{local}$ and number of explored configurations $\#\textit{config}$ for different target sizes $n$. Only plans that did not time out are shown and outliers are omitted for better readability. All option sorting strategies are compared.}
 	\label{fig:AFN_planstats}
 \end{figure}
 
@@ -89,7 +105,6 @@ We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each t
 	\caption[Local plans in plan stack for different target sizes]{Local plans in plan stack $|P|$ for different target sizes $n$. All option sorting strategies are compared.}
 	\label{fig:AFN_ltg}
 \end{figure}
-
 
 
 

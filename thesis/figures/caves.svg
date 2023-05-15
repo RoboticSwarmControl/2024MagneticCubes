@@ -8,7 +8,7 @@
    version="1.1"
    id="svg566"
    inkscape:version="1.2.2 (732a01da63, 2022-12-09, custom)"
-   sodipodi:docname="holes.svg"
+   sodipodi:docname="caves.svg"
    inkscape:export-filename="../8fcac291/caves.pdf"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96"
@@ -27,15 +27,15 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.8926347"
-     inkscape:cx="342.8054"
-     inkscape:cy="350.64736"
+     inkscape:zoom="1.2623761"
+     inkscape:cx="434.89417"
+     inkscape:cy="264.58042"
      inkscape:window-width="2560"
      inkscape:window-height="1355"
      inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g8564-6" />
+     inkscape:current-layer="g8564" />
   <defs
      id="defs563">
     <marker
@@ -415,10 +415,10 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,-142.57904,2.6842796)"
          id="text14252-6-6"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0);display:inline;fill:#000000;fill-opacity:1;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan1745">a)</tspan></text>
+           id="tspan17451">a)</tspan></text>
       <g
          id="g3873-5-36-9-6"
          inkscape:label="blue"
@@ -790,10 +790,10 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,-145.82771,2.6842794)"
          id="text14252-6-6-59"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-5);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-5);display:inline;fill:#000000;fill-opacity:1;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan1747">c)</tspan></text>
+           id="tspan17453">c)</tspan></text>
       <g
          id="g3873-5-36-9-6-49"
          inkscape:label="blue"
@@ -1166,10 +1166,10 @@
          xml:space="preserve"
          transform="matrix(0.26458333,0,0,0.26458333,-145.46901,2.6842794)"
          id="text14252-6-6-5"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-2);display:inline;fill:#808080;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-2);display:inline;fill:#000000;fill-opacity:1;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan1749">b)</tspan></text>
+           id="tspan17455">b)</tspan></text>
       <g
          id="g3873-5-36-9-6-4"
          inkscape:label="blue"
