@@ -183,32 +183,6 @@ def linePolyHori(ncubes, firstType=None):
         lastCube = newCube
     return poly
 
-def threeByThree() -> Polyomino:
-    m = Cube(0)
-    l = Cube(1)
-    r = Cube(1)
-    p = Polyomino(m)
-    p.connect(l, m, Direction.WEST)
-    p.connect(r, m, Direction.EAST)
-    p.connect(Cube(1), m, Direction.NORTH)
-    p.connect(Cube(1), m, Direction.SOUTH)
-    p.connect(Cube(0), l, Direction.NORTH)
-    p.connect(Cube(0), l, Direction.SOUTH)
-    p.connect(Cube(0), r, Direction.NORTH)
-    p.connect(Cube(0), r, Direction.SOUTH)
-    return p
-
-def threeByThreeRing() -> Polyomino:
-    c = Cube(0)
-    p = Polyomino(c)
-    type_edge = [(1,Direction.EAST),(0,Direction.EAST),(1,Direction.SOUTH),(0,Direction.SOUTH),(1,Direction.WEST),
-                 (0,Direction.WEST),(1,Direction.NORTH)]
-    for type, edge in type_edge:
-        cnew = Cube(type)
-        p.connect(cnew, c, edge)
-        c = cnew
-    return p
-
 def fourCube_LShape() -> Polyomino:
     c = Cube(1)
     p = Polyomino(c)
@@ -229,6 +203,15 @@ def twoByTwo() -> Polyomino:
         c = cnew
     return p
 
+def threeByThree() -> Polyomino:
+    p1 = linePolyVert(3,3)
+    p2 = linePolyVert(3,0)
+    p3 = linePolyVert(3,3)
+    c2 = p2.getCube((0,0))
+    p: Polyomino = p1.connectPoly(p1.getCube((0,0)), p2, c2, Direction.WEST)
+    p = p.connectPoly(c2, p3, p3.getCube((0,0)), Direction.WEST)
+    return p
+
 def fiveByTwo()-> Polyomino:
     pR = linePolyVert(5,5)
     pL = linePolyVert(5,0)
@@ -242,6 +225,54 @@ def twoByFive()-> Polyomino:
     cT = pT.getCube((0,0))
     cB = pB.getCube((0,0))
     return pT.connectPoly(cT, pB, cB, Direction.NORTH)
+
+def threeByThreeCB() -> Polyomino:
+    m = Cube(0)
+    l = Cube(1)
+    r = Cube(1)
+    p = Polyomino(m)
+    p.connect(l, m, Direction.WEST)
+    p.connect(r, m, Direction.EAST)
+    p.connect(Cube(1), m, Direction.NORTH)
+    p.connect(Cube(1), m, Direction.SOUTH)
+    p.connect(Cube(0), l, Direction.NORTH)
+    p.connect(Cube(0), l, Direction.SOUTH)
+    p.connect(Cube(0), r, Direction.NORTH)
+    p.connect(Cube(0), r, Direction.SOUTH)
+    return p
+
+def fiveByTwoCB()-> Polyomino:
+    c = Cube(0)
+    p = Polyomino(c)
+    type_edge = [(1, Direction.NORTH),(0,Direction.NORTH),(1,Direction.NORTH),(0,Direction.NORTH),
+                 (1,Direction.EAST),(0,Direction.SOUTH),(1,Direction.SOUTH),(0,Direction.SOUTH),(1,Direction.SOUTH)]
+    for type, edge in type_edge:
+        cnew = Cube(type)
+        p.connect(cnew, c, edge)
+        c = cnew
+    return p
+
+def twoByFiveCB()-> Polyomino:
+    c = Cube(1)
+    p = Polyomino(c)
+    type_edge = [(0,Direction.EAST),(1, Direction.EAST),(0,Direction.EAST),(1,Direction.EAST),(0,Direction.NORTH),
+                 (1,Direction.WEST),(0,Direction.WEST),(1,Direction.WEST),(0,Direction.WEST)]
+    for type, edge in type_edge:
+        cnew = Cube(type)
+        p.connect(cnew, c, edge)
+        c = cnew
+    return p
+
+def tenByOneCB()-> Polyomino:
+    c = Cube(1)
+    p = Polyomino(c)
+    type_edge = [(0,Direction.NORTH),(1, Direction.NORTH),(0,Direction.NORTH),(1,Direction.NORTH),(0,Direction.NORTH),
+                 (1,Direction.NORTH),(0,Direction.NORTH),(1,Direction.NORTH),(0,Direction.NORTH)]
+    for type, edge in type_edge:
+        cnew = Cube(type)
+        p.connect(cnew, c, edge)
+        c = cnew
+    return p
 
 def letterC()-> Polyomino:
     c = Cube(1)
@@ -272,6 +303,17 @@ def letterA()-> Polyomino:
     p.connect(Cube(0), c, Direction.EAST)
     type_edge = [(0,Direction.NORTH),(1,Direction.NORTH),(0,Direction.NORTH),(1,Direction.EAST),(0,Direction.EAST),
                  (1,Direction.SOUTH),(0,Direction.SOUTH),(1,Direction.SOUTH),(0,Direction.SOUTH)]
+    for type, edge in type_edge:
+        cnew = Cube(type)
+        p.connect(cnew, c, edge)
+        c = cnew
+    return p
+
+def threeByThreeRing() -> Polyomino:
+    c = Cube(0)
+    p = Polyomino(c)
+    type_edge = [(1,Direction.EAST),(0,Direction.EAST),(1,Direction.SOUTH),(0,Direction.SOUTH),(1,Direction.WEST),
+                 (0,Direction.WEST),(1,Direction.NORTH)]
     for type, edge in type_edge:
         cnew = Cube(type)
         p.connect(cnew, c, edge)

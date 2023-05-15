@@ -35,6 +35,10 @@ SHAPES = {
     "2x5": factory.twoByFive(),
     "10x1": factory.linePolyVert(10,10),
     "1x10": factory.linePolyHori(10,0),
+    "3x3cb": factory.threeByThreeCB(),
+    "5x2cb": factory.fiveByTwoCB(),
+    "2x5cb": factory.twoByFiveCB(),
+    "10x1cb": factory.tenByOneCB(),
     "letterC": factory.letterC(),
     "letterS": factory.letterS(),
     "letterA": factory.letterA()
@@ -48,7 +52,7 @@ slurminade.update_default_configuration(
     mail_type="ALL",
 )
 
-BATCH_MAX_SIZE = 75
+BATCH_MAX_SIZE = 100
 
 class PlanData:
      
