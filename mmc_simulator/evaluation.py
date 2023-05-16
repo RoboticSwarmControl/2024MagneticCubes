@@ -321,8 +321,10 @@ def createFigures():
     boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "localsToGoal", "AFN_ltg.pdf", onlySuccess=True)
     barplot_multipleSorting("TAFS-experiments-2", "targetSize", "timeout", "AFN_timeout.pdf")
     #AFTS
-    boxplot_multipleSortings("AFTS-experiments", "targetShape", "time", "AFTS_time.pdf", onlySuccess=True)
-    barplot_multipleSorting("AFTS-experiments", "targetShape", "timeout", "AFTS_timeout.pdf")
+    boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "time", "AFTS_cb_time.pdf", onlySuccess=True)
+    barplot_multipleSorting("AFTS-experiments-cb", "targetShape", "timeout", "AFTS_cb_timeout.pdf")
+    boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "time", "AFTS_sp_time.pdf", onlySuccess=True)
+    barplot_multipleSorting("AFTS-experiments-sp", "targetShape", "timeout", "AFTS_sp_timeout.pdf")
     #AFBS
     boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", "AFBS_time.pdf", onlySuccess=True)  
     barplot_multipleSorting("AFBS-experiments", "boardSize", "timeout", "AFBS_timeout.pdf")
@@ -337,14 +339,15 @@ def main():
     #pieplot_timeUse("time-stats.json")
     #boxplot_TCSA("TCSA-experiments")
     #---Result Plots---
-    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", onlySuccess=True)
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nlocal", onlySuccess=False)
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nconfig", onlySuccess=False)
     #barplot_multipleSorting("TAFS-experiments-2", "targetSize", "timeout")
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=False)
     #barplot_multipleSorting("AFBS-experiments", "boardSize", "timeout")
-    #boxplot_multipleSortings("AFTS-experiments", "targetShape", "time", onlySuccess=False)
+    #boxplot_multipleSortings("AFTS-experiments", "targetShape", "time", onlySuccess=True)
     #barplot_multipleSorting("AFTS-experiments", "targetShape", "timeout")
     #---Create Figures---
-    createFigures()
+    #createFigures()
 
 if __name__ == "__main__":
     main()

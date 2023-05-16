@@ -31,14 +31,14 @@ BOARDSIZES = [
 
 SHAPES = {
     "3x3": factory.threeByThree(),
-    "5x2": factory.fiveByTwo(),
-    "2x5": factory.twoByFive(),
-    "10x1": factory.linePolyVert(10,10),
-    "1x10": factory.linePolyHori(10,0),
     "3x3cb": factory.threeByThreeCB(),
+    "5x2": factory.fiveByTwo(),
     "5x2cb": factory.fiveByTwoCB(),
+    "2x5": factory.twoByFive(),
     "2x5cb": factory.twoByFiveCB(),
+    "10x1": factory.linePolyVert(10,10),
     "10x1cb": factory.tenByOneCB(),
+    "1x10": factory.linePolyHori(10,0),
     "letterC": factory.letterC(),
     "letterS": factory.letterS(),
     "letterA": factory.letterA()
