@@ -245,7 +245,7 @@ def __expPlanData(expName, xaxis):
         return dict(sorted(exp_plan_data.items(), key=lambda t: list(SHAPES.keys()).index(t[0].targetShape)))
     return exp_plan_data
 
-def barplot_multipleSorting(expName, xaxis, yaxis, outFile=None):
+def barplot_multipleSortings(expName, xaxis, yaxis, outFile=None):
     xaxisLabel = AXIS_LABELS[xaxis]
     yaxisLabel = AXIS_LABELS[yaxis]
     sorting_data = __emptySortingData(xaxisLabel, yaxisLabel)
@@ -269,8 +269,19 @@ def barplot_multipleSorting(expName, xaxis, yaxis, outFile=None):
     dataFrame = pd.concat([pd.DataFrame(data=d) for d in sorting_data.values()])
     # plot catplot bars
     seaborn.set(font_scale=FONTSCALE)
-    seaborn.catplot(data=dataFrame, kind="bar", x=xaxisLabel, y=yaxisLabel, hue="option sorting",
+    g = seaborn.catplot(data=dataFrame, kind="bar", x=xaxisLabel, y=yaxisLabel, hue="option sorting",
                     errorbar=None, legend_out=False)
+    # add zero labels if bar has no height
+    ax = g.facet_axis(0, 0)
+    for c in ax.containers:
+        labels = []
+        for v in c:
+            if v.get_height() != 0:
+                labels.append("")
+            else:
+                labels.append("0")
+        ax.bar_label(c, labels=labels, label_type="edge")
+    # ledgend and show
     plt.legend(loc="upper left", prop={'size': LEGEND_SIZE})
     if outFile == None:
         plt.show()
@@ -319,16 +330,19 @@ def createFigures():
     boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nlocal", "AFN_nlocal.pdf", onlySuccess=True, showFliers=False)
     boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nconfig", "AFN_nconfig.pdf", onlySuccess=True, showFliers=False)
     boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "localsToGoal", "AFN_ltg.pdf", onlySuccess=True)
-    barplot_multipleSorting("TAFS-experiments-2", "targetSize", "timeout", "AFN_timeout.pdf")
+    barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout", "AFN_timeout.pdf")
     #AFTS
     boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "time", "AFTS_cb_time.pdf", onlySuccess=True)
-    barplot_multipleSorting("AFTS-experiments-cb", "targetShape", "timeout", "AFTS_cb_timeout.pdf")
+    barplot_multipleSortings("AFTS-experiments-cb", "targetShape", "timeout", "AFTS_cb_timeout.pdf")
     boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "time", "AFTS_sp_time.pdf", onlySuccess=True)
-    barplot_multipleSorting("AFTS-experiments-sp", "targetShape", "timeout", "AFTS_sp_timeout.pdf")
+    barplot_multipleSortings("AFTS-experiments-sp", "targetShape", "timeout", "AFTS_sp_timeout.pdf")
     #AFBS
     boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", "AFBS_time.pdf", onlySuccess=True)  
-    barplot_multipleSorting("AFBS-experiments", "boardSize", "timeout", "AFBS_timeout.pdf")
+    barplot_multipleSortings("AFBS-experiments", "boardSize", "timeout", "AFBS_timeout.pdf")
     boxplot_multipleSortings("AFBS-experiments", "boardSize", "cost", "AFBS_cost.pdf", onlySuccess=True, showFliers=False)
+    #AFNR
+    boxplot_multipleSortings("AFNR-experiments", "targetNred", "time", "AFNR_time.pdf", onlySuccess=True, showFliers=False)
+    barplot_multipleSortings("AFNR-experiments", "targetNred", "timeout", "AFNR_timeout.pdf")
 
 
 def main():
@@ -339,15 +353,10 @@ def main():
     #pieplot_timeUse("time-stats.json")
     #boxplot_TCSA("TCSA-experiments")
     #---Result Plots---
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nlocal", onlySuccess=False)
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nconfig", onlySuccess=False)
-    #barplot_multipleSorting("TAFS-experiments-2", "targetSize", "timeout")
-    #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=False)
-    #barplot_multipleSorting("AFBS-experiments", "boardSize", "timeout")
-    #boxplot_multipleSortings("AFTS-experiments", "targetShape", "time", onlySuccess=True)
-    #barplot_multipleSorting("AFTS-experiments", "targetShape", "timeout")
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
+    #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
     #---Create Figures---
-    #createFigures()
+    createFigures()
 
 if __name__ == "__main__":
     main()
