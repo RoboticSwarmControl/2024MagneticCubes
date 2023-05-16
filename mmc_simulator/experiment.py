@@ -153,11 +153,14 @@ def targetAssembly(path, seed, shapeName, boardSize, sorting):
     writeData(path, PlanData(seed, success, dt, plan.cost(), plan.nconfig, plan.nlocal, plan.ntcsa, len(plan.actions)))
 
 @slurminade.slurmify()
-def randomTargetAssembly(path, seed, ncubes, nred, boardSize, sorting):
+def randomTargetAssembly(path, seed, ncubes, nred, boardSize, sorting, lineVert = False):
     sorting = OptionSorting(sorting)
     boardSize = tuple(boardSize)
     factory.generator.seed(seed)
-    target = factory.randomPoly(ncubes, nred)
+    if lineVert:
+        target = factory.linePolyVert(ncubes, nred)
+    else:
+        target = factory.randomPoly(ncubes, nred)
     initial = factory.randomConfigWithCubes(boardSize, ncubes, nred)
     print(f"Assembling -> seed={seed}, ncubes={ncubes}, nred={nred}, bsize={boardSize}, sorting={sorting.name}")
     t0 = time.monotonic()
@@ -169,6 +172,30 @@ def randomTargetAssembly(path, seed, ncubes, nred, boardSize, sorting):
     else:
         success = False
     writeData(path, PlanData(seed, success, dt, plan.cost(), plan.nconfig, plan.nlocal, plan.ntcsa, len(plan.actions)))
+
+def assemblyForTargetSize(path, startSeed, samplesPerSize, startSize, endSize, optionSortings: list):
+    boardSize = (1000,1000)
+    assemblies = 0
+    skipped = 0
+    with slurminade.Batch(BATCH_MAX_SIZE):
+        for ncubes in range(startSize, endSize + 1):
+            nred = math.floor(ncubes / 2)
+            for sorting in optionSortings:
+                # create experiment data and a directory for the planning results
+                dataPath = os.path.join(path, f"TAFS-{ncubes}-{sorting.name}")
+                if not os.path.exists(dataPath):
+                    os.mkdir(dataPath)
+                    writeData(dataPath + ".json", ExperimentData(ncubes, nred, "random", boardSize, sorting.name))
+                # distribute the planning samples
+                endSeed = startSeed + samplesPerSize - 1
+                for seed in range(startSeed, endSeed + 1):
+                    assemblies += 1
+                    filePath = os.path.join(dataPath, f"seed-{seed}.json")
+                    if os.path.exists(filePath):
+                        skipped += 1
+                        continue
+                    randomTargetAssembly.distribute(filePath, seed, ncubes, nred, boardSize, sorting.value)
+    print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
 
 
 def assemblyForTargetShape(path, startSeed, samplesPerSize, shapes: list, optionSortings: list):
@@ -223,19 +250,19 @@ def assemblyForBoardSize(path, startSeed, samplesPerSize, boardSizes: list, opti
     print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
 
 
-def assemblyForTargetSize(path, startSeed, samplesPerSize, startSize, endSize, optionSortings: list):
+def assemblyForNred(path, startSeed, samplesPerSize, startNred, endNred, optionSortings: list):
     boardSize = (1000,1000)
+    ncubes = 10
     assemblies = 0
     skipped = 0
     with slurminade.Batch(BATCH_MAX_SIZE):
-        for ncubes in range(startSize, endSize + 1):
-            nred = math.floor(ncubes / 2)
+        for nred in range(startNred, endNred + 1):
             for sorting in optionSortings:
                 # create experiment data and a directory for the planning results
-                dataPath = os.path.join(path, f"TAFS-{ncubes}-{sorting.name}")
+                dataPath = os.path.join(path, f"AFNR-{nred}-{sorting.name}")
                 if not os.path.exists(dataPath):
                     os.mkdir(dataPath)
-                    writeData(dataPath + ".json", ExperimentData(ncubes, nred, "random", boardSize, sorting.name))
+                    writeData(dataPath + ".json", ExperimentData(ncubes, nred, "10x1", boardSize, sorting.name))
                 # distribute the planning samples
                 endSeed = startSeed + samplesPerSize - 1
                 for seed in range(startSeed, endSeed + 1):
@@ -244,9 +271,8 @@ def assemblyForTargetSize(path, startSeed, samplesPerSize, startSize, endSize, o
                     if os.path.exists(filePath):
                         skipped += 1
                         continue
-                    randomTargetAssembly.distribute(filePath, seed, ncubes, nred, boardSize, sorting.value)
+                    randomTargetAssembly.distribute(filePath, seed, ncubes, nred, boardSize, sorting.value, True)
     print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -262,7 +288,8 @@ def main():
     # Put the experiments to execute here
     #assemblyForTargetSize(path, 100, 150, 12, 12, OptionSorting.list())
     #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
-    assemblyForTargetShape(path, 100, 100, SHAPES.keys(), OptionSorting.list())
+    #assemblyForTargetShape(path, 100, 100, SHAPES.keys(), OptionSorting.list())
+    assemblyForNred(path, 100, 100, 0, 5, OptionSorting.list())
     #TCSA_analysis(path, 0, 200, 5, 12)
 
 
