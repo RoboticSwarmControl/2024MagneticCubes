@@ -2,38 +2,46 @@
 \label{chap:results}
 
 All experiments conducted are about assembling target polyominoes with the use of our global planner (\autoref{chap:global}).
-In \autoref{sec:AFN} we analyze the effect of increasing target sizes on planning time, rotational cost and other global planner characteristics mentioned in \autoref{sec:global_complex}.
-The polyominoes of this experiment are randomly generated, but we also evaluate the construction of manually designed polyominoes in \autoref{sec:AFTS}.
+In \autoref{sec:AFN} we analyze the effect of increasing polyomino size on planning time, rotational cost and other global planner characteristics mentioned in \autoref{sec:global_complex}.
+The polyominoes used for this experiment are randomly generated, but we also evaluate the construction of manually designed polyominoes in \autoref{sec:AFTS}.
 With these polyominoes, we can specifically test the assembly of targets with caves or holes, varying widths and heights, or different patterns of red and blue cubes. 
-Furthermore, we experiment with different workspace sizes and aspect ratios in \autoref{sec:AFBS}.
-We run all these experiments with the three option sorting strategies of \autoref{sec:connect_options},
+Furthermore, we experiment with different workspace sizes and aspect ratios in \autoref{sec:AFBS} and how the ratio of red and blue cubes affect the assembly of straight line polyominoes in \autoref{sec:AFNR}.
+
+\paragraph{Option Sorting Strategies}
+We run all experiments with the three option sorting strategies from \autoref{sec:connect_options},
 \begin{enumerate}
 	\item Minimal Distance (MIN DIST)
 	\item Grow Largest Component (GROW LARGEST)
 	\item Grow Smallest Component (GROW SMALLEST)
 \end{enumerate}
 
-The experiments were done on multiple computers with the same hardware specification (\textbf{AMD Ryzen 7 5800X @ 8x3.8GHz (-4.7 GHz), 128GB RAM}) running Ubuntu 22.04.2 LTS.
-
-For the creation of random polyominoes and initial configurations we use a seed-based pseudorandom number generator to make experiments reproducible.
+\paragraph{Instance Generation}
+For the generation of random polyominoes and initial configurations we use a seed-based pseudorandom number generator to make experiments reproducible.
 That way the option sorting strategies are applied to the same set of seeds to make the results comparable.
+When an initial configuration is randomly generated the number of red and blue cubes matches with the target polyomino.
+Sub-assemblies in the initial configuration can occur, since the global planner is able to handle this.
+
+\paragraph{Timeout Failure}
 The global planner states a timeout failure after a planning time of $600$ seconds.
 We do not time out during the simulation of local plans, so instances can exceed $600$ seconds and still be successful if the last local plan assembles the target polyomino.
+
+\paragraph{Hardware Setup}
+The experiments were done on multiple computers with the same hardware specification (\textbf{AMD Ryzen 7 5800X @ 8x3.8GHz (-4.7 GHz), 128GB RAM}) running Ubuntu 22.04.2 LTS.
 
 %TODO key legende fuer box-whisker plots
 
 
 
 
-\section{Assembly for Target Size}
+\section{Assembly for Polyomino Size}
 \label{sec:AFN}
 
-This experiment was conducted with randomly generated initial configuration and randomly generated polyominoes of specific target sizes $n$.
+This experiment was conducted with randomly generated initial configuration and randomly generated polyominoes of specific sizes $n$.
 To maximize the variety of possible polyomino-shapes the number of red cubes is set to $n_\textit{red} = \lfloor \frac{n}{2} \rfloor$ \cite{Lu2021}.
 Because of the variety, this experiment is well-suited for not only analyzing planning time and rotational-cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
 We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each target size $150$ samples were taken.
 
-\paragraph{Planning Time}
+\subsection{Planning Time}
 
 \begin{figure}
 	\centering
@@ -68,7 +76,7 @@ In terms of planning time the option sorting strategies make no noticeable diffe
 For the fraction of timeouts, growing the largest component often exceeds the other two strategies clearly visible for $n=11$, where grow largest is at $20\%$ and the others under $10\%$ of plans timed out.
 
 
-\paragraph{Plan Cost}
+\subsection{Plan Cost}
 
 \begin{figure}
 	\centering
@@ -82,7 +90,7 @@ The cost increase slightly for bigger polyominoes, but the gradient increases ge
 Plan cost is generally in a range of $50$ to $150$ radians, which is the equivalent of $8$ to $24$ full longitude rotations of the magnetic field.
 The different option sorting strategies do not impact the cost of a plan.
 
-\paragraph{Planning Attributes}
+\subsection{Planning Attributes}
 
 \begin{figure}
 	\centering
@@ -137,15 +145,44 @@ In terms of the option sorting strategies the only noticeable difference is that
 
 
 
-\section{Assembly for Target Shape}
+\section{Assembly for Custom Polyominoes}
 \label{sec:AFTS}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\textwidth]{figures/AFTS_shapes.pdf}
-	\caption[List of manually designed polyominoes]{List of manually designed polyominoes for experimenting with special shapes...}
+	\begin{subfigure}[b]{\textwidth}
+		\centering
+		\includegraphics[width=0.8\textwidth]{figures/AFTS_cb_shapes.pdf}
+		\caption{Rectangular polyominoes evaluated in \ref{sec:w/h_pattern}. The checkerboard pattern is labeled with ``cb''. \hfill}
+		\label{fig:AFTS_cb_shapes}
+	\end{subfigure}
+	\begin{subfigure}[b]{\textwidth}
+		\centering
+		\includegraphics[width=0.8\textwidth]{figures/AFTS_sp_shapes.pdf}
+		\caption{Special polyomino shapes evaluated in \autoref{sec:special_poly}.}
+		\label{fig:AFTS_sp_shapes}
+	\end{subfigure}
+	\caption[List of manually designed polyominoes for experimenting]{List of manually designed polyominoes for experimenting.}
 	\label{fig:AFTS_shapes}
 \end{figure}
+
+In this experiment manually designed polyominoes are assembled from multiple randomly generated initial configurations.
+$100$ samples were taken for each custom polyomino with a workspace size of $50 r_C \times 50 r_C$.
+
+In \autoref{sec:w/h_pattern} we focus on how rectangular polyominoes with varying width/height ratios influence planning time.
+Furthermore we experiment with two patterns of red and blue for each rectangle.
+The \textit{switching-column pattern} switches between red and blue cubes column vise and the \textit{checkerboard pattern} creates a checkerboard of single red and blue cubes.
+A list of these polyominoes can be found in \autoref{fig:AFTS_cb_shapes}.
+
+In \autoref{sec:special_poly} assembly of special polyomino shapes is examined. 
+The polyominoes are listed in \autoref{fig:AFTS_sp_shapes}.
+The polyominoes ``letter C'', ``letter S'' and ``letter A'' provide different caves.
+``letter A'' additionally contains a hole. 
+
+\subsection{Width/Height and Cube Pattern}
+\label{sec:w/h_pattern}
+
+
 
 
 \begin{figure}
@@ -167,6 +204,12 @@ In terms of the option sorting strategies the only noticeable difference is that
 	\label{fig:AFTS_cb_timestats}
 \end{figure}
 
+Text
+
+
+\subsection{Special Polyomino Shapes}
+\label{sec:special_poly}
+
 
 \begin{figure}
 	\centering
@@ -187,7 +230,7 @@ In terms of the option sorting strategies the only noticeable difference is that
 	\label{fig:AFTS_sp_timestats}
 \end{figure}
 
-
+Text
 
 
 
@@ -220,6 +263,12 @@ In terms of the option sorting strategies the only noticeable difference is that
 	\caption[]{}
 	\label{fig:AFBS_cost}
 \end{figure}
+
+Text
+
+
+\section{Assembly for Red to Blue Ration}
+\label{sec:AFNR}
 
 
 
