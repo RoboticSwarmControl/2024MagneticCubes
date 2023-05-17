@@ -144,8 +144,7 @@ The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nod
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\textwidth]{figures/plots/tcsa_nodes_edges.pdf}
-	\caption[Average two-cut-sub-assembly nodes and edges for target size $n$.]{Average number of nodes (left) and edges (right) of a TCSA graph for different target sizes $n$.
-		For each target size $200$ samples of randomly generated polyominoes were taken.}
+	\caption[Average two-cut-sub-assembly nodes and edges for target size $n$.]{Average number of nodes (left) and edges (right) of a TCSA graph for different target sizes $n$. For each $n$ $200$ samples of randomly generated polyominoes were taken. Black lines are fitted exponential functions through the averages.}
 	\label{fig:tcsa_plot}
 \end{figure}
 
@@ -167,10 +166,10 @@ which is also referred to as the Bell number \cite{jelliss1991}.
 
 In our case, the only way of sorting cubes into partitions is by monotonously two-cutting existing polyominoes, which drastically lowers the number of $\#\textit{nodes}_\textit{worst}$.
 In \autoref{fig:tcsa_plot} statistical data shows the average number of nodes and edges a TCSA graph consists of for varying target sizes $n$.
-%TODO analyse grow trend. ie. exponenziell
+The growth of nodes and edges seems to be exponential, which is show with fitted functions in \autoref{fig:tcsa_plot}. 
 
 Our implementation of $G_{\textit{TCSA}}(\mathcal{T})$ stores nodes in a hash-table.
-Accessing nodes and connected edges, or checking if a polyomino set is contained in $G_{\textit{TCSA}}(\mathcal{T})$, can be done in  $\mathcal{O}(1)$.´
+Accessing nodes and connected edges, or checking if a polyomino set is contained in $G_{\textit{TCSA}}(\mathcal{T})$, can be done in  $\mathcal{O}(1)$.
 The creation of $G_{\textit{TCSA}}(\mathcal{T})$ becomes more complex for increasing numbers of $n$, but it provides an easily accessible building instruction that drastically cuts the number of unnecessary local plans simulated.
 Lowering simulation time makes a complex data-structure like the TCSA graph worth the extra effort.
 

@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn
 import numpy as np
+from scipy.optimize import curve_fit
 
 from experiment import *
 from com.state import Cube
@@ -193,11 +194,23 @@ def pieplot_timeUse(fileName):
     plt.show()
 
 
-def boxplot_TCSA(expName):
+def __fitExponential(ax_bar):
+    y = []
+    for c in ax_bar.containers:
+        for v in c:
+           y.append(v.get_height())
+    x = np.asarray(range(0,7))
+    y = np.asarray(y)
+    popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, x, y)
+    x_fitted = np.linspace(np.min(x), np.max(x), 100)
+    y_fitted = popt[0] * np.exp(popt[1] * x_fitted) + popt[2]
+    plt.plot(x_fitted, y_fitted, linewidth=4, color="black")
+
+def barplot_TCSA(expName):
     filePath = os.path.join(RESULT_DIR, expName, "TCSA.json")
     with open(filePath, 'r') as file:
         exp_data = json.load(file)
-    xaxisLabel = "target size $n$"
+    xaxisLabel = "target polyomino size $n$"
     yaxisLabel1 = AXIS_LABELS["nodes"]
     yaxisLabel2 = AXIS_LABELS["edges"]
     data = {}
@@ -214,11 +227,13 @@ def boxplot_TCSA(expName):
     dataFrame = pd.DataFrame(data=data)
     seaborn.set(font_scale=4)
     plt.subplot(1,2,1)
-    seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel1, errorbar=None,
+    ax1 =seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel1, errorbar=None,
                     color='darkorange', width=0.65)
+    __fitExponential(ax1)
     plt.subplot(1,2,2)
-    seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel2, errorbar=None,
+    ax2 = seaborn.barplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel2, errorbar=None,
                     color='green', width=0.65)
+    __fitExponential(ax2)
     #plt.tight_layout(pad=15)
     plt.subplots_adjust(wspace=0.5)
     plt.show()
@@ -351,12 +366,13 @@ def main():
     #plot_pivotAngleDistance()
     #plot_magnetForce()
     #pieplot_timeUse("time-stats.json")
-    #boxplot_TCSA("TCSA-experiments")
+    barplot_TCSA("TCSA-experiments")
     #---Result Plots---
     #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
+    #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)  
     #---Create Figures---
-    createFigures()
+    #createFigures()
 
 if __name__ == "__main__":
     main()

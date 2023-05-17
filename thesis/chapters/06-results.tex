@@ -55,7 +55,7 @@ We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each t
 	\begin{subfigure}[b]{\textwidth}
 		\centering
 		\includegraphics[width=0.9\textwidth]{figures/plots/AFN_timeout.pdf}
-		\caption{Fraction of plans that timed out}
+		\caption{Fraction of plans that timed out.}
 		\label{fig:AFN_timeout}
 	\end{subfigure}
 	\caption[Planning time and fraction timed out for different target sizes]{Planning time and fraction timed out for different target sizes $n$. All option sorting strategies are compared.}
@@ -104,7 +104,7 @@ The different option sorting strategies do not impact the cost of a plan.
 	\begin{subfigure}[b]{\textwidth}
 		\centering
 		\includegraphics[width=0.9\textwidth]{figures/plots/AFN_nconfig.pdf}
-		\caption{Number of explored configurations}
+		\caption{Number of explored configurations.}
 		\label{fig:AFN_nconfig}
 	\end{subfigure}
 	\caption[$\#\textit{local}$ and $\#\textit{config}$ for different target sizes]{Number of simulated local plans $\#\textit{local}$ and number of explored configurations $\#\textit{config}$ for different target sizes $n$. Only plans that did not time out are shown and outliers are omitted for better readability. All option sorting strategies are compared.}
@@ -145,7 +145,7 @@ In terms of the option sorting strategies the only noticeable difference is that
 
 
 
-\section{Assembly for Custom Polyominoes}
+\section{Assembly of Custom Polyominoes}
 \label{sec:AFTS}
 
 \begin{figure}
@@ -235,27 +235,69 @@ Text
 
 
 
-\section{Assembly for Workspace Size}
+\section{Assembly in different Workspaces}
 \label{sec:AFBS}
+
+In this experiment we tested the assembly of randomly generated polyominoes of size $n=9$ with random initial configurations in various rectangular workspaces.
+We choose three workspace sizes (S, M, L) in three different aspect ratios each.
+All aspect ratios for one size are roughly the same area. The workspaces are:
+
+\begin{center}
+	\begin{tabular}{|c|c|}
+		\hline
+		S, $ 1:1 $ & $35 r_C \times 35 r_C$\\
+		\hline
+		M, $ 1:1 $ & $50 r_C \times 50 r_C$ \\
+		\hline
+		L, $ 1:1 $ & $65 r_C \times 65 r_C$ \\
+		\hline
+		S, $ 2:1 $ & $50 r_C \times 25 r_C$\\
+		\hline
+		M, $ 2:1 $ & $70 r_C \times 35 r_C$ \\
+		\hline
+		L, $ 2:1 $ & $90 r_C \times 45 r_C$ \\
+		\hline
+		S, $ 3:1 $ & $60 r_C \times 20 r_C$\\
+		\hline
+		M, $ 3:1 $ & $90 r_C \times 30 r_C$ \\
+		\hline
+		L, $ 3:1 $ & $105 r_C \times 35 r_C$ \\
+		\hline
+	\end{tabular}
+\end{center}
+
+A workspace with aspect ration $ 1:x $ would produce similar results to one with aspect ration $ x:1 $, since the magnetic field can be rotated freely.
+The maximum width or height of polyomino with size $9$ in $18 r_C$.
+We made sure that such a polyomino could fit in all workspace variations while being able to rotate 360 degrees.
+We analyze the affect of these workspace variations on planning time and rotational cost.
+
+\paragraph{Planning Time} 
 
 \begin{figure}
 	\centering
 	\begin{subfigure}[b]{\textwidth}
 		\centering
 		\includegraphics[width=0.9\textwidth]{figures/plots/AFBS_time.pdf}
-		\caption{}
+		\caption{Planning time in seconds. Only plans that did not time out are shown.}
 		\label{fig:AFBS_time}
 	\end{subfigure}
 	
 	\begin{subfigure}[b]{\textwidth}
 		\centering
 		\includegraphics[width=0.9\textwidth]{figures/plots/AFBS_timeout.pdf}
-		\caption{}
+		\caption{Fraction of plans that timed out.}
 		\label{fig:AFBS_timeout}
 	\end{subfigure}
 	\caption[]{}
 	\label{fig:AFBS_timestats}
 \end{figure}
+
+\autoref{fig:AFBS_time} shows the planning time for all workspace variations.
+In terms of the size within one class of aspect ration no significant affect can be observed.
+Narrowing down the workspace by increasing the aspect ration seems to increase planning time slightly, but for the majority of instances planning time stays under $100$ seconds.
+The fraction of timeouts in \autoref{fig:AFBS_timeout} remains constant for all workspaces and the options sorting strategies do not show any difference as well.
+
+\paragraph{Plan Cost} 
 
 \begin{figure}
 	\centering
@@ -264,7 +306,12 @@ Text
 	\label{fig:AFBS_cost}
 \end{figure}
 
-Text
+It is not surprising that the distribution of rotational cost, presented in \autoref{fig:AFBS_cost}, increases with bigger workspace areas.
+Cubes and walls are further apart, which results in more pivot walking steps necessary to assemble polyominoes.
+With in a class of same size, increasing the aspect ratio results in slightly more rotational cost as well.
+
+
+
 
 
 \section{Assembly for Red and Blue Ration}
