@@ -11,6 +11,10 @@ If a local plan was successful, this guaranties a change of polyominoes in the w
 
 For this, the local planner makes use of our simulator from \autoref{chap:sim} in a closed-loop manner, meaning that the state of the simulation can be observed at any time and the actions can be adjusted accordingly.
 The local planner observes the position of cubes and polyominoes and works with the distance between them.
+The distance between two cubes is the Euclidean distance between their centers $p_{c_\mathcal{A}}$, $p_{c_\mathcal{B}}$
+\begin{equation*}
+d(c_\mathcal{A}, c_\mathcal{B}) = \lVert p_{c_{\mathcal{A}}} - p_{c_{\mathcal{B}}}\rVert \, .
+\end{equation*}¸
 It also works with the orientation of cube faces.
 In a real application of Magnetic Modular Cubes a camera, able to track cubes in the workspace, could to used to retrieve the necessary information. 
 
@@ -43,9 +47,9 @@ We call this the \textit{slide-in direction} $\vec{m} \in \{\vec{E}, \vec{W}\}$,
 \end{figure}
 
 To establish a connection between two polyominoes $\mathcal{A}$ and $\mathcal{B}$, the connection-cubes $c_\mathcal{A}$ and $c_\mathcal{B}$ with their connection-edges $e_\mathcal{A}$ and $e_\mathcal{B}$ need to be aligned in the correct way.
-When $\mathcal{A}$ is rotated without magnetic field elevation, a cube with position $p_{c_\mathcal{A}}$ rotates in a circle around the center of mass of its polyomino $p_\mathcal{A}$.
+When $\mathcal{A}$ is rotated without magnetic field elevation, a cube center rotates in a circle around the center of mass of its polyomino $p_\mathcal{A}$.
 The vector $r_\mathcal{A} = p_{c_\mathcal{A}} - p_\mathcal{A}$ is the radius of this rotation-circle.
-When also considering $\mathcal{B}$, a rotation of the magnetic field rotates $r_\mathcal{B}$ and $r_\mathcal{B}$ by the same angle $\beta$.
+When also considering $\mathcal{B}$, a rotation of the magnetic field rotates $r_\mathcal{A}$ and $r_\mathcal{B}$ by the same angle $\beta$.
 The goal is to find this angular difference $\beta$, so that the cubes are aligned.
 There are two different approaches for alignment: Straight-align and offset-align.
 
@@ -131,7 +135,7 @@ This is fairly complex and recalculating would be necessary in many situations, 
 
 We estimate the pivot walking cycles necessary until $c_\mathcal{A}$ moved to the original position of $c_\mathcal{B}$, before it is moved with
 \begin{equation}
-n = \left\lceil \frac{\lVert p_{c_\mathcal{A}} - p_{c_\mathcal{B}}\rVert}{\lVert \vec{d_\mathcal{A}} \rVert} \right\rceil \,.
+n = \left\lceil \frac{d(c_\mathcal{A}, c_\mathcal{B})}{d_{p, \mathcal{A}}} \right\rceil \,.
 \end{equation}
 We then only walk a portion of $n$ and re-align the cubes.
 When $c_\mathcal{A}$ and $c_\mathcal{B}$ are near enough for magnetic forces to act we frequently wait a short period to let magnetic attraction pull $e_\mathcal{A}$ and $e_\mathcal{B}$ together.

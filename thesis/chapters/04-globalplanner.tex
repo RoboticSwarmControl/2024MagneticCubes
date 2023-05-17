@@ -203,6 +203,7 @@ If $\mathcal{A} = \mathcal{B}$, the options where a polyomino will be connected 
 
 With multiple edges and various polyomino pairs per edge, many options emerge for the global planner to consider.
 We examined three sorting strategies for these options, to provide an order of the best probable outcome that the global planner can work through. 
+We define functions for determining the best option $\hat{o}$ out of two options $o_1$ and $o_2$.
 The approaches are compared in \autoref{chap:results}.
 
 \paragraph{Minimal Distance}
@@ -211,11 +212,18 @@ The minimal distance sorting sorts connection options based on the distance betw
 The idea is that a smaller distances requires less movement to connect, which means shorter simulation time and lower plan costs of the resulting plan.
 Due to sliding on walls and different pivot walking distances, this is not true in every case, but it remains a good heuristic for sorting.
 Less movement might even prevent unwanted sub-assemblies.
+\begin{equation}
+\hat{o}(o_1, o_2) =
+\begin{cases}
+o_1 & \text{if } d(c_{\mathcal{A},1}, c_{\mathcal{B},1}) \leq d(c_{\mathcal{A},2}, c_{\mathcal{B},2}) \\
+o_2 & \text{otherwise}
+\end{cases}
+\end{equation}
 
 \paragraph{Grow Largest Component}
 
 Another approach is to grow the largest component.
-The options are sorted into classes of maximum polyomino sizes in the resulting polyomino sets.
+The options are sorted into classes of maximum polyomino size $\hat{n}$ of the resulting polyomino set.
 We prefer TCSA edges that lead to sets containing the biggest polyominoes.
 When the options for $S_4$ in \autoref{fig:tcsa} are sorted, the one leading to $S_1$ is preferred over the one leading to $S_2$, because $S_1$ contains a polyomino of size $3$, while $S_2$ only contains polyominoes of size $2$. 
 The options within each class are sorted with the minimal distance approach.
@@ -224,12 +232,26 @@ If no other sub-assemblies occur, growing the largest component behaves like one
 The benefit is, that even if they occur the TSCA graph can provide solutions to integrate them if possible.
 Larger polyominoes generally move faster acting positive on plan costs.
 
+\begin{equation}
+\hat{o}(o_1, o_2) =
+\begin{cases}
+o_1 & \text{if } \hat{n}_1 > \hat{n}_2 \lor \left( \hat{n}_1 = \hat{n}_2 \land d(c_{\mathcal{A},1}, c_{\mathcal{B},1}) \leq d(c_{\mathcal{A},2}, c_{\mathcal{B},2})\right) \\
+o_2 & \text{otherwise}
+\end{cases}
+\end{equation}
+
 \paragraph{Grow Smallest Component}
 
 Oppositely to growing the largest component, options can be sorted by the smallest maximum size of polyominoes in polyomino sets.
 This avoids working with large polyominoes, which are faster, but also need more simulation time to perform rotations and can be hard to handle, because of sheer size.
 
-%TODO equations formel fall unterscheidung 
+\begin{equation}
+\hat{o}(o_1, o_2) =
+\begin{cases}
+o_1 & \text{if } \hat{n}_1 < \hat{n}_2 \lor \left( \hat{n}_1 = \hat{n}_2 \land d(c_{\mathcal{A},1}, c_{\mathcal{B},1}) \leq d(c_{\mathcal{A},2}, c_{\mathcal{B},2})\right) \\
+o_2 & \text{otherwise}
+\end{cases}
+\end{equation}
 
 \section{Use of Local Planner}
 \label{sec:local_in_global}
