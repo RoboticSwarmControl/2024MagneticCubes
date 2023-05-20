@@ -41,7 +41,7 @@ To maximize the variety of possible polyomino-shapes the number of red cubes is 
 Because of the variety, this experiment is well-suited for not only analyzing planning time and rotational-cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
 We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each target size $150$ samples were taken.
 
-\subsection{Planning Time}
+\paragraph{Planning Time}
 
 \begin{figure}
 	\centering
@@ -76,7 +76,7 @@ In terms of planning time the option sorting strategies make no noticeable diffe
 For the fraction of timeouts, growing the largest component often exceeds the other two strategies clearly visible for $n=11$, where grow largest is at $20\%$ and the others under $10\%$ of plans timed out.
 
 
-\subsection{Plan Cost}
+\paragraph{Plan Cost}
 
 \begin{figure}
 	\centering
@@ -90,7 +90,7 @@ The cost increase slightly for bigger polyominoes, but the gradient increases ge
 Plan cost is generally in a range of $50$ to $150$ radians, which is the equivalent of $8$ to $24$ full longitude rotations of the magnetic field.
 The different option sorting strategies do not impact the cost of a plan.
 
-\subsection{Planning Attributes}
+\paragraph{Planning Attributes}
 
 \begin{figure}
 	\centering
@@ -182,9 +182,6 @@ The polyominoes ``letter C'', ``letter S'' and ``letter A'' provide different ca
 \subsection{Width/Height and Cube Pattern}
 \label{sec:w/h_pattern}
 
-
-
-
 \begin{figure}
 	\centering
 	\begin{subfigure}[b]{\textwidth}
@@ -267,7 +264,7 @@ All aspect ratios for one size are roughly the same area. The workspaces are:
 \end{center}
 
 A workspace with aspect ration $ 1:x $ would produce similar results to one with aspect ration $ x:1 $, since the magnetic field can be rotated freely.
-The maximum width or height of polyomino with size $9$ in $18 r_C$.
+The maximum width or height of a polyomino with size $9$ is $18 r_C$.
 We made sure that such a polyomino could fit in all workspace variations while being able to rotate 360 degrees.
 We analyze the affect of these workspace variations on planning time and rotational cost.
 
@@ -288,7 +285,7 @@ We analyze the affect of these workspace variations on planning time and rotatio
 		\caption{Fraction of plans that timed out.}
 		\label{fig:AFBS_timeout}
 	\end{subfigure}
-	\caption[]{}
+	\caption[Planning time and fraction timed out for different workspace variations]{Planning time and fraction timed out for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared.}
 	\label{fig:AFBS_timestats}
 \end{figure}
 
@@ -302,7 +299,7 @@ The fraction of timeouts in \autoref{fig:AFBS_timeout} remains constant for all 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFBS_cost.pdf}
-	\caption[]{}
+	\caption[Plan cost for different workspace variations]{Plan cost in radians of successful plans for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared.}
 	\label{fig:AFBS_cost}
 \end{figure}
 
@@ -314,8 +311,20 @@ With in a class of same size, increasing the aspect ratio results in slightly mo
 
 
 
-\section{Assembly for Red and Blue Ration}
+\section{Assembly for Red and Blue Cube Ration}
 \label{sec:AFNR}
+
+We examined the affect of red and blue cube ratio on planning time.
+For this we increased the number of red cubes $0 \leq n_\textit{red} \leq \lfloor \frac{n}{2}\rfloor$ while keeping the target polyomino size fixed at $n = 10$.
+With $n_\textit{red} = 0$ only north-south connections allow the creation of just a vertical line polyomino.
+$n_\textit{red} = \lfloor \frac{n}{2}\rfloor$ holds the biggest variety of polyomino shapes.
+To exclude the influence of varying polyomino shapes on the experiment, the shape is set to a $10 \times 1$ polyomino.
+$\lfloor \frac{n}{2}\rfloor < n_\textit{red} \leq n$ is equal to $0 \leq n_\textit{blue} \leq \lfloor \frac{n}{2}\rfloor$.
+Conducting the experiment with $n_\textit{red}$ or $n_\textit{blue}$ in equivalent.
+The patterns of red and blue cubes within the $10 \times 1$ polyomino and the initial configurations are randomly generated in a workspace of size $50 r_C \times 50 r_C$.
+For each $n_\textit{red}$ $100$ samples were taken.
+
+\paragraph{Planning Time}
 
 \begin{figure}
 	\centering
@@ -335,4 +344,14 @@ With in a class of same size, increasing the aspect ratio results in slightly mo
 	\caption[]{}
 	\label{fig:AFNR_timestats}
 \end{figure}
+
+\autoref{fig:AFNR_time} shows the distribution of planning time for this experiment.
+By increasing $n_\textit{red}$ from $0$ to $1$ a clear increase in planning time is visible.
+With only blue cubes every cube can be placed everywhere in the polyomino.
+By introducing one red cube position becomes important.
+Further increasing the number of $n_\textit{red}$ does not affect planning time significantly.
+For these vertical straight line polyominoes growing the smallest component performs slightly worst than the other two option sorting strategies.
+The fraction of timeouts presented in \autoref{fig:AFNR_timeout} is under $2\%$ for all $n_\textit{red}$. 
+
+
 

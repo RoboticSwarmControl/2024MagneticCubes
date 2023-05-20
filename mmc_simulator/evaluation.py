@@ -116,15 +116,17 @@ def __alignFunction(comA: Vec2d, posA: Vec2d, comB: Vec2d, posB: Vec2d, edgeB: D
 
 
 def plot_pivotAngleDistance():
-    plt.rc('font', size=14)
+    plt.rc('font', size=16)
+    plt.rc('text', usetex=True)
+    plt.rc('text.latex', preamble=r'\usepackage{amsmath}')
     pAxisLengths = [Cube.RAD * 6, Cube.RAD * 4, Cube.RAD * 2]
     alpha = np.linspace(0, np.pi, 100)
     for a_p in pAxisLengths:
         d_p = 2 * np.sin(0.5 * alpha) * a_p
-        plt.plot(alpha/np.pi, d_p/Cube.RAD, label=f"$a_p = ${round(a_p / Cube.RAD)} $r_C$")
+        plt.plot(alpha/np.pi, d_p/Cube.RAD, label=(r"$\lVert \vec{a} \rVert =" + f"{round(a_p / Cube.RAD)} r_C$"))
     ax = plt.subplot()
     plt.xlabel(r'pivot walking angle $\alpha$')
-    plt.ylabel('pivot walking distance $d_p$')
+    plt.ylabel(r'pivot walking distance $\lVert\vec{d}\rVert$')
     plt.xlim(xmin=0, xmax=1)
     plt.ylim(ymin=0, ymax=12.5)
     ax.legend()
@@ -363,14 +365,15 @@ def createFigures():
 def main():
     #---Thesis plots---
     #plot_alignFunctions()
-    #plot_pivotAngleDistance()
+    plot_pivotAngleDistance()
     #plot_magnetForce()
     #pieplot_timeUse("time-stats.json")
-    barplot_TCSA("TCSA-experiments")
+    #barplot_TCSA("TCSA-experiments")
     #---Result Plots---
     #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
-    #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)  
+    #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
+    #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
     #---Create Figures---
     #createFigures()
 

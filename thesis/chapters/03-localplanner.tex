@@ -11,10 +11,7 @@ If a local plan was successful, this guaranties a change of polyominoes in the w
 
 For this, the local planner makes use of our simulator from \autoref{chap:sim} in a closed-loop manner, meaning that the state of the simulation can be observed at any time and the actions can be adjusted accordingly.
 The local planner observes the position of cubes and polyominoes and works with the distance between them.
-The distance between two cubes is the Euclidean distance between their centers $p_{c_\mathcal{A}}$, $p_{c_\mathcal{B}}$
-\begin{equation*}
-d(c_\mathcal{A}, c_\mathcal{B}) = \lVert p_{c_{\mathcal{A}}} - p_{c_{\mathcal{B}}}\rVert \, .
-\end{equation*}¸
+The distance between two cubes is the Euclidean distance $d(c_\mathcal{A}, c_\mathcal{B}) = \lVert p_{c_{\mathcal{A}}} - p_{c_{\mathcal{B}}}\rVert$ between the cube centers $p_{c_\mathcal{A}}$ and $p_{c_\mathcal{B}}$.
 It also works with the orientation of cube faces.
 In a real application of Magnetic Modular Cubes a camera, able to track cubes in the workspace, could to used to retrieve the necessary information. 
 
@@ -45,11 +42,12 @@ We call this the \textit{slide-in direction} $\vec{m} \in \{\vec{E}, \vec{W}\}$,
 	\caption[Illustration of straight- and offset-aligning]{The figure shows examples for straight- and offset-aligning. The edges to be connected are marked yellow. a) shows two not aligned polyominoes (top) and the result of a straight-align (bottom). In b) you can see the two approaches for an offset-align. The cubes were aligned with their west edge (top) and with their east edge (bottom).}
 	\label{fig:aligning}
 \end{figure}
+%TODO renmame vars in figure. Only when certain of names!!!
 
 To establish a connection between two polyominoes $\mathcal{A}$ and $\mathcal{B}$, the connection-cubes $c_\mathcal{A}$ and $c_\mathcal{B}$ with their connection-edges $e_\mathcal{A}$ and $e_\mathcal{B}$ need to be aligned in the correct way.
 When $\mathcal{A}$ is rotated without magnetic field elevation, a cube center rotates in a circle around the center of mass of its polyomino $p_\mathcal{A}$.
-The vector $r_\mathcal{A} = p_{c_\mathcal{A}} - p_\mathcal{A}$ is the radius of this rotation-circle.
-When also considering $\mathcal{B}$, a rotation of the magnetic field rotates $r_\mathcal{A}$ and $r_\mathcal{B}$ by the same angle $\beta$.
+The vector $r_{c_\mathcal{A}} = p_{c_\mathcal{A}} - p_\mathcal{A}$ is the radius of this rotation-circle.
+When also considering $\mathcal{B}$, a rotation of the magnetic field rotates $r_{c_\mathcal{A}}$ and $r_{c_\mathcal{B}}$ by the same angle $\beta$.
 The goal is to find this angular difference $\beta$, so that the cubes are aligned.
 There are two different approaches for alignment: Straight-align and offset-align.
 
@@ -66,9 +64,8 @@ Straight-aligning is always used for east-west connections, but we also use it f
 \paragraph{Offset-Align:}
 
 When considering north-south connections we need to align with an offset, so that the cubes can be moved together from east or west direction.
-We again define $\overrightarrow{\mathcal{A}\mathcal{B}} = \hat{p}_{c_\mathcal{B}} - p_{c_\mathcal{A}}$ with $\hat{p}_{c_\mathcal{B}} = d_o \cdot e_\mathcal{B} + p_{c_\mathcal{B}}$.
-We add an offset $d_o$ to $p_{c_\mathcal{B}}$ in the direction of $e_\mathcal{B}$, so $\overrightarrow{\mathcal{A}\mathcal{B}}$ points from $p_{c_\mathcal{A}}$ to a position above or below $p_{c_\mathcal{B}}$.
-In a perfect world $d_o = 2 \cdot r_C$ is exactly one cube length, but to avoid failures when moving together, we give the alignment a bigger offset.
+We again define $\overrightarrow{\mathcal{A}\mathcal{B}} = \left( d_\textit{offset} \cdot e_\mathcal{B} + p_{c_\mathcal{B}} \right) - p_{c_\mathcal{A}}$, but this time an offset $d_\textit{offset}$ is added to $p_{c_\mathcal{B}}$ in the direction of $e_\mathcal{B}$, so $\overrightarrow{\mathcal{A}\mathcal{B}}$ points from $p_{c_\mathcal{A}}$ to a position above or below $p_{c_\mathcal{B}}$.
+In a perfect world $d_\textit{offset} = 2 \cdot r_C$ is exactly one cube length, but to avoid failures when moving together, we give the alignment a bigger offset.
 Instead of pointing $e_\mathcal{A}$ in the same direction as $\overrightarrow{\mathcal{A}\mathcal{B}}$ we now have two options:
 Either solving $\angle \left( \vec{E}, \overrightarrow{\mathcal{A}\mathcal{B}} \right) = 0$ or $\angle \left( \vec{W}, \overrightarrow{\mathcal{A}\mathcal{B}} \right) = 0$, depending on if we want to move $\mathcal{A}$ in east direction, or in the west direction towards $\mathcal{B}$.
 
@@ -98,14 +95,14 @@ For calculating angular difference we use the dot-product
 with $a,b \in \mathbb{R}^2$. This way the difference is always positive, which is beneficial in the case of alignment.
 We define a function for straight-aligning based on the rotation angle $\beta$, where both $e_\mathcal{A}$ and $\overrightarrow{\mathcal{A}\mathcal{B}}$ change according to $\beta$.
 \begin{equation}
-\delta(\beta) = \angle \left( R_\beta e_\mathcal{A}, \, \left( R_\beta r_\mathcal{B} + p_\mathcal{B} \right) - \left( R_\beta r_\mathcal{A} + p_\mathcal{A} \right)\right) \,.
+\delta(\beta) = \angle \left( \mathbf{R}_\beta e_\mathcal{A}, \, \left( \mathbf{R}_\beta r_{c_\mathcal{B}} + p_\mathcal{B} \right) - \left( \mathbf{R}_\beta r_{c_\mathcal{A}} + p_\mathcal{A} \right)\right) \,.
 \end{equation}
-$R_\beta$ is a rotation matrix used for rotating vectors by $\beta$.
+$\mathbf{R}_\beta$ is a rotation matrix used for rotating vectors by $\beta$.
 For an offset-align the function would be
 \begin{equation}
-\delta(\beta) = \angle \left( R_\beta e, \, \left( R_\beta \hat{r_\mathcal{B}} + p_\mathcal{B} \right) - \left( R_\beta r_\mathcal{A} + p_\mathcal{A} \right)\right) \,,
+\delta(\beta) = \angle \left( \mathbf{R}_\beta e, \, \left( \mathbf{R}_\beta r + p_\mathcal{B} \right) - \left( \mathbf{R}_\beta r_{c_\mathcal{A}} + p_\mathcal{A} \right)\right) \,,
 \end{equation}
-with $e \in \{ \vec{E}, \vec{W}\}$ and $\hat{r_\mathcal{B}} = \hat{p}_{c_\mathcal{B}} - p_\mathcal{B}$
+with $e \in \{ \vec{E}, \vec{W}\}$ and $r = \left( d_\textit{offset} \cdot e_\mathcal{B} + p_{c_\mathcal{B}} \right) - p_\mathcal{B}$
 
 Alignment is not always possible, so instead of solving $\delta(\beta) = 0$, we are minimizing $\delta(\beta)$.
 \autoref{fig:aligning_plot} shows two example cases for $\delta(\beta)$.
@@ -120,7 +117,7 @@ This way we at least get as close to an alignment as possible.
 \label{sec:walk_wait}
 
 Since both polyominoes $\mathcal{A}$ and $\mathcal{B}$ perform pivot walking motions simultaneously, due to global control, a connection will most likely happen when one polyomino walks into a wall of the workspace boundary.
-Connection can only happen in the middle of the workspace when one polyomino is faster than the other, meaning it has a greater pivot walking distance $d_p$.
+Connection can only happen in the middle of the workspace when one polyomino is faster than the other, meaning it has a greater pivot walking distance $\lVert \vec{d} \rVert$.
 At a first glance it seems easy to move polyominoes together, after the connection-cubes are aligned as described in \autoref{sec:align}.
 The two options of walking left and right determine if either $\mathcal{A}$ is chasing $\mathcal{B}$, or if $\mathcal{B}$ is chasing $\mathcal{A}$, which is of course also dependent on their initial position and orientation.
 In the end one option might be shorter or better in terms of other polyominoes interfering with $\mathcal{A}$ and $\mathcal{B}$, but theoretically both are able to establish the connection.
@@ -129,22 +126,22 @@ In reality it becomes more difficult.
 When a polyomino is continuously walking against a wall at any angle other than 90 degree, the polyomino will move alongside the wall.
 In \cite{schmidt2020} research is done on how friction with boundary-walls under global control forces can be used to calculate the necessary motions for reaching a desired goal configuration, but friction forces depend greatly on material choices and are stochastic.
 Another difficulty are different orientations of displacement vectors.
-It is mathematically possible to calculate the right orientation of the magnetic field to result in a collision after $n$ pivot walking cycle for both polyominoes, even at desired edges, but it is not guaranteed that this collision-point is within the workspace boundaries.
+It is mathematically possible to calculate the right orientation of the magnetic field to result in a collision after a certain number of pivot walking cycles for both polyominoes, even at desired edges, but it is not guaranteed that this collision-point is within the workspace boundaries.
 In that case the calculation of friction and displacement have to be combined together with other factors like polyominoes blocking each other or changing their shape during movement.
 This is fairly complex and recalculating would be necessary in many situations, so we choose a simpler dynamic approach.
 
-We estimate the pivot walking cycles necessary until $c_\mathcal{A}$ moved to the original position of $c_\mathcal{B}$, before it is moved with
+We estimate the pivot walking cycles necessary until $c_\mathcal{A}$ moved to the original position of $c_\mathcal{B}$ with
 \begin{equation}
-n = \left\lceil \frac{d(c_\mathcal{A}, c_\mathcal{B})}{d_{p, \mathcal{A}}} \right\rceil \,.
+\#\textit{walks} = \left\lceil \frac{d(c_\mathcal{A}, c_\mathcal{B})}{\lVert \vec{d}_\mathcal{A} \rVert} \right\rceil \,.
 \end{equation}
-We then only walk a portion of $n$ and re-align the cubes.
+We then only walk $\frac{\#\textit{walks}}{2}$ and re-align the cubes.
 When $c_\mathcal{A}$ and $c_\mathcal{B}$ are near enough for magnetic forces to act we frequently wait a short period to let magnetic attraction pull $e_\mathcal{A}$ and $e_\mathcal{B}$ together.
 This will automatically adjust the alignment, but for even more precision we decreased the pivot walking angle $\alpha$ when in close proximity.
 
 \section{Plan and Failures}
 \label{sec:plan}
 
-A plan is a sequence of actions $A = a_1, ... , a_n$ that when applied to an initial configuration $g_{init}$, leads to a goal configuration $g_{goal}$.
+A plan is a sequence of actions $A = a_1, ... , a_k$ that when applied to an initial configuration $g_\textit{init}$, leads to a goal configuration $g_\textit{goal}$.
 Two plans can be concatenated when the goal of the first matches with the initial configuration of the second.
 That way multiple local plans can be connected to form a global plan.
 We define a metric to compare and evaluate plans based on rotational cost of its actions.
@@ -153,9 +150,9 @@ Let $a_i$ be a normal rotation of angle $\beta$, then $\text{cost}(a_i) = |\beta
 If it is a pivot walking motion, then $\text{cost}(a_i) = |2\alpha|$.
 The cost for the plan is the sum of the costs of all its actions
 \begin{equation}
-\sum_{i=1}^{n} \text{cost}(a_i) \,.
+\sum_{i=1}^{k} \text{cost}(a_i) \,.
 \end{equation}
-A local plan is successful if $g_{goal}$ contains a polyomino with the desired connection of $c_\mathcal{A}$ and $c_\mathcal{B}$ at $(e_\mathcal{A}, e_\mathcal{B})$.
+A local plan is successful if $g_\textit{goal}$ contains a polyomino with the desired connection of $c_\mathcal{A}$ and $c_\mathcal{B}$ at $(e_\mathcal{A}, e_\mathcal{B})$.
 If a plan is successful or not is described by the plan-state $s$.
 There are several reasons the local planner might fail to develop a plan:
 
@@ -180,7 +177,7 @@ Because of different displacement directions, we know this is not true, but it i
 Research on assembling a polyomino out of two parts by moving one part towards the other without collision, was done by Agarwal et al. \cite{agarwal2021}. 
 
 When pre-checking this condition, we can state failure if both directions are not possible.
-Otherwise, we can align with respect t$s$, $P$o the valid slide-in direction, or try out both, if both are possible.
+Otherwise, we can align with respect to the valid slide-in direction, or try out both, if both are possible.
 Again, the condition needs to be re-checked frequently, due to changing polyominoes.
 
 \paragraph{Polyominoes being Stuck:}
@@ -230,8 +227,7 @@ We also pre-check (and frequently re-check) if the polyomino that will be create
 
 As a worst-case failure, we limit the amount of movement $\mathcal{A}$ and $\mathcal{B}$ are able to do.
 Whenever a pivot walking motion is done, we sum up the distances $c_\mathcal{A}$ and $c_\mathcal{B}$ moved together.
-Let $(w,h)$ be the size of the workspace.
-We define a maximum movement capacity of $2\cdot(w+h)$.
+We define a maximum movement capacity of $2\cdot(\text{width} + \text{height})$ dependent on the size of the workspace.
 This capacity gives the polyominoes enough movement, so that both can move along a horizontal and vertical workspace boundary, which should be sufficient to establish a connection.
 
 \section{Local Planning Algorithm}
@@ -241,10 +237,10 @@ This capacity gives the polyominoes enough movement, so that both can move along
 	\caption{\scshape Align-Walk-Realign}
 	\label{algo:local_algo}
 	\begin{algorithmic}[1]
-		\REQUIRE $c_\mathcal{A}$, $c_\mathcal{B}$, $e_\mathcal{A}$, $e_\mathcal{B}$, $\vec{w}$, $\vec{m}$, $g_{init}$ 
-		\ENSURE $(s, g_{goal}, A)$ \COMMENT{state $s$ and actions $A$ leading to configuration $g_{goal}$}
+		\REQUIRE $c_\mathcal{A}$, $c_\mathcal{B}$, $e_\mathcal{A}$, $e_\mathcal{B}$, $\vec{w}$, $\vec{m}$, $g_\textit{init}$ 
+		\ENSURE $(s, g_\textit{goal}, A)$ \COMMENT{state $s$ and actions $A$ leading to configuration $g_\textit{goal}$}
 		\STATE $s \gets \text{undefined}$
-		\STATE $g_{goal} \gets g_{init}$
+		\STATE $g_\textit{goal} \gets g_\textit{init}$
 		\STATE $A \gets \{\}$
 		\STATE $\text{wait} \gets$ \TRUE
 		\LOOP
@@ -253,11 +249,11 @@ This capacity gives the polyominoes enough movement, so that both can move along
 			\ELSE
 				\STATE $a \gets \text{\scshape Align-Offset}(c_\mathcal{A}, c_\mathcal{B}, \vec{m}, e_\mathcal{B})$
 			\ENDIF
-			\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+			\STATE $g_\textit{goal} \gets \text{\scshape Simulate}(g_\textit{goal}, a)$
 			\STATE $A \gets \text{\scshape Append}(A, a)$
-			\STATE $s \gets \text{\scshape Update-State}(g_{goal}, c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A}, \vec{m})$
+			\STATE $s \gets \text{\scshape Update-State}(g_\textit{goal}, c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A}, \vec{m})$
 			\IF[first time checking for failure or success]{$s \neq \text{undefined}$}
-				\RETURN $(s, g_{goal}, A)$
+				\RETURN $(s, g_\textit{goal}, A)$
 			\ENDIF
 			\IF[wait or walk]{$\text{\scshape Critical-Distance}(c_\mathcal{A}, c_\mathcal{B})$ \AND wait}
 				\STATE $a \gets \text{\scshape Wait}()$
@@ -266,21 +262,21 @@ This capacity gives the polyominoes enough movement, so that both can move along
 				\STATE $a \gets \text{\scshape Walk}(c_\mathcal{A}, c_\mathcal{B}, \vec{w})$ \COMMENT{$a$ can be multiple walking steps (\autoref{sec:walk_wait})}
 				\STATE $\text{wait} \gets$ \TRUE
 			\ENDIF
-			\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+			\STATE $g_\textit{goal} \gets \text{\scshape Simulate}(g_\textit{goal}, a)$
 			\STATE $A \gets \text{\scshape Append}(A, a)$
 			\IF[handle stuck condition]{$\text{\scshape Stuck}(c_\mathcal{A}, c_\mathcal{B})$}
 				\STATE $a \gets \text{\scshape Align-Straight}(c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A})$ \COMMENT{do a straight aligne}
-				\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+				\STATE $g_\textit{goal} \gets \text{\scshape Simulate}(g_\textit{goal}, a)$
 				\STATE $A \gets \text{\scshape Append}(A, a)$
 				\WHILE[let magnets attract until stuck again]{\NOT $\text{\scshape Stuck}(c_\mathcal{A}, c_\mathcal{B})$}
 					\STATE $a \gets \text{\scshape Wait}()$
-					\STATE $g_{goal} \gets \text{\scshape Simulate}(g_{goal}, a)$
+					\STATE $g_\textit{goal} \gets \text{\scshape Simulate}(g_\textit{goal}, a)$
 					\STATE $A \gets \text{\scshape Append}(A, a)$
 				\ENDWHILE
 			\ENDIF
-			\STATE $s \gets \text{\scshape Update-State}(g_{goal}, c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A}, \vec{m})$
+			\STATE $s \gets \text{\scshape Update-State}(g_\textit{goal}, c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A}, \vec{m})$
 			\IF[second time checking for failure or success]{$s \neq \text{undefined}$}
-				\RETURN $(s, g_{goal}, A)$
+				\RETURN $(s, g_\textit{goal}, A)$
 			\ENDIF
 		\ENDLOOP 
 	\end{algorithmic}
@@ -302,18 +298,18 @@ Generally speaking a low computation time can be linked with low rotational cost
 
 \paragraph{Align-Walk-Realign:}
 
-\autoref{algo:local_algo} takes the connection-cubes and edges $c_\mathcal{A}$, $c_\mathcal{B}$, $e_\mathcal{A}$, $e_\mathcal{B}$ along with $\vec{w}$, $\vec{m}$ and an initial configuration $g_{init}$ as inputs and returns a plan-state $s$ along with the configuration $g_{goal}$ the algorithm ended in after applying the sequence of actions $\mathcal{A}$.
+\autoref{algo:local_algo} takes the connection-cubes and edges $c_\mathcal{A}$, $c_\mathcal{B}$, $e_\mathcal{A}$, $e_\mathcal{B}$ along with $\vec{w}$, $\vec{m}$ and an initial configuration $g_\textit{init}$ as inputs and returns a plan-state $s$ along with the configuration $g_\textit{goal}$ the algorithm ended in after applying the sequence of actions $\mathcal{A}$.
 The algorithm runs in a loop until $s$ changes to success or one of the failure condition.
 The failure and success conditions are evaluated twice per iteration with {\scshape Update-State}.
 Once after aligning, and once at the end of the loop.
 That way, the planner avoids simulating unnecessary actions.
-$g_{goal}$ is updated by simulating the determined actions with {\scshape Simulate}.
+$g_\textit{goal}$ is updated by simulating the determined actions with {\scshape Simulate}.
 The actions are appended to $\mathcal{A}$ after simulation.
 We perform either a straight or offset-align, depending on $e_\mathcal{A}$ and $e_\mathcal{B}$.
 The offset-align is done with the direction of $\vec{m}$.
 After aligning we walk the estimated amount of pivot walking cycles (\autoref{sec:walk_wait}) in direction $\vec{w}$ with {\scshape Walk}, or we wait with {\scshape Wait}, if $c_\mathcal{A}$ and $c_\mathcal{B}$ are in close proximity, determined by {\scshape Critical-Distance}.
 If we waited in the previous iteration, we walk in the current one and oppositely.
-This behavior is toggled by the variable $wait$. 
+This behavior is toggled by the variable $\text{wait}$. 
 The stuck condition is evaluated with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
 When the polyominoes are stuck, the algorithm performs a straight-align and waits as long as this changes the stuck condition.
 

@@ -140,7 +140,7 @@ F_\textit{mag} = \frac{\mu_\textit{mag}}{r^4} \left(m_2(m_1 \cdotp \hat{r}) + m_
 \end{equation}
 with $\hat{r}$ being the unit vector pointing from magnet 1 to magnet 2.
 The force acting from magnet 2 on magnet 1 is $-F_\textit{mag}$.
-We set the strength of all magnets to $\mu_{mag} = 2.5 \cdot 10^7$ \cite{levitt2013}. 
+We set the strength of all magnets to $\mu_\textit{mag} = 2.5 \cdot 10^7$ \cite{levitt2013}. 
 
 
 \subsection{Magnetic Field Forces}
@@ -151,9 +151,9 @@ Force is applied only at the position of north and south magnets for each cube o
 The forces at north and south magnets act in opposite directions to ensure a rotation.
 $F_\textit{field}$ is calculated based on the difference of cube orientation $\gamma_\textit{cube}$ and magnetic field orientation $\gamma_\textit{field}$ with
 \begin{equation}
-F_\textit{field} = \mu_\textit{field} \begin{pmatrix} \sin(\gamma_\textit{cube} - \gamma_\textit{field}) \\ 0 \end{pmatrix} R_{\gamma_\textit{cube}} \, .
+F_\textit{field} = \mu_\textit{field} \begin{pmatrix} \sin(\gamma_\textit{cube} - \gamma_\textit{field}) \\ 0 \end{pmatrix} \mathbf{R}_{\gamma_\textit{cube}} \, .
 \end{equation}
-$\mu_\textit{field} = 1000$ is the strength of the magnetic field and $R_{\gamma_\textit{cube}}$ is the rotation matrix used for rotating the force direction by $\gamma_\textit{cube}$.
+$\mu_\textit{field} = 1000$ is the strength of the magnetic field and $\mathbf{R}_{\gamma_\textit{cube}}$ is the rotation matrix used for rotating the force direction by $\gamma_\textit{cube}$.
 An alignment where $\gamma_\textit{cube} = \gamma_\textit{field}$ results in $F_\textit{field} = \vec{0}$.
 
 
