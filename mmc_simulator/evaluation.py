@@ -201,13 +201,18 @@ def __fitExponential(ax_bar):
     for c in ax_bar.containers:
         for v in c:
            y.append(v.get_height())
-    x = np.asarray(range(0,7))
+    x = np.asarray(range(5,12))
     y = np.asarray(y)
     popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, x, y)
+    a = popt[0]
+    b = popt[1]
+    c = popt[2]
     x_fitted = np.linspace(np.min(x), np.max(x), 100)
-    y_fitted = popt[0] * np.exp(popt[1] * x_fitted) + popt[2]
-    plt.plot(x_fitted, y_fitted, linewidth=4, color="black")
-
+    y_fitted = a * np.exp(b * x_fitted) + c
+    plt.plot(x_fitted - 5, y_fitted, linewidth=4, color="black",
+             label=(f"${round(a,2)}" + r"e^{" + f"{round(b,2)}" + r"n}" + f"{round(c)}$"))
+    plt.legend(prop={'size': LEGEND_SIZE * 2.5})
+0
 def barplot_TCSA(expName):
     filePath = os.path.join(RESULT_DIR, expName, "TCSA.json")
     with open(filePath, 'r') as file:
@@ -368,7 +373,7 @@ def main():
     #plot_pivotAngleDistance()
     #plot_magnetForce()
     #pieplot_timeUse("time-stats.json")
-    #barplot_TCSA("TCSA-experiments")
+    barplot_TCSA("TCSA-experiments")
     #---Result Plots---
     #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
@@ -376,7 +381,7 @@ def main():
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "ntcsa", onlySuccess=True)
     #---Create Figures---
-    createFigures()
+    #createFigures()
 
 if __name__ == "__main__":
     main()
