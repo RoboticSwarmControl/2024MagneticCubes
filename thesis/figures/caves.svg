@@ -28,14 +28,14 @@
      inkscape:document-units="mm"
      showgrid="false"
      inkscape:zoom="1.2623761"
-     inkscape:cx="434.89417"
-     inkscape:cy="264.58042"
+     inkscape:cx="321.61572"
+     inkscape:cy="130.7059"
      inkscape:window-width="2560"
      inkscape:window-height="1355"
      inkscape:window-x="1920"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g8564" />
+     inkscape:current-layer="g8564-4" />
   <defs
      id="defs563">
     <marker
@@ -418,7 +418,7 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0);display:inline;fill:#000000;fill-opacity:1;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan17451">a)</tspan></text>
+           id="tspan13325">a)</tspan></text>
       <g
          id="g3873-5-36-9-6"
          inkscape:label="blue"
@@ -475,7 +475,7 @@
       <g
          id="g4746-9-1-7"
          inkscape:label="polyA"
-         transform="matrix(0.68008889,0,0,0.68008889,27.610906,7.2596557)">
+         transform="matrix(0.68008889,0,0,0.68008889,26.219845,13.037874)">
         <g
            id="g3873-5-36-9-4"
            inkscape:label="blue"
@@ -511,6 +511,47 @@
           <rect
              style="fill:#0000c3;fill-opacity:1;stroke:#0000c3;stroke-width:1.165;stroke-opacity:1"
              id="rect1102-6-9-1-5-6"
+             width="6.3925414"
+             height="6.3925414"
+             x="69.933197"
+             y="35.040257" />
+        </g>
+        <g
+           id="g3873-5-36-9-4-6"
+           inkscape:label="blue"
+           transform="matrix(0.30645137,0,0,0.30645137,18.795298,3.4118425)"
+           style="display:inline">
+          <rect
+             style="fill:#9696fa;fill-opacity:1;stroke:#5a5a5a;stroke-width:1.165;stroke-opacity:1"
+             id="rect234-3-0-4-4-8"
+             width="55.428146"
+             height="55.428146"
+             x="22.082335"
+             y="10.522455" />
+          <rect
+             style="fill:#c30000;fill-opacity:1;stroke:#c30000;stroke-width:1.165;stroke-opacity:1"
+             id="rect1102-5-6-7-3-8"
+             width="6.3925414"
+             height="6.3925414"
+             x="46.600136"
+             y="11.737125" />
+          <rect
+             style="fill:#0000c3;fill-opacity:1;stroke:#0000c3;stroke-width:1.165;stroke-opacity:1"
+             id="rect1102-3-6-2-8-07-4"
+             width="6.3925414"
+             height="6.3925414"
+             x="23.263891"
+             y="35.040257" />
+          <rect
+             style="fill:#0000c3;fill-opacity:1;stroke:#0100c3;stroke-width:1.165;stroke-opacity:1"
+             id="rect1102-3-7-2-6-4-8-3"
+             width="6.3925414"
+             height="6.3925414"
+             x="46.61866"
+             y="58.383682" />
+          <rect
+             style="fill:#0000c3;fill-opacity:1;stroke:#0000c3;stroke-width:1.165;stroke-opacity:1"
+             id="rect1102-6-9-1-5-6-1"
              width="6.3925414"
              height="6.3925414"
              x="69.933197"
@@ -641,7 +682,7 @@
         <g
            id="g3873-3-3-9"
            inkscape:label="red"
-           transform="matrix(0.30668623,0,0,0.30668623,18.783603,20.395402)">
+           transform="matrix(0.30668623,0,0,0.30668623,36.133296,3.409508)">
           <rect
              style="fill:#fa9696;fill-opacity:1;stroke:#5a5a5a;stroke-width:1.165;stroke-opacity:1"
              id="rect234-7-2-2"
@@ -673,6 +714,47 @@
           <rect
              style="fill:#c30000;fill-opacity:1;stroke:#c30000;stroke-width:1.16493;stroke-opacity:1"
              id="rect1102-6-97-5-92"
+             width="6.3921657"
+             height="6.3921657"
+             x="69.933609"
+             y="35.042038" />
+        </g>
+        <g
+           id="g3873-3-3-9-4"
+           inkscape:label="red"
+           transform="matrix(0.30668623,0,0,0.30668623,1.4272634,3.4028619)"
+           style="display:inline">
+          <rect
+             style="fill:#fa9696;fill-opacity:1;stroke:#5a5a5a;stroke-width:1.165;stroke-opacity:1"
+             id="rect234-7-2-2-9"
+             width="55.428146"
+             height="55.428146"
+             x="22.082335"
+             y="10.522455" />
+          <rect
+             style="fill:#c30000;fill-opacity:1;stroke:#c30000;stroke-width:1.16493;stroke-opacity:1"
+             id="rect1102-59-0-0-2"
+             width="6.3921657"
+             height="6.3921657"
+             x="46.601917"
+             y="11.740275" />
+          <rect
+             style="fill:#c30000;fill-opacity:1;stroke:#c30000;stroke-width:1.16493;stroke-opacity:1"
+             id="rect1102-3-2-6-6-0"
+             width="6.3921657"
+             height="6.3921657"
+             x="23.267042"
+             y="35.042038" />
+          <rect
+             style="fill:#0000c3;fill-opacity:1;stroke:#0100c3;stroke-width:1.16493;stroke-opacity:1"
+             id="rect1102-3-7-28-1-8-6"
+             width="6.3921657"
+             height="6.3921657"
+             x="46.620438"
+             y="58.38409" />
+          <rect
+             style="fill:#c30000;fill-opacity:1;stroke:#c30000;stroke-width:1.16493;stroke-opacity:1"
+             id="rect1102-6-97-5-92-8"
              width="6.3921657"
              height="6.3921657"
              x="69.933609"
@@ -793,11 +875,11 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-5);display:inline;fill:#000000;fill-opacity:1;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan17453">c)</tspan></text>
+           id="tspan13327">c)</tspan></text>
       <g
          id="g3873-5-36-9-6-49"
          inkscape:label="blue"
-         transform="matrix(0.20841417,0,0,0.20841417,6.0493401,32.935782)"
+         transform="matrix(0.20841417,0,0,0.20841417,5.3153004,39.50696)"
          style="display:inline">
         <rect
            style="fill:#9696fa;fill-opacity:1;stroke:#5a5a5a;stroke-width:1.165;stroke-opacity:1"
@@ -1169,7 +1251,7 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:24px;font-family:'Times New Roman';-inkscape-font-specification:'Times New Roman, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect14254-8-0-2);display:inline;fill:#000000;fill-opacity:1;stroke:#808080;stroke-width:0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"><tspan
            x="575.82422"
            y="29.423994"
-           id="tspan17455">b)</tspan></text>
+           id="tspan13329">b)</tspan></text>
       <g
          id="g3873-5-36-9-6-4"
          inkscape:label="blue"

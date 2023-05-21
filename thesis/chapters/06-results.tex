@@ -166,11 +166,13 @@ In terms of the option sorting strategies the only noticeable difference is that
 	\label{fig:AFTS_shapes}
 \end{figure}
 
+%TODO show number of tcsa nodes for all shapes
+
 In this experiment manually designed polyominoes are assembled from multiple randomly generated initial configurations.
 $100$ samples were taken for each custom polyomino with a workspace size of $50 r_C \times 50 r_C$.
 
 In \autoref{sec:w/h_pattern} we focus on how rectangular polyominoes with varying width/height ratios influence planning time.
-Furthermore we experiment with two patterns of red and blue for each rectangle.
+Furthermore we experiment with two patterns of red and blue for each polyomino.
 The \textit{switching-column pattern} switches between red and blue cubes column vise and the \textit{checkerboard pattern} creates a checkerboard of single red and blue cubes.
 A list of these polyominoes can be found in \autoref{fig:AFTS_cb_shapes}.
 
@@ -201,8 +203,20 @@ The polyominoes ``letter C'', ``letter S'' and ``letter A'' provide different ca
 	\label{fig:AFTS_cb_timestats}
 \end{figure}
 
-Text
+When comparing the two cube pattern in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
+It is not a huge difference, but still noticeable.
+For instance, the ``3x3'' polyomino is on average at $50$ seconds planning time, while the ``3x3 cb'' polyomino is at 75 seconds with a wider spread and worst outliers.
 
+Polyomino shapes with more height than width are faster to assemble.
+``10x1'' is the best followed by ``5x2'', ``3x3'' and ``2x5''.
+The same order persists for the checkerboard pattern.
+Surprisingly the ``1x10'' polyomino breaks out of this order.
+Its planning time lays between the ``5x2'' and the ``3x3''.
+The ``2x5'' performs significantly worst than all other polyominoes.
+While the majority of instances for all other shapes can be solved in under $100$ seconds, the ``2x5'' exceeds this time with a spread reaching up to $600$ seconds.
+
+For the fraction of timed out plans shown in \autoref{fig:AFTS_cb_timeout}, the ``2x5'' is the only shape where $10\%$ to $20\%$ timeouts, depending on the option sorting strategy, can be observed.
+All other shapes experience nearly no timeouts.
 
 \subsection{Special Polyomino Shapes}
 \label{sec:special_poly}
@@ -311,7 +325,7 @@ With in a class of same size, increasing the aspect ratio results in slightly mo
 
 
 
-\section{Assembly for Red and Blue Cube Ration}
+\section{Assembly for Red and Blue Cube Ratio}
 \label{sec:AFNR}
 
 We examined the affect of red and blue cube ratio on planning time.

@@ -365,7 +365,7 @@ def createFigures():
 def main():
     #---Thesis plots---
     #plot_alignFunctions()
-    plot_pivotAngleDistance()
+    #plot_pivotAngleDistance()
     #plot_magnetForce()
     #pieplot_timeUse("time-stats.json")
     #barplot_TCSA("TCSA-experiments")
@@ -374,6 +374,7 @@ def main():
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
+    boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "ntcsa", onlySuccess=True)
     #---Create Figures---
     #createFigures()
 

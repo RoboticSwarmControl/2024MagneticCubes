@@ -61,42 +61,46 @@
 	
 	$n$
 	&
-	...
+	Size of the target polyomino or number of cubes in the workspace.
+	In case of our global planner cube count equals target polyomino size.
 	\\ \midrule
 	
 	$\vec{d}$
 	&
-	...
+	Displacement vector for one pivot walking cycle of a polyomino.
 	\\ \midrule
 	
 	$\vec{a}$
 	&
-	...
+	Pivot walking axis of a polyomino.
+	Vector between north and south pivot point.
 	\\ \midrule
 	
 	$\alpha$
 	&
-	...
+	Pivot walking angle.
 	\\ \midrule
 	
 	$\vec{w}$
 	&
-	...
+	Pivot walking direction $\vec{w} \in \{ \vec{E}, \vec{W} \}$.
 	\\ \midrule
 	
 	$\vec{m}$
 	&
-	...
+	Slide-in direction $\vec{m} \in \{ \vec{E}, \vec{W} \}$.
 	\\ \midrule
 	
 	$\overrightarrow{\mathcal{A}\mathcal{B}}$
 	&
-	...
+	Vector used in the process of aligning cubes.
+	Points from $p_{c_\mathcal{A}}$ to $p_{c_\mathcal{B}}$ for straight aligning, or to a position above/below $p_{c_\mathcal{B}}$ for offset aligning.
 	\\ \midrule
 	
 	$d_\textit{offset}$
 	&
-	...
+	Offset distance for offset aligning.
+	$d_\textit{offset} > 2 r_C$.
 	\\ \midrule
 	
 	$\beta$  
@@ -111,97 +115,104 @@
 	
 	$\#\textit{walks}$
 	&
-	...
+	Number of estimated pivot walking cycles in our dynamic walk-align-realign approach.
 	\\ \midrule
 	
 	$s$
 	&
-	...
+	Plan state of either local or global plans. States if successful, or the reason of failure.
 	\\ \midrule
 	
 	$A$
 	&
-	$a_1, ... , a_k$
+	Sequence of actions $a_1, ... , a_k$ a local plan consists of.
 	\\ \midrule
 		
 	$g$, $g_\textit{init}$, $g_\textit{goal}$
 	&
-	...
+	Configurations of the configuration-space $SE(2)$. $g_\textit{init}$ indicates the initial and $g_\textit{goal}$ the goal configuration of local or global plan.
 	\\ \midrule
 	
 	$S$, $S(g)$, $S_\mathcal{T}$, $S_\textit{trivial}$
 	&
-	...
+	Polyomino sets store information about the polyomino types present in the workspace without considering position or distinguishing between physical polyominoes.
+	The amount of one type is also stored.
+	$S(g)$ is the polyomino set of a configuration $g$.
+	$S_\mathcal{T}$ contains only one occurrence of $\mathcal{T}$ and $S_\textit{trivial}$ only trivial polyominoes.
+	Both are used in TCSA graphs.
 	\\ \midrule
 	
 	$\hat{n}$
 	&
-	...
+	Maximum polyomino size in one configuration or polyomino set.
 	\\ \midrule
 	
 	$t_c$
 	&
-	... 
+	Continuous two-cutting edge path through a polyomino.
 	\\ \midrule
 	
 	$G_{\textit{TCSA}}(\mathcal{T})$
 	&
-	$(V,E)$, $(S_0, t_c, S_1)$
+	Two-cut-sub-assembly graph of $\mathcal{T}$ represented by nodes $V$ and edges $E$.
+	Nodes are polyomino sets and edges connect two sets $\{S_0, t_c, S_1\}$ with a two-cut as an edge weight.
 	\\ \midrule
 	
 	$L_\mathcal{A}$
 	&
-	...
+	Collection of all physically distinct polyominoes of the polyomino type $\mathcal{A}$.
 	\\ \midrule
 	
 	$O$
 	&
-	$o$
+	List of connection options $o$ for one configuration determined with a TCSA graph.
 	\\ \midrule
 	
 	$\hat{o}(o_1,o_2)$
 	&
-	...
+	Function comparing connection options $o_1$ and $o_2$ and returning the better one based on the option sorting strategy used.
 	\\ \midrule
 	
 	$P$
 	&
-	$p$
+	Plan stack containing a continuous sequence of local plans $p$.
+	Used in the global planning algorithm.
 	\\ \midrule
 	
 	$\#\textit{local}$
 	&
-	...
+	Number of local plans simulated during planning with the global planning algorithm.
 	\\ \midrule
 	
 	$\#\textit{config}$
 	&
-	...
+	Number of configurations explored during planning with the global planning algorithm.
 	\\ \midrule
 	
 	$\mu_\textit{mag}$
 	&
-	...
+	Magnetic strength of embedded permanent magnets of magnetic modular cubes use in our simulator.
 	\\ \midrule
 	
 	$\mu_\textit{field}$
 	&
-	...
+	Strength of the magnetic field used in our simulator.
 	\\ \midrule
 	
 	$p_\textit{fric}$
 	&
-	...
+	Friction point of a cube depending on the latitude of the magnetic field.
+	Either at the position of north or south magnet.
 	\\ \midrule
 	
 	$n_\textit{fric}$
 	&
-	...
+	Number of friction-cubes of a polyomino to which friction force is applied.
 	\\ \midrule
 	
 	$w_\textit{nom}$
 	&
-	...
+	Fraction of nominal friction, that gets applied to all non friction-cubes of a polyomino.
 	\\ \bottomrule
 	
 \end{xltabular}
