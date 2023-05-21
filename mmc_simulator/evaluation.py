@@ -12,9 +12,9 @@ FIGURE_DIR = "../thesis/figures/plots"
 
 AXIS_LABELS = {
     "targetSize": "target polyomino size $n$",
-    "targetNred": "number of red cubes in target",
+    "targetNred": r"number of red cubes $n_{red}$",
     "targetShape": "target polyomino shape",
-    "boardSize": "workspace area, aspect ratio",
+    "boardSize": "workspace",
     "time": "planning time [s]",
     "cost": "plan cost [rad]",
     "nconfig": "#config",
@@ -374,9 +374,9 @@ def main():
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
-    boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "ntcsa", onlySuccess=True)
+    #boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "ntcsa", onlySuccess=True)
     #---Create Figures---
-    #createFigures()
+    createFigures()
 
 if __name__ == "__main__":
     main()
