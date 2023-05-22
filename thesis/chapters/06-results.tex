@@ -4,11 +4,11 @@
 All experiments conducted are about assembling target polyominoes with the use of our global planner (\autoref{chap:global}).
 In \autoref{sec:AFN} we analyze the effect of increasing polyomino size on planning time, rotational cost and other global planner characteristics mentioned in \autoref{sec:global_complex}.
 The polyominoes used for this experiment are randomly generated, but we also evaluate the construction of manually designed polyominoes in \autoref{sec:AFTS}.
-With these polyominoes, we can specifically test the assembly of targets with caves or holes, varying widths and heights, or different patterns of red and blue cubes. 
+With manually designed polyominoes, we can specifically test the assembly of targets with caves or holes, varying widths and heights, or different patterns of red and blue cubes. 
 Furthermore, we experiment with different workspace sizes and aspect ratios in \autoref{sec:AFBS} and how the ratio of red and blue cubes affect the assembly of straight line polyominoes in \autoref{sec:AFNR}.
 
 \paragraph{Option Sorting Strategies}
-We run all experiments with the three option sorting strategies from \autoref{sec:connect_options},
+We conducted all experiments with the three option sorting strategies from \autoref{sec:connect_options}:
 \begin{enumerate}
 	\item Minimal Distance (MIN DIST)
 	\item Grow Largest Component (GROW LARGEST)
@@ -16,17 +16,17 @@ We run all experiments with the three option sorting strategies from \autoref{se
 \end{enumerate}
 
 \paragraph{Instance Generation}
-For the generation of random polyominoes and initial configurations we use a seed-based pseudorandom number generator to make experiments reproducible.
-That way the option sorting strategies are applied to the same set of seeds to make the results comparable.
-When an initial configuration is randomly generated the number of red and blue cubes matches with the target polyomino.
-Sub-assemblies in the initial configuration can occur, since the global planner is able to handle this.
+Random polyominoes and initial configurations were created with a seed-based pseudorandom number generator, to make experiments reproducible.
+The option sorting strategies are applied to the same set of seeds to make the results comparable.
+When an initial configuration is randomly generated, the number of red and blue cubes matches with the target polyomino.
+Sub-assemblies in the initial configuration can occur.
 
 \paragraph{Timeout Failure}
 The global planner states a timeout failure after a planning time of $600$ seconds.
 We do not time out during the simulation of local plans, so instances can exceed $600$ seconds and still be successful if the last local plan assembles the target polyomino.
 
 \paragraph{Hardware Setup}
-The experiments were done on multiple computers with the same hardware specification (\textbf{AMD Ryzen 7 5800X @ 8x3.8GHz (-4.7 GHz), 128GB RAM}) running Ubuntu 22.04.2 LTS.
+The experiments were done on multiple computers with the same hardware specification (\textbf{AMD Ryzen 7 5800X @ 8x3.8 GHz (-4.7 GHz), 128 GB RAM}) running Ubuntu 22.04.2 LTS.
 
 %TODO key legende fuer box-whisker plots
 
@@ -36,10 +36,10 @@ The experiments were done on multiple computers with the same hardware specifica
 \section{Assembly for Polyomino Size}
 \label{sec:AFN}
 
-This experiment was conducted with randomly generated initial configuration and randomly generated polyominoes of specific sizes $n$.
-To maximize the variety of possible polyomino-shapes the number of red cubes is set to $n_\textit{red} = \lfloor \frac{n}{2} \rfloor$ \cite{Lu2021}.
-Because of the variety, this experiment is well-suited for not only analyzing planning time and rotational-cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
-We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each target size $150$ samples were taken.
+This experiment was conducted with randomly generated initial configuration and randomly generated polyominoes of specific size $n$.
+To maximize the variety of possible polyomino shapes, the number of red cubes is set to $n_\textit{red} = \lfloor \frac{n}{2} \rfloor$ \cite{Lu2021}.
+This makes the experiment well-suited for not only analyzing planning time and rotational-cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
+The workspace is of size $50 r_C \times 50 r_C$ and for each target size $150$ samples were taken.
 
 \paragraph{Planning Time}
 
@@ -58,22 +58,21 @@ We worked in a quadratic workspace of size $50 r_C \times 50 r_C$ and for each t
 		\caption{Fraction of plans that timed out.}
 		\label{fig:AFN_timeout}
 	\end{subfigure}
-	\caption[Planning time and fraction timed out for different target sizes]{Planning time and fraction timed out for different target sizes $n$. All option sorting strategies are compared.}
+	\caption[Planning time and fraction of timeouts for increasing target size]{Planning time and fraction of timeouts for increasing target size $n$. All option sorting strategies are compared.}
 	\label{fig:AFN_timestats}
 \end{figure}
 
-\autoref{fig:AFN_time} shows distribution of planning time and \autoref{fig:AFN_timeout} plots the fraction of timeouts during this experiment.
+\autoref{fig:AFN_time} shows the distribution of planning time and \autoref{fig:AFN_timeout} the fraction of timed out instances.
 The construction of target polyominoes with sizes $5$ to $7$ can be planned in under $30$ seconds with just a few outliers exceeding this time.
-Note the non of the instances timed out.
+Note the none of these instances timed out.
 
-For target sizes above $7$ timeout failures first appear with roughly $5\%$ for $n = 8$.
-The fraction of timeouts increases to $20\%$ for $n=12$.
+For target sizes above $7$ timeout failures first appear with roughly $5\%$ for $n = 8$ increasing to $20\%$ for $n=12$.
 The planning time for $n = 12$ increases to $150$ seconds on average with a median of $100$ seconds.
-With increasing $n$, a wider spread of planning time can be observed.
-Outliers can reach planning times close to the timeout of $600$ seconds.´
+With increasing $n$ a wider spread of planning time can be observed.
+Outliers can reach planning times close to the timeout of $600$ seconds.
 
 In terms of planning time the option sorting strategies make no noticeable difference.
-For the fraction of timeouts, growing the largest component often exceeds the other two strategies clearly visible for $n=11$, where grow largest is at $20\%$ and the others under $10\%$ of plans timed out.
+For the fraction of timeouts growing the largest component often exceeds the other two strategies, clearly visible for $n=11$, where grow largest is at $20\%$ and the others under $10\%$ of plans timed out.
 
 
 \paragraph{Plan Cost}
@@ -81,12 +80,12 @@ For the fraction of timeouts, growing the largest component often exceeds the ot
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFN_cost.pdf}
-	\caption[Plan cost for different target sizes]{Plan cost in radians of successful plans for different target sizes $n$. All option sorting strategies are compared.}
+	\caption[Plan cost for increasing size]{Plan cost in radians of successful plans for increasing target size $n$. All option sorting strategies are compared and outliers are omitted.}
 	\label{fig:AFN_cost}
 \end{figure}
 
-\autoref{fig:AFN_cost} shows the rotational cost of the resulting plans that successfully assembled the target.
-The cost increase slightly for bigger polyominoes, but the gradient increases gently and seems to be flatting out for sizes $11$ and $12$.
+\autoref{fig:AFN_cost} shows the rotational cost of plans that successfully assembled the target.
+The cost increase slightly for bigger polyominoes, but the gradient seems to be flatting out for sizes $11$ and $12$.
 Plan cost is generally in a range of $50$ to $150$ radians, which is the equivalent of $8$ to $24$ full longitude rotations of the magnetic field.
 The different option sorting strategies do not impact the cost of a plan.
 
@@ -107,43 +106,46 @@ The different option sorting strategies do not impact the cost of a plan.
 		\caption{Number of explored configurations.}
 		\label{fig:AFN_nconfig}
 	\end{subfigure}
-	\caption[$\#\textit{local}$ and $\#\textit{config}$ for different target sizes]{Number of simulated local plans $\#\textit{local}$ and number of explored configurations $\#\textit{config}$ for different target sizes $n$. Only plans that did not time out are shown and outliers are omitted for better readability. All option sorting strategies are compared.}
+	\caption[Number of simulated local plans and explored configurations for increasing target size]{Number of simulated local plans $\#\textit{local}$ and explored configurations $\#\textit{config}$ for increasing target size $n$. Only plans that did not time out are shown and outliers are omitted for better readability. All option sorting strategies are compared.}
 	\label{fig:AFN_planstats}
 \end{figure}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFN_ltg.pdf}
-	\caption[Local plans in plan stack for different target sizes]{Local plans in plan stack $|P|$ for different target sizes $n$. Only successful plans are shown and all option sorting strategies are compared.}
+	\caption[Local plans in plan stack for increasing target size]{Local plans in plan stack $|P|$ for increasing target size $n$. Only successful plans are shown and all option sorting strategies are compared.}
 	\label{fig:AFN_ltg}
 \end{figure}
 
 
 We analyze the number of simulated local plan $\#\textit{local}$ and the number of explored configuration $\#\textit{config}$ in \autoref{fig:AFN_planstats}.
 The number of local plans contained in the plan stack of the resulting global plan $|P|$ is evaluated in \autoref{fig:AFN_ltg}.
-When a plan times out it is not possible to predict how many more local plan or configurations would have to be explored to assemble the target.
-In that case $\#\textit{local}$ and $\#\textit{config}$ just show how many local plan and configurations can be explored within the timeout.
-Numbers can reach values up to $\#\textit{local} = 1200$ and $\#\textit{config} = 300$, but all plans that timed out are omitted in the plots of \autoref{fig:AFN_planstats}.
+
+When a plan times out $\#\textit{local}$ and $\#\textit{config}$ only portray how many local plan and configurations can be explored within the timeout.
+Numbers can reach values up to $\#\textit{local} = 1200$ and $\#\textit{config} = 300$.
+Timed out instances are omitted in the plots of \autoref{fig:AFN_planstats}.
 
 $\#\textit{local}$ increases for bigger target polyominoes.
 On average the realistic best case of $n-1$ local plans (\autoref{sec:global_complex}) is exceeded.
-For $n=8$ there were $25$, for $n=10$ about $50$ and for $n=12$ roughly $75$ local plans simulated on average.
-For all target polyomino sizes the majority of instances is below the average, although some instances can reach up to $250$ local plans.
+For $n=8$ there are $25$, for $n=10$ about $50$ and for $n=12$ roughly $75$ local plans simulated on average.
+For all $n$ the majority of instances are below the average.
+Outliers can reach up to $250$ local plans.
 
-The same goes for $\#\textit{config}$.
-The averages exceeds the realistic best case of $n$, for example $16$ with $n=12$.
+$\#\textit{config}$ behaves similarly.
+The averages exceed the realistic best case of $n$, for example $\#\textit{config} = 16$ with $n=12$.
 In this example the global planner encountered at least $4$ dead ends during planning.
-The small numbers of $\#\textit{config}$ show that the depth first search approach is able to assemble polyominoes by only exploring a small portion of the whole configuration space.
+The small numbers of $\#\textit{config}$ show that our depth first search approach is able to assemble polyominoes by only exploring a small portion of the whole configuration space.
 
-For the majority of instances $|P| = n-1$, but layer skipping can be observed whenever $|P| < n-1$.
-Surprisingly we observe instances with $|P| > n-1$.
-This should not be possible when assembling with a TCSA graph.
-The only explanation for this is that polyominoes break during simulation and create polyomino sets, which are at the same or a lower depth then the initial set.
-This effect becomes more frequent for $n \geq 9$.
+For the majority of instances the number of local plans in the plan stack is at $|P| = n-1$.
+Layer skipping can be observed frequently whenever $|P| < n-1$.
+Surprisingly, instances with $|P| > n-1$ can also be observed.
+This should not be possible due to a TCSA graph depth of $n$.
+An explanation for this is that polyominoes break during simulation and create polyomino sets, which are at the same or a lower depth than the initial set that the local planner started with.
+This phenomenon becomes more frequent for $n \geq 9$.
 
-In terms of the option sorting strategies the only noticeable difference is that growing the largest component tends to have slightly lower value of $\#\textit{config}$.
+The only noticeable difference between the option sorting strategies is that growing the largest component tends to have slightly lower numbers of $\#\textit{config}$.
 
-
+%TODO-----Prove reading-------
 
 \section{Assembly of Custom Polyominoes}
 \label{sec:AFTS}

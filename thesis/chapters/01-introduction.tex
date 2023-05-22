@@ -54,11 +54,10 @@ In this model, particles can have different sets of glues and connect according 
 However, he considers this process as nondeterministic, so there is no exact instruction on how to assemble a desired structure.
 %TODO define particles, non-derministic
 
-One model more related to the magnetic modular cubes used in this thesis is the Tilt model from Becker et al.\ \cite{Becker2014_SP}.
+One model more related to the magnetic modular cubes is the Tilt model from Becker et al.\ \cite{Becker2014_SP}.
 In the Tilt model, all tiles move into one of the cardinal directions until hitting an obstacle.
 Different variations of the model include moving everything only one step, or the maximally possible amount.
-It offers a solution when robots are controlled uniformly by external global control inputs.
-%TODO solution to what
+It offers a solution for motion planning problems when robots are controlled uniformly by external global control inputs.
 
 In \cite{Becker2014_SP} it is shown that transforming one configuration into another, known as the reconfiguration-problem, is NP-hard.
 Caballero et al.\ \cite{caballero2020} also researched complexity of problems regarding the Tilt model.
@@ -82,10 +81,25 @@ Since all cubes are the same size, the assembled 2-dimensional shapes can be rep
 An enumeration was done on the amount of possible polyominoes that can be created by cubes with different magnet configurations \cite{Lu2021}.
 
 By limiting the controls to only 90 degree turns and assuming a uniform pivot walking distance for all structures per step, magnetic modular cubes follow rules similar to the Tilt model.
-Following these limitations, a simple discrete motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Bhattacharjee2022}.
-One interesting paper from Blumenberg et al.\ \cite{blumenberg2023} explores the assembly of polyominoes in arbitrary environments, when cubes obey the tilt model.
-He provides different algorithmic approaches using various distance heuristics and even a solution making use of RRTs.
-For that he follows the rules of Tilt in a discrete setting.
+Following these limitations, a simple discrete open-loop motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Bhattacharjee2022}.
+
+One interesting paper from Blumenberg et al.\ \cite{blumenberg2023} explores the assembly of specific target polyominoes in arbitrary environments, when cubes obey the tilt model in a discrete setting.
+He provides different algorithmic approaches using various distance heuristics and a solution making use of RRTs.
+
+Lu et al.\ \cite{Lu2023} are working on establishing closed-loop control for magnetic modular cubes by using computer vision-based feedback of the workspace.
+The used motion planner is still working in a discrete setting, but can assembly specific target shapes, while handling collision events of estimated continuous motion.
 
 
 \section{Contribution}
+
+We provide more information about the general framework of magnetic modular cubes on which this thesis relies in \autoref{chap:prelim}.
+
+In \autoref{chap:local} we develop a local planner that focuses on connection two polyominoes at desired faces.
+The local planner is not limited to discrete movement and works in a closed-loop manner to account for all types of collision events between workspace and polyominoes of varying shapes and sizes.
+The resulting local plans are not optimal, but follow heuristics for minimizing the cost of movements.
+This main focus of the local planner is to decrease time spend on planning.
+
+The local planner works with our magnetic modular cube simulator presented in \autoref{chap:sim}.
+This 2D-physics simulator aims to replicate the behavior of magnetic modular cubes as accurately as possible, while still being efficient enough to be used for planning the assembly of target polyominoes.
+
+
