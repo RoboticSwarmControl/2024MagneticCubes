@@ -373,7 +373,7 @@ def main():
     #plot_pivotAngleDistance()
     #plot_magnetForce()
     #pieplot_timeUse("time-stats.json")
-    barplot_TCSA("TCSA-experiments")
+    #barplot_TCSA("TCSA-experiments")
     #---Result Plots---
     #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
@@ -381,7 +381,7 @@ def main():
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "ntcsa", onlySuccess=True)
     #---Create Figures---
-    #createFigures()
+    createFigures()
 
 if __name__ == "__main__":
     main()

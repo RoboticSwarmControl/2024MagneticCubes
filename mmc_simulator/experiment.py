@@ -39,9 +39,13 @@ SHAPES = {
     "10x1": factory.linePolyVert(10,10),
     "10x1cb": factory.tenByOneCB(),
     "1x10": factory.linePolyHori(10,0),
-    "letterC": factory.letterC(),
-    "letterS": factory.letterS(),
-    "letterA": factory.letterA()
+    "C": factory.letterC(),
+    "S": factory.letterS(),
+    "A": factory.letterA(),
+    "O": factory.letterO(),
+    "I": factory.letterI(),
+    "H": factory.letterH(),
+    "Plus": factory.letterPlus()
 }
 
 
@@ -274,6 +278,30 @@ def assemblyForNred(path, startSeed, samplesPerSize, startNred, endNred, optionS
                     randomTargetAssembly.distribute(filePath, seed, ncubes, nred, boardSize, sorting.value, True)
     print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
 
+
+def assemblyReliability(path, seed, samples, shape, optionSortings: list):
+    boardSize = (1000,1000)
+    target = SHAPES[shape]
+    ncubes = target.size()
+    nred = target.nred()
+    assemblies = 0
+    skipped = 0
+    with slurminade.Batch(BATCH_MAX_SIZE):
+        for sorting in optionSortings:
+            dataPath = os.path.join(path, f"AR-{shape}-{seed}-{sorting.name}")
+            if not os.path.exists(dataPath):
+                os.mkdir(dataPath)
+                writeData(dataPath + ".json", ExperimentData(ncubes, nred, shape, boardSize, sorting.name))
+            for i in range(samples):
+                assemblies += 1
+                filePath = os.path.join(dataPath, f"sample-{i}.json")
+                if os.path.exists(filePath):
+                    skipped += 1
+                    continue
+                targetAssembly.distribute(filePath, seed, shape, boardSize, sorting.value)
+    print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", type=str, help="The name of the output directory. If not specified a new one is created.")
@@ -288,8 +316,9 @@ def main():
     # Put the experiments to execute here
     #assemblyForTargetSize(path, 100, 150, 12, 12, OptionSorting.list())
     #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
-    #assemblyForTargetShape(path, 100, 100, SHAPES.keys(), OptionSorting.list())
-    assemblyForNred(path, 100, 100, 0, 5, OptionSorting.list())
+    assemblyForTargetShape(path, 100, 100, ["O", "I", "H", "Plus"], OptionSorting.list())
+    #assemblyForNred(path, 100, 100, 0, 5, OptionSorting.list())
+    #assemblyReliability(path, 23, 3, "3x3", OptionSorting.list())
     #TCSA_analysis(path, 0, 200, 5, 12)
 
 

@@ -309,6 +309,56 @@ def letterA()-> Polyomino:
         c = cnew
     return p
 
+def letterO()-> Polyomino:
+    c = Cube(1)
+    p = Polyomino(c)
+    type_edge = [(0,Direction.NORTH),(1,Direction.NORTH),(0,Direction.NORTH),(1,Direction.EAST),(0,Direction.EAST),
+                 (1,Direction.EAST),(0,Direction.SOUTH),(1,Direction.SOUTH),(0,Direction.SOUTH),(1,Direction.WEST),
+                 (0,Direction.WEST)]
+    for type, edge in type_edge:
+        cnew = Cube(type)
+        p.connect(cnew, c, edge)
+        c = cnew
+    return p
+
+def letterI()-> Polyomino:
+    c = Cube(1)
+    p = Polyomino(c)
+    type_edge = [(0,Direction.EAST),(1,Direction.NORTH),(0,Direction.NORTH),(1,Direction.NORTH),(0,Direction.EAST),
+                 (1,Direction.SOUTH),(0,Direction.SOUTH),(1,Direction.SOUTH),(0,Direction.EAST)]
+    for type, edge in type_edge:
+        cnew = Cube(type)
+        p.connect(cnew, c, edge)
+        c = cnew
+    p.connect(Cube(0), p.getCube((1,3)), Direction.WEST)
+    p.connect(Cube(1), p.getCube((2,3)), Direction.EAST)
+    return p
+
+def letterH()-> Polyomino:
+    c = Cube(1)
+    p = Polyomino(c)
+    type_edge = [(0,Direction.NORTH),(1,Direction.EAST),(0,Direction.EAST),(1,Direction.EAST),(0,Direction.NORTH),
+                 (1,Direction.WEST),(0,Direction.WEST),(1,Direction.WEST),(0,Direction.NORTH)]
+    for type, edge in type_edge:
+        cnew = Cube(type)
+        p.connect(cnew, c, edge)
+        c = cnew
+    p.connect(Cube(0), p.getCube((3,1)), Direction.SOUTH)
+    p.connect(Cube(1), p.getCube((3,2)), Direction.NORTH)
+    return p
+
+def letterPlus()-> Polyomino:
+    c = Cube(1)
+    p = Polyomino(c)
+    type_edge = [(0,Direction.EAST),(1,Direction.NORTH),(0,Direction.EAST),(1,Direction.SOUTH),(0,Direction.EAST),
+                 (1,Direction.SOUTH),(0,Direction.WEST),(1,Direction.SOUTH),(0,Direction.WEST),(1,Direction.NORTH),
+                 (0,Direction.WEST)]
+    for type, edge in type_edge:
+        cnew = Cube(type)
+        p.connect(cnew, c, edge)
+        c = cnew
+    return p
+
 def threeByThreeRing() -> Polyomino:
     c = Cube(0)
     p = Polyomino(c)
