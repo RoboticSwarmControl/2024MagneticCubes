@@ -63,7 +63,7 @@ A certain amount of zero-updates, dependent on the size of the largest polyomino
 This way the control program will not be notified until all polyominoes are aligned with the magnetic field.
 This is the reason simulating larger polyominoes requires more simulation time.
 
-%TODO coordinate frame?
+%TODO coordinate frame from. 3d to 2d
 
 \section{Workspace State}
 \label{sec:workspace_state}
@@ -139,8 +139,8 @@ For two magnets with moments $m_1$ and $m_2$ and a distance of $r$ the magnet fo
 F_\textit{mag} = \frac{\mu_\textit{mag}}{r^4} \left(m_2(m_1 \cdotp \hat{r}) + m_1(m_2 \cdotp \hat{r}) + \hat{r}(m_1 \cdotp m_2) - 5\hat{r}(m_1 \cdotp \hat{r})(m_2 \cdotp \hat{r}) \right) \, ,
 \end{equation}
 with $\hat{r}$ being the unit vector pointing from magnet 1 to magnet 2.
-The force acting from magnet 2 on magnet 1 is $-F_\textit{mag}$.
-We set the strength of all magnets to $\mu_\textit{mag} = 2.5 \cdot 10^7$ \cite{levitt2013}. 
+The force acting from magnet 2 on magnet 1 is $-F_\textit{mag}$ \cite{levitt2013}.
+We set the strength of all magnets to $\mu_\textit{mag} = 2.5 \cdot 10^7$. 
 
 
 \subsection{Magnetic Field Forces}

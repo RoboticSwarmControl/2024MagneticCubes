@@ -11,17 +11,13 @@ Biomedical applications could be targeted drug delivery or drug screening \cite{
 
 Designing robots at these small sizes faces challenging problems.
 Equipping each robot with its own sensors, actuation-system, connection-system and power supply seem infeasible, in terms of the miniaturization required and power-limitations \cite{white2007}.
-%TODO Condider C-atoms
+
 Therefore, the use of external global control, effecting every robot in the workspace with the same torque and force, is a promising solution \cite{white2007}.
 Using robots with embedded permanent magnets, has all the desired effects.
 Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply and for sensing an external camera can be used \cite{saab2019}.
 
 One example for magnetically controlled robots are the magnetic modular cubes by Bhattacharjee et al.\ \cite{Bhattacharjee2022}, which are the subjects of this thesis.
-We will develop a simulation that simulates the behavior of magnetic modular cubes, without assuming discrete movement or limiting rotations to a certain amount.
-The simulation will be used for developing closed-loop planing algorithms, which provide a control sequence to assemble desired target shapes.
-For that it is necessary to develop a local planner that is able to connect structures at desired faces.
-We will look at the difficulties and problems that occur, when working with magnetic modular cubes in the 2-dimensional special Euclidean group \(SE(2)\), the space of rigid movements in a 2-dimensional plane.
-%TODO cite bhattacharjees dissertation. Arons wants to provide
+We will look at the difficulties and problems that occur, when assembling structures with magnetic modular cubes in the 2-dimensional special Euclidean group \(SE(2)\), the space of rigid movements in a 2-dimensional plane.
 
 \section{Related Work}
 
@@ -37,11 +33,10 @@ Decades of research has been done on motion planning.
 The textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
 
 When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one concept that has been successful for many robotics problem is sample-based motion planning.
-%TODO define uncountable infinite and complete
+
 By taking samples, you can reduce the planning problem from navigating a configuration space to planning on a graph, but you might lose possible solutions.
-Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point, and therefore these algorithms can be called resolution complete.
-%TODO grid is resolution complete, random sampling probabalistically complete
-Ways of sampling include random sampling or using a grid with a resolution that is dynamically adjustable.
+Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point.
+Ways of sampling include random sampling being probabilistically complete or using a grid with a resolution that is dynamically adjustable resulting in resolution completeness.
 After sampling, conventional discrete planning algorithms can be applied \cite{LaValle2006}.
 
 One state-of-the-art sampling-based approach uses rapidly-exploring random trees (RRT).
@@ -52,7 +47,6 @@ One interesting idea is that single robots can connect to form bigger structures
 This is referred to as self-assembly and E. Winfree \cite{winfree1998} proposed the abstract Tile Assembly Model (aTAM) in the context of assembling DNA.
 In this model, particles can have different sets of glues and connect according to certain rules regarding the glue type.
 However, he considers this process as nondeterministic, so there is no exact instruction on how to assemble a desired structure.
-%TODO define particles, non-derministic
 
 One model more related to the magnetic modular cubes is the Tilt model from Becker et al.\ \cite{Becker2014_SP}.
 In the Tilt model, all tiles move into one of the cardinal directions until hitting an obstacle.
@@ -94,12 +88,17 @@ The used motion planner is still working in a discrete setting, but can assembly
 
 We provide more information about the general framework of magnetic modular cubes on which this thesis relies in \autoref{chap:prelim}.
 
-In \autoref{chap:local} we develop a local planner that focuses on connection two polyominoes at desired faces.
-The local planner is not limited to discrete movement and works in a closed-loop manner to account for all types of collision events between workspace and polyominoes of varying shapes and sizes.
+In \autoref{chap:local} we develop a local planner that is connecting two magnetic modular cube structures at desired faces.
+We do this with a closed-loop algorithm to account for all types of collision events.
 The resulting local plans are not optimal, but follow heuristics for minimizing the cost of movements.
-This main focus of the local planner is to decrease time spend on planning.
+The local planner focuses more on reducing planning time. 
 
 The local planner works with our magnetic modular cube simulator presented in \autoref{chap:sim}.
-This 2D-physics simulator aims to replicate the behavior of magnetic modular cubes as accurately as possible, while still being efficient enough to be used for planning the assembly of target polyominoes.
+This 2D-physics simulator aims to replicate the behavior of magnetic modular cubes accurately, while still being efficient enough to be used for motion planning.
+The simulator does not assume discrete movement or limits rotations to a certain amount.
 
+Based on the local planner we develop a global planning algorithm in \autoref{chap:global}, which provides a control sequence to assemble desired target structures.
+The configuration-space is sampled by only considering connections between structures as local plans and using a specially constructed graph as a building instruction for target polyominoes.
+The use of RRTs would be too inefficient, since we are working with a high fidelity simulation. 
 
+Results evaluating our global planner are presented in \autoref{chap:results} and a conclusion with possible directions for future work is given in \autoref{chap:conclusion}.

@@ -112,7 +112,7 @@
 	Obwohl sich das Magnetfeld auf alle Einheiten gleichermaßen auswirkt, kann durch Kollision mit der Arbeitsflächenbegrenzung eine Änderung der Anordnung bewirkt werden.
 	Befinden sich zwei magnetic-cubes nah genug beieinander können sich diese durch die Permanentmagneten miteinander verbinden und so Polyominos als größere Strukturen aufbauen,
 	welche auf die gleiche Weise wie einzelne cubes gesteuert werden können.
-	Frühere Arbeiten betrachteten das "tilt-model", bei welchem sich Strukturen jeder Größe mit gleicher Geschwindigkeit in ganzzahligen Schritten und mit ausschließen 90° Drehungen bewegen lassen.
+	Frühere Arbeiten betrachteten das "`tilt-model"', bei welchem sich Strukturen jeder Größe mit gleicher Geschwindigkeit in ganzzahligen Schritten und mit ausschließen 90° Drehungen bewegen lassen.
 	
 	Herr Keunes Aufgabe in dieser Bachelorarbeit ist es, einen motion-planner für die beschriebenen magnetic-cubes zu entwerfen, welcher mit beliebigen Positionen und Rotationen umgehen kann.
 	Dabei ist es erforderlich, eine Simulationsumgebung zu schaffen, welche das Verhalten der magnetic-cubes repliziert.
@@ -131,14 +131,12 @@ Magnetic modular cubes are scalable modular subunits with embedded permanent mag
 These cubes can act as reconfigurable modular robots, even though they contain no power, actuation or computing.
 Instead, these cubes can be wirelessly controlled by an external, uniform, time-varying magnetic field.
 This control allows the cubes to spin in place or pivot walk to the left or right direction.
-%Rotating the magnetic field can make the cubes spin in place.
-%The cubes can pivot walk by first lifting their magnetic north (or south) end up, then rotating the cubes about the end touching the workspace, and then then lowering the cube back onto the workspace.   
-Although the applied magnetic field is the same for each magnetic modular cube, collisions with workspace boundaries can be used to rearrange the cubes.
+ 
+Although the applied magnetic field is thse same for each magnetic modular cube, collisions with workspace boundaries can be used to rearrange the cubes.
 Moreover, the cubes magnetically self-assemble when brought in close proximity of another cube, and form polyominoes, which can be controlled the same way as single cubes.  
-%These polyominoes can also pivot walk and rotate in place.
-Related work has considered the “tilt model,” where similar cubes and polyominoes move between integer positions, all move at the same speed, and only rotate by 90 degree steps.
+Related work has considered the ``tilt model,'' where similar cubes and polyominoes move between integer positions, all move at the same speed, and only rotate by 90 degree steps.
 
-In his thesis, Mr\. Keune's task is to design a motion planner for magnetic cubes that can assume arbitrary positions and orientations in the workspace.
+In his thesis, Mr.\ Keune's task is to design a motion planner for magnetic cubes that can assume arbitrary positions and orientations in the workspace.
 This requires designing a simulation environment that replicates the behavior of magnetic cubes.
 He will design local planners for moving two polyominoes to assemble at desired faces.
 Designing the local planner includes heuristics that minimize the number of steps.
@@ -152,10 +150,7 @@ One exciting outcome will be studying how well instances can be solved in practi
 	
 	%% Remove listoffigures or listoftables if not needed!
 	\listoffigures
-	
 	\include{./chapters/00-variables}
-	%TODO add a table of varialbes
-	
 	%\listoftables
 	
 	\mainmatter
