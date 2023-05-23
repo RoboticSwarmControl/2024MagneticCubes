@@ -1,2 +1,27 @@
 \chapter{Conclusion}
 \label{chap:conclusion}
+
+In this thesis we developed a heuristic approach for the motion planning problem of assembling polyominoes with magnetic modular cubes \cite{Bhattacharjee2022} in the 2-dimensional special Euclidean group $\textit{SE}(2)$.
+
+All thought our simulator is not a physically accurate representation of magnetic modular cubes, since we are simulating 3D-movement in a 2D-environment, it is able to depict continuous movement of rotations and pivot walking and also simulates magnetic attraction and repulsion of embedded permanent magnets.
+While doing so, collision between cubes and collision with workspace boundaries is detected and resolved.
+
+All these attributes of the simulator allow our closed-loop local planning algorithm to dynamically adjust for events like structures blocking each other, structures sliding along the workspace boundaries and varying movement directions due to different pivot walking displacement vectors of polyomino shapes.
+By not limiting rotations to certain degrees, structures can always be aligned and theoretically connected by pivot walking a straight path.
+Above mentioned events prevent this straight and optimal movement, but dynamic realigning provides a good heuristic for minimizing movement while being efficient on planning time.
+
+The simulator is balanced between physical accuracy and efficiency, but it is still a high fidelity physics simulation.
+Simulating movement is costly and local plans require planning times in a range of seconds.
+On a global scale of doing multiple local plans to assemble desired target structures, simulation should be avoided as much as possible.
+Using classical motion planning approaches that broadly explore the configuration-space like RRT, are not feasible under this condition.
+
+The global planner uses the ability of two-cutting polyominoes to create a two-cut-sub-assembly graph that will be used as a building instruction for target polyominoes.
+The configuration-space is explored by depth first search traversing this graph.
+The graph leaves multiple options for traversing one edge, because it does not consider workspace position of polyominoes. 
+We evaluated three strategies of sorting these options by best probable outcome.
+
+
+%TODO summarize results
+
+
+%TODO future work

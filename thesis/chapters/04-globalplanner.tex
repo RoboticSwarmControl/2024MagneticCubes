@@ -4,7 +4,7 @@
 The task of the global planner is to assemble a specified target polyomino $\mathcal{T}$ given an initial configuration $g_\textit{init}$.
 The configuration-space is explored by executing local plans developed by the local planner from \autoref{chap:local}.
 That way, the part of the configuration-space we can actually explore is limited to configurations where a connection attempt between two cubes was made.
-Compared to $SE(2)$ this part is manageable in size and only contains configurations which are relevant for self-assembly.
+Compared to $\textit{SE}(2)$ this part is manageable in size and only contains configurations which are relevant for self-assembly.
 
 Determining how these configurations are explored affects the run time considerably.
 Using rapidly-exploring random trees (RRTs) \cite{lavalle1998} yields good results in many cases, since the configuration-space gets evenly explored without the challenge of determining what decisions are promising for the end goal.
@@ -29,7 +29,7 @@ An explanation on why is this done and why the problem becomes more complex when
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.6\textwidth]{figures/twocuts.pdf}
+	\includegraphics[width=0.55\textwidth]{figures/twocuts.pdf}
 	\caption[Different cuts for polyomino shapes]{Examples for cutting polyomino shapes. a) to d) show three two-cuts for a $3\times3$ shape, of which only a) and d) are monotone and therefore valid. b) creates a cave and c) one a hole. e) and f) show cuts that do not split the polyomino into two pieces. e) does not break the polyomino at all and f) creates three sub-polyominoes.}
 	\label{fig:twocuts}
 \end{figure}
@@ -60,18 +60,18 @@ After the path ended the connection at its edges are removed from the polyomino 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.45\textwidth]{figures/tcsa_multiedge.pdf}
-	\caption[Two two-cut-sub-assembly nodes connected with multiple edges.]{Two two-cut-sub-assembly edges connecting the polyomino sets $S_0$ and $S_1$. The weights of the edges differ, since there are two ways to connect the $2\times1$ with the $1\times1$ to create a $3\times1$ polyomino. The connections are illustrated in rectangular boxes placed on the edges.}
-	\label{fig:tcsa_multiedge}
-\end{figure}
-
-\begin{figure}
-	\centering
 	\includegraphics[width=1\textwidth]{figures/tcsa.pdf}
 	\caption[Example for a two-cut-sub-assembly graph.]{Example of an two-cut-sub-assembly graph for a four-cube L-shape. The polyomino sets are illustrated as ellipses. If the polyominoes of a set are not numbered, there is only one occurrence of this polyomino. Otherwise the number of occurrences is placed left of the polyomino. The sets are numbered as if the graph was produced by \autoref{algo:build_tcsa} starting from $S_\mathcal{T}$. The weight of edges are illustrated as rectangular boxes containing the polyominoes that need to be connected at specific edges, marked in yellow.}
 	\label{fig:tcsa}
 \end{figure}
 %TODO addglobal plan comic sequence and highlight path in graph
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.4\textwidth]{figures/tcsa_multiedge.pdf}
+	\caption[Two two-cut-sub-assembly nodes connected with multiple edges.]{Two two-cut-sub-assembly edges connecting the polyomino sets $S_0$ and $S_1$. The weights of the edges differ, since there are two ways to connect the $2\times1$ with the $1\times1$ to create a $3\times1$ polyomino. The connections are illustrated in rectangular boxes placed on the edges.}
+	\label{fig:tcsa_multiedge}
+\end{figure}
 
 The two-cut-sub-assembly graph, short TCSA graph, functions as a building instruction for a specific target polyomino, we will call it $G_{\textit{TCSA}}(\mathcal{T}) = (V,E)$ represented by nodes $V$ and edges $E$.
 The TCSA graph works with sets of polyominoes as nodes.

@@ -62,7 +62,13 @@ def connectionOptions():
     input()
     sim.terminate()
 
-
+def comicSequence():
+    pB = factory.fourCube_LShape()
+    pA = factory.linePolyHori(2,0)
+    cB = pB.getCube((1,0))
+    cA = pA.getCube((0,0))
+    c = factory.configWithPolys((700,700),math.radians(90), [pB,pA], [(150,150), (350,300)])
+    plan = local.planCubeConnect(c, cA, cB, Direction.SOUTH)
 
 def holeConnectionTest():
     cubeA = Cube(0)
@@ -244,4 +250,4 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
 
 
 if __name__ == "__main__":
-    connectionOptions()
+    comicSequence()

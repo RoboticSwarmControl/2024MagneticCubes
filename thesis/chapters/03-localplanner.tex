@@ -149,7 +149,7 @@ Let $a_i$ be a normal rotation of angle $\beta$, then $\text{cost}(a_i) = |\beta
 If it is a pivot walking motion, then $\text{cost}(a_i) = |2\alpha|$.
 The cost for the plan is the sum of the costs of all its actions
 \begin{equation}
-\sum_{i=1}^{k} \text{cost}(a_i) \,.
+\text{cost}(A) = \sum_{i=1}^{k} \text{cost}(a_i) \,.
 \end{equation}
 A local plan is successful if $g_\textit{goal}$ contains a polyomino with the desired connection of $c_\mathcal{A}$ and $c_\mathcal{B}$ at $(e_\mathcal{A}, e_\mathcal{B})$.
 If a plan is successful or not is described by the plan-state $s$.
@@ -280,19 +280,28 @@ This capacity gives the polyominoes enough movement, so that both can move along
 	\end{algorithmic}
 \end{algorithm}
 
-Before executing the algorithm presented in \autoref{algo:local_algo} we evaluate all the failure conditions that can be checked in advance, so no simulation-time is wasted on a plan that is bound to fail from the start.
+\begin{figure}
+	\centering
+	\includegraphics[width=1\textwidth]{figures/local_plans.pdf}
+	\caption[Local plans for all pivot walking and slide-in directions]{Illustration of all local plans developed by \autoref{algo:local_algo} for different pivot walking direction $\vec{w}$ and slide-in directions $\vec{m}$. On the left side the initial configuration and connection cubes/edges of $\mathcal{A}$ and $\mathcal{B}$ are shown. All though both slide-in directions are possible, choosing $\vec{m}=\vec{E}$ results in failure, due to a wrong connection for both c) and d). The two successful plans a) and b) have a huge difference in plan cost. a) would be the cheaper plan returned by the local planner. In b) $\mathcal{A}$ and $\mathcal{B}$ slide along the workspace boundaries until connecting in the bottom right corner. Both $c_\mathcal{A}$ (red) and $c_\mathcal{B}$ (blue) leave a trace when pivot walking.}
+	\label{fig:local_plans}
+\end{figure}
+
+Before executing \autoref{algo:local_algo} we evaluate all the failure conditions that can be checked in advance, so no simulation-time is wasted on a plan that is bound to fail from the start.
 While doing so, the possible slide-in directions are also determined and \autoref{algo:local_algo} is executed with both pivot walking directions $\vec{w}$ for each possible $\vec{m}$.
-This means for an east-west connection, we always develop two plans and for a north-south connection two or four, depending on the slide-in directions.
+This means two plans are developed for an east-west connection and two or four for a north-south connection, depending on the slide-in directions.
+\autoref{fig:local_plans} shows an example of these four local plans created by \autoref{algo:local_algo}.
 
 In the end, the successful plan with the lowest costs is returned.
-Even if all plans fail, we still determine the best failure.
+If all plans fail, the best failure is determined.
 Again, plans with lower costs are preferable, but we favor impossible connection and slide-in failures.
 These failures just state that we can not establish a specific connection, but a global planner could continue to plan based on the goal configuration the local planner ended in.
-A configuration when the polyominoes are stuck, or the maximum movement capacity is reached, is not good for further planning, but invalid polyominoes or polyominoes with caves will definitely be omitted on a global scale.
+A plan that ended due to polyominoes being stuck, or a reached maximum movement capacity, is not a good starting point for further planning.
+Plans creating invalid polyominoes or polyominoes with caves will definitely be omitted on a global scale.
 
 The different plans are developed in parallel and if one process finishes with a successful plan, the execution of all other plans can be canceled.
-This saves a lot of computation time, although we might not return the best plan, since fastest computation does not automatically mean lowest costs.
-Generally speaking a low computation time can be linked with low rotational cost, because the local planner spends the majority of time, about $98\%$, on simulating the actions.
+This saves computation time, although we might not return the best plan, since fastest computation does not automatically mean lowest costs.
+Generally speaking a low computation time can be linked with low rotational cost, because the local planner spends the majority of time, about $98\%$, on simulating actions.
 
 \paragraph{Align-Walk-Realign:}
 

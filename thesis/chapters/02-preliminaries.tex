@@ -63,7 +63,7 @@ Because the motion planning problem of self-assembling target shapes in the spec
 The workspace is bounded by surrounding walls, which are the only objects that could be considered as obstacles in classical motion planning.
 However, we do not assume a fixed size, as long as the workspace stays finite and rectangular.
 
-For planning we work in the configuration space of the 2-dimensional special Euclidean group $SE(2) = \mathbb{R}^2 \times \mathbb{S}^1$.
+For planning we work in the configuration space of the 2-dimensional special Euclidean group $\textit{SE}(2) = \mathbb{R}^2 \times \mathbb{S}^1$.
 When only considering one cube, the group consists of the position in $\mathbb{R}^2$ and an orientation $\mathbb{S} = [0,2\pi)$ \cite{LaValle2006}.
 When working with $n$ cubes, the dimension of our configuration space increases to $\mathbb{R}^{2n} \times \mathbb{S}^1$.
 Note that we can still assume only one orientation for $n$ cubes, because we are working with a global magnetic field orienting all cubes the same way.
