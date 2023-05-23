@@ -379,7 +379,7 @@ def main():
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
-    #boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "ntcsa", onlySuccess=True)
+    #boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "cost", onlySuccess=True)
     #---Create Figures---
     createFigures()
 

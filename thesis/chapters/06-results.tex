@@ -178,10 +178,13 @@ Furthermore we experiment with two patterns of red and blue for each polyomino.
 The \textit{switching-column pattern} switches between red and blue cubes column vise and the \textit{checkerboard pattern} creates a checkerboard of single red and blue cubes.
 A list of these polyominoes can be found in \autoref{fig:AFTS_cb_shapes}.
 
-In \autoref{sec:special_poly} assembly of special polyomino shapes is examined. 
-The polyominoes are listed in \autoref{fig:AFTS_sp_shapes}.
-The polyominoes ``letter C'', ``letter S'' and ``letter A'' provide different caves.
-``letter A'' additionally contains a hole. 
+In \autoref{sec:special_poly} the assembly of special polyomino shapes, that are listed in \autoref{fig:AFTS_sp_shapes}, is examined. 
+The polyominoes ``C'', ``S'', ``A'' and ``O'' contain caves and/or holes of different sizes, but are thin shapes with fewer connections.
+They more or less consist of a one cube thick line.
+The polyominoes ``I'', ``H'' and ``Plus'' are thick shapes with many connections, but still contain caves or are at least not rectangular.
+All these polyominoes are build with the checkerboard pattern to archive equal amounts of red and blue cubes.
+The size of all polyominoes, except for ``C'', is $n=12$.
+ 
 
 \subsection{Width/Height and Cube Pattern}
 \label{sec:w/h_pattern}
@@ -218,12 +221,11 @@ Its planning time lays between the ``5x2'' and the ``3x3''.
 The ``2x5'' performs significantly worst than all other polyominoes.
 While the majority of instances for all other shapes can be solved in under $100$ seconds, the ``2x5'' exceeds this time with a spread reaching up to $600$ seconds.
 
-For the fraction of timed out plans shown in \autoref{fig:AFTS_cb_timeout}, the ``2x5'' is the only shape where $10\%$ to $20\%$ timeouts, depending on the option sorting strategy, can be observed.
+For the fraction of timed out plans shown in \autoref{fig:AFTS_cb_timeout}, the ``2x5'' is the only shape with $10\%$ to $20\%$, depending on the option sorting strategy.
 All other shapes experience nearly no timeouts.
 
 \subsection{Special Polyomino Shapes}
 \label{sec:special_poly}
-
 
 \begin{figure}
 	\centering
@@ -245,8 +247,6 @@ All other shapes experience nearly no timeouts.
 \end{figure}
 
 Text
-
-
 
 
 \section{Assembly in different Workspaces}
