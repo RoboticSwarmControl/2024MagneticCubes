@@ -154,13 +154,13 @@ The only noticeable difference between the option sorting strategies is that gro
 	\centering
 	\begin{subfigure}[b]{\textwidth}
 		\centering
-		\includegraphics[width=0.8\textwidth]{figures/AFTS_cb_shapes.pdf}
+		\includegraphics[width=0.62\textwidth]{figures/AFTS_cb_shapes.pdf}
 		\caption{Rectangular polyominoes evaluated in \autoref{sec:w/h_pattern}. The checkerboard pattern is labeled with ``cb''. \hfill}
 		\label{fig:AFTS_cb_shapes}
 	\end{subfigure}
 	\begin{subfigure}[b]{\textwidth}
 		\centering
-		\includegraphics[width=0.7\textwidth]{figures/AFTS_sp_shapes.pdf}
+		\includegraphics[width=0.52\textwidth]{figures/AFTS_sp_shapes.pdf}
 		\caption{Special polyomino shapes evaluated in \autoref{sec:special_poly}.}
 		\label{fig:AFTS_sp_shapes}
 	\end{subfigure}
@@ -209,7 +209,7 @@ The size of all polyominoes, except for ``C'', is $n=12$.
 \end{figure}
 %TODO shows shapes under plot
 
-When comparing the two cube pattern in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
+When comparing planning time of the two cube pattern in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
 It is not a huge difference, but still noticeable.
 For instance, the ``3x3'' polyomino is on average at $50$ seconds planning time, while the ``3x3 cb'' polyomino is at 75 seconds with a wider spread and worst outliers.
 
@@ -218,6 +218,7 @@ Polyomino shapes with more height than width are faster to assemble.
 The same order persists for the checkerboard pattern.
 Surprisingly the ``1x10'' polyomino breaks out of this order.
 Its planning time lays between the ``5x2'' and the ``3x3''.
+
 The ``2x5'' performs significantly worst than all other polyominoes.
 While the majority of instances for all other shapes can be solved in under $100$ seconds, the ``2x5'' exceeds this time with a spread reaching up to $600$ seconds.
 
@@ -232,21 +233,54 @@ All other shapes experience nearly no timeouts.
 	\begin{subfigure}[b]{\textwidth}
 		\centering
 		\includegraphics[width=0.9\textwidth]{figures/plots/AFTS_sp_time.pdf}
-		\caption{}
+		\caption{Planning time in seconds. Only plans that did not time out are shown.}
 		\label{fig:AFTS_sp_time}
 	\end{subfigure}
 	
 	\begin{subfigure}[b]{\textwidth}
 		\centering
 		\includegraphics[width=0.9\textwidth]{figures/plots/AFTS_sp_timeout.pdf}
-		\caption{}
+		\caption{Fraction of plans that timed out.}
 		\label{fig:AFTS_sp_timeout}
 	\end{subfigure}
-	\caption[]{}
+	\caption[Planning time and fraction timed out for special polyominoes]{Planning time and fraction timed out for special polyominoes listed in \autoref{fig:AFTS_sp_shapes}. All option sorting strategies are compared.}
 	\label{fig:AFTS_sp_timestats}
 \end{figure}
 
-Text
+The planning time and fraction of timeouts are evaluated in \autoref{fig:AFTS_sp_timestats}.
+Constructing the thin shapes ``C'', ``S'', ``A'' and ``O'' is comparable in terms of planning time with $100$ seconds on average, which is below the average of randomly generated $12$ size polyominoes, already examined in \autoref{fig:AFN_time}.
+The fraction of timeouts is mostly under $5\%$, which is a huge difference to $25\%$ for the random polyominoes in \autoref{fig:AFNR_timeout}.
+The ``O'' shape has the worst performance of the four, which could be related to it being the only shape with a width of 4.
+We already observed how a more horizontally stretched shape is harder to assemble with the ``5x2'' and ``2x5'' rectangles in \autoref{fig:AFTS_cb_timestats}.
+
+The three thick shapes perform much worst with an average of $200$ seconds planning time for ``I'' and ``H'' and $250$ seconds for the ``Plus'' shape.
+The instances have a wide spread in distribution of planning time and timeouts reach $20\%$ for ``I'' and ``H'' and even $30\%$ to $50\%$ for the ``Plus'' shape.
+Assembling the ``Plus'' polyomino holds the worst performance out of all custom and random polyominoes evaluated in this thesis.
+
+Caves and holes have no impact on the performance of the global planner.
+The option sorting strategies do not show any recognizable pattern, but strong differences between them can be observed.
+Growing the smallest component, while assembling the ``Plus'' shape, reduces the fraction of timeouts by half, compared to the others.
+
+
+\subsection{Hardest Shapes to Assemble}
+
+Evaluating all custom polyominoes from \autoref{fig:AFTS_shapes} we can observe which parameters have the most influence on planning time.
+The number of connections between cubes within a polyominoes seems to increase planning time.
+This makes sense since more connections provide more possible two-cuts, which increases complexity of a TCSA graph.
+But connectivity alone is not the driving factor for shapes like the ``2x5''.
+The ``5x2'' provides an equal amount of connections and can be assembled very efficiently with no timeouts, while the ``2x5'' performs much worse.
+Width alone is also not responsible, since the ``1x10'' performs better than the ``2x5''.
+
+The global planner becomes inefficient, when connectivity and increasing width is combined.
+The reason for this could be located within the local planner.
+North-south connections become problematic when the connection-cube have to move above or below non-connection-cubes to get to their desired position.
+A small example of this can be seen in \autoref{fig:local_plans}, where the local plans c) and d) fail, because they connected to the wrong cubes, while trying to move above them.
+With increasing width the effects becomes more dramatic.
+
+Increasing the offset distance when aligning the connection cubes (\autoref{sec:align}) is not a solution since a north-south connection cannot be established when magnetic attraction becomes to weak.
+Choosing the right option sorting strategy might make a difference, but it is hard to predict the best strategy for a specific polyomino.
+Other option sorting strategies could be developed to take these problematic connections into account and prefer the unproblematic ones.
+
 
 
 \section{Assembly in different Workspaces}
