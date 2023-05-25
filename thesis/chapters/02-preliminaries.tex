@@ -1,9 +1,9 @@
 \chapter{Preliminaries}
 \label{chap:prelim}
 
-This chapter presents the preliminary concepts that will be used in this thesis.
+This chapter introduces preliminary concepts for this thesis.
 \autoref{sec:mmc} further describes magnetic modular cubes and \autoref{sec:workspace} the surrounding workspace.
-In terms of self-assembly \autoref{sec:polys} introduces \textit{polyominoes} as structures we will assembled and \autoref{sec:motion} provides insight on how we interact with these structures in the workspace.
+\autoref{sec:polys} introduces polyominoes as magnetic modular cube structures and \autoref{sec:motion} provides insight on how the global magnetic field is used to interact with these structures in the workspace.
 
 \section{Magnetic Modular Cubes}
 \label{sec:mmc}
@@ -27,13 +27,14 @@ The magnetic modular cubes are cube-shaped bodies embedded with permanent magnet
 The magnets have different orientations of their north and south pole. 
 One pole is always pointing outward and the other straight to the center of the cube.
 The magnet at the front face has its north pole pointing outwards and the magnet at the back its south pole.
-These two magnets ensure that the cube is always aligned with the global magnetic field and this orientation holds true for both cube types.
+These two magnets ensure that the cube is always aligned with the global magnetic field and their orientation holds true for both cube types.
 The two other side faces must have the same outwards pointing pole, so that this axis does not provide a magnetic torque.
 
 In fact, this is the reason a distinct definition of front, back and side is even possible.
-Since the front is always pointing to the north pole of the magnetic field, we also call it the north face, or north edge in two dimensions, and all the other faces can also be called by their corresponding cardinal direction.
+Since the front is always pointing to the north pole of the magnetic field, we also call it the north face, or north edge in two dimensions.
+All the other faces can also be called by their corresponding cardinal direction.
 Each face is represented by a vector $e \in \{ \vec{N},\vec{E},\vec{S},\vec{W}\}$ with $\lVert e \rVert = 1$ pointing in the cardinal direction of the magnetic field.
-For simplification we refer to magnets by their outwards pointing pole in further sections.
+For simplification we refer to magnets by their outwards pointing pole.
 
 Furthermore, two different cube types are defined:
 Either both side magnets point out their north pole, these cubes are called red cubes, or they point out their south pole, which is then called a blue cube.
@@ -42,7 +43,7 @@ A compass always shows the orientation of the magnetic field in our illustration
 
 Magnetic Modular Cubes can be constructed in different sizes and ways. For more technical details and length measurements, we refer to the original paper \cite{Bhattacharjee2022}.
 In \autoref{fig:real_mmcs} magnetic modular cubes with 2.8 mm edges can be seen in a real workspace.
-Two important lengths that we use for planning and simulating are the cube radius $r_C$ and the magnet radius $r_M$ (also illustrated in \autoref{fig:magnetic_cubes}).
+Two important lengths are the cube radius $r_C$ and the magnet radius $r_M$ (also illustrated in \autoref{fig:magnetic_cubes}).
 $r_C$ is one half-length of a cube face and $r_M$ is the distance from the center of the cube to the center of the magnet.
 
 
@@ -59,16 +60,16 @@ $r_C$ is one half-length of a cube face and $r_M$ is the distance from the cente
 
 Magnetic modular cubes could theoretically be placed and maneuvered on any 2-dimensional plane with numerous obstacles, as long as you can surround the workspace with a time varying magnetic field.
 The magnetic field should be able to point in any direction specified by angles of latitude and longitude, so that the cubes can operate in all desired motion modes.
+
 Because the motion planning problem of self-assembling target shapes in the special Euclidean group is hard enough without considering obstacles and arbitrary workspace shapes, this thesis limits itself to a rectangular workspace with no internal obstacles.
 The workspace is bounded by surrounding walls, which are the only objects that could be considered as obstacles in classical motion planning.
 However, we do not assume a fixed size, as long as the workspace stays finite and rectangular.
 
-For planning we work in the configuration space of the 2-dimensional special Euclidean group $\textit{SE}(2) = \mathbb{R}^2 \times \mathbb{S}^1$.
+For planning we work in the configuration-space of the 2-dimensional special Euclidean group $\textit{SE}(2) = \mathbb{R}^2 \times \mathbb{S}^1$.
 When only considering one cube, the group consists of the position in $\mathbb{R}^2$ and an orientation $\mathbb{S} = [0,2\pi)$ \cite{LaValle2006}.
 When working with $n$ cubes, the dimension of our configuration space increases to $\mathbb{R}^{2n} \times \mathbb{S}^1$.
-Note that we can still assume only one orientation for $n$ cubes, because we are working with a global magnetic field orienting all cubes the same way.
-We assume that eventually all cubes align with the global magnetic field and only consider static configurations.
-Future work could examine the dynamic configuration, which would enable faster motion planning, but a more complex planning problem.
+Note that the number of cubes do not affect the orientation.
+Because we are working with a global magnetic field, we assume that eventually all cubes are aligned with the field.
 \autoref{fig:workspace_config} shows a configuration with four cubes in the workspace.
 It is irrelevant which exact physical cube is at which position as long as they are the same type, so switching the positions of the two red cubes in \autoref{fig:workspace_config} would lead to the same configuration as before.
 
@@ -78,29 +79,32 @@ It is irrelevant which exact physical cube is at which position as long as they 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.65\textwidth]{figures/polyominoes.pdf}
-	\caption[Examples of Polyominoes and their equality]{Examples of polyominoes and their equality. a) and d) are equal, only the magnetic field changed its orientation. a) and c) are not equal, they have the same shape, but it is rotated. a) and b) are also not equal because of different cube types in the same shape. e) shows an invalid polyomino in its grid representation (top) and how it behaves in the simulation (bottom).}
+	\caption[Examples of Polyominoes and their equality]{Examples of polyominoes and their equality. a) and d) are equal, only the magnetic field changed its orientation. a) and c) are not equal, they have the same shape, but it is rotated. a) and b) are also not equal because of different cube types in the same shape. e) shows an invalid polyomino in its grid representation (top) and how it behaves in the simulator (bottom).}
 	\label{fig:polyominoes}
 \end{figure}
 
 The embedded magnets not only align the cube with the magnetic field, they also allow cubes to self-assemble into polyominoes.
 Two cube faces can connect if their magnets have opposite polarities.
-Because of this and the alignment with the magnetic field, cubes can either be connected at north and south faces, or east and west faces, if the cubes are not the same type.
+Because of this and the alignment with the magnetic field, cubes can either be connected at north and south faces, or east and west faces if the cubes are not the same type.
 A \textit{polyomino} is a set of uniformly sized cubes on a 2-dimensional grid.
-Because we work with arbitrary positions and orientations the grid alignment does not hold true for multiple polyominoes in the workspace, but for each polyomino on its own the cubes can be represented in a local coordinate system with position $(x,y)$, $x,y \in \mathbb{Z}$ \cite{Lu2021}.
+The grid alignment does not hold true for multiple polyominoes in the workspace, because we work with arbitrary positions and orientations, but for each polyomino on its own the cubes can be represented in a local coordinate system with position $(x,y)$, $x,y \in \mathbb{Z}$ \cite{Lu2021}.
 
 We consider \textit{fixed polyominoes}, meaning that two polyominoes are distinct if their shape or orientation are different \cite{Lu2021}.
 The magnetic field always provides an orientation, so in \autoref{fig:polyominoes} a) and d) the polyominoes are equal, just the magnetic field is rotated.
-Conversely, the polyominoes in \autoref{fig:polyominoes} a) and c) are the same shape but with a different rotation under the same magnetic field orientation, so they are not equal.
-Furthermore, two polyominoes are only equal if all the cubes at equal positions are the same type.
+Conversely, the polyominoes in \autoref{fig:polyominoes} a) and c) are the same shape with a different rotation under the same magnetic field orientation, so they are not equal.
+Furthermore, two polyominoes are only equal if all cubes at equal grid positions are the same type.
 The polyominoes in \autoref{fig:polyominoes} a) and b) are not equal because the cube types differ.
 It is possible that a workspace contains multiple equal polyominoes.
 In that case, we refer to them as being the same polyomino-type, instead of calling them equal, since it is important to differentiate between physical polyominoes with different positions.
 
 The size of a polyomino is the number of cubes it consists of.
-Because it is easier to view all structures in the workspace as a polyomino, single cubes are often referred to as trivial polyominoes with size 1.
+Because it is easier to view all structures in the workspace as a polyomino, single cubes are referred to as trivial polyominoes with size 1.
 Although it is not possible to connect cubes of same type at east and west faces, the magnetic modular cubes can assemble structures like the one shown in \autoref{fig:polyominoes} e).
 The connection of the bottom two cubes is strong enough to hold the structure together, even though the four blue cubes on the top repel each other.
-The resulting polyomino in its grid representation has two east-west connections between cubes the same type and is therefor marked as an invalid polyomino.
+The resulting polyomino in its grid representation has two east-west connections between equal cube types and is therefor marked as an invalid polyomino.
+
+
+%TODO -----Prove reading------
 
 
 \section{Motion Modes}
