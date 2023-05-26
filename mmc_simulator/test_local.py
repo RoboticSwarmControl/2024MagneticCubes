@@ -250,4 +250,4 @@ def twoPolyConnect_ncubes(seed=0, samples=1, ncubes=10):
 
 
 if __name__ == "__main__":
-    comicSequence()
+    twoPolyConnect(7836000,1, 7, False)

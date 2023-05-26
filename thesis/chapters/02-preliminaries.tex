@@ -104,8 +104,6 @@ The connection of the bottom two cubes is strong enough to hold the structure to
 The resulting polyomino in its grid representation has two east-west connections between equal cube types and is therefor marked as an invalid polyomino.
 
 
-%TODO -----Prove reading------
-
 
 \section{Motion Modes}
 \label{sec:motion}
@@ -113,17 +111,17 @@ The resulting polyomino in its grid representation has two east-west connections
 \begin{figure}
 	\centering
 	\includegraphics[width=0.80\textwidth]{figures/pivot_walking.pdf}
-	\caption[Illustration of the pivot walking motion]{Illustration of pivot walking motion in detail. a) shows the six pivot walking steps for a single red cube. You can see the orientation of the magnetic field (bigger arrow indicates elevation, so in step 1,2 the south pole is raised in the air). In b) an example polyomino with its pivot axis, edges and points is shown. c) illustrates the rotation of the pivot axis labeled with all the pivot walking parameters.}
+	\caption[Illustration of the pivot walking motion]{Illustration of the pivot walking motion in detail. a) shows the six pivot walking steps for a single red cube. You can see the orientation of the magnetic field (bigger arrow indicates elevation, so in step 1,2 the south pole is lifted up). In b) an example polyomino with its pivot axis, edges and points is shown. c) illustrates the rotation of the pivot axis labeled with all the pivot walking parameters.}
 	\label{fig:pivot_walking}
 \end{figure}
 
-In \cite{Bhattacharjee2022} three motion modes are presented. Rotation, pivot walking, and rolling.
+In \cite{Bhattacharjee2022} three motion modes are presented. Rotating, pivot walking, and rolling.
 
-If the magnetic field orientation lays in the plane of the workspace and rotates without any inclination the rotation is performed around the center of mass for all polyominoes and we consider this motion a normal rotation.
+If the magnetic field orientation lays in the plane of the workspace and rotates without any inclination the rotation is performed around the center of mass for all polyominoes and this motion is considered a normal rotation.
 
-Rotating the magnetic field perpendicular to the workspace plane, cubes can roll forwards or backwards.
-This rolling motion becomes problematic for self-assembly, because the top and bottom face of the cube, which contain no magnets, can become a side face.
-Because rotation and pivot walking are sufficient to reach any position in the workspace, we do not consider rolling in our simulation and planning algorithms.
+When rotating the magnetic field perpendicular to the workspace plane, cubes can roll forwards or backwards.
+At certain steps of the rolling motion the cubes top and bottom face become side faces, which is problematic for assembly, since these faces contain no magnets.
+Because rotation and pivot walking are sufficient to reach any position in the workspace, we do not consider rolling in our simulator and planning algorithms.
 
 When elevating the magnetic field orientation by lifting up the south pole slightly, all polyominoes will pivot on the north face bottom edges of their most north-placed cubes.
 Pulling up the north pole does the opposite. The polyominoes will pivot on the south face bottom edges of their most south-placed cubes.
@@ -148,31 +146,31 @@ All these edges and points are illustrated in \autoref{fig:pivot_walking} b).
 	\label{fig:displacement_pivot_walking}
 \end{figure}
 
-Not rotating around the center of mass is important for pivot walking.
+Not rotating around the center of mass is the key factor for pivot walking.
 In the first step of a pivot waking cycle, the magnetic field is elevated to let the polyomino pivot on its north pivot edge.
-As a second step a rotation of $-\frac{1}{2} \cdot \alpha$ is performed around the north pivot point.
+As a second step, a rotation of $-\frac{1}{2} \cdot \alpha$ is performed around the north pivot point.
 $-\pi \leq \alpha \leq \pi$ is the pivot walking angle.
 For step 3 and 4 the elevation changes to its opposite to perform a rotation of $\alpha$ around the south pivot point.
 Step 5 and 6 are equal to 1 and 2 and will bring the polyomino back to its original orientation.
-You can see the pivot walking cycle steps in \autoref{fig:pivot_walking} a) and have a closer look at its parameters in \autoref{fig:pivot_walking} c).
+You can see the pivot walking steps in \autoref{fig:pivot_walking} a) and have a closer look at its parameters in \autoref{fig:pivot_walking} c).
 
-After one pivot walking cycle, the polyomino has moved by a displacement vector $\vec{d}$, so $\lVert \vec{d} \rVert$ is the distance the polyomino moved.
-The direction and length of $\vec{d}$ changes with the shape of the polyomino.
-The movement is always perpendicular to the pivot walking axis $\vec{a}$, which is the vector between the north and the south pivot point, visualized in \autoref{fig:pivot_walking} b).
+After one pivot walking cycle the polyomino moved by a displacement vector $\vec{d}$, so $\lVert \vec{d} \rVert$ is the pivot walking distance.
+The direction and length of $\vec{d}$ changes with the shape of a polyomino.
+The movement is always perpendicular to the pivot walking axis $\vec{a}$, which is a vector pointing from north to south pivot point, visualized in \autoref{fig:pivot_walking} b).
 $\lVert \vec{d} \rVert$ can be calculated with
 \begin{equation}\label{eq:pwalk_dist}
-\lVert \vec{d} \rVert = 2 \cdot \sin\left(\frac{1}{2} \cdot \alpha \right) \cdot \lVert \vec{a} \rVert \,.
+\lVert \vec{d} \rVert = 2 \cdot \sin\left(\frac{1}{2} \alpha \right) \cdot \lVert \vec{a} \rVert \,.
 \end{equation}
 
 \autoref{fig:pw_angle_plot} shows functions for this equation based on $\alpha$ for different $\lVert \vec{a} \rVert$.
 To determine $\vec{d}$ we take the perpendicular of $\vec{a}$ and scale it to the length calculated with \autoref{eq:pwalk_dist}.
 
 When a big $\alpha$ is chosen according to amount, $\lVert \vec{d} \rVert$ becomes also bigger, but the polyomino needs more space to the north and south to perform the rotations.
-For better maneuvering smaller values of $\alpha$ are preferable.
+For better maneuvering, smaller values of $\alpha$ are preferable.
 There is a strong deviation of length and direction of the displacement for different polyomino shapes.
-Doing a pivot walking motion might not move two polyominoes in the same direction.
+Performing a pivot walking motion might not move two polyominoes in the same direction.
 \autoref{fig:displacement_pivot_walking} shows all 19 four-cube polyomino shapes with their displacement vectors.
-There are still two options for pivot walking, depending on a negative or positive value of $\alpha$.
-You can walk left, in the direction of the west-faces, or right, in the direction of the east-faces.
+There are two options for pivot walking, depending on a negative or positive value of $\alpha$.
+A polyomino can walk left, in the direction of its west-faces, or right, in the direction of its east-faces.
 Although the polyomino actually moves in the direction of $\vec{d}$, we can still say that a pivot walk right moves to the east, because $\left| \angle \left( \vec{E}, \vec{d} \right) \right| < \frac{\pi}{2}$.
 We call these two options the pivot walking direction $\vec{w} \in \{\vec{E}, \vec{W}\}$.
