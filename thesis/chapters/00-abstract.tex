@@ -6,7 +6,7 @@ Magnetic modular cubes are cube-shaped bodies with embedded permanent magnets un
 A 2D physics simulator is use to simulate global control and the resulting continuous movement of magnetic modular cube structures as well as magnetic attraction and repulsion, while detecting and resolving collision.
 The simulator allows closed-loop control algorithms for planning the connection of two structures at desired faces.
 These developed sequences of movements, called local plans, will be used on a global scale to plan the assembly of specified target structures in a rectangular workspace with no internal obstacles.
-The assembly is done by generating a set of building instructions for a target structure represented as a graph that we traversed in a depth first search approach by applying local plans to current states of the workspace.
+The assembly is done by generating a set of building instructions for a target structure represented as a graph that we traversed in a depth-first-search approach by applying local plans to current states of the workspace.
 
 We analyze how target structures of varying sizes and shapes in different rectangular workspaces affect planning time and the rotational-cost of movements.
 The traversal of the building instruction graph can be further optimized for which we present three strategies and their effect on the performance of the global planner.

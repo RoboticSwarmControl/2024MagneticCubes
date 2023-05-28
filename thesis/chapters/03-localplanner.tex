@@ -41,7 +41,7 @@ When also considering $\mathcal{B}$, a rotation of the magnetic field rotates $r
 The goal is to find this angular difference $\beta$, so that the cubes are aligned.
 There are two different approaches for alignment: Straight-aligning and offset-aligning.
 
-\paragraph{Straight-Aligning:}
+\paragraph{Straight-Aligning}
 
 For straight aligning we define a vector $\overrightarrow{\mathcal{A}\mathcal{B}} = p_{c_\mathcal{B}} - p_{c_\mathcal{A}}$ pointing form $c_\mathcal{A}$ to $c_\mathcal{B}$.
 The alignment is done when $e_\mathcal{A}$ points in the same direction as $\overrightarrow{\mathcal{A}\mathcal{B}}$, so $\angle \left( e_\mathcal{A}, \overrightarrow{\mathcal{A}\mathcal{B}} \right) = 0$.
@@ -51,7 +51,7 @@ Consequently $\angle \left( e_\mathcal{B}, \overrightarrow{\mathcal{A}\mathcal{B
 The two polyominoes could now theoretically pivot walk together and connect at the desired edges.
 Straight-aligning is always used for east-west connections, but we also use it for north-south connection in one special case. More on that in \autoref{sec:plan}.
 
-\paragraph{Offset-Aligning:}
+\paragraph{Offset-Aligning}
 
 When considering north-south connections we need to align with an offset, so that the cubes can be moved together from either east or west direction.
 We again define $\overrightarrow{\mathcal{A}\mathcal{B}} = \left( d_\textit{offset} \cdot e_\mathcal{B} + p_{c_\mathcal{B}} \right) - p_{c_\mathcal{A}}$, but this time an offset $d_\textit{offset}$ is added to $p_{c_\mathcal{B}}$ in the direction of $e_\mathcal{B}$, so $\overrightarrow{\mathcal{A}\mathcal{B}}$ points from $p_{c_\mathcal{A}}$ to a position above or below $p_{c_\mathcal{B}}$.
@@ -60,7 +60,7 @@ Instead of pointing $e_\mathcal{A}$ in the same direction as $\overrightarrow{\m
 Either solving $\angle \left( \vec{E}, \overrightarrow{\mathcal{A}\mathcal{B}} \right) = 0$ or $\angle \left( \vec{W}, \overrightarrow{\mathcal{A}\mathcal{B}} \right) = 0$, depending on if we want to move $\mathcal{A}$ in east direction, or in the west direction towards $\mathcal{B}$.
 You can see the two options for offset-aligning in \autoref{fig:aligning} b).
 
-\subsection{Solving Alignment:}
+\subsection{Solving Alignment}
 
 For calculating angular difference we use the dot-product
 \begin{equation*}
@@ -138,7 +138,7 @@ A local plan is successful if $g_\textit{goal}$ contains a polyomino with the de
 The plan-state $s$ describes if a plan is successful or not.
 There are several reasons the local planner might fail to develop a plan:
 
-\paragraph{Impossible Connection:}
+\paragraph{Impossible Connection}
 
 Most failures occur, because it is not possible to connect the polyominoes.
 First of all, $e_\mathcal{A}$ and $e_\mathcal{B}$ need to be free, so no other cube is already connected to them.
@@ -150,7 +150,7 @@ Of course, a connection is never possible if $e_\mathcal{A}$ and $e_\mathcal{B}$
 All these conditions are easy to check in a discrete way before even starting to plan, but connections with other polyominoes during planning can invalidate those pre-checked conditions.
 Because of this, frequently re-checking them is necessary.
 
-\paragraph{Impossible Slide-In:}
+\paragraph{Impossible Slide-In}
 
 Even if a connection in a common local coordinate-system is possible, the polyominoes need to slide in from east or west dsirection.
 Other cubes can again prevent this by blocking the way for an easy slide-in.
@@ -163,7 +163,7 @@ When pre-checking this condition, we can state failure if both directions are no
 Otherwise, we can align with respect to the valid slide-in direction, or try out both, if both are possible.
 Again, this condition needs to be re-checked frequently, due to changing polyominoes.
 
-\paragraph{Polyominoes being Stuck:W}
+\paragraph{Polyominoes being Stuck}
 
 Polyominoes can get stuck in corners or on walls of the workspace.
 In this state it is not possible to decrease the distance of $\mathcal{A}$ and $\mathcal{B}$ by pivot walking.
@@ -175,7 +175,7 @@ If the distance is too big for magnetic forces to act, failure is reported.
 If the cubes are close enough the local planner waits until magnetic attraction connects $e_\mathcal{A}$ and $e_\mathcal{B}$.
 
 
-\paragraph{Connecting in Caves:}
+\paragraph{Connecting in Caves}
 
 \begin{figure}
 	\centering
@@ -202,13 +202,13 @@ In our simulator the connection-face will be more attracted or repelled by faces
 Pivot walking into east-west caves, even with small values for $\alpha$, has also a high failure rate because of other magnets.
 The local planner states failure immediately when polyominoes should be connected in any cave-type.
 
-\paragraph{Invalid Polyominoes:}
+\paragraph{Invalid Polyominoes}
 
 Because construction of invalid polyominoes is hard to handle on a global scale, we already omit plans containing them in our local planner.
 Failure is stated if an invalid polyomino is created at any point during planning.
 We also pre-check (and frequently re-check) if the polyomino that will be created by establishing the connection would itself be invalid. 
 
-\paragraph{Maximum Movement Capacity:}
+\paragraph{Maximum Movement Capacity}
 
 As a worst-case failure, we limit the amount of movement $\mathcal{A}$ and $\mathcal{B}$ are able to do.
 Whenever a pivot walking motion is done, we sum up the distances $c_\mathcal{A}$ and $c_\mathcal{B}$ moved together.
@@ -290,7 +290,7 @@ The different plans are developed in parallel and if one process finishes with a
 This saves computation time, although we might not return the best plan, since fastest computation does not automatically mean lowest costs.
 Generally speaking a low computation time can be linked with low rotational cost, because the local planner spends the majority of time, about $98\%$, on simulating actions.
 
-\paragraph{Align-Walk-Realign:}
+\paragraph{Align-Walk-Realign}
 
 \autoref{algo:local_algo} takes the connection-cubes and edges $c_\mathcal{A}$, $c_\mathcal{B}$, $e_\mathcal{A}$, $e_\mathcal{B}$ along with $\vec{w}$, $\vec{m}$ and an initial configuration $g_\textit{init}$ as inputs and returns a plan-state $s$ along with the configuration $g_\textit{goal}$ the algorithm ended in after applying the sequence of actions $\mathcal{A}$.
 The algorithm runs in a loop until $s$ changes to success or one of the failure condition.

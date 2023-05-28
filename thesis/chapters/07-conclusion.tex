@@ -20,7 +20,7 @@ On a global scale of doing multiple local plans to assemble desired target struc
 Using classical motion planning approaches that broadly explore the configuration-space like RRT, are not feasible under this condition.
 
 Our global planner uses the ability of two-cutting polyominoes to create a two-cut-sub-assembly graph that will be used as a building instruction for target polyominoes.
-The configuration-space is explored by depth first search traversing this graph, to get closer to the target with each local plan.
+The configuration-space is explored by depth-first-search traversing this graph, to get closer to the target with each local plan.
 The graph leaves multiple options for traversing one edge, because it does not consider workspace position of polyominoes. 
 We evaluated three strategies of sorting these options by best probable outcome.
 
