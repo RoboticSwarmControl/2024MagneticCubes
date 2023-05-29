@@ -95,7 +95,7 @@ If we want to connect an east face of polyomino $\mathcal{A}$ to a west face of 
 
 When $\mathcal{A}$ should be connected at a south face of $\mathcal{B}$, $\mathcal{A}$ can now walk into east or west direction towards $\mathcal{B}$, and $\mathcal{B}$ could again do the opposite.
 We call this the \textit{slide-in direction} $\vec{m} \in \{\vec{E}, \vec{W}\}$, which states that $\mathcal{B}$ is positioned in direction $\vec{m}$ of $\mathcal{A}$.
-Both slide-in directions can be archived in any configuration with offset-aligning from \autoref{sec:align}.
+Both slide-in directions can be achieved in any configuration with offset-aligning from \autoref{sec:align}.
 In \autoref{fig:aligning} b) you can see the difference the slide-in directions can make.
 In this example, establishing a connection by letting $\mathcal{A}$ move towards $\mathcal{B}$ in west direction is possible, but by moving in east direction other cubes of the polyominoes are blocking the way.
 In \autoref{sec:plan} we present a method for checking which slide-in directions are possible for two polyominoes. 
@@ -114,9 +114,9 @@ In that case the calculation of friction and displacement have to be combined to
 This is fairly complex and recalculating would be necessary in many situations, so we choose a simpler dynamic approach.
 We estimate the pivot walking cycles necessary until $c_\mathcal{A}$ moved to the original position of $c_\mathcal{B}$ with
 \begin{equation}
-\#\textit{walks} = \left\lceil \frac{d(c_\mathcal{A}, c_\mathcal{B})}{\lVert \vec{d}_\mathcal{A} \rVert} \right\rceil \,.
+\#\textit{steps} = \left\lceil \frac{d(c_\mathcal{A}, c_\mathcal{B})}{\lVert \vec{d}_\mathcal{A} \rVert} \right\rceil \,.
 \end{equation}
-We then only walk $\frac{\#\textit{walks}}{2}$ and re-align the cubes.
+We then only walk $\frac{\#\textit{steps}}{2}$ and re-align the cubes.
 When $c_\mathcal{A}$ and $c_\mathcal{B}$ are near enough for magnetic forces to act, we frequently wait a short period to let magnetic attraction pull $e_\mathcal{A}$ and $e_\mathcal{B}$ together.
 This will automatically adjust the alignment, but for even more precision we decreased the pivot walking angle $\alpha$ when in close proximity.
 
@@ -244,13 +244,13 @@ This capacity gives the polyominoes enough movement, so that both can move along
 				\STATE $a \gets \text{\scshape Wait}()$
 				\STATE $\text{wait} \gets$ \FALSE
 			\ELSE
-				\STATE $a \gets \text{\scshape Walk}(c_\mathcal{A}, c_\mathcal{B}, \vec{w})$ \COMMENT{$a$ is $\frac{\#\textit{walks}}{2}$ actions (\autoref{sec:walk_wait})}
+				\STATE $a \gets \text{\scshape Walk}(c_\mathcal{A}, c_\mathcal{B}, \vec{w})$ \COMMENT{$a$ is $\frac{\#\textit{steps}}{2}$ actions (\autoref{sec:walk_wait})}
 				\STATE $\text{wait} \gets$ \TRUE
 			\ENDIF
 			\STATE $g_\textit{goal} \gets \text{\scshape Simulate}(g_\textit{goal}, a)$
 			\STATE $A \gets \text{\scshape Append}(A, a)$
 			\IF[handle stuck condition]{$\text{\scshape Stuck}(c_\mathcal{A}, c_\mathcal{B})$}
-				\STATE $a \gets \text{\scshape Align-Straight}(c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A})$ \COMMENT{do a straight aligne}
+				\STATE $a \gets \text{\scshape Align-Straight}(c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A})$ \COMMENT{do a straight align}
 				\STATE $g_\textit{goal} \gets \text{\scshape Simulate}(g_\textit{goal}, a)$
 				\STATE $A \gets \text{\scshape Append}(A, a)$
 				\WHILE[let magnets attract until stuck again]{\NOT $\text{\scshape Stuck}(c_\mathcal{A}, c_\mathcal{B})$}
@@ -270,7 +270,7 @@ This capacity gives the polyominoes enough movement, so that both can move along
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{figures/local_plans.pdf}
-	\caption[Local plans for all pivot walking and slide-in directions]{Illustration of all local plans developed by \autoref{algo:local_algo} for different pivot walking direction $\vec{w}$ and slide-in directions $\vec{m}$. On the left side the initial configuration and connection cubes/edges of $\mathcal{A}$ and $\mathcal{B}$ are shown. Although both slide-in directions are possible, choosing $\vec{m}=\vec{E}$ results in failure due to a wrong connection for both c) and d). The two successful plans a) and b) have a huge difference in plan cost. a) would be the cheaper plan returned by the local planner. In b) $\mathcal{A}$ and $\mathcal{B}$ slide along the workspace boundaries until connecting in the bottom right corner. Both $c_\mathcal{A}$ (red) and $c_\mathcal{B}$ (blue) leave a trace when pivot walking.}
+	\caption[Local plans for all pivot walking and slide-in directions]{Illustration of all local plans developed by \autoref{algo:local_algo} for different pivot walking directions $\vec{w}$ and slide-in directions $\vec{m}$. On the left side the initial configuration and connection cubes/edges of $\mathcal{A}$ and $\mathcal{B}$ are shown. Although both slide-in directions are possible, choosing $\vec{m}=\vec{E}$ results in failure due to a wrong connection for both c) and d). The two successful plans a) and b) have a huge difference in plan cost. a) is the cheaper plan returned by the local planner. In b) $\mathcal{A}$ and $\mathcal{B}$ slide along the workspace boundaries until connecting in the bottom right corner. Both $c_\mathcal{A}$ (red) and $c_\mathcal{B}$ (blue) leave a trace when pivot walking.}
 	\label{fig:local_plans}
 \end{figure}
 
@@ -284,7 +284,7 @@ If all plans fail, the best failure is determined.
 Again, plans with lower costs are preferable, but we favor impossible connection and slide-in failures.
 These failures just state that a specific connection cannot be established, but a global planner could continue to plan based on the goal configuration the local planner ended in.
 A plan that ended due to polyominoes being stuck, or a reached maximum movement capacity, is not a good starting point for further planning.
-Plans creating invalid polyominoes or polyominoes with caves will definitely be omitted on a global scale.
+Plans creating invalid polyominoes or polyominoes with caves are omitted by the global planner.
 
 The different plans are developed in parallel and if one process finishes with a successful plan, the execution of all other processes can be canceled.
 This saves computation time, although we might not return the best plan, since fastest computation does not automatically mean lowest costs.
@@ -301,7 +301,7 @@ The actions are appended to $A$ after simulation.
 We perform either a straight or offset-align, depending on $e_\mathcal{A}$ and $e_\mathcal{B}$.
 The offset-align is done with the direction of $\vec{m}$.
 After aligning we walk the estimated amount of pivot walking cycles (\autoref{sec:walk_wait}) in direction $\vec{w}$ with {\scshape Walk}, or we wait with {\scshape Wait}, if $c_\mathcal{A}$ and $c_\mathcal{B}$ are in close proximity, determined by {\scshape Critical-Distance}.
-If we waited in the previous iteration, we walk in the current one and oppositely.
+If we waited in the previous iteration, we walk in the current one and if we walked previously, we wait in the current iteration.
 This behavior is toggled by the variable ``wait''. 
 The stuck condition is evaluated with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
 When the polyominoes are stuck, the algorithm performs a straight-align and waits as long as this changes the stuck condition.
@@ -311,22 +311,23 @@ When the polyominoes are stuck, the algorithm performs a straight-align and wait
 
 \paragraph{Optimality}
 
-In our case the optimal plan for connecting two polyominoes is the one establishing the connection with the lowest rotational cost, defined in \autoref{sec:plan}.
+The optimal plan for connecting two polyominoes is the one establishing the connection with the lowest rotational cost, defined in \autoref{sec:plan}.
 We use this metric, because it is strongly linked with computation time, but can also be interpreted in a real word application of modular magnetic cubes.
 Even if the local planner would not calculate plans in parallel, our dynamic approach of realigning does not produce optimal solutions.
 It therefore simulates only the actions that are included in the final plan, which minimizes simulation time.
 
-Optimality could be archived when sliding on walls and different polyomino displacements, as described in \autoref{sec:walk_wait}, are not existent.
+Optimality could be achieved when sliding on walls and different polyomino displacements, as described in \autoref{sec:walk_wait}, are not existent.
 In this hypothetical case both pivot walking directions produce plans that move the polyominoes together in a straight path.
 The plan with the shorter path would be optimal.
-In reality these factors have to be considered, and even if they were by a local planner in a pre-calculated way, it is hard to say if this is enough to prove optimality.
+In reality these factors must be considered.
+Even if the local planner could pre-calculated those, it is unclear if this would be enough to prove optimality.
 
 \paragraph{Completeness}
 
 Our local planner is not complete.
 We cannot exclude the existence of a solution just because the up to four dynamic plans developed fail.
-If other polyominoes are blocking the way of $\mathcal{A}$ and $\mathcal{B}$, complex movements around these polyominoes, instead of the more or less straight path that we are taking, could create solutions where our local planner fails.
-The reason we choose this simple an not complete approach is again to avoid simulation of movements as much as possible. 
+If other polyominoes are blocking the way of $\mathcal{A}$ and $\mathcal{B}$, complex movements around these polyominoes, instead of the approximately straight path that we are taking, could create solutions where our local planner fails.
+The reason we choose this simple and not complete approach is to minimize simulation of movements as much as possible. 
 
 
 

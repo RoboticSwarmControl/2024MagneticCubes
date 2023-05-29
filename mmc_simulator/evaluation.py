@@ -4,6 +4,7 @@ import pandas as pd
 import seaborn
 import numpy as np
 from scipy.optimize import curve_fit
+from sklearn.metrics import r2_score
 
 from experiment import *
 from com.state import Cube
@@ -209,10 +210,12 @@ def __fitExponential(ax_bar):
     c = popt[2]
     x_fitted = np.linspace(np.min(x), np.max(x), 100)
     y_fitted = a * np.exp(b * x_fitted) + c
+    #r2 = r2_score(y, y_fitted)
+    #print(r2)
     plt.plot(x_fitted - 5, y_fitted, linewidth=4, color="black",
              label=(f"${round(a,2)}" + r"e^{" + f"{round(b,2)}" + r"n}" + f"{round(c)}$"))
     plt.legend(prop={'size': LEGEND_SIZE * 2.5})
-0
+
 def barplot_TCSA(expName):
     filePath = os.path.join(RESULT_DIR, expName, "TCSA.json")
     with open(filePath, 'r') as file:
@@ -244,6 +247,7 @@ def barplot_TCSA(expName):
     #plt.tight_layout(pad=15)
     plt.subplots_adjust(wspace=0.5)
     plt.show()
+
 
 def __emptySortingData(xaxisLabel, yaxisLabel):
     # each sorting option gets a dataframe
@@ -375,13 +379,13 @@ def main():
     #pieplot_timeUse("time-stats.json")
     #barplot_TCSA("TCSA-experiments")
     #---Result Plots---
-    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
+    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", onlySuccess=True)
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "cost", onlySuccess=True)
     #---Create Figures---
-    createFigures()
+    #createFigures()
 
 if __name__ == "__main__":
     main()

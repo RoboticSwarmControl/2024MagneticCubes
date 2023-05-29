@@ -3,16 +3,16 @@
 
 In this thesis we developed a heuristic approach for the motion planning problem of assembling polyominoes with magnetic modular cubes \cite{Bhattacharjee2022} in the 2-dimensional special Euclidean group $\textit{SE}(2)$.
 
-All thought our simulator is not a physically accurate representation of magnetic modular cubes, since we are simulating 3D-movement in a 2D-environment, it is able to depict continuous movement of rotations and pivot walking and also simulates magnetic attraction and repulsion of embedded permanent magnets.
+Although our simulator is not a physically accurate representation of magnetic modular cubes, since we are simulating 3D-movement in a 2D-environment, it is able to depict continuous movement of rotations and pivot walking and also simulates magnetic attraction and repulsion of embedded permanent magnets.
 While doing so, collision between cubes and collision with workspace boundaries is detected and resolved.
 
 These attributes of the simulator allow our closed-loop local planning algorithm to dynamically adjust for events like structures blocking each other, structures sliding along the workspace boundaries and varying movement directions due to different pivot walking displacement vectors of polyomino shapes.
 By not limiting rotations to certain degrees, structures can always be aligned and theoretically connect by pivot walking a straight path.
 Above mentioned events prevent this straight and optimal movement, but dynamic realigning provides a good heuristic for minimizing movement while being efficient on planning time.
 
-We constrained the workspace to be rectangular with no obstacles expect the outer boundaries and experimented with different sizes and aspect ratios of the rectangle.
+We constrained the workspace to be rectangular with no obstacles except the outer boundaries and experimented with different sizes and aspect ratios of the rectangle.
 Our local planner is not designed to handle obstacles.
-Designing a local planner able to navigate around obstacles and handle pivot walking displacement and sliding on walls in a more calculated way, could be a interesting direction for future work.
+Designing a local planner able to navigate around obstacles and handle pivot walking displacement and sliding on walls in a more calculated way could be a interesting direction for future work.
 
 The simulator is balanced between physical accuracy and efficiency, but it remains a high fidelity physics simulation.
 Simulating movement is costly and local plans require planning times in a range of seconds.
@@ -36,4 +36,4 @@ The option sorting strategies seem to perform differently for varying shapes, bu
 Studying attributes of polyominoes and their effect on performance is another possible direction for future work.
 Designing new specialized option sorting strategies and determining which on to use, based on the target polyomino, looks promising. 
 
-
+%TODO talk about hardware experiments.

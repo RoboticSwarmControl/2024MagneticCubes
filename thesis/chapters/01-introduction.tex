@@ -88,17 +88,17 @@ The used motion planner is still working in a discrete setting, but can assembly
 
 We provide more information about the general framework of magnetic modular cubes on which this thesis relies in \autoref{chap:prelim}.
 
-In \autoref{chap:local} we develop a local planner that is connecting two magnetic modular cube structures at desired faces.
+In \autoref{chap:local} we develop a local planner finds control sequences that connect two magnetic modular cube structures at desired faces.
 We do this with a closed-loop algorithm to account for all types of collision events.
 The resulting local plans are not optimal, but follow heuristics for minimizing the cost of movements.
-The local planner focuses more on reducing planning time. 
+The local planner prioritizes reducing planning time. 
 
 The local planner works with our magnetic modular cube simulator presented in \autoref{chap:sim}.
 This 2D physics simulator replicates the behavior of magnetic modular cubes accurately, while still being efficient enough to be used for motion planning.
-The simulator does not assume discrete movement or limits rotations to a certain amount.
+The simulator does not assume discrete movement or limit rotations to a certain amount.
 
 Based on the local planner we develop a global planning algorithm in \autoref{chap:global}, which provides a control sequence to assemble desired target structures.
-The configuration-space is sampled by only considering connections between structures as local plans and using a specially constructed graph as a building instruction for target polyominoes.
+The configuration-space is sampled by only considering connections between polyominoes as local plans and using a specially constructed graph as a building instruction for target polyominoes.
 The use of RRTs would be too inefficient, since we are working with a high fidelity simulation. 
 
 Results evaluating our global planner are presented in \autoref{chap:results} and a conclusion with possible directions for future work is given in \autoref{chap:conclusion}.
