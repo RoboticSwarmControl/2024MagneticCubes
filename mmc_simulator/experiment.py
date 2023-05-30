@@ -313,9 +313,10 @@ def main():
     # Put the experiments to execute here
     #assemblyForTargetSize(path, 100, 150, 12, 12, OptionSorting.list())
     #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
-    assemblyForTargetShape(path, 100, 100, ["O", "I", "H", "Plus"], OptionSorting.list())
+    #assemblyForTargetShape(path, 100, 100, ["O", "I", "H", "Plus"], OptionSorting.list())
     #assemblyForNred(path, 100, 100, 0, 5, OptionSorting.list())
-    #assemblyReliability(path, 23, 3, "3x3", OptionSorting.list())
+    for i in range(100,105):
+        assemblyReliability(path, i, 50, "3x3", OptionSorting.list())
     #TCSA_analysis(path, 0, 200, 5, 12)
 
 
