@@ -276,7 +276,7 @@ def assemblyForNred(path, startSeed, samplesPerSize, startNred, endNred, optionS
     print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
 
 
-def assemblyReliability(path, seed, samples, shape, optionSortings: list):
+def assemblyReliability(path, seeds, samples, shape, optionSortings: list):
     boardSize = (1000,1000)
     target = SHAPES[shape]
     ncubes = target.size()
@@ -284,18 +284,19 @@ def assemblyReliability(path, seed, samples, shape, optionSortings: list):
     assemblies = 0
     skipped = 0
     with slurminade.Batch(BATCH_MAX_SIZE):
-        for sorting in optionSortings:
-            dataPath = os.path.join(path, f"AR-{shape}-{seed}-{sorting.name}")
-            if not os.path.exists(dataPath):
-                os.mkdir(dataPath)
-                writeData(dataPath + ".json", ExperimentData(ncubes, nred, shape, boardSize, sorting.name))
-            for i in range(samples):
-                assemblies += 1
-                filePath = os.path.join(dataPath, f"sample-{i}.json")
-                if os.path.exists(filePath):
-                    skipped += 1
-                    continue
-                targetAssembly.distribute(filePath, seed, shape, boardSize, sorting.value)
+        for seed in seeds:
+            for sorting in optionSortings:
+                dataPath = os.path.join(path, f"AR-{shape}-{seed}-{sorting.name}")
+                if not os.path.exists(dataPath):
+                    os.mkdir(dataPath)
+                    writeData(dataPath + ".json", ExperimentData(ncubes, nred, shape, boardSize, sorting.name))
+                for i in range(samples):
+                    assemblies += 1
+                    filePath = os.path.join(dataPath, f"sample-{i}.json")
+                    if os.path.exists(filePath):
+                        skipped += 1
+                        continue
+                    targetAssembly.distribute(filePath, seed, shape, boardSize, sorting.value)
     print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
 
 
@@ -315,8 +316,7 @@ def main():
     #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
     #assemblyForTargetShape(path, 100, 100, ["O", "I", "H", "Plus"], OptionSorting.list())
     #assemblyForNred(path, 100, 100, 0, 5, OptionSorting.list())
-    for i in range(100,105):
-        assemblyReliability(path, i, 50, "3x3", OptionSorting.list())
+    assemblyReliability(path, range(100,110), 100, "3x3", OptionSorting.list())
     #TCSA_analysis(path, 0, 200, 5, 12)
 
 

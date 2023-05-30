@@ -24,7 +24,8 @@ AXIS_LABELS = {
     "localsToGoal": "$|P|$",
     "timeout": "fraction timed out",
     "nodes": "number of TCSA nodes",
-    "edges": "number of TCSA edges"
+    "edges": "number of TCSA edges",
+    "seed": "instance seed"
 }
 
 BOARDSIZES_LABELS = {
@@ -204,16 +205,15 @@ def __fitExponential(ax_bar):
            y.append(v.get_height())
     x = np.asarray(range(5,12))
     y = np.asarray(y)
-    popt, pcov = curve_fit(lambda t, a, b, c: a * np.exp(b * t) + c, x, y)
+    popt, pcov = curve_fit(lambda t, a, b: a * np.exp(b * t), x, y)
     a = popt[0]
     b = popt[1]
-    c = popt[2]
     x_fitted = np.linspace(np.min(x), np.max(x), 100)
-    y_fitted = a * np.exp(b * x_fitted) + c
+    y_fitted = a * np.exp(b * x_fitted)
     #r2 = r2_score(y, y_fitted)
     #print(r2)
     plt.plot(x_fitted - 5, y_fitted, linewidth=4, color="black",
-             label=(f"${round(a,2)}" + r"e^{" + f"{round(b,2)}" + r"n}" + f"{round(c)}$"))
+             label=(f"${round(a,2)}" + r"e^{" + f"{round(b,2)}" + r"n}$"))
     plt.legend(prop={'size': LEGEND_SIZE * 2.5})
 
 def barplot_TCSA(expName):
@@ -286,6 +286,8 @@ def barplot_multipleSortings(expName, xaxis, yaxis, outFile=None):
                 timedout += 1
             if xaxis == "boardSize":
                 data[xaxisLabel].append(BOARDSIZES_LABELS[exp.boardSize])
+            elif xaxis == "seed":
+                data[xaxisLabel].append(plan.__dict__[xaxis])
             else:
                 data[xaxisLabel].append(exp.__dict__[xaxis])
             data["option sorting"].append(exp.optionSorting)
@@ -329,6 +331,8 @@ def boxplot_multipleSortings(expName, xaxis, yaxis, outFile=None, showFliers=Tru
                 continue
             if xaxis == "boardSize":
                 data[xaxisLabel].append(BOARDSIZES_LABELS[exp.boardSize])
+            elif xaxis == "seed":
+                data[xaxisLabel].append(plan.__dict__[xaxis])
             else:
                 data[xaxisLabel].append(exp.__dict__[xaxis])
             data[yaxisLabel].append(plan.__dict__[yaxis])
@@ -348,7 +352,38 @@ def boxplot_multipleSortings(expName, xaxis, yaxis, outFile=None, showFliers=Tru
         figure.set_size_inches(16, 9)
         plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
     plt.close()
-        
+
+def stripplot_multipleSorting(expName, xaxis, yaxis, outFile=None, onlySuccess=False):
+    xaxisLabel = AXIS_LABELS[xaxis]
+    yaxisLabel = AXIS_LABELS[yaxis]
+    sorting_data = __emptySortingData(xaxisLabel, yaxisLabel)
+    exp_plan_data = __expPlanData(expName, xaxis)
+    for exp, plans in exp_plan_data.items():
+        data = sorting_data[exp.optionSorting]
+        for plan in plans:
+            if onlySuccess and not plan.success:
+                continue
+            if xaxis == "seed":
+                data[xaxisLabel].append(plan.__dict__[xaxis])
+            else:
+                data[xaxisLabel].append(exp.__dict__[xaxis])
+            data[yaxisLabel].append(plan.__dict__[yaxis])
+            data["option sorting"].append(exp.optionSorting)
+    # create pandas dataframe
+    dataFrame = pd.concat([pd.DataFrame(data=d) for d in sorting_data.values()])
+    # create seaborn stripplot
+    seaborn.set(font_scale=FONTSCALE)
+    seaborn.stripplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel, hue="option sorting", dodge=True)
+    plt.legend(loc="upper right", prop={'size': LEGEND_SIZE})
+    figure = plt.gcf()
+    figure.set_size_inches(12, 8)
+    if outFile == None:
+        plt.show()
+    else:
+        plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
+    plt.close()
+
+
 def createFigures():
     #TAFS
     boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
@@ -379,11 +414,13 @@ def main():
     #pieplot_timeUse("time-stats.json")
     #barplot_TCSA("TCSA-experiments")
     #---Result Plots---
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", onlySuccess=True)
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", onlySuccess=True)
     #barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout")
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "cost", onlySuccess=True)
+    stripplot_multipleSorting("AR-experiments", "seed", "time", onlySuccess=False)
+    stripplot_multipleSorting("AR-experiments", "seed", "cost", onlySuccess=False)
     #---Create Figures---
     #createFigures()
 
