@@ -4,25 +4,25 @@
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{figures/simulator_controlflow.pdf}
-	\caption[Control flow of the simulator]{Flowchart diagram illustrating the control flow of the simulator's simulation loop. Any control program can interact with the top-level interface of the simulator. Calculated forces are provided to the Pymunk-step for the next iteration of the loop.}
+	\caption[Control flow of the simulator's simulation loop]{Flowchart diagram illustrating the control flow of the simulator's simulation loop. Any control program can interact with the top-level interface of the simulator. Calculated forces are provided to the Pymunk-step for the next iteration of the loop.}
 	\label{fig:simulator}
 \end{figure}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\textwidth]{figures/plots/simulator_timeuse.pdf}
-	\caption[Diagram of time-use for certain steps in simulation loop]{Fraction of time used on certain steps in the simulation loop. The simulator ran for $8$ seconds without drawing and executed various motions with ten cubes in the workspace. The steps can be found in the control flow illustrated in \autoref{fig:simulator}.}
+	\caption[Time-use for certain steps in simulation loop]{Fraction of time used on certain steps in the simulation loop. The simulator ran for $8$ seconds without drawing and executed various motions with ten cubes in the workspace. The steps can be found in the flowchart diagram of \autoref{fig:simulator}.}
 	\label{fig:timeuse}
 \end{figure}
 
-Our simulator used for modeling the behavior of magnetic modular cubes uses the 2D physics library Pymunk\footnote{Pymunk: \url{https://www.pymunk.org/}}.
+Our simulator modeling the behavior of magnetic modular cubes uses the 2D physics library Pymunk\footnote{Pymunk: \url{https://www.pymunk.org/}}.
 This library is built for the Python 3 and Python 2 environment based on the 2D physics library Chipmunk\footnote{Chipmunk: \url{http://chipmunk-physics.net/}}.
 We used Pymunk, because it can be easily integrated and customized in a Python implementation.
 Furthermore it is light-weight and capable of running headless, but also offers an interface for Pygame\footnote{Pygame: \url{https://www.pygame.org/}}, which we use to visualize developed motion plans and to allow user controls.
 As a disadvantage of a 2D simulator, we can only approximate 3D movement, in particular pivot walking.
 This way we trade simulation accuracy for faster simulation time, which is necessary to develop global plans in a reasonable time.
 
-In \autoref{fig:simulator} a flow chart diagram illustrates the control flow of the simulator's simulation loop.
+The flowchart diagram in \autoref{fig:simulator} illustrates the control flow of the simulator's simulation loop.
 The individual steps in the diagram are explained in this and in the following sections.
 
 Any control program, for example a local planner or a ``sandbox program'' for visually controlling magnetic modular cubes with keyboard inputs, can interact with the top-level interface of the simulator.
@@ -34,12 +34,12 @@ The Pymunk-step is a library function, responsible for updating the simulation e
 The duration of a time step is a parameter that allows a trade off between simulation accuracy and simulation time. 
 Inside the Pymunk-step forces are applied to the cubes and collision with workspace boundaries and between cubes is handled (\autoref{sec:coll_handling}).
 
-After the Pymunk-step the magnetic forces between the cube's permanent magnets are calculated.
-This also determines connections of cube faces that will be used to retrieve information about polyominoes in the workspace (\autoref{sec:force_magnet}).
-Polyomino information is necessary to calculate forces of the magnetic field acting on cubes (\autoref{sec:force_field}) and friction forces, on which we heavily rely on to simulate 3D movement like pivoting on pivot edges (\autoref{sec:force_friction}).
+After the Pymunk-step the magnetic forces between the cube's permanent magnets are calculated (\autoref{sec:force_magnet}).
+This also determines connections of cube faces that will be used to retrieve information about polyominoes in the workspace.
+Polyomino information is necessary to calculate forces of the global magnetic field acting on cubes (\autoref{sec:force_field}) and friction forces, on which we heavily rely on to simulate 3D movement like pivoting on pivot edges (\autoref{sec:force_friction}).
 All the calculated forces will be applied in the Pymunk-step of the next iteration.
 
-When drawing is enabled, the Pygame-rendering of the workspace is the last step before beginning the next iteration.
+When drawing is enabled, the Pygame-rendering of the workspace is the last step before the next iteration begins.
 
 
 \section{Motion Control}
@@ -57,11 +57,11 @@ Each motion will be simulated by applying its sequence of updates with a notific
 This makes closed loop control possible, by letting the control program wait until motions are simulated.
 
 Motions control the magnetic field orientation and not the cubes directly.
-Cubes will orient themselves by magnetic field forces we further explain in \autoref{sec:force_field}.
+Cubes will be rotated by magnetic field forces we further explain in \autoref{sec:force_field}.
 Due to increased inertia, the larger a polyomino is, the more time it needs to align with the magnetic field, which can take longer than rotating the magnetic field itself.
 A certain amount of zero-updates, dependent on the size of the largest polyomino in the workspace, is added to a rotations update sequence.
 This way the control program will not be notified until all polyominoes are aligned with the magnetic field.
-This is the reason simulating larger polyominoes requires more simulation time.
+For that reason, working with larger polyominoes requires more simulation time.
 
 %TODO coordinate frame from. 3d to 2d
 
@@ -76,7 +76,7 @@ Furthermore a configuration stores magnetic field orientation and the polyominoe
 Polyominoes are stored in a custom data structure that functions both as a list of physical polyominoes and a polyomino set for the use in two-cut-sub-assembly graphs (\autoref{sec:tcsa}).
 The data structure and the polyominoes themselves are hash-able for fast equality and inclusion checks.
 
-Individual orientation and velocities of cubes will not be used for planning, but they ensure a correct loading of a workspace configuration that was saved while in motion or when cubes were not or not yet aligned with the magnetic field.
+Individual orientation and velocities of cubes will not be used for planning, but they ensure a correct loading of a configuration that was saved while in motion or when cubes were not, or not yet, aligned with the magnetic field.
 The alignment can be prevented by walls or other cubes, even though we assume perfect alignment with the magnetic field during planning.
 
 
@@ -94,9 +94,9 @@ More on the use of cube pairs in critical-distance in \autoref{sec:force_magnet}
 \section{Simulating Forces}
 
 To model accurate behavior of magnetic modular cubes we calculate and apply the three most significant forces acting on cubes in the workspace, forces between permanent magnets, forces from the global magnetic field and friction with the workspace plane.
-Friction between cubes and with workspace boundaries is handled by Pymunk's collision detection.
+Friction with the workspace boundaries and between cubes is handled by Pymunk's collision detection.
 The reason forces are calculated after the Pymunk-step, where they are applied, is because of the cube pairs in critical-distance determined with the collision detection of Pymunk.
-Providing forces for to be applied in the next iteration does not effect simulation accuracy.
+Applying the calculated forces in the next iteration does not effect simulation accuracy.
 
 \subsection{Magnet Forces}
 \label{sec:force_magnet}
@@ -104,7 +104,7 @@ Providing forces for to be applied in the next iteration does not effect simulat
 \begin{figure}
 	\centering
 	\includegraphics[width=0.6\textwidth]{figures/plots/magnet_force.pdf}
-	\caption[Declining magnetic forces with increasing cube distance.]{Decline of magnetic force between two permanent magnets with increasing distance between the cube centers. We reach a maximum force at $2 r_C$, when the cube faces are in contact. With distances bigger than the critical-distance of $5 r_C$ the fraction of force is negligible.}
+	\caption[Declining magnetic force with increasing cube distance]{Decline of magnetic force between two permanent magnets with increasing distance between the cube centers. We reach a maximum force at $2 r_C$, when the cube faces are in contact. With distances bigger than the critical-distance of $5 r_C$, the fraction of force is negligible.}
 	\label{fig:magnet_force}
 \end{figure}
 
@@ -115,13 +115,13 @@ Nevertheless, fast rotation or hitting workspace boundaries can cause connection
 
 We can define a maximum attraction force when cubes are at a distance of $2 r_C$.
 When such a force is reached with a valid pair of cube faces we mark the faces as connected.
-Based on the marked connections, polyominoes in the workspace can be identified.
+Polyominoes in the workspace can be identified based on the marked connections.
 
 The majority of simulation time, about $75\%$, is spent on calculating magnet forces as shown in \autoref{fig:timeuse}.
 Cubes not within critical-distance are too far away to significantly affect each other with magnetic forces of their permanent magnets.
 The steep decline of magnetic force with increasing cube distance can be seen in \autoref{fig:magnet_force}.
-We only calculate magnet forces for cube pairs in critical-distance to speed up simulation.
-Because assembling large target shapes is the goal of global planning, it is not uncommon that most cubes are in critical-distance.
+We only calculate magnet forces for cube pairs within critical-distance to speed up simulation.
+Because assembling large target structures is the goal of global planning, it is not uncommon that most cubes are in critical-distance.
 For a more efficient simulation we further determine which magnet pairs to consider.
 
 \paragraph{Determining Magnet Pairs}
@@ -154,7 +154,8 @@ $F_\textit{field}$ is calculated based on the difference of cube orientation $\g
 \begin{equation}
 F_\textit{field} = \mu_\textit{field} \begin{pmatrix} \sin(\gamma_\textit{cube} - \gamma_\textit{field}) \\ 0 \end{pmatrix} \mathbf{R}_{\gamma_\textit{cube}} \, .
 \end{equation}
-$\mu_\textit{field} = 1000$ is the strength of the magnetic field and $\mathbf{R}_{\gamma_\textit{cube}}$ is the rotation matrix used for rotating the force direction by $\gamma_\textit{cube}$.
+$\mu_\textit{field} = 1000$ is the strength of the magnetic field.
+$\mathbf{R}_{\gamma_\textit{cube}}$ is the rotation matrix used for rotating the force direction by $\gamma_\textit{cube}$ to match with the orientation of the cube.
 An alignment where $\gamma_\textit{cube} = \gamma_\textit{field}$ results in $F_\textit{field} = \vec{0}$.
 
 

@@ -13,6 +13,7 @@ In \autoref{sec:AFN} we analyze the effect of increasing polyomino size on plann
 The polyominoes used for this experiment are randomly generated, but we also evaluate the construction of manually designed polyominoes in \autoref{sec:AFTS}.
 With manually designed polyominoes, we can specifically test the assembly of targets with caves or holes, varying widths and heights, or different patterns of red and blue cubes. 
 Furthermore, we experiment with different workspace sizes and aspect ratios in \autoref{sec:AFBS} and how the ratio of red and blue cubes affects the assembly of straight line polyominoes in \autoref{sec:AFNR}.
+A legend for the box-whisker plots used to present the experimental data can be found in \autoref{fig:bw_legend}.
 
 \paragraph{Option Sorting Strategies}
 We conducted all experiments with the three option sorting strategies from \autoref{sec:connect_options}:
@@ -23,7 +24,7 @@ We conducted all experiments with the three option sorting strategies from \auto
 \end{enumerate}
 
 \paragraph{Instance Generation}
-Random polyominoes and initial configurations were created with a seed-based pseudorandom number generator, to make experiments reproducible.
+Random polyominoes and initial configurations were created with a seed-based pseudorandom number generator to make experiments reproducible.
 The option sorting strategies are applied to the same set of seeds to make the results comparable.
 When an initial configuration is randomly generated, the number of red and blue cubes matches with the target polyomino.
 Sub-assemblies in the initial configuration can occur.
@@ -66,17 +67,17 @@ The workspace is of size $50 r_C \times 50 r_C$ and for each target size $150$ s
 	\label{fig:AFN_timestats}
 \end{figure}
 
-\autoref{fig:AFN_time} shows the distribution of planning time and \autoref{fig:AFN_timeout} the fraction of timed out instances.
+\autoref{fig:AFN_time} shows the distribution of planning time and \autoref{fig:AFN_timeout} the fraction of timed-out instances.
 The construction of target polyominoes with sizes $5$ to $7$ can be planned in under $30$ seconds with just a few outliers exceeding this time.
 Note that none of these instances timed out.
 
-For target sizes above $7$ timeout failures first appear with roughly $5\%$ for $n = 8$, and increasing to $20\%$ for $n=12$.
+For target sizes above $7$, timeout failures first appear with roughly $5\%$ for $n = 8$, and increasing to $20\%$ for $n=12$.
 The planning time for $n = 12$ increases to $150$ seconds on average with a median of $100$ seconds.
 With increasing $n$ a wider spread of planning time can be observed.
 Outliers can reach planning times close to the timeout of $600$ seconds.
 
 In terms of planning time the option sorting strategies make no noticeable difference.
-For the fraction of timeouts growing the largest component often exceeds the other two strategies, clearly visible for $n=11$, where growing the largest component is at $20\%$ and the others under $10\%$ of plans timed out.
+For the fraction of timeouts, growing the largest component often exceeds the other two strategies, clearly visible for $n=11$, where growing the largest component is at $20\%$ and the others under $10\%$ of plans timed out.
 
 
 \paragraph{Plan Cost}
@@ -84,7 +85,7 @@ For the fraction of timeouts growing the largest component often exceeds the oth
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFN_cost.pdf}
-	\caption[Plan cost for increasing size]{Plan cost in radians of successful plans for increasing target size $n$. All option sorting strategies are compared with $150$ samples each and outliers are omitted.}
+	\caption[Plan cost for increasing target size]{Plan cost in radians of successful plans for increasing target size $n$. All option sorting strategies are compared with $150$ samples each and outliers are omitted.}
 	\label{fig:AFN_cost}
 \end{figure}
 
@@ -127,18 +128,18 @@ The number of local plans contained in the plan stack of the resulting global pl
 
 When a plan times out $\#\textit{local}$ and $\#\textit{config}$ only portray how many local plans and configurations can be explored within the timeout.
 Numbers can reach values up to $\#\textit{local} = 1200$ and $\#\textit{config} = 300$.
-Timed out instances are omitted in the plots of \autoref{fig:AFN_planstats}.
+Timed-out instances are omitted in the plots of \autoref{fig:AFN_planstats}.
 
 $\#\textit{local}$ increases for bigger target polyominoes.
 On average the realistic best case of $n-1$ local plans (\autoref{sec:global_complex}) is exceeded.
 For $n=8$ there are $25$, for $n=10$ about $50$ and for $n=12$ roughly $75$ local plans simulated on average.
 For all $n$ the majority of instances are below the average.
-Outliers can reach up to $250$ local plans.
+Some instances can reach up to $250$ local plans.
 
 $\#\textit{config}$ behaves similarly.
 The averages exceed the realistic best case of $n$, for example $\#\textit{config} = 16$ with $n=12$.
 In this example the global planner encountered at least $4$ dead ends during planning.
-The small numbers of $\#\textit{config}$ show that our depth-first-search approach is able to assemble polyominoes by only exploring a small portion of the whole configuration space.
+The small numbers of $\#\textit{config}$ show that our depth-first-search approach is able to assemble polyominoes by only exploring a small portion of the whole configuration-space.
 
 For the majority of instances the number of local plans in the plan stack is at $|P| = n-1$.
 Layer skipping can be observed frequently whenever $|P| < n-1$.
@@ -149,7 +150,6 @@ This phenomenon becomes more frequent for $n \geq 9$.
 
 The only noticeable difference between the option sorting strategies is that growing the largest component tends to have slightly lower numbers of $\#\textit{config}$.
 
-%TODO-----Prove reading-------
 
 \section{Assembly of Custom Polyominoes}
 \label{sec:AFTS}
@@ -178,7 +178,7 @@ In this experiment manually designed polyominoes are assembled from multiple ran
 $100$ samples were taken for each custom polyomino with a workspace size of $50 r_C \times 50 r_C$.
 
 In \autoref{sec:w/h_pattern} we focus on how rectangular polyominoes with varying width/height ratios influence planning time.
-Furthermore we experiment with two patterns of red and blue for each polyomino.
+Furthermore we experiment with two patterns of red and blue cubes for each polyomino.
 The \textit{switching-column pattern} switches between red and blue cubes column-wise and the \textit{checkerboard pattern} creates a checkerboard of single red and blue cubes.
 A list of these polyominoes can be found in \autoref{fig:AFTS_cb_shapes}.
 
@@ -189,6 +189,7 @@ The polyominoes ``I'', ``H'' and ``Plus'' are thick shapes with many connections
 All these polyominoes are build with the checkerboard pattern to achieve equal amounts of red and blue cubes.
 The size of all polyominoes, except for ``C'', is $n=12$.
  
+In \autoref{sec:hard_shape} we analyze the polyomino attributes that are especially challenging for the global planner based on all data gather in our experiments.
 
 \subsection{Width/Height and Cube Pattern}
 \label{sec:w/h_pattern}
@@ -208,7 +209,7 @@ The size of all polyominoes, except for ``C'', is $n=12$.
 		\caption{Fraction of plans that timed out.}
 		\label{fig:AFTS_cb_timeout}
 	\end{subfigure}
-	\caption[Planning time and fraction timed out for rectangular polyominoes]{Planning time and fraction timed out for rectangular polyominoes listed in \autoref{fig:AFTS_cb_shapes}. All option sorting strategies are compared with $100$ samples each.}
+	\caption[Planning time and fraction of timeouts for rectangular polyominoes]{Planning time and fraction of timeouts for rectangular polyominoes listed in \autoref{fig:AFTS_cb_shapes}. All option sorting strategies are compared with $100$ samples each.}
 	\label{fig:AFTS_cb_timestats}
 \end{figure}
 %TODO shows shapes under plot
@@ -220,7 +221,7 @@ For instance, the ``3x3'' polyomino is on average at $50$ seconds planning time,
 Polyomino shapes with more height than width are faster to assemble.
 ``10x1'' is the best followed by ``5x2'', ``3x3'' and ``2x5''.
 The same order persists for the checkerboard pattern.
-Surprisingly the ``1x10'' polyomino breaks out of this order.
+Surprisingly, the ``1x10'' polyomino breaks out of this order.
 Its planning time lays between the ``5x2'' and the ``3x3''.
 
 The ``2x5'' performs significantly worst than all other polyominoes.
@@ -247,15 +248,15 @@ All other shapes experience nearly no timeouts.
 		\caption{Fraction of plans that timed out.}
 		\label{fig:AFTS_sp_timeout}
 	\end{subfigure}
-	\caption[Planning time and fraction timed out for special polyominoes]{Planning time and fraction timed out for special polyominoes listed in \autoref{fig:AFTS_sp_shapes}. All option sorting strategies are compared with $100$ samples each.}
+	\caption[Planning time and fraction of timeouts for special polyominoes]{Planning time and fraction of timeouts for special polyominoes listed in \autoref{fig:AFTS_sp_shapes}. All option sorting strategies are compared with $100$ samples each.}
 	\label{fig:AFTS_sp_timestats}
 \end{figure}
 
 The planning time and fraction of timeouts are evaluated in \autoref{fig:AFTS_sp_timestats}.
 Constructing the thin shapes ``C'', ``S'', ``A'' and ``O'' is comparable in terms of planning time with $100$ seconds on average, which is below the average of randomly generated $12$ size polyominoes, already examined in \autoref{fig:AFN_time}.
-The fraction of timeouts is mostly under $5\%$, which is a huge difference to $25\%$ for the random polyominoes in \autoref{fig:AFNR_timeout}.
+The fraction of timeouts is mostly under $5\%$, which is a huge difference to $25\%$ for the random polyominoes evaluated in \autoref{fig:AFN_timeout}.
 The ``O'' shape has the worst performance of the four, which could be related to it being the only shape with a width of 4.
-We already observed how a more horizontally stretched shape is harder to assemble with the ``5x2'' and ``2x5'' rectangles in \autoref{fig:AFTS_cb_timestats}.
+We already observed how a more horizontally stretched shape is harder to assemble with the ``5x2'' and ``2x5'' rectangles.
 
 The three thick shapes perform much worst with an average of $200$ seconds planning time for ``I'' and ``H'' and $250$ seconds for the ``Plus'' shape.
 The instances have a wide spread in distribution of planning time and timeouts reach $20\%$ for ``I'' and ``H'' and even $30\%$ to $50\%$ for the ``Plus'' shape.
@@ -267,18 +268,19 @@ Growing the smallest component, while assembling the ``Plus'' shape reduces the 
 
 
 \subsection{Hardest Shapes to Assemble}
+\label{sec:hard_shape}
 
-Evaluating all custom polyominoes from \autoref{fig:AFTS_shapes} we can observe which parameters have the most influence on planning time.
+By evaluating all custom polyominoes from \autoref{fig:AFTS_shapes}, we can observe which parameters have the most influence on planning time.
 The number of connections between cubes within a polyominoes seems to increase planning time.
 This makes sense since more connections provide more possible two-cuts, which increases complexity of a TCSA graph.
 But connectivity alone is not the driving factor for shapes like the ``2x5''.
 The ``5x2'' provides an equal amount of connections and can be assembled very efficiently with no timeouts, while the ``2x5'' performs much worse.
-Width alone is also not responsible, since the ``1x10'' performs better than the ``2x5''.
+Width alone is also not responsible either, since the ``1x10'' performs better than the ``2x5''.
 
 The global planner becomes inefficient, when connectivity and increasing width is combined.
 The reason for this could be located within the local planner.
-North-south connections become problematic when the connection-cube have to move above or below non-connection-cubes to get to their desired position.
-A small example of this can be seen in \autoref{fig:local_plans}, where the local plans c) and d) fail, because they connected to the wrong cubes, while trying to move above them.
+North-south connections become problematic when the connection-cubes have to move above or below non-connection-cubes to get to their desired position.
+A small example of this can be seen in \autoref{fig:local_plans}, where the local plans c) and d) fail, because they connected to the wrong cubes, while trying to slide above them.
 With increasing width the effects become more dramatic.
 
 Increasing the offset distance when aligning the connection cubes (\autoref{sec:align}) is not a solution since a north-south connection cannot be established when magnetic attraction becomes to weak.
@@ -322,9 +324,9 @@ Other option sorting strategies could be developed to take these problematic con
 In this experiment we tested the assembly of randomly generated polyominoes of size $n=9$ with random initial configurations in various rectangular workspaces.
 We choose three workspace sizes (S, M, L) in three different aspect ratios ($ 1:1 $, $ 2:1 $, $ 3:1 $) each.
 All aspect ratios for one size result in roughly the same area. The workspaces with their exact widths and heights are listed in \autoref{tab:workspaces}.
-A workspace with aspect ration $ 1:x $ would produce similar results to one with aspect ration $ x:1 $, since the magnetic field can be rotated freely.
+A workspace with aspect ratio $ 1:x $ would produce similar results to one with aspect ratio $ x:1 $, since the magnetic field can be rotated freely.
 The maximum width or height of a polyomino with size $9$ is $18 r_C$.
-We ensured that such a polyomino could fit in all workspace variations while being able to rotate 360 degrees.
+We ensured that such a polyomino could fit in all workspace variations while being able to rotate $360$ degrees without getting stuck.
 We analyze the affect of these workspace variations on planning time and rotational cost.
 
 \paragraph{Planning Time} 
@@ -344,13 +346,13 @@ We analyze the affect of these workspace variations on planning time and rotatio
 		\caption{Fraction of plans that timed out.}
 		\label{fig:AFBS_timeout}
 	\end{subfigure}
-	\caption[Planning time and fraction timed out for different workspace variations]{Planning time and fraction timed out for different workspace variations listed in \autoref{tab:workspaces}. All option sorting strategies are compared with $100$ samples each.}
+	\caption[Planning time and fraction of timeouts for different workspace variations]{Planning time and fraction timeouts for different workspace variations listed in \autoref{tab:workspaces}. All option sorting strategies are compared with $100$ samples each.}
 	\label{fig:AFBS_timestats}
 \end{figure}
 
 \autoref{fig:AFBS_time} shows the planning time for all workspace variations.
-In terms of the size within one class of aspect ration no significant affect can be observed.
-Narrowing down the workspace by increasing the aspect ration seems to increase planning time slightly, but for the majority of instances planning time stays under $100$ seconds.
+In terms of the size within one class of aspect ratio no significant effect can be observed.
+Narrowing down the workspace by increasing the aspect ratio seems to increase planning time slightly, but for the majority of instances planning time stays under $100$ seconds.
 The fraction of timeouts in \autoref{fig:AFBS_timeout} remains constant for all workspaces and the options sorting strategies do not show any difference as well.
 
 \paragraph{Plan Cost} 
@@ -362,33 +364,31 @@ The fraction of timeouts in \autoref{fig:AFBS_timeout} remains constant for all 
 	\label{fig:AFBS_cost}
 \end{figure}
 
-It is not surprising that the distribution of rotational cost, presented in \autoref{fig:AFBS_cost}, increases with bigger workspace areas.
-Cubes and walls are further apart, which results in more pivot walking steps necessary to assemble polyominoes.
+It is not surprising that the rotational cost, presented in \autoref{fig:AFBS_cost}, increases with bigger workspace areas.
+Cubes and walls are further apart, which results in more pivot walking cycles necessary to assemble polyominoes.
 Within a class of same size, increasing the aspect ratio results in slightly more rotational cost as well.
-
-
 
 
 
 \section{Assembly for Red and Blue Cube Ratio}
 \label{sec:AFNR}
 
-We examined the affect of red and blue cube ratio on planning time.
+We examined the effect of red and blue cube ratio on planning time.
 For this we increased the number of red cubes $0 \leq n_\textit{red} \leq \lfloor \frac{n}{2}\rfloor$ while keeping the target polyomino size fixed at $n = 10$.
-With $n_\textit{red} = 0$ only north-south connections allow the creation of just a vertical line polyomino.
-$n_\textit{red} = \lfloor \frac{n}{2}\rfloor$ holds the biggest variety of polyomino shapes.
+With $n_\textit{red} = 0$, only north-south connections allow the creation of just a vertical line polyomino.
+$n_\textit{red} = \lfloor \frac{n}{2}\rfloor$ holds the biggest variety of polyomino shapes \cite{Lu2021}.
 To exclude the influence of varying polyomino shapes on the experiment, the shape is set to a $10 \times 1$ polyomino.
 $\lfloor \frac{n}{2}\rfloor < n_\textit{red} \leq n$ is equal to $0 \leq n_\textit{blue} \leq \lfloor \frac{n}{2}\rfloor$.
 Conducting the experiment with $n_\textit{red}$ or $n_\textit{blue}$ in equivalent.
 The patterns of red and blue cubes within the $10 \times 1$ polyomino and the initial configurations are randomly generated in a workspace of size $50 r_C \times 50 r_C$.
-For each $n_\textit{red}$ $100$ samples were taken.
+For each number of red cubes $100$ samples were taken.
 
 \paragraph{Planning Time}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFNR_time.pdf}
-	\caption[Planning time for number of red cubes]{Planning time for different numbers of red cubes $n_\textit{red}$. All option sorting strategies are compared with $100$ sample each. The fraction of timeouts is rarely at $2\%$ and is therefore not plotted.}
+	\caption[Planning time for number of red cubes]{Planning time for different numbers of red cubes $n_\textit{red}$. All option sorting strategies are compared with $100$ samples each. The fraction of timeouts is rarely at $2\%$ and is therefore not plotted.}
 	\label{fig:AFNR_time}
 \end{figure}
 

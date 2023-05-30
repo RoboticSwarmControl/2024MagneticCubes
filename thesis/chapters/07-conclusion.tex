@@ -25,15 +25,26 @@ The graph leaves multiple options for traversing one edge, because it does not c
 We evaluated three strategies of sorting these options by best probable outcome.
 
 The global planner can identify if the assembly of a target is possible out of any sub-assemblies present in the workspace at any point in time, but requires equal amounts of cubes in the workspace and in the target polyomino.
-How to work with more cubes than necessary for the assembly when two-cut-sub-assembly graphs are used remains an open question for future work.
+How to work with more cubes than necessary for the assembly, when two-cut-sub-assembly graphs are used, remains an open question for future work with some insights on the problem given in \autoref{sec:more_cubes}.
 
 We evaluated the assembly of polyominoes with up to 12 cubes in varying shapes and patterns of cube types.
 Planning time and timeout failures increase exponentially with the number of cubes, as it is expected with increasing dimensionality of the configuration-space.
-We are able to solve the majority of instances in under $200$ seconds, but certain attributes of polyominoes heavily decrease efficiency of the global planner.
-We found out that a combination of many connections within a polyomino and polyomino width produces especially bad results.
+We are able to solve the majority of instances in well under $200$ seconds, but certain attributes of polyominoes heavily decrease efficiency of the global planner.
+We found out that many connections within a polyomino combined with increasing polyomino width produces especially bad results.
 
 The option sorting strategies seem to perform differently for varying shapes, but we were not able to identify a clear pattern.
 Studying attributes of polyominoes and their effect on performance is another possible direction for future work.
 Designing new specialized option sorting strategies and determining which on to use, based on the target polyomino, looks promising. 
 
-%TODO talk about hardware experiments.
+Using our global planner to calculate motion sequences and applying them to a real workspace of magnetic modular cubes will most likely not result in a successful target assembly, because the mismatch between simulation and the real world is too big.
+Instead, the simulator could be replaced by a computer vision-based feedback and control system of the workspace, like the one currently developed by Lu et al.\ \cite{Lu2023}.
+Resetting configurations to previous states is not possible in the real world.
+Although we are resetting configurations in our global planner, we are already trying to avoid unnecessary simulation as much as possible.
+Further optimizing the two-cut-sub-assembly graph traversal to make even more careful decisions could be promising for a real world applications of magnetic modular cubes and actual hardware experiments would be interesting to see.
+
+
+
+
+
+
+

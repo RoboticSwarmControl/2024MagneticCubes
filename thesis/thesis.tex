@@ -105,22 +105,22 @@
 \paragraph{Deutsch:}
 \begin{otherlanguage}{ngerman}
 	Um spezifische Aufgaben besser zu bewältigen, lassen sich modulare, rekonfigurierbare Roboter zu größeren Strukturen zusammensetzen und wieder auseinandernehmen.
-	Magnetic-modular-cubes sind skalierbare Einheiten, bei welchen Permanentmagneten in einen würfelförmigen Körper eingebettet sind.
+	Magnetic-Modular-Cubes sind skalierbare Einheiten, bei welchen Permanentmagneten in einen würfelförmigen Körper eingebettet sind.
 	Diese Einheiten zählen als rekonfigurierbare Roboter, obwohl sie selber keine Logik oder Stromversorgung beinhalten.
 	Stattdessen lassen sich diese durch ein externes, gleichmäßiges und sich zeitlich änderndes Magnetfeld steuern.
-	Durch diese Steuerung können die magnetic-cubes auf der Stelle gedreht oder durch pivot-walking nach rechts und links bewegt werden.
+	Durch diese Steuerung können die Roboter auf der Stelle gedreht oder durch Pivotwalking nach rechts und links bewegt werden.
 	
 	Obwohl sich das Magnetfeld auf alle Einheiten gleichermaßen auswirkt, kann durch Kollision mit der Arbeitsflächenbegrenzung eine Änderung der Anordnung bewirkt werden.
-	Befinden sich zwei magnetic-cubes nah genug beieinander können sich diese durch die Permanentmagneten miteinander verbinden und so Polyominoes als größere Strukturen aufbauen, welche auf die gleiche Weise wie einzelne cubes gesteuert werden können.
+	Befinden sich zwei Roboter nah genug beieinander, können sich diese durch die Permanentmagneten miteinander verbinden und so Polyominoes als größere Strukturen aufbauen, welche auf die gleiche Weise wie einzelne Roboter gesteuert werden können.
 	Polyominoes bewegen sich mit unterschiedlicher Geschwindigkeit in unterschiedliche Richtungen, abhängig von deren Form.
-	Frühere Arbeiten betrachteten das "`tilt-model"', bei welchem sich Strukturen jeder Größe mit gleicher Geschwindigkeit in ganzzahligen Schritten und mit ausschließen 90° Drehungen bewegen lassen.
+	Frühere Arbeiten betrachteten das Tilt-Model, bei welchem sich Strukturen jeder Größe mit gleicher Geschwindigkeit in ganzzahligen Schritten und mit ausschließen 90° Drehungen bewegen lassen.
 	
-	Herr Keunes Aufgabe in dieser Bachelorarbeit ist es, einen motion-planner für die beschriebenen magnetic-cubes zu entwerfen, welcher mit beliebigen Positionen und Rotationen umgehen kann.
-	Dabei ist es erforderlich, eine Simulationsumgebung zu schaffen, welche das Verhalten der magnetic-cubes repliziert.
-	Es soll ein lokaler motion-planner entwickelt werden, um zwei Polyominos an gewünschten Kanten zu verbinden.
-	Dieser local-planner soll Heuristiken für Bewegungsabläufe mit möglichst wenig Schritten realisieren.
-	Ebenfalls soll dieser global eingesetzt werden, um Bewegungsabläufe zu finden, die gewünschte Polyominos aus einer zufällig gegebenen Startkonfiguration erzeugen.
-	Ein interessantes Ergebnis wird es sein, zu sehen, wie gut Probleminstanzen dieser Art in der Realität gelöst werden können und welche Parameter die gravierendsten Auswirkungen auf die Schwierigkeit von motion-planning Problemen haben. 
+	Herr Keunes Aufgabe in dieser Bachelorarbeit ist es, einen Motionplanner für die beschriebenen Magnetic-Modular-Cubes zu entwerfen, welcher mit beliebigen Positionen und Rotationen umgehen kann.
+	Dabei ist es erforderlich, eine Simulationsumgebung zu schaffen, welche das Verhalten der Roboter repliziert.
+	Es soll ein lokaler Motionplanner entwickelt werden, um zwei Polyominoes an gewünschten Kanten zu verbinden.
+	Dieser Localplanner soll Heuristiken für Bewegungsabläufe mit möglichst wenig Schritten realisieren.
+	Ebenfalls soll dieser global eingesetzt werden, um Bewegungsabläufe zu finden, die gewünschte Polyominoes aus einer zufällig gegebenen Startkonfiguration erzeugen.
+	Ein interessantes Ergebnis wird es sein, zu sehen, wie gut Probleminstanzen dieser Art in der Realität gelöst werden können und welche Parameter die gravierendsten Auswirkungen auf die Schwierigkeit von Motionplanning-Problemen haben.
 	
 \end{otherlanguage}
 
