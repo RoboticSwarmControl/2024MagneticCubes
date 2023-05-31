@@ -373,10 +373,13 @@ def stripplot_multipleSorting(expName, xaxis, yaxis, outFile=None, onlySuccess=F
     dataFrame = pd.concat([pd.DataFrame(data=d) for d in sorting_data.values()])
     # create seaborn stripplot
     seaborn.set(font_scale=FONTSCALE)
+    dfm = pd.melt(dataFrame, id_vars=[xaxisLabel])
     seaborn.stripplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel, hue="option sorting", dodge=True)
     plt.legend(loc="upper right", prop={'size': LEGEND_SIZE})
+    for x in range(0, len(dfm[xaxisLabel].unique())):
+        plt.axvspan(x - 0.5, x + 0.5, facecolor='black', alpha=[0.05 if x%2 == 0 else 0][0])
     figure = plt.gcf()
-    figure.set_size_inches(12, 8)
+    figure.set_size_inches(8, 13)
     if outFile == None:
         plt.show()
     else:
@@ -404,6 +407,9 @@ def createFigures():
     #AFNR
     boxplot_multipleSortings("AFNR-experiments", "targetNred", "time", "AFNR_time.pdf", onlySuccess=True, showFliers=False)
     barplot_multipleSortings("AFNR-experiments", "targetNred", "timeout", "AFNR_timeout.pdf")
+    #AR
+    stripplot_multipleSorting("AR-bestseeds", "seed", "time", "AR_time.pdf", onlySuccess=True)
+    stripplot_multipleSorting("AR-bestseeds", "seed", "cost", "AR_cost.pdf", onlySuccess=True)
 
 
 def main():
@@ -419,10 +425,12 @@ def main():
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "cost", onlySuccess=True)
-    stripplot_multipleSorting("AR-experiments", "seed", "time", onlySuccess=False)
-    stripplot_multipleSorting("AR-experiments", "seed", "cost", onlySuccess=False)
+    #stripplot_multipleSorting("AR-experiments", "seed", "time", onlySuccess=False)
+    #stripplot_multipleSorting("AR-experiments", "seed", "cost", onlySuccess=False)
+    #stripplot_multipleSorting("AR-bestseeds", "seed", "time", onlySuccess=True)
+    #stripplot_multipleSorting("AR-bestseeds", "seed", "cost", onlySuccess=True)
     #---Create Figures---
-    #createFigures()
+    createFigures()
 
 if __name__ == "__main__":
     main()

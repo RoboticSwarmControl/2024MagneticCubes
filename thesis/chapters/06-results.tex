@@ -402,4 +402,32 @@ For these vertical straight line polyominoes growing the smallest component perf
 Nearly no instances timed out during planning. 
 
 
+\section{Reliability}
 
+\begin{figure}
+	\centering
+	\begin{subfigure}[h]{0.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/plots/AR_time.pdf}
+		\caption{}
+		\label{fig:AR_time}
+	\end{subfigure}%
+	\begin{subfigure}[h]{0.45\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/plots/AR_cost.pdf}
+		\caption{}
+		\label{fig:AR_cost}
+	\end{subfigure}
+	\caption[]{}
+	\label{fig:AR}
+\end{figure}
+
+
+% option sorting makes difference not only for shape but for initial if comparing seeds
+% clusters can form -> we delevop k plans.
+% k=1 102 md gs, 101 gl
+% k=2 106 gs well seen in planning time and cost
+% k=4 102 gl well seen in cost, time spreads
+% k can get arbitrarely bad 100
+% 100 had a timeout failure
+% all of this due to local planner fail/success not deterministic
