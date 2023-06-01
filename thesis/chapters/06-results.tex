@@ -431,14 +431,13 @@ We tested different seed-values affecting the initial configuration and for all 
 First thing to notice is that the global planner behaves non-deterministically.
 Although samples start at the same initial configuration and assemble the same target, multiple plans with varying plan cost and planning times are developed.
 The amount of plans developed changes per seed-value.
-
 For seed $101$ when growing the largest and smallest component, or for seed $102$ with minimal distance and growing the smallest component, nearly all data-points are clustered at one spot for both the planning time and plan cost.
 For these seeds and sorting strategies the global planner is stable and develops the same plan for all samples, except for a few outliers.
 Samples can cluster around multiple distinct spots, as it can be seen for seed $106$ with growing the smallest component.
 Here the global planner alternates between developing two distinct plans.
-Data-points can also form more than two clusters or spread widely without forming cluster at all, as it is the case for seed $100$.
-This seed even experienced one timeout failure. 
+Data-points can form arbitrary numbers of clusters or spread widely without forming noticeable cluster at all, as it is the case for seed $100$.
+This seed even experienced one timeout failure, not shown in the plots for better readability. 
 
-We have already examined that option sorting strategies perform differently depending on the target polyomino, but this experiment shows that the initial configuration alone can make a difference as well.
+We have already observed that option sorting strategies perform differently depending on the target polyomino, but this experiment shows that the initial configuration alone can make a difference as well.
 
 % all of this due to local planner fail/success not deterministic

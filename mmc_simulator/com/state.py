@@ -142,10 +142,10 @@ class Polyomino:
     def __init__(self, root: Cube):
         self.__pos_cube = {(0, 0): root}
         self.__cube_pos = {root: (0, 0)}
-        self.__xmin = 0
-        self.__xmax = 0
-        self.__ymin = 0
-        self.__ymax = 0
+        self.xmin = 0
+        self.xmax = 0
+        self.ymin = 0
+        self.ymax = 0
         self.__valid = True
         self.id = Polyomino.nextId
         Polyomino.nextId += 1
@@ -173,10 +173,10 @@ class Polyomino:
         self.__cube_pos[cubeA] = posA
         self.__pos_cube[posA] = cubeA
         # update the bounds
-        self.__xmin = min(posA[0], self.__xmin)
-        self.__xmax = max(posA[0], self.__xmax)
-        self.__ymin = min(posA[1], self.__ymin)
-        self.__ymax = max(posA[1], self.__ymax)
+        self.xmin = min(posA[0], self.xmin)
+        self.xmax = max(posA[0], self.xmax)
+        self.ymin = min(posA[1], self.ymin)
+        self.ymax = max(posA[1], self.ymax)
         # update coordinate-system if root changed
         if posA[0] < 0 or (posA[0] == 0 and posA[1] < 0):
             self.__updateCoordinates__(cubeA)
@@ -238,14 +238,14 @@ class Polyomino:
         return self.__cube_pos[cube]
 
     def getBottomRow(self):
-        return self.__getRow__(self.__ymin)
+        return self.__getRow__(self.ymin)
 
     def getTopRow(self):
-        return self.__getRow__(self.__ymax)
+        return self.__getRow__(self.ymax)
 
     def __getRow__(self, y):
         cubes = []
-        for x in range(self.__xmin, self.__xmax + 1):
+        for x in range(self.xmin, self.xmax + 1):
             try:
                 cubes.append(self.__pos_cube[(x, y)])
             except KeyError:
@@ -254,7 +254,7 @@ class Polyomino:
 
     def __getColum__(self, x):
         cubes = []
-        for y in range(self.__ymin, self.__ymax + 1):
+        for y in range(self.ymin, self.ymax + 1):
             try:
                 cubes.append(self.__pos_cube[(x, y)])
             except KeyError:
@@ -281,7 +281,7 @@ class Polyomino:
         return cube in self.__cube_pos
 
     def bounds(self):
-        return (self.__xmax - self.__xmin + 1, self.__ymax - self.__ymin + 1)
+        return (self.xmax - self.xmin + 1, self.ymax - self.ymin + 1)
 
     def connectPoly(self, cubeA: Cube, polyB, cubeB: Cube, edgeB: Direction):
         if ((not self.contains(cubeA)) or (not polyB.contains(cubeB))):
@@ -314,10 +314,10 @@ class Polyomino:
         if edgeB == direction:
             return False
         if direction == Direction.EAST:
-            end = target.__xmin - 1
+            end = target.xmin - 1
             step = -1
         elif direction == Direction.WEST:
-            end = target.__xmax + 1
+            end = target.xmax + 1
             step = 1
         else:
             return False
@@ -338,19 +338,19 @@ class Polyomino:
             clone.__cube_pos[cube] = pos
             clone.__pos_cube[pos] = cube
         clone.__valid = self.__valid
-        clone.__xmax = self.__xmax
-        clone.__xmin = self.__xmin
-        clone.__ymax = self.__ymax
-        clone.__ymin = self.__ymin
+        clone.xmax = self.xmax
+        clone.xmin = self.xmin
+        clone.ymax = self.ymax
+        clone.ymin = self.ymin
         return clone
 
     def __updateCoordinates__(self, newRoot):
         self.__pos_cube.clear()
         posUpdate = self.__cube_pos[newRoot]
-        self.__xmin -= posUpdate[0]
-        self.__xmax -= posUpdate[0]
-        self.__ymin -= posUpdate[1]
-        self.__ymax -= posUpdate[1]
+        self.xmin -= posUpdate[0]
+        self.xmax -= posUpdate[0]
+        self.ymin -= posUpdate[1]
+        self.ymax -= posUpdate[1]
         for cube in self.getCubes():
             posOld = self.__cube_pos[cube]
             posNew = (posOld[0] - posUpdate[0], posOld[1] - posUpdate[1])
@@ -378,8 +378,8 @@ class Polyomino:
 
     def __str__(self) -> str:
         string = f""
-        for y in range(self.__ymax, self.__ymin - 1, -1):
-            for x in range(self.__xmin, self.__xmax + 1):
+        for y in range(self.ymax, self.ymin - 1, -1):
+            for x in range(self.xmin, self.xmax + 1):
                 try:
                     string += str(self.__pos_cube[(x,y)])
                 except KeyError:

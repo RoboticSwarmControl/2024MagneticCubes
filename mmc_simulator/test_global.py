@@ -32,5 +32,5 @@ def customTargetAssembly(seed, target: Polyomino, boardSize, sorting: OptionSort
         plan.execute()
 
 if __name__ == "__main__":
-    customTargetAssembly(15, factory.threeByThreeCB(), (1000,1000), OptionSorting.MIN_DIST)
-    #randomTargetAssembly(1, 10 ,5, (1000,1000), OptionSorting.GROW_SMALLEST)
+    #customTargetAssembly(15, factory.threeByThreeCB(), (1000,1000), OptionSorting.MIN_DIST)
+    randomTargetAssembly(1, 10 ,5, (1000,1000), OptionSorting.GROW_SMALLEST)

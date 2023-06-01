@@ -1,7 +1,10 @@
+import math
 import pygame
+from pymunk import Vec2d
 import pymunk.pygame_util
+from com import factory
 from sim.handling import StateHandler
-from com.state import Cube, Direction
+from com.state import Cube, Direction, Polyomino
 
 class Renderer:
 
@@ -26,6 +29,7 @@ class Renderer:
         self.markedCubes = set()
         self.pointsToDraw = []
         self.linesToDraw = []
+        self.targetToDraw: Polyomino = factory.randomPoly(26)
 
     def pygameInit(self):
         if self.initialized:
@@ -52,60 +56,85 @@ class Renderer:
             return
         self.__window.fill(Renderer.WHITE)
         # draw the walls
-        for shape in self.__stateHandler.getBoundaries():
-            pygame.draw.line(self.__window, Renderer.DARKGREY, shape.body.local_to_world(
-                shape.a), shape.body.local_to_world(shape.b), StateHandler.BOUNDARIE_RAD)
-        # draw the cubes with magnets and frictionpoints
+        self.__drawWalls()
+        # draw the cubes
         for cube in self.__stateHandler.getCubes():
             shape = self.__stateHandler.getCubeShape(cube)
-            verts = [shape.body.local_to_world(lv)
-                     for lv in shape.get_vertices()]
-            # draw cube rect
-            if cube.type == Cube.TYPE_RED:
-                cubeColor = Renderer.LIGHTRED
-            else:
-                cubeColor = Renderer.LIGHTBLUE
-            pygame.draw.polygon(self.__window, cubeColor, verts)
-            # draw cube outline
-            if cube in self.markedCubes:
-                outlineColor = Renderer.YELLOW
-            else:
-                outlineColor = Renderer.DARKGREY
-            pygame.draw.lines(self.__window, outlineColor, True, verts, 2)
-            # draw the magnets
-            for i, magP in enumerate(cube.magnetPos):
-                if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
-                    magcolor = Renderer.BLUE
-                else:
-                    magcolor = Renderer.RED
-                pygame.draw.circle(
-                    self.__window, magcolor, shape.body.local_to_world(magP), 4)
-            # draw frictino points
+            self.__drawCube(cube, shape.body.position, shape.body.angle)
+            # draw friction points
             # if shape in self.__stateHandler.frictionpoints:
-            #     pygame.draw.circle(self.__window, Renderer.PURPLE,
-            #                        self.__stateHandler.frictionpoints[shape], 3)
-        # polyomino drawing
-        # for i, poly in enumerate(self.__stateHandler.polyominoes.getAll()):
-        #     for cube in poly.getCubes():
-        #         connects = poly.getConnected(cube)
-        #         for cubeCon in connects:
-        #             if cubeCon == None:
-        #                 continue
-        #             pygame.draw.line(self.__window, Renderer.PURPLE, self.__stateHandler.getCubeShape(cube).body.local_to_world(
-        #                 (0, 0)), self.__stateHandler.getCubeShape(cubeCon).body.local_to_world((0, 0)), 4)
+            #     pygame.draw.circle(self.__window, Renderer.PURPLE, self.__stateHandler.frictionpoints[shape], 3)
         # draw user points and lines
         for point in self.pointsToDraw:
             pygame.draw.circle(self.__window, point[0], point[1], point[2])
         for line in self.linesToDraw:
             pygame.draw.line(self.__window, line[0], line[1], line[2], line[3])
+        if self.targetToDraw != None:
+            self.__drawTarget()
         # draw the compass
-        comPos = pymunk.Vec2d(12,12)
-        pygame.draw.circle(self.__window, Renderer.LIGHTGRAY,  comPos, 12)
-        pygame.draw.circle(self.__window, Renderer.LIGHTBROWN,  comPos, 10)
-        pygame.draw.line(self.__window, Renderer.BLUE, comPos, comPos + 12 * Direction.SOUTH.vec(self.__stateHandler.magAngle), 3)
-        pygame.draw.line(self.__window, Renderer.RED, comPos, comPos + 12 * Direction.NORTH.vec(self.__stateHandler.magAngle), 3)
+        self.__drawCompass()
         # debug draw
         self.__stateHandler.space.debug_draw(self.__drawOpt)
         # update the screen
         pygame.display.update()
         self.__clock.tick(fps)
+
+    def __drawWalls(self):
+        for shape in self.__stateHandler.getBoundaries():
+            pygame.draw.line(self.__window, Renderer.DARKGREY, shape.body.local_to_world(
+                shape.a), shape.body.local_to_world(shape.b), StateHandler.BOUNDARIE_RAD)
+
+    def __drawCube(self, cube: Cube, pos: Vec2d, ori, scale=1):
+        verts = [Vec2d(Cube.RAD, Cube.RAD), Vec2d(Cube.RAD, -Cube.RAD), Vec2d(-Cube.RAD, -Cube.RAD), Vec2d(-Cube.RAD, Cube.RAD)]
+        for i in range(len(verts)):
+            verts[i] *= scale
+            verts[i] = verts[i].rotated(ori) + pos
+        # draw cube rect
+        if cube.type == Cube.TYPE_RED:
+            cubeColor = Renderer.LIGHTRED
+        else:
+            cubeColor = Renderer.LIGHTBLUE
+        pygame.draw.polygon(self.__window, cubeColor, verts)
+        # draw cube outline
+        if cube in self.markedCubes:
+            outlineColor = Renderer.YELLOW
+        else:
+            outlineColor = Renderer.DARKGREY
+        pygame.draw.lines(self.__window, outlineColor, True, verts, math.ceil(2 * scale))
+        # draw the magnets
+        for i, magP in enumerate(cube.magnetPos):
+            if 0 < magP[0]*cube.magnetOri[i][0]+magP[1]*cube.magnetOri[i][1]:
+                magcolor = Renderer.BLUE
+            else:
+                magcolor = Renderer.RED
+            pygame.draw.circle(self.__window, magcolor, (Vec2d(magP[0], magP[1]) * scale).rotated(ori) + pos, math.ceil(4 * scale))
+
+    def __drawCompass(self):
+        comPos = pymunk.Vec2d(12,12)
+        pygame.draw.circle(self.__window, Renderer.LIGHTGRAY,  comPos, 12)
+        pygame.draw.circle(self.__window, Renderer.LIGHTBROWN,  comPos, 10)
+        pygame.draw.line(self.__window, Renderer.BLUE, comPos, comPos + 12 * Direction.SOUTH.vec(self.__stateHandler.magAngle), 3)
+        pygame.draw.line(self.__window, Renderer.RED, comPos, comPos + 12 * Direction.NORTH.vec(self.__stateHandler.magAngle), 3)
+
+    def __drawTarget(self):
+        margin = StateHandler.BOUNDARIE_RAD + 2
+        scale = 0.5
+        globalZero = Vec2d(self.__stateHandler.boardSize[0] - margin - 2 * Cube.RAD * scale * (self.targetToDraw.xmax + 1) + Cube.RAD * scale ,
+                           margin + 2 * Cube.RAD * scale * (self.targetToDraw.ymax + 1) - Cube.RAD * scale )
+        pygame.draw.circle(self.__window, Renderer.LIGHTGRAY,  globalZero, 4)
+        for cube in self.targetToDraw.getCubes():
+            localPos = self.targetToDraw.getLocalCoordinates(cube)
+            pos = Vec2d(localPos[0], -localPos[1]) * (2 * Cube.RAD * scale) + globalZero
+            self.__drawCube(cube, pos, math.radians(90), scale)
+        
+        
+
+# polyomino drawing
+# for i, poly in enumerate(self.__stateHandler.polyominoes.getAll()):
+#     for cube in poly.getCubes():
+#         connects = poly.getConnected(cube)
+#         for cubeCon in connects:
+#             if cubeCon == None:
+#                 continue
+#             pygame.draw.line(self.__window, Renderer.PURPLE, self.__stateHandler.getCubeShape(cube).body.local_to_world(
+#                 (0, 0)), self.__stateHandler.getCubeShape(cubeCon).body.local_to_world((0, 0)), 4)

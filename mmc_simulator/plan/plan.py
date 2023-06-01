@@ -137,6 +137,7 @@ class GlobalPlan(Plan):
         Visually executes the actions of all local plans in this global plan 
         """
         sim = Simulation(True, False)
+        sim.renderer.targetToDraw = self.target
         for plan in self.actions:
             sim.loadConfig(plan.initial)
             if plan.connection != None:
