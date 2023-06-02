@@ -150,10 +150,9 @@ The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nod
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\textwidth]{figures/plots/tcsa_nodes_edges.pdf}
-	\caption[Average two-cut-sub-assembly nodes and edges for target size $n$]{Average number of nodes (left) and edges (right) of a TCSA graph for different target polyomino sizes $n$. For each size $200$ polyominoes were randomly generated. An exponential function is fitted over the averages of nodes and edges.}
+	\caption[Average two-cut-sub-assembly nodes and edges for target size $n$]{Average number of nodes (left) and edges (right) of a TCSA graph for different target polyomino sizes $n$. For each size $200$ polyominoes were randomly generated. An exponential function is fitted over the averages of nodes and edges with a mean-squared error of $0.9999$ for both functions.}
 	\label{fig:tcsa_plot}
 \end{figure}
-%TODO add R2 error ", with R2 values of ___ and ___"
 
 The Stirling numbers of second kind provide an upper bound for the number of nodes in a TCSA graph.
 The Stirling numbers of second kind
@@ -173,7 +172,8 @@ which is also referred to as the Bell number \cite{jelliss1991}.
 
 In our case, the only way of sorting cubes into partitions is by monotonously two-cutting existing polyominoes, which drastically lowers the number of $|V|_\textit{worst}$.
 In \autoref{fig:tcsa_plot} statistical data shows the average number of nodes and edges a TCSA graph consists of for varying target polyomino sizes $n$.
-The growth of nodes and edges seems to be exponential, which is shown with fitted functions in \autoref{fig:tcsa_plot}. 
+The growth of nodes and edges seems to be exponential, which is shown with fitted functions in \autoref{fig:tcsa_plot}.
+The mean-squared error of $0.9999$ for both functions was calculated with the python library scikit-learn\footnote{scikit-learn: \url{https://scikit-learn.org/}}.
 
 Our implementation of $G_{\textit{TCSA}}(\mathcal{T})$ stores nodes in a hash-table.
 Accessing nodes and connected edges, or checking if a polyomino set is contained in $G_{\textit{TCSA}}(\mathcal{T})$, can be done in  $\mathcal{O}(1)$.
@@ -428,8 +428,8 @@ The global planner could handle this by summing up the connection options of all
 After assembling $\mathcal{T}$ all the leftover cubes could assemble various polyominoes.
 We could enumerate all possible left over polyomino sets $S_l$ and remove all of them separately from $S(g)$ to check for $S_\textit{TCSA} = S(g) \setminus S_l$.
 This would again result in multiple nodes and summed up connection options, but with the ability to hash compare for equality.
-The number of $S_l$ can become huge for increasing numbers of leftover cubes leading to a less efficient global planner.
-
+The number of $S_l$ can become large for increasing numbers of leftover cubes, since $n$ leftover cubes can assemble all polyominoes of up to size $n$.
+This leads to a less efficient global planner.
 
 
 

@@ -420,12 +420,12 @@ Nearly no instances timed out during planning.
 		\caption{Plan cost for seed-values.}
 		\label{fig:AR_cost}
 	\end{subfigure}
-	\caption[Planning time and plan cost for different seeds]{Distribution of planning time and plan cost for four different seeds of initial configurations. For all seeds a $3 \times 3$ polyomino was constructed. All option sorting strategies are compared with $100$ samples each. Only successful plans are shown for better readability. Stronger color and bigger spots indicate multiple overlapping data points.}
+	\caption[Planning time and plan cost for different seeds]{Distribution of planning time and plan cost for four different seeds of initial configurations. For all seeds the ``3x3'' polyomino from \autoref{fig:AFTS_cb_shapes} was constructed. All option sorting strategies are compared with $100$ samples each. Only successful plans are shown for better readability. Stronger color and bigger spots indicate multiple overlapping data points.}
 	\label{fig:AR}
 \end{figure}
 
 To test the reliability of the global planner, we ran $100$ samples for the same initial configuration and same target polyomino.
-We tested different seed-values affecting the initial configuration and for all seeds we assembled the same $3 \times 3$ target polyomino.
+We tested different seed-values affecting the initial configuration and for all seeds we assembled the ``3x3'' polyomino of \autoref{fig:AFTS_cb_shapes}.
 
 \autoref{fig:AR} shows the distribution of planning time and plan cost for this experiment.
 First thing to notice is that the global planner behaves non-deterministically.
@@ -440,4 +440,10 @@ This seed even experienced one timeout failure, not shown in the plots for bette
 
 We have already observed that option sorting strategies perform differently depending on the target polyomino, but this experiment shows that the initial configuration alone can make a difference as well.
 
-% all of this due to local planner fail/success not deterministic
+%TODO show initials of seeds
+%TODO global random for pymunk
+% change to first section?
+
+
+
+%TODO plot for tcsanodes and planning time
