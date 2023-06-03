@@ -39,6 +39,65 @@ The experiments were done on multiple computers with the same hardware specifica
 
 
 
+
+\section{Reliability}
+\label{sec:AR}
+
+\begin{figure}
+	\centering
+	\begin{subfigure}[b]{0.95\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/AR_initials.pdf}
+	\end{subfigure}%
+	\vspace{0.3em}
+	\begin{subfigure}[h]{0.5\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/plots/AR_time.pdf}
+		\caption{Planning time for seed-values.}
+		\label{fig:AR_time}
+	\end{subfigure}%
+	\begin{subfigure}[h]{0.5\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/plots/AR_cost.pdf}
+		\caption{Plan cost for seed-values.}
+		\label{fig:AR_cost}
+	\end{subfigure}
+	\caption[Planning time and plan cost for different seeds]{Distribution of planning time and plan cost for four different seeds of initial configurations. For all seeds the ``3x3'' polyomino from \autoref{fig:AFTS_cb_shapes} was constructed. All option sorting strategies are compared with $100$ samples each. Only successful plans are shown for better readability. Stronger color and bigger spots indicate multiple overlapping data points. The initial configurations of the seed-values are shown at the top.}
+	\label{fig:AR}
+\end{figure}
+
+To test the reliability of the global planner, we ran $100$ samples for the same initial configuration and same target polyomino.
+We tested different seed-values affecting the initial configuration and for all seeds we assembled the ``3x3'' polyomino of \autoref{fig:AFTS_cb_shapes}.
+The workspace has a size of $50 r_C \times 50 r_C$.
+
+\autoref{fig:AR} shows the distribution of planning time and plan cost for this experiment.
+First thing to notice is that the global planner behaves non-deterministically.
+Although samples start at the same initial configuration and assemble the same target, multiple plans with varying plan cost and planning times are developed.
+The amount of plans developed changes per seed-value.
+For seed $101$ when growing the largest and smallest component, or for seed $102$ with minimal distance and growing the smallest component, nearly all data-points are clustered at one spot for both the planning time and plan cost.
+For these seeds and sorting strategies the global planner is stable and develops the same plan for all samples, except for a few outliers.
+Samples can cluster around multiple distinct spots, as it can be seen for seed $106$ with growing the smallest component.
+Here the global planner alternates between developing two distinct plans.
+Data-points can form arbitrary numbers of clusters or spread widely without forming noticeable cluster at all, as it is the case for seed $100$.
+This seed even experienced one timeout failure, not shown in the plots for better readability. 
+
+\paragraph{Non-Deterministic Behavior}
+
+Two reasons for the non-deterministic behavior of the global planner can be identified.
+
+By developing local plans for different slide-in and pivot walking directions with multiple processes in parallel and returning the first successful plan to finish (\autoref{sec:local_algo}), a deterministic behavior cannot be ensured anymore.
+When these processes are scheduled differently or execution time varies slightly, the local planner can return different local plans to the global planner.
+For instance, pivot walking left or right results in completely different goal configurations with different possible sub-assemblies.
+This has a large impact on further decisions the global planner will make.
+
+The second reason is located in the interaction between local planner and simulator.
+Both components are running on separate threads and interacting with the simulator's simulation loop at different iterations changes the behavior of the simulator.
+We are minimizing this effect as much as possible, but it is not guarantied that equal amounts of simulation iterations are done for the same local plan.
+Although this effect produces slightly different local plans, the parallel development of local plans has a more severe effect on the wide spread of planning time and plan cost.
+
+
+
+
 \section{Assembly for Polyomino Size}
 \label{sec:AFN}
 
@@ -173,8 +232,6 @@ The only noticeable difference between the option sorting strategies is that gro
 	\label{fig:AFTS_shapes}
 \end{figure}
 
-%TODO show number of tcsa nodes for all shapes
-
 In this experiment manually designed polyominoes are assembled from multiple randomly generated initial configurations.
 $100$ samples were taken for each custom polyomino with a workspace size of $50 r_C \times 50 r_C$.
 
@@ -203,17 +260,19 @@ In \autoref{sec:hard_shape} we analyze the polyomino attributes that are especia
 		\caption{Planning time in seconds. Only plans that did not time out are shown.}
 		\label{fig:AFTS_cb_time}
 	\end{subfigure}
-	
 	\begin{subfigure}[b]{\textwidth}
 		\centering
 		\includegraphics[width=0.9\textwidth]{figures/plots/AFTS_cb_timeout.pdf}
 		\caption{Fraction of plans that timed out.}
 		\label{fig:AFTS_cb_timeout}
 	\end{subfigure}
-	\caption[Planning time and fraction of timeouts for rectangular polyominoes]{Planning time and fraction of timeouts for rectangular polyominoes listed in \autoref{fig:AFTS_cb_shapes}. All option sorting strategies are compared with $100$ samples each.}
+	\begin{subfigure}[b]{\textwidth}
+		\centering
+		\includegraphics[width=0.9\textwidth]{figures/AFTS_cb_shapes_small.pdf}
+	\end{subfigure}
+	\caption[Planning time and fraction of timeouts for rectangular polyominoes]{Planning time and fraction of timeouts for rectangular polyominoes. All option sorting strategies are compared with $100$ samples each.}
 	\label{fig:AFTS_cb_timestats}
 \end{figure}
-%TODO shows shapes under plot
 
 When comparing planning time of the two cube pattern in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
 It is not a huge difference, but still noticeable.
@@ -242,14 +301,17 @@ All other shapes experience nearly no timeouts.
 		\caption{Planning time in seconds. Only plans that did not time out are shown.}
 		\label{fig:AFTS_sp_time}
 	\end{subfigure}
-	
 	\begin{subfigure}[b]{\textwidth}
 		\centering
 		\includegraphics[width=0.9\textwidth]{figures/plots/AFTS_sp_timeout.pdf}
 		\caption{Fraction of plans that timed out.}
 		\label{fig:AFTS_sp_timeout}
 	\end{subfigure}
-	\caption[Planning time and fraction of timeouts for special polyominoes]{Planning time and fraction of timeouts for special polyominoes listed in \autoref{fig:AFTS_sp_shapes}. All option sorting strategies are compared with $100$ samples each.}
+	\begin{subfigure}[b]{\textwidth}
+		\centering
+		\includegraphics[width=0.9\textwidth]{figures/AFTS_sp_shapes_small.pdf}
+	\end{subfigure}
+	\caption[Planning time and fraction of timeouts for special polyominoes]{Planning time and fraction of timeouts for special polyominoes. All option sorting strategies are compared with $100$ samples each.}
 	\label{fig:AFTS_sp_timestats}
 \end{figure}
 
@@ -403,47 +465,4 @@ For these vertical straight line polyominoes growing the smallest component perf
 Nearly no instances timed out during planning. 
 
 
-\section{Reliability}
-\label{sec:AR}
 
-\begin{figure}
-	\centering
-	\begin{subfigure}[h]{0.5\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{figures/plots/AR_time.pdf}
-		\caption{Planning time for seed-values.}
-		\label{fig:AR_time}
-	\end{subfigure}%
-	\begin{subfigure}[h]{0.5\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{figures/plots/AR_cost.pdf}
-		\caption{Plan cost for seed-values.}
-		\label{fig:AR_cost}
-	\end{subfigure}
-	\caption[Planning time and plan cost for different seeds]{Distribution of planning time and plan cost for four different seeds of initial configurations. For all seeds the ``3x3'' polyomino from \autoref{fig:AFTS_cb_shapes} was constructed. All option sorting strategies are compared with $100$ samples each. Only successful plans are shown for better readability. Stronger color and bigger spots indicate multiple overlapping data points.}
-	\label{fig:AR}
-\end{figure}
-
-To test the reliability of the global planner, we ran $100$ samples for the same initial configuration and same target polyomino.
-We tested different seed-values affecting the initial configuration and for all seeds we assembled the ``3x3'' polyomino of \autoref{fig:AFTS_cb_shapes}.
-
-\autoref{fig:AR} shows the distribution of planning time and plan cost for this experiment.
-First thing to notice is that the global planner behaves non-deterministically.
-Although samples start at the same initial configuration and assemble the same target, multiple plans with varying plan cost and planning times are developed.
-The amount of plans developed changes per seed-value.
-For seed $101$ when growing the largest and smallest component, or for seed $102$ with minimal distance and growing the smallest component, nearly all data-points are clustered at one spot for both the planning time and plan cost.
-For these seeds and sorting strategies the global planner is stable and develops the same plan for all samples, except for a few outliers.
-Samples can cluster around multiple distinct spots, as it can be seen for seed $106$ with growing the smallest component.
-Here the global planner alternates between developing two distinct plans.
-Data-points can form arbitrary numbers of clusters or spread widely without forming noticeable cluster at all, as it is the case for seed $100$.
-This seed even experienced one timeout failure, not shown in the plots for better readability. 
-
-We have already observed that option sorting strategies perform differently depending on the target polyomino, but this experiment shows that the initial configuration alone can make a difference as well.
-
-%TODO show initials of seeds
-%TODO global random for pymunk
-% change to first section?
-
-
-
-%TODO plot for tcsanodes and planning time

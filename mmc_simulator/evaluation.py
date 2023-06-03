@@ -139,6 +139,7 @@ def plot_pivotAngleDistance():
     plt.tight_layout()
     plt.show()
 
+
 def plot_magnetForce():
     plt.rc('font', size=14)
     xmin = 2 * Cube.RAD
@@ -198,24 +199,6 @@ def pieplot_timeUse(fileName):
     plt.show()
 
 
-def __fitExponential(ax_bar):
-    y = []
-    for c in ax_bar.containers:
-        for v in c:
-           y.append(v.get_height())
-    x = np.asarray(range(5,12))
-    y = np.asarray(y)
-    popt, pcov = curve_fit(lambda t, a, b: a * np.exp(b * t), x, y)
-    a = popt[0]
-    b = popt[1]
-    x_fitted = np.linspace(np.min(x), np.max(x), 100)
-    y_fitted = a * np.exp(b * x_fitted)
-    #r2 = r2_score(y, y_fitted)
-    #print(r2)
-    plt.plot(x_fitted - 5, y_fitted, linewidth=4, color="black",
-             label=(f"${round(a,2)}" + r"e^{" + f"{round(b,2)}" + r"n}$"))
-    plt.legend(prop={'size': LEGEND_SIZE * 2.5})
-
 def barplot_TCSA(expName):
     filePath = os.path.join(RESULT_DIR, expName, "TCSA.json")
     with open(filePath, 'r') as file:
@@ -247,6 +230,24 @@ def barplot_TCSA(expName):
     #plt.tight_layout(pad=15)
     plt.subplots_adjust(wspace=0.5)
     plt.show()
+
+def __fitExponential(ax_bar):
+    y = []
+    for c in ax_bar.containers:
+        for v in c:
+           y.append(v.get_height())
+    x = np.asarray(range(5,12))
+    y = np.asarray(y)
+    popt, pcov = curve_fit(lambda t, a, b: a * np.exp(b * t), x, y)
+    a = popt[0]
+    b = popt[1]
+    x_fitted = np.linspace(np.min(x), np.max(x), 100)
+    y_fitted = a * np.exp(b * x_fitted)
+    #r2 = r2_score(y, y_fitted)
+    #print(r2)
+    plt.plot(x_fitted - 5, y_fitted, linewidth=4, color="black",
+             label=(f"${round(a,2)}" + r"e^{" + f"{round(b,2)}" + r"n}$"))
+    plt.legend(prop={'size': LEGEND_SIZE * 2.5})
 
 
 def __emptySortingData(xaxisLabel, yaxisLabel):
@@ -386,6 +387,36 @@ def stripplot_multipleSortings(expName, xaxis, yaxis, outFile=None, onlySuccess=
         plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
     plt.close()
 
+def scatterplot_multipleSortings(expName, xaxis, yaxis, outFile=None, onlySuccess=False):
+    xaxisLabel = AXIS_LABELS[xaxis]
+    yaxisLabel = AXIS_LABELS[yaxis]
+    sorting_data = __emptySortingData(xaxisLabel, yaxisLabel)
+    exp_plan_data = __expPlanData(expName, xaxis)
+    for exp, plans in exp_plan_data.items():
+        data = sorting_data[exp.optionSorting]
+        for plan in plans:
+            if onlySuccess and not plan.success:
+                continue
+            if xaxis == "ntcsa":
+                data[xaxisLabel].append(plan.__dict__[xaxis])
+            else:
+                data[xaxisLabel].append(exp.__dict__[xaxis])
+            data[yaxisLabel].append(plan.__dict__[yaxis])
+            data["option sorting"].append(exp.optionSorting)
+    # create pandas dataframe
+    dataFrame = pd.concat([pd.DataFrame(data=d) for d in sorting_data.values()])
+    # create seaborn scatterplot
+    seaborn.set(font_scale=FONTSCALE)
+    seaborn.scatterplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel, hue="option sorting")
+    plt.legend(loc="upper right", prop={'size': LEGEND_SIZE})
+    if outFile == None:
+        plt.show()
+    else:
+        figure = plt.gcf()
+        figure.set_size_inches(16*1.15 ,9*1.15)
+        plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
+    plt.close()
+
 
 def createFigures():
     #TAFS
@@ -429,6 +460,7 @@ def main():
     #stripplot_multipleSortings("AR-bestseeds", "seed", "cost", onlySuccess=True)
     #boxplot_multipleSortings("AR-bestseeds", "seed", "time", onlySuccess=True)
     #boxplot_multipleSortings("AR-bestseeds", "seed", "cost", onlySuccess=True)
+    #scatterplot_multipleSortings("TAFS-experiments-2", "ntcsa", "cost", onlySuccess=True)
     #---Create Figures---
     createFigures()
 

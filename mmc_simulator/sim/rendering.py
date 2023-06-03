@@ -29,7 +29,7 @@ class Renderer:
         self.markedCubes = set()
         self.pointsToDraw = []
         self.linesToDraw = []
-        self.targetToDraw: Polyomino = factory.randomPoly(26)
+        self.targetToDraw: Polyomino = None
 
     def pygameInit(self):
         if self.initialized:
