@@ -34,9 +34,9 @@ The textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview a
 
 When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one concept that has been successful for many robotics problem is sample-based motion planning.
 
-By taking samples, you can reduce the planning problem from navigating a configuration space to planning on a graph, but you might lose possible solutions.
+By taking samples, the planning problem can be reduced from navigating a configuration space to planning on a graph, but you might lose possible solutions.
 Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point.
-Ways of sampling include random sampling being probabilistically complete or using a grid with a resolution that is dynamically adjustable resulting in resolution completeness.
+Ways of sampling include random sampling, being probabilistically complete, or using a grid with a resolution that is dynamically adjustable resulting in resolution completeness.
 After sampling, conventional discrete planning algorithms can be applied \cite{LaValle2006}.
 
 One state-of-the-art sampling-based approach uses rapidly-exploring random trees (RRT).
@@ -46,7 +46,7 @@ When working with multiple robots, the interaction of robots with each other bec
 One interesting idea is that single robots can connect to form bigger structures.
 This is referred to as self-assembly and E. Winfree \cite{winfree1998} proposed the abstract Tile Assembly Model (aTAM) in the context of assembling DNA.
 In this model, particles can have different sets of glues and connect according to certain rules regarding the glue type.
-However, he considers this process as nondeterministic, so there is no exact instruction on how to assemble a desired structure.
+However, he considers this process as non-deterministic, so there is no exact instruction on how to assemble a desired structure.
 
 One model more related to the magnetic modular cubes is the Tilt model from Becker et al.\ \cite{Becker2014_SP}.
 In the Tilt model, all tiles move into one of the cardinal directions until hitting an obstacle.
@@ -68,16 +68,16 @@ One article considering the construction with so-called sub-assemblies is propos
 Most recently, Bhattacharjee et al.\ \cite{Bhattacharjee2022} developed the magnetic modular cubes.
 These robots contain embedded permanent magnets and have no computation or power supply.
 Instead, they are controlled by an external time-varying magnetic field and are able to perform various actions.
-Most importantly, they can rotate in place or use a technique called pivot walking to move either left or right.
+Most importantly, they can rotate in place or use a technique called pivot walking to move either left or right in a local coordinate frame.
 The magnets also act as glues and allow the cubes to perform self-assembly.
 Although it is theoretically possible to assemble 3-dimensional structures, most research was done by only connecting cubes in two dimensions.
 Since all cubes are the same size, the assembled 2-dimensional shapes can be represented as polyominoes.
-An enumeration was done on the amount of possible polyominoes that can be created by cubes with different magnet configurations \cite{Lu2021}.
+An enumeration was done by Lu et al.\ \cite{Lu2021} on the amount of possible polyominoes that can be created by cubes with different magnet configurations.
 
 By limiting the controls to only 90 degree turns and assuming a uniform pivot walking distance for all structures per step, magnetic modular cubes follow rules similar to the Tilt model.
 Following these limitations, a simple discrete open-loop motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Bhattacharjee2022}.
 
-One interesting paper from Blumenberg et al.\ \cite{blumenberg2023} explores the assembly of specific target polyominoes in arbitrary environments, when cubes obey the tilt model in a discrete setting.
+One interesting paper from Blumenberg et al.\ \cite{blumenberg2023} explores the assembly of specific target polyominoes in arbitrary environments, when cubes obey the Tilt model in a discrete setting.
 He provides different algorithmic approaches using various distance heuristics and a solution making use of RRTs.
 
 Lu et al.\ \cite{Lu2023} are working on establishing closed-loop control for magnetic modular cubes by using computer vision-based feedback of the workspace.
@@ -88,7 +88,7 @@ The used motion planner is still working in a discrete setting, but can assembly
 
 We provide more information about the general framework of magnetic modular cubes on which this thesis relies in \autoref{chap:prelim}.
 
-In \autoref{chap:local} we develop a local planner finds control sequences that connect two magnetic modular cube structures at desired faces.
+In \autoref{chap:local} we develop a local planner finding control sequences that connect two magnetic modular cube structures at desired faces.
 We do this with a closed-loop algorithm to account for all types of collision events.
 The resulting local plans are not optimal, but follow heuristics for minimizing the cost of movements.
 The local planner prioritizes reducing planning time. 

@@ -103,7 +103,7 @@ Although this effect produces slightly different local plans, the parallel devel
 
 This experiment was conducted with randomly generated initial configuration and randomly generated polyominoes of specific size $n$.
 To maximize the variety of possible polyomino shapes, the number of red cubes is set to $n_\textit{red} = \lfloor \frac{n}{2} \rfloor$ as indicated in \cite{Lu2021}.
-This makes the experiment well-suited for not only analyzing planning time and rotational-cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
+This makes the experiment well-suited for not only analyzing planning time and rotational cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
 The workspace is of size $50 r_C \times 50 r_C$ and for each target size $150$ samples were taken.
 
 \paragraph{Planning Time}
@@ -409,7 +409,7 @@ We analyze the affect of these workspace variations on planning time and rotatio
 		\caption{Fraction of plans that timed out.}
 		\label{fig:AFBS_timeout}
 	\end{subfigure}
-	\caption[Planning time and fraction of timeouts for different workspace variations]{Planning time and fraction timeouts for different workspace variations listed in \autoref{tab:workspaces}. All option sorting strategies are compared with $100$ samples each.}
+	\caption[Planning time and fraction of timeouts for workspace variations]{Planning time and fraction timeouts for different workspace variations listed in \autoref{tab:workspaces}. All option sorting strategies are compared with $100$ samples each.}
 	\label{fig:AFBS_timestats}
 \end{figure}
 
@@ -423,7 +423,7 @@ The fraction of timeouts in \autoref{fig:AFBS_timeout} remains constant for all 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFBS_cost.pdf}
-	\caption[Plan cost for different workspace variations]{Plan cost in radians of successful plans for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared with $100$ samples each.}
+	\caption[Plan cost for workspace variations]{Plan cost in radians of successful plans for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared with $100$ samples each.}
 	\label{fig:AFBS_cost}
 \end{figure}
 
