@@ -251,6 +251,56 @@ def __fitExponential(ax_bar):
     plt.legend(prop={'size': LEGEND_SIZE * 2.5})
 
 
+def boxplot_parSeqCompare():
+    xaxisLabel = "seed 100"
+    ytime = AXIS_LABELS["time"]
+    ycost = AXIS_LABELS["cost"]
+    sorting_data = {}
+    for sorting in OptionSorting.list():
+        data = {}
+        data[xaxisLabel] = []
+        data[ytime] = []
+        data[ycost] = []
+        data["option sorting"] = []
+        sorting_data[sorting.name] = data
+    # load parallel data
+    data_par = loadExperimentSet(os.path.join(RESULT_DIR, "AR-parallel"))
+    for exp, plans in data_par.items():
+        data = sorting_data[exp.optionSorting]
+        for plan in plans:
+            if not plan.success:
+                continue
+            data[xaxisLabel].append("parallel")
+            data[ytime].append(plan.time)
+            data[ycost].append(plan.cost)
+            data["option sorting"].append(exp.optionSorting)
+    # load sequential data
+    data_seq = loadExperimentSet(os.path.join(RESULT_DIR, "AR-sequential"))
+    for exp, plans in data_seq.items():
+        data = sorting_data[exp.optionSorting]
+        for plan in plans:
+            if not plan.success:
+                continue
+            data[xaxisLabel].append("sequential")
+            data[ytime].append(plan.time)
+            data[ycost].append(plan.cost)
+            data["option sorting"].append(exp.optionSorting)
+    # create pandas dataframe
+    dataFrame = pd.concat([pd.DataFrame(data=d) for d in sorting_data.values()])
+    # create seaborn stripplot
+    seaborn.set(font_scale=FONTSCALE)
+    for yaxis in ("time","cost"):
+        seaborn.boxplot(x=xaxisLabel, y=AXIS_LABELS[yaxis], data=dataFrame, hue="option sorting",
+                    showmeans=True, meanprops={"marker": "o","markerfacecolor": "white","markeredgecolor": "black","markersize": "10"},
+                    showfliers=True, flierprops=dict(markerfacecolor='0.50', markersize=5))
+        plt.legend(loc="upper right", prop={'size': LEGEND_SIZE})
+        figure = plt.gcf()
+        figure.set_size_inches(8, 13)
+        #plt.show()
+        plt.savefig(os.path.join(FIGURE_DIR, f"AR_parseq_{yaxis}.pdf"), bbox_inches='tight') 
+        plt.close()
+
+
 def __emptySortingData(xaxisLabel, yaxisLabel):
     # each sorting option gets a dataframe
     sorting_data = {}
@@ -379,7 +429,7 @@ def stripplot_multipleSortings(expName, xaxis, yaxis, outFile=None, onlySuccess=
     seaborn.stripplot(data=dataFrame, x=xaxisLabel, y=yaxisLabel, hue="option sorting", alpha=0.25, s=8, dodge=True, jitter=True)
     plt.legend(loc="upper right", prop={'size': LEGEND_SIZE})
     for x in range(0, len(dfm[xaxisLabel].unique())):
-        plt.axvspan(x - 0.5, x + 0.5, facecolor='black', alpha=[0.033 if x%2 == 0 else 0][0])
+        plt.axvspan(x - 0.5, x + 0.5, facecolor='black', alpha=[0 if x%2 == 0 else 0.033][0])
     figure = plt.gcf()
     figure.set_size_inches(8, 13)
     if outFile == None:
@@ -440,8 +490,8 @@ def createFigures():
     boxplot_multipleSortings("AFNR-experiments", "targetNred", "time", "AFNR_time.pdf", onlySuccess=True, showFliers=False)
     barplot_multipleSortings("AFNR-experiments", "targetNred", "timeout", "AFNR_timeout.pdf")
     #AR
-    stripplot_multipleSortings("AR-bestseeds", "seed", "time", "AR_time.pdf", onlySuccess=True)
-    stripplot_multipleSortings("AR-bestseeds", "seed", "cost", "AR_cost.pdf", onlySuccess=True)
+    stripplot_multipleSortings("AR-experiments", "seed", "time", "AR_time.pdf", onlySuccess=True)
+    stripplot_multipleSortings("AR-experiments", "seed", "cost", "AR_cost.pdf", onlySuccess=True)
 
 
 def main():
@@ -457,10 +507,11 @@ def main():
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "cost", onlySuccess=True)
-    stripplot_multipleSortings("AR-sequential", "seed", "time", onlySuccess=True)
-    stripplot_multipleSortings("AR-sequential", "seed", "cost", onlySuccess=True)
-    #boxplot_multipleSortings("AR-bestseeds", "seed", "time", onlySuccess=True)
-    #boxplot_multipleSortings("AR-bestseeds", "seed", "cost", onlySuccess=True)
+    #stripplot_multipleSortings("AR-sequential", "seed", "time", onlySuccess=True)
+    #stripplot_multipleSortings("AR-sequential", "seed", "cost", onlySuccess=True)
+    boxplot_parSeqCompare()
+    #boxplot_multipleSortings("AR-experiments", "seed", "time", onlySuccess=True)
+    #boxplot_multipleSortings("AR-experiments", "seed", "cost", onlySuccess=True)
     #scatterplot_multipleSortings("TAFS-experiments-2", "ntcsa", "cost", onlySuccess=True)
     #---Create Figures---
     #createFigures()

@@ -9,11 +9,11 @@
 \end{figure}
 
 All experiments conducted are about assembling target polyominoes with the use of our global planner (\autoref{chap:global}).
+The reliability of the global planner is tested in \autoref{sec:AR} by running instances with the same initial configuration and target polyomino multiple times.
 In \autoref{sec:AFN} we analyze the effect of increasing polyomino size on planning time, rotational cost and other global planner characteristics mentioned in \autoref{sec:global_complex}.
-The polyominoes used for this experiment are randomly generated, but we also evaluate the construction of manually designed polyominoes in \autoref{sec:AFTS}.
+The polyominoes used for this experiment are randomly generated, but we also evaluate the assembly of manually designed polyominoes in \autoref{sec:AFTS}.
 With manually designed polyominoes, we can specifically test the assembly of targets with caves or holes, varying widths and heights, or different patterns of red and blue cubes. 
 Furthermore, we experiment with different workspace sizes and aspect ratios in \autoref{sec:AFBS} and how the ratio of red and blue cubes affects the assembly of straight line polyominoes in \autoref{sec:AFNR}.
-In \autoref{sec:AR} the reliability of the global planner is testes by running instances with the same initial configuration and target polyomino multiple times.
 A legend for the box-whisker plots used to present the experimental data can be found in \autoref{fig:bw_legend}.
 
 \paragraph{Option Sorting Strategies}
@@ -25,7 +25,7 @@ We conducted all experiments with the three option sorting strategies from \auto
 \end{enumerate}
 
 \paragraph{Instance Generation}
-Random polyominoes and initial configurations were created with a seed-based pseudorandom number generator to make experiments reproducible.
+Random polyominoes and initial configurations are created with a seed-based pseudorandom number generator to make experiments reproducible.
 The option sorting strategies are applied to the same set of seeds to make the results comparable.
 When an initial configuration is randomly generated, the number of red and blue cubes matches with the target polyomino.
 Sub-assemblies in the initial configuration can occur.
@@ -62,7 +62,7 @@ The experiments were done on multiple computers with the same hardware specifica
 		\caption{Plan cost for seed-values.}
 		\label{fig:AR_cost}
 	\end{subfigure}
-	\caption[Planning time and plan cost for different seeds]{Distribution of planning time and plan cost for four different seeds of initial configurations. For all seeds the same polyomino was constructed. All option sorting strategies are compared with $100$ samples each. Only successful plans are shown for better readability. Stronger color and bigger spots indicate multiple overlapping data points. The target polyomino and the initial configurations of the seed-values are shown at the top.}
+	\caption[Planning time and plan cost for different seeds]{Distribution of planning time and plan cost for four different seeds of initial configurations. For all seeds the same polyomino was constructed. All option sorting strategies are compared with $100$ samples each. Only successful plans are shown for better readability. Stronger color and bigger spots indicate multiple overlapping data points. The target polyomino and the initial configurations of the seed-values are illustrated at the top.}
 	\label{fig:AR}
 \end{figure}
 
@@ -83,6 +83,24 @@ This seed even experienced one timeout failure, not shown in the plots for bette
 
 \paragraph{Non-Deterministic Behavior}
 
+\begin{figure}
+	\centering
+	\begin{subfigure}[h]{0.5\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/plots/AR_parseq_time.pdf}
+		\caption{Planning time compared.}
+		\label{fig:AR_parseq_time}
+	\end{subfigure}%
+	\begin{subfigure}[h]{0.5\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{figures/plots/AR_parseq_cost.pdf}
+		\caption{Plan cost compared.}
+		\label{fig:AR_parseq_cost}
+	\end{subfigure}
+	\caption[]{}
+	\label{fig:AR_parseq}
+\end{figure}
+
 Two reasons for the non-deterministic behavior of the global planner can be identified.
 
 The first reason is due to opportunistic parallel processing.
@@ -95,7 +113,7 @@ The second reason is located in the interaction between local planner and simula
 Both components are running on separate threads.
 Interacting with the simulator's simulation loop at different iterations changes the behavior of the simulator.
 We are minimizing this effect as much as possible, but it is not guaranteed that equal amounts of simulation iterations are done for the same local plan.
-Although this effect can produce local plans with different outcomes, the parallel development of local plans has a more severe effect on the spread of planning time and plan cost.
+Although this effect can produce local plans with a different outcome, the parallel development of local plans has a more severe effect on the spread of planning time and plan cost.
 
 
 
@@ -186,7 +204,7 @@ The different option sorting strategies do not impact the cost of a plan.
 
 
 We analyze the number of simulated local plan $\#\textit{local}$ and the number of explored configuration $\#\textit{config}$ in \autoref{fig:AFN_planstats}.
-The number of local plans contained in the plan stack of the resulting global plan $|P|$ is evaluated in \autoref{fig:AFN_ltg}.
+The number of local plans in the plan stack $|P|$ is evaluated in \autoref{fig:AFN_ltg}.
 
 When a plan times out $\#\textit{local}$ and $\#\textit{config}$ only portray how many local plans and configurations can be explored within the timeout.
 Numbers can reach values up to $\#\textit{local} = 1200$ and $\#\textit{config} = 300$.
