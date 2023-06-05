@@ -95,7 +95,7 @@ The second reason is located in the interaction between local planner and simula
 Both components are running on separate threads.
 Interacting with the simulator's simulation loop at different iterations changes the behavior of the simulator.
 We are minimizing this effect as much as possible, but it is not guaranteed that equal amounts of simulation iterations are done for the same local plan.
-Although this effect produces slightly different local plans, the parallel development of local plans has a more severe effect on the spread of planning time and plan cost.
+Although this effect can produce local plans with different outcomes, the parallel development of local plans has a more severe effect on the spread of planning time and plan cost.
 
 
 

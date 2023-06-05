@@ -457,13 +457,13 @@ def main():
     #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFNR-experiments", "targetNred", "cost", onlySuccess=True, showFliers=False)
     #boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "cost", onlySuccess=True)
-    #stripplot_multipleSortings("AR-bestseeds", "seed", "time", onlySuccess=True)
-    #stripplot_multipleSortings("AR-bestseeds", "seed", "cost", onlySuccess=True)
+    stripplot_multipleSortings("AR-sequential", "seed", "time", onlySuccess=True)
+    stripplot_multipleSortings("AR-sequential", "seed", "cost", onlySuccess=True)
     #boxplot_multipleSortings("AR-bestseeds", "seed", "time", onlySuccess=True)
     #boxplot_multipleSortings("AR-bestseeds", "seed", "cost", onlySuccess=True)
     #scatterplot_multipleSortings("TAFS-experiments-2", "ntcsa", "cost", onlySuccess=True)
     #---Create Figures---
-    createFigures()
+    #createFigures()
 
 if __name__ == "__main__":
     main()
