@@ -11,7 +11,7 @@
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\textwidth]{figures/plots/simulator_timeuse.pdf}
-	\caption[Time-use for certain steps in simulation loop]{Fraction of time used on certain steps in the simulation loop. The simulator ran for $8$ seconds without drawing and executed various motions with ten cubes in the workspace. The steps can be found in the flowchart diagram of \autoref{fig:simulator}.}
+	\caption[Time-use for certain steps in simulation loop]{Fraction of time used on certain steps in the simulation loop. The simulator ran for $8$ seconds without drawing and executed various motions with ten cubes in the workspace. All steps can be found in the flowchart diagram of \autoref{fig:simulator}.}
 	\label{fig:timeuse}
 \end{figure}
 
@@ -34,7 +34,7 @@ The Pymunk-step is a library function, responsible for updating the simulation e
 The duration of a time step is a parameter that allows a trade off between simulation accuracy and simulation time. 
 Inside the Pymunk-step forces are applied to the cubes and collision with workspace boundaries and between cubes is handled (\autoref{sec:coll_handling}).
 
-After the Pymunk-step the magnetic forces between the cube's permanent magnets are calculated (\autoref{sec:force_magnet}).
+After the Pymunk-step the magnetic forces between the cubes' permanent magnets are calculated (\autoref{sec:force_magnet}).
 This also determines connections of cube faces that will be used to retrieve information about polyominoes in the workspace.
 Polyomino information is necessary to calculate forces of the global magnetic field acting on cubes (\autoref{sec:force_field}) and friction forces, on which we heavily rely on to simulate 3D movement like pivoting on pivot edges (\autoref{sec:force_friction}).
 All the calculated forces will be applied in the Pymunk-step of the next iteration.
@@ -50,10 +50,10 @@ This change consists of the longitude change in radians and the latitude change 
 In our simulator the elevation states if the magnetic field lays in the workspace plane, referred to as neutral, or if the magnetic north or south is pointing up.
 We do not specify an angular value of the latitude.
 The elevation just indicates if polyominoes are pivoting or not.
-\autoref{sec:force_friction} has more details.
+\autoref{sec:force_friction} offers more details.
 
-A change of elevation is executed in a single iteration, but the angle of a rotation will be simulated by multiple longitude changes in a linear ramp with a rotational velocity we choose to set to $\frac{\pi}{8} \, \text{rad}/\text{s}$.
-Each motion will be simulated by applying its sequence of updates with a notification to the control program when done.
+A change of elevation is executed in a single iteration, but a rotation will be simulated by dividing its angle in multiple longitude changes in a linear ramp with a rotational velocity we choose to set to $\frac{\pi}{8} \, \text{rad}/\text{s}$.
+Each motion will be simulated by applying its sequence of updates and sending a notification to the control program when done.
 This makes closed loop control possible, by letting the control program wait until motions are simulated.
 
 Motions control the magnetic field orientation and not the cubes directly.
@@ -89,13 +89,13 @@ We make use of this efficient collision detection for determining cube pairs wit
 For that, each cube is surrounded by a circular sensor with a radius of half the critical-distance.
 A cube pair is within critical-distance if their sensors collide.
 We set the critical-distance to $5 r_C$.
-More on the use of cube pairs in critical-distance in \autoref{sec:force_magnet}.
+More on the use of cube pairs within critical-distance in \autoref{sec:force_magnet}.
 
 \section{Simulating Forces}
 
 To model accurate behavior of magnetic modular cubes we calculate and apply the three most significant forces acting on cubes in the workspace, forces between permanent magnets, forces from the global magnetic field and friction with the workspace plane.
 Friction with the workspace boundaries and between cubes is handled by Pymunk's collision detection.
-The reason forces are calculated after the Pymunk-step, where they are applied, is because of the cube pairs in critical-distance determined with the collision detection of Pymunk.
+The reason forces are calculated after the Pymunk-step, where they are applied, is because of the cube pairs within critical-distance determined with the collision detection of Pymunk.
 Applying the calculated forces in the next iteration does not effect simulation accuracy.
 
 \subsection{Magnet Forces}
@@ -117,16 +117,18 @@ We can define a maximum attraction force when cubes are at a distance of $2 r_C$
 When such a force is reached with a valid pair of cube faces we mark the faces as connected.
 Polyominoes in the workspace can be identified based on the marked connections.
 
-The majority of simulation time, about $75\%$, is spent on calculating magnet forces as shown in \autoref{fig:timeuse}.
+The majority of simulation time, about $75\%$, is spent on calculating magnet forces, as shown in \autoref{fig:timeuse}.
 Cubes not within critical-distance are too far away to significantly affect each other with magnetic forces of their permanent magnets.
 The steep decline of magnetic force with increasing cube distance can be seen in \autoref{fig:magnet_force}.
 We only calculate magnet forces for cube pairs within critical-distance to speed up simulation.
-Because assembling large target structures is the goal of global planning, it is not uncommon that most cubes are in critical-distance.
+Because assembling large target structures is the goal of global planning, it is not uncommon that most cubes are within critical-distance.
 For a more efficient simulation we further determine which magnet pairs to consider.
+
+\newpage
 
 \paragraph{Determining Magnet Pairs}
 
-For a single cube pair each of the four magnets of one cube interacts with each magnet of the other cube, resulting in $16$ magnet pairs to consider for a physically accurate simulation.
+For a single cube pair, each of the four magnets of one cube interacts with each magnet of the other cube, resulting in $16$ magnet pairs to consider for a physically accurate simulation.
 Magnet forces of pairs within the same cube are neglected, since they do not result in any movement.
 Determining the first $k$ pairs with minimal distance is a reasonable approach to not calculate all $16$ pairs, since they should have the strongest force interaction.
 Of course $k=1$ is most efficient, but results in a loss of real world behavior of magnetic modular cubes.
@@ -143,6 +145,7 @@ with $\hat{r}$ being the unit vector pointing from magnet 1 to magnet 2.
 The force acting from magnet 2 on magnet 1 is $-F_\textit{mag}$ \cite{levitt2013}.
 We set the strength of all magnets to $\mu_\textit{mag} = 2.5 \cdot 10^7$. 
 
+\newpage
 
 \subsection{Magnetic Field Forces}
 \label{sec:force_field}
@@ -168,8 +171,8 @@ To achieve this, friction forces are applied at different points depending on th
 
 Friction forces are applied per cube at a friction-point $p_\textit{fric}$, but polyomino information is still necessary to determine cubes that are in contact with the ground, called friction-cubes.
 In case of a neutral elevation, all cubes of the polyomino are friction-cubes and $p_\textit{fric}$ is the cube center.
-If the magnetic north is pointing up, all cubes along the south pivot-edge become friction-cubes and $p_\textit{fric}$ becomes the position of the south magnet for each friction-cube.
-If the magnetic south is pointing up, all cubes along the north pivot-edge are friction-cubes with $p_\textit{fric}$ being the position of the north magnet for each friction-cube.
+If the magnetic north is pointing up, all cubes along the south pivot edge become friction-cubes and $p_\textit{fric}$ becomes the position of the south magnet for each friction-cube.
+If the magnetic south is pointing up, all cubes along the north pivot edge are friction-cubes with $p_\textit{fric}$ being the position of the north magnet for each friction-cube.
 The force applied for friction-cubes is dependent on the velocity at the friction-point $v_{p_\textit{fric}}$ and the mass of a cube $m_C$
 \begin{equation}
 F_\textit{fric} = -v_{p_\textit{fric}} \cdot m_C \cdot \frac{n}{n_\textit{fric}} \cdot (1 - w_\textit{nom})\, .
@@ -183,6 +186,7 @@ To ensure a more stable simulator, we apply a nominal friction force
 F_\textit{nom} = -v_{p_\textit{fric}} \cdot m_C \cdot w_\textit{nom}
 \end{equation}
 to all cubes.
+This is is also the reason why $F_\textit{fric}$ is multiplied by $(1 - w_\textit{nom})$.
 We control the fraction of this force by $w_\textit{nom} = 0.35$.
 
 

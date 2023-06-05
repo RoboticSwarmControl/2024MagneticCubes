@@ -10,6 +10,7 @@ from plan.plan import *
 
 
 DEBUG = False
+PLAN_PARALLEL = False
 
 CRITICAL_DISTANCE = Cube.MAG_DISTANCE_MIN
 SLOWWALK_DISTANCE = CRITICAL_DISTANCE * 1.5
@@ -65,7 +66,7 @@ def planCubeConnect(initial: Configuration, cubeA: Cube, cubeB: Cube, edgeB: Dir
     if facingInv  in slideDirections:
         plansToExec.append((initial, connection, PivotWalk.LEFT, facingInv, allowedPolyColls))
         plansToExec.append((initial, connection, PivotWalk.RIGHT, facingInv, allowedPolyColls))
-    if DEBUG:
+    if DEBUG or not PLAN_PARALLEL:
         return __planSequential(plansToExec)
     else:
         return __planParallel(plansToExec)

@@ -19,6 +19,8 @@ Robots can be controlled by an external magnetic field and also connect to each 
 One example for magnetically controlled robots are the magnetic modular cubes by Bhattacharjee et al.\ \cite{Bhattacharjee2022}, which are the subjects of this thesis.
 We will look at the difficulties and problems that occur, when assembling structures with magnetic modular cubes in the 2-dimensional special Euclidean group $\textit{SE}(2)$, the space of rigid movements in a 2-dimensional plane.
 
+
+
 \section{Related Work}
 
 Continuous motion planning is a crucial subject in the field of robotics.
@@ -84,6 +86,7 @@ Lu et al.\ \cite{Lu2023} are working on establishing closed-loop control for mag
 The used motion planner is still working in a discrete setting, but can assembly specific target shapes, while handling collision events of estimated continuous motion.
 
 
+
 \section{Contribution}
 
 We provide more information about the general framework of magnetic modular cubes on which this thesis relies in \autoref{chap:prelim}.
@@ -101,4 +104,8 @@ Based on the local planner we develop a global planning algorithm in \autoref{ch
 The configuration-space is sampled by only considering connections between polyominoes as local plans and using a specially constructed graph as a building instruction for target polyominoes.
 The use of RRTs would be too inefficient, since we are working with a high fidelity simulation. 
 
-Results evaluating our global planner are presented in \autoref{chap:results} and a conclusion with possible directions for future work is given in \autoref{chap:conclusion}.
+Results evaluating our global planner are presented in \autoref{chap:results}.
+We experimented with polyominoes of up to 12 cubes and in various custom and randomly generated shapes.
+Furthermore we tested different rectangular workspaces and the reliability of the global planner.  
+
+A conclusion with possible directions for future work is given in \autoref{chap:conclusion}.

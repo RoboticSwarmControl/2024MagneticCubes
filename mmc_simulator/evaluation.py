@@ -40,6 +40,17 @@ BOARDSIZES_LABELS = {
     (2100,700): "L, 3:1"
 }
 
+TASK_COLORS = {
+    "Load Configuration": "limegreen",
+    "Pymunk-Step": "tab:blue",
+    "Polyomino Detection": "coral",
+    "Save Configuration": "forestgreen",
+    "Calculate Magnetic Field Forces": "indianred",
+    "Calculate Friction Forces": "lightcoral",
+    "Calculate Magnet Forces": "tab:red",
+    "Other": "tab:gray"
+}
+
 FONTSCALE = 2
 LEGEND_SIZE = 15
 
@@ -181,20 +192,10 @@ def pieplot_timeUse(fileName):
         timeOthers -= time
     task_time["Other"] = timeOthers
     task_time = {k: v for k, v in sorted(task_time.items(), key=lambda item: item[1], reverse=False)}
-    task_colors = {
-        "Load Configuration": "limegreen",
-        "Pymunk-Step": "tab:blue",
-        "Polyomino Detection": "coral",
-        "Save Configuration": "forestgreen",
-        "Calculate Magnetic Field Forces": "indianred",
-        "Calculate Friction Forces": "lightcoral",
-        "Calculate Magnet Forces": "tab:red",
-        "Other": "tab:gray"
-    }
     #plot
     plt.rc('font', size=14)
     ax = plt.subplot()
-    ax.pie(task_time.values(), labels=task_time.keys(), colors=[task_colors[t] for t in task_time.keys()], autopct='%1.1f%%')
+    ax.pie(task_time.values(), labels=task_time.keys(), colors=[TASK_COLORS[t] for t in task_time.keys()], autopct='%1.1f%%')
     plt.tight_layout()
     plt.show()
 
