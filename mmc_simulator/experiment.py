@@ -53,7 +53,7 @@ slurminade.update_default_configuration(
     mail_type="ALL",
 )
 
-BATCH_MAX_SIZE = 100
+BATCH_MAX_SIZE = 5
 
 class PlanData:
      
