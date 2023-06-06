@@ -20,7 +20,7 @@ On a global scale of doing multiple local plans to assemble desired target struc
 Using classical motion planning approaches that broadly explore the configuration-space like RRT, are not feasible under this condition.
 
 Our global planner uses the ability of two-cutting polyominoes to create a two-cut-sub-assembly graph that will be used as a building instruction for target polyominoes.
-The configuration-space is explored by depth-first-search traversing this graph, to get closer to the target with each local plan.
+The configuration-space is explored by depth-first-search traversing this graph to get closer to the target with each local plan.
 The graph leaves multiple options for traversing one edge, because it does not consider workspace position of polyominoes. 
 We evaluated three strategies of sorting these options by best probable outcome.
 
@@ -36,14 +36,12 @@ The option sorting strategies seem to perform differently for varying shapes, bu
 Studying attributes of polyominoes and their effect on performance is another possible direction for future work.
 Designing new specialized option sorting strategies and determining which on to use, based on the target polyomino, looks promising. 
 
-It would be interesting to see hardware experiments, but transferring our global planner to a hardware platform will require effort.
+Hardware experiments would be interesting to see, but transferring our global planner to a hardware platform will require effort.
 Because of the mismatch between simulation and real world behavior of magnetic modular cubes, calculated motion sequences cannot be applied directly to a hardware platform.
 Instead, the simulator could be replaced by a computer vision-based feedback and control system of the workspace, like the one currently developed by Lu et al.\ \cite{Lu2023}.
 Resetting configurations to previous states is a difficult and time consuming task in the real world.
 Although we are resetting configurations in our global planner, we are already trying to avoid unnecessary simulation as much as possible.
-Further optimizing the two-cut-sub-assembly graph traversal to make even more careful decisions, could be promising for a real world applications of magnetic modular cubes.
-
-%TODO how can traversal be optimized?
+Finding ways to optimize the two-cut-sub-assembly graph traversal to make even more careful decisions, could be promising for a real world applications of magnetic modular cubes.
 
 
 

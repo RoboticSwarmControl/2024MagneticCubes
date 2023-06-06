@@ -97,7 +97,7 @@ This seed even experienced one timeout failure, not shown in the plots for bette
 		\caption{Plan cost compared.}
 		\label{fig:AR_parseq_cost}
 	\end{subfigure}
-	\caption[]{}
+	\caption[Planning time and plan cost for parallel and sequential planning]{Planing time and plan cost compared for parallel and sequential development of local plans. The experimental setup equals with the one from \autoref{fig:AR}. Sequential planning was only conducted for seed $100$. Only successful plans are shown and all option sorting strategies are compared with $100$ samples each.}
 	\label{fig:AR_parseq}
 \end{figure}
 
@@ -113,15 +113,19 @@ The second reason is located in the interaction between local planner and simula
 Both components are running on separate threads.
 Interacting with the simulator's simulation loop at different iterations changes the behavior of the simulator.
 We are minimizing this effect as much as possible, but it is not guaranteed that equal amounts of simulation iterations are done for the same local plan.
+
 Although this effect can produce local plans with a different outcome, the parallel development of local plans has a more severe effect on the spread of planning time and plan cost.
-
-
+We conducted the same experiment for seed $100$ with a altered local planner that develops local plans sequentially and returns the one with the lowest cost.
+\autoref{fig:AR_parseq_time} shows that the spread of planning time is reduced for sequential planning, but many outliers still occur.
+The plan cost distribution, presented in \autoref{fig:AR_parseq_cost}, better portrays that sequential planning produces the same plan for the majority of samples.
+The existence of outliers means that sequential planning alone is not responsible for all the non-deterministic behavior.
+We use the benefit of parallel processing to reduce planning time in further experiments, even thought we are aware of the non-determinism it causes.
 
 
 \section{Assembly for Polyomino Size}
 \label{sec:AFN}
 
-This experiment was conducted with randomly generated initial configuration and randomly generated polyominoes of specific size $n$.
+This experiment was conducted with randomly generated initial configurations and randomly generated polyominoes of specific size $n$.
 To maximize the variety of possible polyomino shapes, the number of red cubes is set to $n_\textit{red} = \lfloor \frac{n}{2} \rfloor$ as indicated in \cite{Lu2021}.
 This makes the experiment well-suited for not only analyzing planning time and rotational cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
 The workspace is of size $50 r_C \times 50 r_C$ and for each target size $150$ samples were taken.
@@ -191,7 +195,7 @@ The different option sorting strategies do not impact the cost of a plan.
 		\caption{Number of explored configurations.}
 		\label{fig:AFN_nconfig}
 	\end{subfigure}
-	\caption[Number of simulated local plans and explored configurations for increasing target size]{Number of simulated local plans $\#\textit{local}$ and explored configurations $\#\textit{config}$ for increasing target size $n$. Only plans that did not time out are shown and outliers are omitted for better readability. All option sorting strategies are compared with $150$ samples each.}
+	\caption[Number of $\#\textit{local}$ and $\#\textit{config}$ for increasing target size]{Number of simulated local plans $\#\textit{local}$ and explored configurations $\#\textit{config}$ for increasing target size $n$. Only plans that did not time out are shown and outliers are omitted for better readability. All option sorting strategies are compared with $150$ samples each.}
 	\label{fig:AFN_planstats}
 \end{figure}
 
@@ -265,7 +269,7 @@ The polyominoes ``C'', ``S'', ``A'' and ``O'' contain caves and/or holes of diff
 They more or less consist of a one-cube-thick line.
 The polyominoes ``I'', ``H'' and ``Plus'' are thick shapes with many connections, but still contain caves or are at least not rectangular.
 All these polyominoes are build with the checkerboard pattern to achieve equal amounts of red and blue cubes.
-The size of all polyominoes, except for ``C'', is $n=12$.
+The size of all these polyominoes, except for ``C'', is $n=12$.
  
 In \autoref{sec:hard_shape} we analyze the polyomino attributes that are especially challenging for the global planner based on all data gather in our experiments.
 
@@ -294,7 +298,7 @@ In \autoref{sec:hard_shape} we analyze the polyomino attributes that are especia
 	\label{fig:AFTS_cb_timestats}
 \end{figure}
 
-When comparing planning time of the two cube pattern in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
+When comparing planning time of the two cube patterns in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
 It is not a huge difference, but still noticeable.
 For instance, the ``3x3'' polyomino is on average at $50$ seconds planning time, while the ``3x3 cb'' polyomino is at 75 seconds with a wider spread and worst outliers.
 
@@ -307,7 +311,7 @@ Its planning time lays between the ``5x2'' and the ``3x3''.
 The ``2x5'' performs significantly worst than all other polyominoes.
 While the majority of instances for all other shapes can be solved in under $100$ seconds, the ``2x5'' exceeds this time with a spread reaching up to $600$ seconds.
 
-For the fraction of timed-out plans shown in \autoref{fig:AFTS_cb_timeout}, the ``2x5'' is the only shape with $10\%$ to $20\%$, depending on the option sorting strategy.
+For the fraction of timed-out plans shown in \autoref{fig:AFTS_cb_timeout}, the ``2x5'' is the only shape with $10\%$ to $20\%$, depending on the option sorting strategy used.
 All other shapes experience nearly no timeouts.
 
 \subsection{Special Polyomino Shapes}
@@ -336,37 +340,37 @@ All other shapes experience nearly no timeouts.
 \end{figure}
 
 The planning time and fraction of timeouts are evaluated in \autoref{fig:AFTS_sp_timestats}.
-Constructing the thin shapes ``C'', ``S'', ``A'' and ``O'' is comparable in terms of planning time with $100$ seconds on average, which is below the average of randomly generated $12$ size polyominoes, already examined in \autoref{fig:AFN_time}.
+Assembling the thin shapes ``C'', ``S'', ``A'' and ``O'' is comparable in terms of planning time with $100$ seconds on average, which is below the average of randomly generated polyominoes of size $12$, already examined in \autoref{fig:AFN_time}.
 The fraction of timeouts is mostly under $5\%$, which is a huge difference to $25\%$ for the random polyominoes evaluated in \autoref{fig:AFN_timeout}.
 The ``O'' shape has the worst performance of the four, which could be related to it being the only shape with a width of 4.
 We already observed how a more horizontally stretched shape is harder to assemble with the ``5x2'' and ``2x5'' rectangles.
 
-The three thick shapes perform much worst with an average of $200$ seconds planning time for ``I'' and ``H'' and $250$ seconds for the ``Plus'' shape.
-The instances have a wide spread in distribution of planning time and timeouts reach $20\%$ for ``I'' and ``H'' and even $30\%$ to $50\%$ for the ``Plus'' shape.
+The three thick shapes perform much worst with an average of $200$ seconds planning time for ``I'' and ``H'', and $250$ seconds for the ``Plus'' shape.
+The instances have a wide spread in distribution of planning time and timeouts reach $20\%$ for ``I'' and ``H'', and even $30\%$ to $50\%$ for the ``Plus'' shape.
 Assembling the ``Plus'' polyomino holds the worst performance out of all custom and random polyominoes evaluated in this thesis.
 
 Caves and holes have no impact on the performance of the global planner.
 The option sorting strategies do not show any recognizable pattern, but strong differences between them can be observed.
-Growing the smallest component, while assembling the ``Plus'' shape reduces the fraction of timeouts by half, compared to the others.
+Growing the smallest component, while assembling the ``Plus'' shape, reduces the fraction of timeouts by half, compared to the others.
 
 
 \subsection{Hardest Shapes to Assemble}
 \label{sec:hard_shape}
 
 By evaluating all custom polyominoes from \autoref{fig:AFTS_shapes}, we can observe which parameters have the most influence on planning time.
-The number of connections between cubes within a polyominoes seems to increase planning time.
+The number of connections between cubes within a polyomino seems to increase planning time.
 This makes sense since more connections provide more possible two-cuts, which increases complexity of a TCSA graph.
 But connectivity alone is not the driving factor for shapes like the ``2x5''.
 The ``5x2'' provides an equal amount of connections and can be assembled very efficiently with no timeouts, while the ``2x5'' performs much worse.
-Width alone is also not responsible either, since the ``1x10'' performs better than the ``2x5''.
+Width alone is not responsible either, since the ``1x10'' performs better than the ``2x5''.
 
-The global planner becomes inefficient, when connectivity and increasing width is combined.
+The global planner becomes inefficient when connectivity and increasing width is combined.
 The reason for this could be located within the local planner.
 North-south connections become problematic when the connection-cubes have to move above or below non-connection-cubes to get to their desired position.
-A small example of this can be seen in \autoref{fig:local_plans}, where the local plans c) and d) fail, because they connected to the wrong cubes, while trying to slide above them.
+A small example of this can be seen in \autoref{fig:local_plans} where the local plans c) and d) fail, because they connected to the wrong cubes while trying to slide above them.
 With increasing width the effects become more dramatic.
 
-Increasing the offset distance when aligning the connection cubes (\autoref{sec:align}) is not a solution since a north-south connection cannot be established when magnetic attraction becomes to weak.
+Increasing the offset distance when aligning the connection cubes (\autoref{sec:align}) is not a solution, since a north-south connection cannot be established when magnetic attraction becomes to weak.
 Choosing the right option sorting strategy might make a difference, but it is hard to predict the best strategy for a specific polyomino.
 Other option sorting strategies could be developed to take these problematic connections into account and prefer the unproblematic ones.
 
@@ -443,7 +447,7 @@ The fraction of timeouts in \autoref{fig:AFBS_timeout} remains constant for all 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFBS_cost.pdf}
-	\caption[Plan cost for workspace variations]{Plan cost in radians of successful plans for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared with $100$ samples each.}
+	\caption[Plan cost for workspace variations]{Plan cost in radians of successful plans for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared with $100$ samples each and outliers are omitted.}
 	\label{fig:AFBS_cost}
 \end{figure}
 
@@ -478,7 +482,7 @@ For each number of red cubes $100$ samples were taken.
 
 \autoref{fig:AFNR_time} shows the distribution of planning time for this experiment.
 By increasing $n_\textit{red}$ from $0$ to $1$ a clear increase in planning time is visible.
-With only blue cubes every cube can be placed everywhere in the polyomino.
+With only blue cubes, every cube can be placed everywhere in the polyomino.
 By introducing one red cube, position becomes important.
 Further increasing the number of $n_\textit{red}$ does not affect planning time significantly.
 For these vertical straight line polyominoes growing the smallest component performs slightly worst than the other two option sorting strategies.
