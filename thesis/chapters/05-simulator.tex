@@ -17,7 +17,7 @@
 
 Our simulator modeling the behavior of magnetic modular cubes uses the 2D physics library Pymunk\footnote{Pymunk: \url{https://www.pymunk.org/}}.
 This library is built for the Python 3 and Python 2 environment based on the 2D physics library Chipmunk\footnote{Chipmunk: \url{http://chipmunk-physics.net/}}.
-We used Pymunk, because it can be easily integrated and customized in a Python implementation.
+We use Pymunk, because it can be easily integrated and customized in a Python implementation.
 Furthermore it is light-weight and capable of running headless, but also offers an interface for Pygame\footnote{Pygame: \url{https://www.pygame.org/}}, which we use to visualize developed motion plans and to allow user controls.
 As a disadvantage of a 2D simulator, we can only approximate 3D movement, in particular pivot walking.
 This way we trade simulation accuracy for faster simulation time, which is necessary to develop global plans in a reasonable time.
@@ -32,12 +32,12 @@ After handling the motion control, further explained in \autoref{sec:motion_cont
 
 The Pymunk-step is a library function, responsible for updating the simulation environment by a certain time step.
 The duration of a time step is a parameter that allows a trade off between simulation accuracy and simulation time. 
-Inside the Pymunk-step forces are applied to the cubes and collision with workspace boundaries and between cubes is handled (\autoref{sec:coll_handling}).
+Inside the Pymunk-step forces are applied to the cubes and collisions with workspace boundaries and between cubes are handled (\autoref{sec:coll_handling}).
 
-After the Pymunk-step the magnetic forces between the cubes' permanent magnets are calculated (\autoref{sec:force_magnet}).
+After the Pymunk-step, the magnetic forces between the cubes' permanent magnets are calculated (\autoref{sec:force_magnet}).
 This also determines connections of cube faces that will be used to retrieve information about polyominoes in the workspace.
 Polyomino information is necessary to calculate forces of the global magnetic field acting on cubes (\autoref{sec:force_field}) and friction forces, on which we heavily rely on to simulate 3D movement like pivoting on pivot edges (\autoref{sec:force_friction}).
-All the calculated forces will be applied in the Pymunk-step of the next iteration.
+All the calculated forces are applied in the Pymunk-step of the next iteration.
 
 When drawing is enabled, the Pygame-rendering of the workspace is the last step before the next iteration begins.
 
@@ -47,20 +47,20 @@ When drawing is enabled, the Pygame-rendering of the workspace is the last step 
 
 The motion control manages the queued-in motions from the control program and determines a change of the magnetic field for each iteration of the simulation loop.
 This change consists of the longitude change in radians and the latitude change called the elevation.
-In our simulator the elevation states if the magnetic field lays in the workspace plane, referred to as neutral, or if the magnetic north or south is pointing up.
+In our simulator, the elevation states if the magnetic field lays in the workspace plane, referred to as neutral, or if the magnetic north or south is pointing up.
 We do not specify an angular value of the latitude.
 The elevation just indicates if polyominoes are pivoting or not.
-\autoref{sec:force_friction} offers more details.
+\autoref{sec:force_friction} provides more details.
 
-A change of elevation is executed in a single iteration, but a rotation will be simulated by dividing its angle in multiple longitude changes in a linear ramp with a rotational velocity we choose to set to $\frac{\pi}{8} \, \text{rad}/\text{s}$.
-Each motion will be simulated by applying its sequence of updates and sending a notification to the control program when done.
-This makes closed loop control possible, by letting the control program wait until motions are simulated.
+A change of elevation is executed in a single iteration, but a rotation will be simulated by dividing its angle in multiple longitude changes in a linear ramp with a rotational velocity we chose to set to $\frac{\pi}{8} \, \text{rad}/\text{s}$.
+Each motion is simulated by applying its sequence of updates and sending a notification to the control program when done.
+This makes closed-loop control possible by letting the control program wait until motions are simulated.
 
 Motions control the magnetic field orientation and not the cubes directly.
-Cubes will be rotated by magnetic field forces we further explain in \autoref{sec:force_field}.
+Cubes are rotated by magnetic field forces we further explain in \autoref{sec:force_field}.
 Due to increased inertia, the larger a polyomino is, the more time it needs to align with the magnetic field, which can take longer than rotating the magnetic field itself.
 A certain amount of zero-updates, dependent on the size of the largest polyomino in the workspace, is added to a rotations update sequence.
-This way the control program will not be notified until all polyominoes are aligned with the magnetic field.
+This way, the control program is not notified until all polyominoes are aligned with the magnetic field.
 For that reason, working with larger polyominoes requires more simulation time.
 
 
@@ -70,13 +70,13 @@ For that reason, working with larger polyominoes requires more simulation time.
 
 The state of the workspace is stored and updated within the Pymunk-space.
 By saving a configuration of the workspace, relevant attributes like position, orientation and linear and angular velocity of cubes are copied from the Pymunk-space.
-When loading in a configuration, the attributes of the Pymunk-space will be manipulated.
+When loading a configuration, the attributes of the Pymunk-space will be manipulated.
 
-Furthermore a configuration stores magnetic field orientation and the polyominoes, together with their center of mass and pivot points.
+Furthermore, a configuration stores magnetic field orientation and the polyominoes, together with their center of mass and pivot points.
 Polyominoes are stored in a custom data structure that functions both as a list of physical polyominoes and a polyomino set for the use in two-cut-sub-assembly graphs (\autoref{sec:tcsa}).
-The data structure and the polyominoes themselves are hash-able for fast equality and inclusion checks.
+The data structure and the polyominoes themselves are hashable for fast equality and inclusion checks.
 
-Individual orientation and velocities of cubes will not be used for planning, but they ensure a correct loading of a configuration that was saved while in motion or when cubes were not, or not yet, aligned with the magnetic field.
+Individual orientation and velocities of cubes are not used for planning, but they ensure a correct loading of a configuration that was saved while in motion or when cubes were not, or not yet, aligned with the magnetic field.
 The alignment can be prevented by walls or other cubes, even though we assume perfect alignment with the magnetic field during planning.
 
 
@@ -93,7 +93,8 @@ More on the use of cube pairs within critical-distance in \autoref{sec:force_mag
 
 \section{Simulating Forces}
 
-To model accurate behavior of magnetic modular cubes we calculate and apply the three most significant forces acting on cubes in the workspace, forces between permanent magnets, forces from the global magnetic field and friction with the workspace plane.
+To model accurate behavior of magnetic modular cubes we calculate and apply the three most significant forces acting on cubes in the workspace:
+Forces between permanent magnets, forces from the global magnetic field and friction with the workspace plane.
 Friction with the workspace boundaries and between cubes is handled by Pymunk's collision detection.
 The reason forces are calculated after the Pymunk-step, where they are applied, is because of the cube pairs within critical-distance determined with the collision detection of Pymunk.
 Applying the calculated forces in the next iteration does not effect simulation accuracy.
@@ -104,21 +105,21 @@ Applying the calculated forces in the next iteration does not effect simulation 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.6\textwidth]{figures/plots/magnet_force.pdf}
-	\caption[Declining magnetic force with increasing cube distance]{Decline of magnetic force between two permanent magnets with increasing distance between the cube centers. We reach a maximum force at $2 r_C$, when the cube faces are in contact. With distances bigger than the critical-distance of $5 r_C$, the fraction of force is negligible.}
+	\caption[Decrease magnetic force with increasing cube distance]{Decrease of magnetic force between two permanent magnets with increasing distance between the cube centers. We reach a maximum force at $2 r_C$, when the cube faces are in contact. With distances bigger than the critical-distance of $5 r_C$, the fraction of force is negligible.}
 	\label{fig:magnet_force}
 \end{figure}
 
 The magnetic dipole-dipole interaction of permanent magnets is the driving force for self-assembly.
-Cubes attract and repulse each other, which results in connection of cube faces and therefore the construction of polyominoes.
+Cubes attract and repulse each other, which results in the connection of cube faces and therefore the construction of polyominoes.
 In our simulator magnet force is the only thing responsible for keeping cubes connected, as it would be in a real world application of magnetic modular cubes.
 Nevertheless, fast rotation or hitting workspace boundaries can cause connections to break.
 
 We can define a maximum attraction force when cubes are at a distance of $2 r_C$.
-When such a force is reached with a valid pair of cube faces we mark the faces as connected.
+When such a force is reached with a valid pair of cube faces, we mark the faces as connected.
 Polyominoes in the workspace can be identified based on the marked connections.
 
 The majority of simulation time, about $75\%$, is spent on calculating magnet forces, as shown in \autoref{fig:timeuse}.
-Cubes not within critical-distance are too far away to significantly affect each other with magnetic forces of their permanent magnets.
+Cubes not within critical-distance are too far away to significantly affect each other with the magnetic forces of their permanent magnets.
 The steep decline of magnetic force with increasing cube distance can be seen in \autoref{fig:magnet_force}.
 We only calculate magnet forces for cube pairs within critical-distance to speed up simulation.
 Because assembling large target structures is the goal of global planning, it is not uncommon that most cubes are within critical-distance.
@@ -132,12 +133,12 @@ For a single cube pair, each of the four magnets of one cube interacts with each
 Magnet forces of pairs within the same cube are neglected, since they do not result in any movement.
 Determining the first $k$ pairs with minimal distance is a reasonable approach to not calculate all $16$ pairs, since they should have the strongest force interaction.
 Of course $k=1$ is most efficient, but results in a loss of real world behavior of magnetic modular cubes.
-We choose $k=4$ to again find balance between accuracy and efficiency.
+We choose $k=4$ to find balance between accuracy and efficiency.
 
 \paragraph{Calculating Magnet Force}
 
 Each calculated force of a magnet pair is applied at the position of both magnets in opposite direction, resulting in either attraction or repulsion.
-For two magnets with moments $m_1$ and $m_2$ and a distance of $r$ the magnet force acting from magnet 1 on magnet 2 is
+For two magnets with moments $m_1$ and $m_2$ and a distance of $r$, the magnet force acting from magnet 1 on magnet 2 is
 \begin{equation}
 F_\textit{mag} = \frac{\mu_\textit{mag}}{r^4} \left(m_2(m_1 \cdotp \hat{r}) + m_1(m_2 \cdotp \hat{r}) + \hat{r}(m_1 \cdotp m_2) - 5\hat{r}(m_1 \cdotp \hat{r})(m_2 \cdotp \hat{r}) \right) \, ,
 \end{equation}
@@ -166,7 +167,7 @@ An alignment where $\gamma_\textit{cube} = \gamma_\textit{field}$ results in $F_
 \label{sec:force_friction}
 
 Since we are working with a 2D-simulation, a workaround is needed to simulate pivoting of polyominoes.
-In the simulator a pivoting polyomino changes its center of rotation from the center of mass to either the north or the south pivot point.
+In the simulator, a pivoting polyomino changes its center of rotation from the center of mass to either the north or the south pivot point.
 To achieve this, friction forces are applied at different points depending on the three states of magnetic field elevation specified in \autoref{sec:motion_control}.
 
 Friction forces are applied per cube at a friction-point $p_\textit{fric}$, but polyomino information is still necessary to determine cubes that are in contact with the ground, called friction-cubes.

@@ -113,17 +113,17 @@
 	Magnetic-Modular-Cubes sind skalierbare Einheiten, bei welchen Permanentmagneten in einen würfelförmigen Körper eingebettet sind.
 	Diese Einheiten zählen als rekonfigurierbare Roboter, obwohl sie selber keine Logik oder Stromversorgung beinhalten.
 	Stattdessen lassen sich diese durch ein externes, gleichmäßiges und sich zeitlich änderndes Magnetfeld steuern.
-	Durch diese Steuerung können die Roboter auf der Stelle gedreht oder durch Pivotwalking nach rechts und links bewegt werden.
+	Die Roboter können auf der Stelle gedreht oder durch Pivotwalking nach rechts und links bewegt werden.
 	
 	Obwohl sich das Magnetfeld auf alle Einheiten gleichermaßen auswirkt, kann durch Kollision mit der Arbeitsflächenbegrenzung eine Änderung der Anordnung bewirkt werden.
 	Befinden sich zwei Roboter nah genug beieinander, können sich diese durch die Permanentmagneten miteinander verbinden und so Polyominoes als größere Strukturen aufbauen, welche auf die gleiche Weise wie einzelne Roboter gesteuert werden können.
-	Polyominoes bewegen sich mit unterschiedlicher Geschwindigkeit in unterschiedliche Richtungen, abhängig von deren Form.
-	Frühere Arbeiten betrachteten das Tilt-Model, bei welchem sich Strukturen jeder Größe mit gleicher Geschwindigkeit in ganzzahligen Schritten und mit ausschließen 90° Drehungen bewegen lassen.
+	Polyominoes bewegen sich mit unterschiedlicher Geschwindigkeit in unterschiedliche Richtung, abhängig von deren Form.
+	Frühere Arbeiten betrachteten das Tilt-Model, bei welchem sich Strukturen jeder Größe mit gleicher Geschwindigkeit in ganzzahligen Schritten und ausschließlich mit 90°-Drehungen bewegen lassen.
 	
 	Herr Keunes Aufgabe in dieser Bachelorarbeit ist es, einen Motionplanner für die beschriebenen Magnetic-Modular-Cubes zu entwerfen, welcher mit beliebigen Positionen und Rotationen umgehen kann.
 	Dabei ist es erforderlich, eine Simulationsumgebung zu schaffen, welche das Verhalten der Roboter repliziert.
 	Es soll ein lokaler Motionplanner entwickelt werden, um zwei Polyominoes an gewünschten Kanten zu verbinden.
-	Dieser Localplanner soll Heuristiken für Bewegungsabläufe mit möglichst wenig Schritten realisieren.
+	Dieser Localplanner soll Heuristiken für Bewegungsabläufe mit möglichst wenigen Schritten realisieren.
 	Ebenfalls soll dieser global eingesetzt werden, um Bewegungsabläufe zu finden, die gewünschte Polyominoes aus einer zufällig gegebenen Startkonfiguration erzeugen.
 	Ein interessantes Ergebnis wird es sein, zu sehen, wie gut Probleminstanzen dieser Art in der Realität gelöst werden können und welche Parameter die gravierendsten Auswirkungen auf die Schwierigkeit von Motionplanning-Problemen haben.
 	

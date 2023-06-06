@@ -25,7 +25,7 @@ We conducted all experiments with the three option sorting strategies from \auto
 \end{enumerate}
 
 \paragraph{Instance Generation}
-Random polyominoes and initial configurations are created with a seed-based pseudorandom number generator to make experiments reproducible.
+Random polyominoes and initial configurations are created with a seed-based pseudorandom number generator to make the experiments reproducible.
 The option sorting strategies are applied to the same set of seeds to make the results comparable.
 When an initial configuration is randomly generated, the number of red and blue cubes matches with the target polyomino.
 Sub-assemblies in the initial configuration can occur.
@@ -35,7 +35,7 @@ The global planner states a timeout failure after a planning time of $600$ secon
 We do not time out during the simulation of local plans, so instances can exceed $600$ seconds and still be successful if the last local plan assembles the target polyomino.
 
 \paragraph{Hardware Setup}
-The experiments were done on multiple computers with the same hardware specification (\textbf{AMD Ryzen 7 5800X @ 8x3.8 GHz (-4.7 GHz), 128 GB RAM}) running Ubuntu 22.04.2 LTS.
+The experiments were conducted on multiple computers with the same hardware specification (\textbf{AMD Ryzen 7 5800X @ 8x3.8 GHz (-4.7 GHz), 128 GB RAM}) running Ubuntu 22.04.2 LTS.
 
 
 
@@ -66,7 +66,7 @@ The experiments were done on multiple computers with the same hardware specifica
 	\label{fig:AR}
 \end{figure}
 
-To test the reliability of the global planner, we ran $100$ samples for the same initial configuration and same target polyomino.
+To test the reliability of the global planner, we ran $100$ samples for the same initial configuration and the same target polyomino.
 We tested different seed-values affecting the initial configuration and for all seeds we assembled the ``3x3'' polyomino of \autoref{fig:AFTS_cb_shapes}.
 The workspace has a size of $50 r_C \times 50 r_C$.
 
@@ -76,7 +76,7 @@ Although samples start at the same initial configuration and assemble the same t
 The amount of plans developed changes per seed-value.
 For seed $101$ when growing the largest and smallest component, or for seed $102$ with minimal distance and growing the smallest component, nearly all data-points are clustered at one spot for both the planning time and plan cost.
 For these seeds and sorting strategies the global planner is stable and develops the same plan for all samples, except for a few outliers.
-Samples can cluster around multiple distinct spots, as it can be seen for seed $106$ with growing the smallest component.
+Samples can cluster around multiple distinct spots, as can be seen for seed $106$ with growing the smallest component.
 Here the global planner alternates between developing two distinct plans.
 Data-points can form arbitrary numbers of clusters or spread widely without forming noticeable clusters at all, as it is the case for seed $100$.
 This seed even experienced one timeout failure, not shown in the plots for better readability. 
@@ -105,21 +105,21 @@ Two reasons for the non-deterministic behavior of the global planner can be iden
 
 The first reason is due to opportunistic parallel processing.
 By developing local plans for different slide-in and pivot walking directions with multiple processes in parallel and returning the first successful plan to finish (\autoref{sec:local_algo}), a deterministic behavior cannot be ensured.
-When these processes are scheduled differently or execution time varies slightly, the local planner can return different local plans to the global planner.
+When these processes are scheduled differently or the execution time varies slightly, the local planner can return different local plans to the global planner.
 For instance, pivot walking left or right results in completely different goal configurations with different possible sub-assemblies.
 This has a large impact on further decisions the global planner will make.
 
-The second reason is located in the interaction between local planner and simulator.
+The second reason is located in the interaction between the local planner and the simulator.
 Both components are running on separate threads.
 Interacting with the simulator's simulation loop at different iterations changes the behavior of the simulator.
 We are minimizing this effect as much as possible, but it is not guaranteed that equal amounts of simulation iterations are done for the same local plan.
 
 Although this effect can produce local plans with a different outcome, the parallel development of local plans has a more severe effect on the spread of planning time and plan cost.
-We conducted the same experiment for seed $100$ with a altered local planner that develops local plans sequentially and returns the one with the lowest cost.
+We conducted the same experiment for seed $100$ with an altered local planner that develops local plans sequentially and returns the one with the lowest cost.
 \autoref{fig:AR_parseq_time} shows that the spread of planning time is reduced for sequential planning, but many outliers still occur.
 The plan cost distribution, presented in \autoref{fig:AR_parseq_cost}, better portrays that sequential planning produces the same plan for the majority of samples.
 The existence of outliers means that sequential planning alone is not responsible for all the non-deterministic behavior.
-We use the benefit of parallel processing to reduce planning time in further experiments, even thought we are aware of the non-determinism it causes.
+We use the benefit of parallel processing to reduce planning time in further experiments, even though we are aware of the non-determinism it causes.
 
 
 \section{Assembly for Polyomino Size}
@@ -127,7 +127,7 @@ We use the benefit of parallel processing to reduce planning time in further exp
 
 This experiment was conducted with randomly generated initial configurations and randomly generated polyominoes of specific size $n$.
 To maximize the variety of possible polyomino shapes, the number of red cubes is set to $n_\textit{red} = \lfloor \frac{n}{2} \rfloor$ as indicated in \cite{Lu2021}.
-This makes the experiment well-suited for not only analyzing planning time and rotational cost, but also examine $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
+This makes the experiment well-suited for not only analyzing planning time and rotational cost, but also examining $\#\textit{local}$, $\#\textit{config}$ and $|P|$.
 The workspace is of size $50 r_C \times 50 r_C$ and for each target size $150$ samples were taken.
 
 \paragraph{Planning Time}
@@ -151,17 +151,17 @@ The workspace is of size $50 r_C \times 50 r_C$ and for each target size $150$ s
 	\label{fig:AFN_timestats}
 \end{figure}
 
-\autoref{fig:AFN_time} shows the distribution of planning time and \autoref{fig:AFN_timeout} the fraction of timed-out instances.
+\autoref{fig:AFN_time} shows the distribution of planning time and \autoref{fig:AFN_timeout} shows the fraction of timed-out instances.
 The construction of target polyominoes with sizes $5$ to $7$ can be planned in under $30$ seconds with just a few outliers exceeding this time.
 Note that none of these instances timed out.
 
 For target sizes above $7$, timeout failures first appear with roughly $5\%$ for $n = 8$, and increasing to $20\%$ for $n=12$.
 The planning time for $n = 12$ increases to $150$ seconds on average with a median of $100$ seconds.
-With increasing $n$ a wider spread of planning time can be observed.
+When increasing $n$, a wider spread of planning time can be observed.
 Outliers can reach planning times close to the timeout of $600$ seconds.
 
 In terms of planning time the option sorting strategies make no noticeable difference.
-For the fraction of timeouts, growing the largest component often exceeds the other two strategies, clearly visible for $n=11$, where growing the largest component is at $20\%$ and the others under $10\%$ of plans timed out.
+For the fraction of timeouts, growing the largest component often exceeds the other two strategies, clearly visible for $n=11$, where growing the largest component is at $20\%$ and the others are under $10\%$ of plans timed out.
 
 
 \paragraph{Plan Cost}
@@ -207,15 +207,15 @@ The different option sorting strategies do not impact the cost of a plan.
 \end{figure}
 
 
-We analyze the number of simulated local plan $\#\textit{local}$ and the number of explored configuration $\#\textit{config}$ in \autoref{fig:AFN_planstats}.
+We analyze the number of simulated local plans $\#\textit{local}$ and the number of explored configurations $\#\textit{config}$ in \autoref{fig:AFN_planstats}.
 The number of local plans in the plan stack $|P|$ is evaluated in \autoref{fig:AFN_ltg}.
 
-When a plan times out $\#\textit{local}$ and $\#\textit{config}$ only portray how many local plans and configurations can be explored within the timeout.
+When a plan times out, $\#\textit{local}$ and $\#\textit{config}$ only portray how many local plans and configurations can be explored within the timeout.
 Numbers can reach values up to $\#\textit{local} = 1200$ and $\#\textit{config} = 300$.
 Timed-out instances are omitted in the plots of \autoref{fig:AFN_planstats}.
 
 $\#\textit{local}$ increases for bigger target polyominoes.
-On average the realistic best case of $n-1$ local plans (\autoref{sec:global_complex}) is exceeded.
+On average, the realistic best case of $n-1$ local plans (\autoref{sec:global_complex}) is exceeded.
 For $n=8$ there are $25$, for $n=10$ about $50$ and for $n=12$ roughly $75$ local plans simulated on average.
 For all $n$ the majority of instances are below the average.
 Some instances can reach up to $250$ local plans.
@@ -268,10 +268,10 @@ In \autoref{sec:special_poly} the assembly of special polyomino shapes, that are
 The polyominoes ``C'', ``S'', ``A'' and ``O'' contain caves and/or holes of different sizes, but are thin shapes with fewer connections.
 They more or less consist of a one-cube-thick line.
 The polyominoes ``I'', ``H'' and ``Plus'' are thick shapes with many connections, but still contain caves or are at least not rectangular.
-All these polyominoes are build with the checkerboard pattern to achieve equal amounts of red and blue cubes.
+All of these polyominoes are build with the checkerboard pattern to achieve equal amounts of red and blue cubes.
 The size of all these polyominoes, except for ``C'', is $n=12$.
  
-In \autoref{sec:hard_shape} we analyze the polyomino attributes that are especially challenging for the global planner based on all data gather in our experiments.
+In \autoref{sec:hard_shape} we analyze the polyomino attributes that are especially challenging for the global planner based on all data gathered in our experiments.
 
 \subsection{Width/Height and Cube Pattern}
 \label{sec:w/h_pattern}
@@ -298,7 +298,7 @@ In \autoref{sec:hard_shape} we analyze the polyomino attributes that are especia
 	\label{fig:AFTS_cb_timestats}
 \end{figure}
 
-When comparing planning time of the two cube patterns in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
+When comparing the planning time of the two cube patterns in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
 It is not a huge difference, but still noticeable.
 For instance, the ``3x3'' polyomino is on average at $50$ seconds planning time, while the ``3x3 cb'' polyomino is at 75 seconds with a wider spread and worst outliers.
 
@@ -345,7 +345,7 @@ The fraction of timeouts is mostly under $5\%$, which is a huge difference to $2
 The ``O'' shape has the worst performance of the four, which could be related to it being the only shape with a width of 4.
 We already observed how a more horizontally stretched shape is harder to assemble with the ``5x2'' and ``2x5'' rectangles.
 
-The three thick shapes perform much worst with an average of $200$ seconds planning time for ``I'' and ``H'', and $250$ seconds for the ``Plus'' shape.
+The three thick shapes perform much worse with an average of $200$ seconds planning time for ``I'' and ``H'', and $250$ seconds for the ``Plus'' shape.
 The instances have a wide spread in distribution of planning time and timeouts reach $20\%$ for ``I'' and ``H'', and even $30\%$ to $50\%$ for the ``Plus'' shape.
 Assembling the ``Plus'' polyomino holds the worst performance out of all custom and random polyominoes evaluated in this thesis.
 
@@ -359,7 +359,7 @@ Growing the smallest component, while assembling the ``Plus'' shape, reduces the
 
 By evaluating all custom polyominoes from \autoref{fig:AFTS_shapes}, we can observe which parameters have the most influence on planning time.
 The number of connections between cubes within a polyomino seems to increase planning time.
-This makes sense since more connections provide more possible two-cuts, which increases complexity of a TCSA graph.
+This makes sense since more connections provide more possible two-cuts, which increases the complexity of a TCSA graph.
 But connectivity alone is not the driving factor for shapes like the ``2x5''.
 The ``5x2'' provides an equal amount of connections and can be assembled very efficiently with no timeouts, while the ``2x5'' performs much worse.
 Width alone is not responsible either, since the ``1x10'' performs better than the ``2x5''.
@@ -367,7 +367,7 @@ Width alone is not responsible either, since the ``1x10'' performs better than t
 The global planner becomes inefficient when connectivity and increasing width is combined.
 The reason for this could be located within the local planner.
 North-south connections become problematic when the connection-cubes have to move above or below non-connection-cubes to get to their desired position.
-A small example of this can be seen in \autoref{fig:local_plans} where the local plans c) and d) fail, because they connected to the wrong cubes while trying to slide above them.
+A small example of this can be seen in \autoref{fig:local_plans} where the local plans c) and d) failed because the polyominoes connected to the wrong cubes while trying to slide above them.
 With increasing width the effects become more dramatic.
 
 Increasing the offset distance when aligning the connection cubes (\autoref{sec:align}) is not a solution, since a north-south connection cannot be established when magnetic attraction becomes to weak.
@@ -409,7 +409,7 @@ Other option sorting strategies could be developed to take these problematic con
 \end{table}
 
 In this experiment we tested the assembly of randomly generated polyominoes of size $n=9$ with random initial configurations in various rectangular workspaces.
-We choose three workspace sizes (S, M, L) in three different aspect ratios ($ 1:1 $, $ 2:1 $, $ 3:1 $) each.
+We chose three workspace sizes (S, M, L) in three different aspect ratios ($ 1:1 $, $ 2:1 $, $ 3:1 $) each.
 All aspect ratios for one size result in roughly the same area. The workspaces with their exact widths and heights are listed in \autoref{tab:workspaces}.
 A workspace with aspect ratio $ 1:x $ would produce similar results to one with aspect ratio $ x:1 $, since the magnetic field can be rotated freely.
 The maximum width or height of a polyomino with size $9$ is $18 r_C$.
@@ -462,7 +462,7 @@ Within a class of same size, increasing the aspect ratio results in slightly mor
 
 We examined the effect of red and blue cube ratio on planning time.
 For this we increased the number of red cubes $0 \leq n_\textit{red} \leq \lfloor \frac{n}{2}\rfloor$ while keeping the target polyomino size fixed at $n = 10$.
-With $n_\textit{red} = 0$, only north-south connections allow the creation of just a vertical line polyomino.
+With $n_\textit{red} = 0$, only north-south connections allow the creation of a vertical line polyomino.
 $n_\textit{red} = \lfloor \frac{n}{2}\rfloor$ holds the biggest variety of polyomino shapes \cite{Lu2021}.
 To exclude the influence of varying polyomino shapes on the experiment, the shape is set to a $10 \times 1$ polyomino.
 $\lfloor \frac{n}{2}\rfloor < n_\textit{red} \leq n$ is equal to $0 \leq n_\textit{blue} \leq \lfloor \frac{n}{2}\rfloor$.
@@ -475,17 +475,16 @@ For each number of red cubes $100$ samples were taken.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFNR_time.pdf}
-	\caption[Planning time for number of red cubes]{Planning time for different numbers of red cubes $n_\textit{red}$. All option sorting strategies are compared with $100$ samples each. The fraction of timeouts is rarely at $2\%$ and is therefore not plotted.}
+	\caption[Planning time for number of red cubes]{Planning time for different numbers of red cubes $n_\textit{red}$. Only $10 \times 1$ polyominoes with random cube patterns are assembled. All option sorting strategies are compared with $100$ samples each. The fraction of timeouts is rarely at $2\%$ and is therefore not plotted.}
 	\label{fig:AFNR_time}
 \end{figure}
 
-
 \autoref{fig:AFNR_time} shows the distribution of planning time for this experiment.
 By increasing $n_\textit{red}$ from $0$ to $1$ a clear increase in planning time is visible.
-With only blue cubes, every cube can be placed everywhere in the polyomino.
+With only blue cubes, every cube can be placed anywhere in the polyomino.
 By introducing one red cube, position becomes important.
 Further increasing the number of $n_\textit{red}$ does not affect planning time significantly.
-For these vertical straight line polyominoes growing the smallest component performs slightly worst than the other two option sorting strategies.
+For these vertical straight line polyominoes growing the smallest component performs slightly worse than the other two option sorting strategies.
 Nearly no instances timed out during planning. 
 
 

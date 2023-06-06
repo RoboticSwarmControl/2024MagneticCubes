@@ -9,14 +9,15 @@ Complex structures, like proteins, can be assembled and disassembled depending o
 Using self-reconfiguring robot swarms in such a way has promising applications in the future.
 Biomedical applications could be targeted drug delivery or drug screening \cite{sitti2015}, or a robot swarm could be used for milliscale and microscale manufacturing \cite{pelrine2016}.
 
-Designing robots at these small sizes faces challenging problems.
-Equipping each robot with its own sensors, actuation-system, connection-system and power supply seem infeasible, in terms of the miniaturization required and power-limitations \cite{white2007}.
+Designing robots of these small sizes brings challenging problems.
+Equipping each robot with its own sensors, actuation-system, connection-system and power supply seems infeasible, in terms of the miniaturization required and power-limitations \cite{white2007}.
 
-Therefore, the use of external global control, effecting every robot in the workspace with the same torque and force, is a promising solution \cite{white2007}.
+Therefore, the use of external global control, affecting every robot in the workspace with the same torque and force, is a promising solution \cite{white2007}.
 Using robots with embedded permanent magnets, has all the desired effects.
-Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply and for sensing an external camera can be used \cite{saab2019}.
+Robots can be controlled by an external magnetic field and also connect to each other without any internal power supply \cite{saab2019}.
+For sensing, an external camera can be used \cite{Lu2023}.
 
-One example for magnetically controlled robots are the magnetic modular cubes by Bhattacharjee et al.\ \cite{Bhattacharjee2022}, which are the subjects of this thesis.
+One example of magnetically controlled robots are the magnetic modular cubes by Bhattacharjee et al.\ \cite{Bhattacharjee2022}, which are the subjects of this thesis.
 We will look at the difficulties and problems that occur, when assembling structures with magnetic modular cubes in the 2-dimensional special Euclidean group $\textit{SE}(2)$, the space of rigid movements in a 2-dimensional plane.
 
 
@@ -27,16 +28,16 @@ Continuous motion planning is a crucial subject in the field of robotics.
 The goal is to find a path from the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
 The movement may result in collision with static obstacles and with other robots, but the objects may not overlap.
 The state of the system is also called a configuration.
-All possible configurations one or multiple robots can be in is defined as the configuration-space.
+The set of all possible configurations that one or multiple robots can be in is defined as the configuration-space.
 Motion planning complexity is often exponential in the dimension of the configuration space \cite{LaValle2006}.
 Increasing the number of robots and/or possible actions, increases the dimension of the configuration space.
-It is difficult to engineer algorithms that explore these huge configuration-spaces and provide continuous path from the initial to the goal configuration, or report failure, if the goal is not reachable.
+It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a continuous path from the initial to the goal configuration, or report failure, if the goal is not reachable.
 Decades of research has been done on motion planning.
 The textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
 
 When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one concept that has been successful for many robotics problem is sample-based motion planning.
 
-By taking samples, the planning problem can be reduced from navigating a configuration space to planning on a graph, but you might lose possible solutions.
+By taking samples, the planning problem can be reduced from navigating a configuration space to planning on a graph, but one might lose possible solutions.
 Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point.
 Ways of sampling include random sampling, being probabilistically complete, or using a grid with a resolution that is dynamically adjustable resulting in resolution completeness.
 After sampling, conventional discrete planning algorithms can be applied \cite{LaValle2006}.
@@ -45,10 +46,10 @@ One state-of-the-art sampling-based approach uses rapidly-exploring random trees
 This method tries to grow a tree-shaped graph in the configuration space by moving into the direction of randomly chosen samples from already explored configurations. That way the space gets explored uniformly without being too fixated on the goal configuration \cite{lavalle1998,lavalle2001}.
 
 When working with multiple robots, the interaction of robots with each other becomes important.
-One interesting idea is that single robots can connect to form bigger structures.
+One interesting idea is that single robots can connect to form larger structures.
 This is referred to as self-assembly and E. Winfree \cite{winfree1998} proposed the abstract Tile Assembly Model (aTAM) in the context of assembling DNA.
 In this model, particles can have different sets of glues and connect according to certain rules regarding the glue type.
-However, he considers this process as non-deterministic, so there is no exact instruction on how to assemble a desired structure.
+However, Winfree considers this process to be non-deterministic, so there is no exact instruction on how to assemble a desired structure.
 
 One model more related to the magnetic modular cubes is the Tilt model from Becker et al.\ \cite{Becker2014_SP}.
 In the Tilt model, all tiles move into one of the cardinal directions until hitting an obstacle.
@@ -70,9 +71,9 @@ One article considering the construction with so-called sub-assemblies is propos
 Most recently, Bhattacharjee et al.\ \cite{Bhattacharjee2022} developed the magnetic modular cubes.
 These robots contain embedded permanent magnets and have no computation or power supply.
 Instead, they are controlled by an external time-varying magnetic field and are able to perform various actions.
-Most importantly, they can rotate in place or use a technique called pivot walking to move either left or right in a local coordinate frame.
+Most importantly, they can rotate in place and use a technique called pivot walking to move either left or right in a local coordinate frame.
 The magnets also act as glues and allow the cubes to perform self-assembly.
-Although it is theoretically possible to assemble 3-dimensional structures, most research was done by only connecting cubes in two dimensions.
+Although it is theoretically possible to assemble 3-dimensional structures, most research yet has been done on only connecting cubes in two dimensions.
 Since all cubes are the same size, the assembled 2-dimensional shapes can be represented as polyominoes.
 An enumeration was done by Lu et al.\ \cite{Lu2021} on the amount of possible polyominoes that can be created by cubes with different magnet configurations.
 
@@ -80,7 +81,7 @@ By limiting the controls to only 90 degree turns and assuming a uniform pivot wa
 Following these limitations, a simple discrete open-loop motion planer was developed, that explores a finite configuration-space and lists all the possible polyominoes that can be created from an initial configuration \cite{Bhattacharjee2022}.
 
 One interesting paper from Blumenberg et al.\ \cite{blumenberg2023} explores the assembly of specific target polyominoes in arbitrary environments, when cubes obey the Tilt model in a discrete setting.
-He provides different algorithmic approaches using various distance heuristics and a solution making use of RRTs.
+The author provides different algorithmic approaches using various distance heuristics and a solution making use of RRTs.
 
 Lu et al.\ \cite{Lu2023} are working on establishing closed-loop control for magnetic modular cubes by using computer vision-based feedback of the workspace.
 The used motion planner is still working in a discrete setting, but can assembly specific target shapes, while handling collision events of estimated continuous motion.
