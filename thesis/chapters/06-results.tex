@@ -16,14 +16,6 @@ With manually designed polyominoes, we can specifically test the assembly of tar
 Furthermore, we experiment with different workspace sizes and aspect ratios in \autoref{sec:AFBS} and how the ratio of red and blue cubes affects the assembly of straight line polyominoes in \autoref{sec:AFNR}.
 A legend for the box-whisker plots used to present the experimental data can be found in \autoref{fig:bw_legend}.
 
-\paragraph{Option Sorting Strategies}
-We conducted all experiments with the three option sorting strategies from \autoref{sec:connect_options}:
-\begin{enumerate}
-	\item Minimal Distance (MIN DIST)
-	\item Grow Largest Component (GROW LARGEST)
-	\item Grow Smallest Component (GROW SMALLEST)
-\end{enumerate}
-
 \paragraph{Instance Generation}
 Random polyominoes and initial configurations are created with a seed-based pseudorandom number generator to make the experiments reproducible.
 The option sorting strategies are applied to the same set of seeds to make the results comparable.
@@ -34,9 +26,16 @@ Sub-assemblies in the initial configuration can occur.
 The global planner states a timeout failure after a planning time of $600$ seconds.
 We do not time out during the simulation of local plans, so instances can exceed $600$ seconds and still be successful if the last local plan assembles the target polyomino.
 
+\paragraph{Option Sorting Strategies}
+We conducted all experiments with the three option sorting strategies from \autoref{sec:connect_options}:
+\begin{enumerate}
+	\item Minimal Distance (MIN DIST)
+	\item Grow Largest Component (GROW LARGEST)
+	\item Grow Smallest Component (GROW SMALLEST)
+\end{enumerate}
+
 \paragraph{Hardware Setup}
 The experiments were conducted on multiple computers with the same hardware specification (\textbf{AMD Ryzen 7 5800X @ 8x3.8 GHz (-4.7 GHz), 128 GB RAM}) running Ubuntu 22.04.2 LTS.
-
 
 
 
@@ -163,6 +162,7 @@ Outliers can reach planning times close to the timeout of $600$ seconds.
 In terms of planning time the option sorting strategies make no noticeable difference.
 For the fraction of timeouts, growing the largest component often exceeds the other two strategies, clearly visible for $n=11$, where growing the largest component is at $20\%$ and the others are under $10\%$ of plans timed out.
 
+\newpage
 
 \paragraph{Plan Cost}
 
@@ -234,10 +234,6 @@ This phenomenon becomes more frequent for $n \geq 9$.
 
 The only noticeable difference between the option sorting strategies is that growing the largest component tends to have slightly lower numbers of $\#\textit{config}$.
 
-
-\section{Assembly of Custom Polyominoes}
-\label{sec:AFTS}
-
 \begin{figure}
 	\centering
 	\begin{subfigure}[b]{\textwidth}
@@ -255,6 +251,9 @@ The only noticeable difference between the option sorting strategies is that gro
 	\caption[List of manually designed polyominoes for experimenting]{List of manually designed polyominoes for experimenting.}
 	\label{fig:AFTS_shapes}
 \end{figure}
+
+\section{Assembly of Custom Polyominoes}
+\label{sec:AFTS}
 
 In this experiment manually designed polyominoes are assembled from multiple randomly generated initial configurations.
 $100$ samples were taken for each custom polyomino with a workspace size of $50 r_C \times 50 r_C$.
@@ -353,6 +352,7 @@ Caves and holes have no impact on the performance of the global planner.
 The option sorting strategies do not show any recognizable pattern, but strong differences between them can be observed.
 Growing the smallest component, while assembling the ``Plus'' shape, reduces the fraction of timeouts by half, compared to the others.
 
+\newpage
 
 \subsection{Hardest Shapes to Assemble}
 \label{sec:hard_shape}
@@ -378,6 +378,14 @@ Other option sorting strategies could be developed to take these problematic con
 
 \section{Assembly in different Workspaces}
 \label{sec:AFBS}
+
+In this experiment we tested the assembly of randomly generated polyominoes of size $n=9$ with random initial configurations in various rectangular workspaces.
+We chose three workspace sizes (S, M, L) in three different aspect ratios ($ 1:1 $, $ 2:1 $, $ 3:1 $) each.
+All aspect ratios for one size result in roughly the same area. The workspaces with their exact widths and heights are listed in \autoref{tab:workspaces}.
+A workspace with aspect ratio $ 1:x $ would produce similar results to one with aspect ratio $ x:1 $, since the magnetic field can be rotated freely.
+The maximum width or height of a polyomino with size $9$ is $18 r_C$.
+We ensured that such a polyomino could fit in all workspace variations while being able to rotate $360$ degrees without getting stuck.
+We analyze the affect of these workspace variations on planning time and rotational cost.
 
 \begin{table}
 	\centering
@@ -408,13 +416,18 @@ Other option sorting strategies could be developed to take these problematic con
 	\label{tab:workspaces}
 \end{table}
 
-In this experiment we tested the assembly of randomly generated polyominoes of size $n=9$ with random initial configurations in various rectangular workspaces.
-We chose three workspace sizes (S, M, L) in three different aspect ratios ($ 1:1 $, $ 2:1 $, $ 3:1 $) each.
-All aspect ratios for one size result in roughly the same area. The workspaces with their exact widths and heights are listed in \autoref{tab:workspaces}.
-A workspace with aspect ratio $ 1:x $ would produce similar results to one with aspect ratio $ x:1 $, since the magnetic field can be rotated freely.
-The maximum width or height of a polyomino with size $9$ is $18 r_C$.
-We ensured that such a polyomino could fit in all workspace variations while being able to rotate $360$ degrees without getting stuck.
-We analyze the affect of these workspace variations on planning time and rotational cost.
+\paragraph{Plan Cost} 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/plots/AFBS_cost.pdf}
+	\caption[Plan cost for workspace variations]{Plan cost in radians of successful plans for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared with $100$ samples each and outliers are omitted.}
+	\label{fig:AFBS_cost}
+\end{figure}
+
+It is not surprising that the rotational cost, presented in \autoref{fig:AFBS_cost}, increases with bigger workspace areas.
+Cubes and walls are further apart, which results in more pivot walking cycles necessary to assemble polyominoes.
+Within a class of same size, increasing the aspect ratio results in slightly more rotational cost as well.
 
 \paragraph{Planning Time} 
 
@@ -441,19 +454,6 @@ We analyze the affect of these workspace variations on planning time and rotatio
 In terms of the size within one class of aspect ratio no significant effect can be observed.
 Narrowing down the workspace by increasing the aspect ratio seems to increase planning time slightly, but for the majority of instances planning time stays under $100$ seconds.
 The fraction of timeouts in \autoref{fig:AFBS_timeout} remains constant for all workspaces and the options sorting strategies do not show any difference as well.
-
-\paragraph{Plan Cost} 
-
-\begin{figure}
-	\centering
-	\includegraphics[width=0.9\textwidth]{figures/plots/AFBS_cost.pdf}
-	\caption[Plan cost for workspace variations]{Plan cost in radians of successful plans for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared with $100$ samples each and outliers are omitted.}
-	\label{fig:AFBS_cost}
-\end{figure}
-
-It is not surprising that the rotational cost, presented in \autoref{fig:AFBS_cost}, increases with bigger workspace areas.
-Cubes and walls are further apart, which results in more pivot walking cycles necessary to assemble polyominoes.
-Within a class of same size, increasing the aspect ratio results in slightly more rotational cost as well.
 
 
 

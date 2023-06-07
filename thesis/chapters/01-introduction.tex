@@ -20,34 +20,34 @@ For sensing, an external camera can be used \cite{Lu2023}.
 One example of magnetically controlled robots are the magnetic modular cubes by Bhattacharjee et al.\ \cite{Bhattacharjee2022}, which are the subjects of this thesis.
 We will look at the difficulties and problems that occur, when assembling structures with magnetic modular cubes in the 2-dimensional special Euclidean group $\textit{SE}(2)$, the space of rigid movements in a 2-dimensional plane.
 
-
+\newpage
 
 \section{Related Work}
 
 Continuous motion planning is a crucial subject in the field of robotics.
 The goal is to find a path from the initial state of a robot to a desired goal state, by performing actions which the robot is capable of.
 The movement may result in collision with static obstacles and with other robots, but the objects may not overlap.
-The state of the system is also called a configuration.
-The set of all possible configurations that one or multiple robots can be in is defined as the configuration-space.
-Motion planning complexity is often exponential in the dimension of the configuration space \cite{LaValle2006}.
-Increasing the number of robots and/or possible actions, increases the dimension of the configuration space.
+The state of the system is also called a \textit{configuration}.
+The set of all possible configurations that one or multiple robots can be in is defined as the \textit{configuration-space}.
+Motion planning complexity is often exponential in the dimension of the configuration-space \cite{LaValle2006}.
+Increasing the number of robots and/or possible actions, increases the dimension of the configuration-space.
 It is difficult to engineer algorithms that explore these huge configuration-spaces and provide a continuous path from the initial to the goal configuration, or report failure, if the goal is not reachable.
+
 Decades of research has been done on motion planning.
 The textbooks \cite{LaValle2006} and \cite{Mueller2019} offer a great overview and also explain a lot of important concepts in detail.
-
 When working with configuration-spaces that are uncountable infinite, like the special Euclidean group, one concept that has been successful for many robotics problem is sample-based motion planning.
 
-By taking samples, the planning problem can be reduced from navigating a configuration space to planning on a graph, but one might lose possible solutions.
+By taking samples, the planning problem can be reduced from navigating a configu\-ration-space to planning on a graph, but one might lose possible solutions.
 Algorithms like that are not complete anymore, but by using a good sampling technique you can get arbitrarily close to any point.
 Ways of sampling include random sampling, being probabilistically complete, or using a grid with a resolution that is dynamically adjustable resulting in resolution completeness.
 After sampling, conventional discrete planning algorithms can be applied \cite{LaValle2006}.
 
 One state-of-the-art sampling-based approach uses rapidly-exploring random trees (RRT).
-This method tries to grow a tree-shaped graph in the configuration space by moving into the direction of randomly chosen samples from already explored configurations. That way the space gets explored uniformly without being too fixated on the goal configuration \cite{lavalle1998,lavalle2001}.
+This method tries to grow a tree-shaped graph in the configuration-space by moving into the direction of randomly chosen samples from already explored configurations. That way the space gets explored uniformly without being too fixated on the goal configuration \cite{lavalle1998,lavalle2001}.
 
 When working with multiple robots, the interaction of robots with each other becomes important.
 One interesting idea is that single robots can connect to form larger structures.
-This is referred to as self-assembly and E. Winfree \cite{winfree1998} proposed the abstract Tile Assembly Model (aTAM) in the context of assembling DNA.
+This is referred to as self-assembly and Winfree \cite{winfree1998} proposed the abstract Tile Assembly Model (aTAM) in the context of assembling DNA.
 In this model, particles can have different sets of glues and connect according to certain rules regarding the glue type.
 However, Winfree considers this process to be non-deterministic, so there is no exact instruction on how to assemble a desired structure.
 
@@ -55,6 +55,8 @@ One model more related to the magnetic modular cubes is the Tilt model from Beck
 In the Tilt model, all tiles move into one of the cardinal directions until hitting an obstacle.
 Different variations of the model include moving everything only one step, or the maximally possible amount.
 It offers a solution for motion planning problems when robots are controlled uniformly by external global control inputs.
+
+\newpage
 
 In \cite{Becker2014_SP} it is shown that transforming one configuration into another, known as the reconfiguration-problem, is NP-hard.
 Caballero et al.\ \cite{caballero2020} also researched complexity of problems regarding the Tilt model.
@@ -65,10 +67,10 @@ In particular, Becker et al.\ \cite{Becker2014} create connected logic gates tha
 More on the side of self-assembly, in \cite{Becker2020} the construction of desired shapes using the tilt model is researched.
 It presents a method that can determine a building sequence for a polyomino by adding one tile at a time, considering the rules of Tilt.
 Also examined are ways of modifying the environment to create factories that construct shapes in a pipeline by repeating the same global control inputs.
-Shapes can be constructed more efficiently by combining multi-tiled shapes to an even bigger structure.
+Shapes can be constructed more efficiently by combining multi-tiled shapes to an even larger structure.
 One article considering the construction with so-called sub-assemblies is proposed by A. Schmidt \cite{Schmidt2018}.
 
-Most recently, Bhattacharjee et al.\ \cite{Bhattacharjee2022} developed the magnetic modular cubes.
+Recently, Bhattacharjee et al.\ \cite{Bhattacharjee2022} developed the magnetic modular cubes.
 These robots contain embedded permanent magnets and have no computation or power supply.
 Instead, they are controlled by an external time-varying magnetic field and are able to perform various actions.
 Most importantly, they can rotate in place and use a technique called pivot walking to move either left or right in a local coordinate frame.
@@ -84,13 +86,13 @@ One interesting paper from Blumenberg et al.\ \cite{blumenberg2023} explores the
 The author provides different algorithmic approaches using various distance heuristics and a solution making use of RRTs.
 
 Lu et al.\ \cite{Lu2023} are working on establishing closed-loop control for magnetic modular cubes by using computer vision-based feedback of the workspace.
-The used motion planner is still working in a discrete setting, but can assembly specific target shapes, while handling collision events of estimated continuous motion.
+The used motion planner is still working in a discrete setting, but can assembly specified target shapes, while handling collision events of estimated continuous motion.
 
-
+\newpage
 
 \section{Contribution}
 
-We provide more information about the general framework of magnetic modular cubes on which this thesis relies in \autoref{chap:prelim}.
+We provide more information about the general framework of magnetic modular cubes in \autoref{chap:prelim}.
 
 In \autoref{chap:local} we develop a local planner finding control sequences that connect two magnetic modular cube structures at desired faces.
 We do this with a closed-loop algorithm to account for all types of collision events.
@@ -108,5 +110,4 @@ The use of RRTs would be too inefficient, since we are working with a high fidel
 Results evaluating our global planner are presented in \autoref{chap:results}.
 We experimented with polyominoes of up to 12 cubes and in various custom and randomly generated shapes.
 Furthermore we tested different rectangular workspaces and the reliability of the global planner.  
-
 A conclusion with possible directions for future work is given in \autoref{chap:conclusion}.

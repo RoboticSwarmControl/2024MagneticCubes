@@ -41,6 +41,8 @@ When also considering $\mathcal{B}$, a rotation of the magnetic field rotates $r
 The goal is to find this angular difference $\beta$, so that the cubes are aligned.
 There are two approaches for alignment: Straight-aligning and offset-aligning.
 
+\newpage
+
 \paragraph{Straight-Aligning}
 
 For straight aligning we define a vector $\overrightarrow{\mathcal{A}\mathcal{B}} = p_{c_\mathcal{B}} - p_{c_\mathcal{A}}$ pointing from $c_\mathcal{A}$ to $c_\mathcal{B}$.
@@ -89,6 +91,7 @@ Otherwise, the minimum of all the calculated values is returned.
 This way we at least get as close to an alignment as possible.
 
 
+
 \section{Moving Polyominoes Together}
 \label{sec:walk_wait}
 
@@ -98,7 +101,7 @@ If we want to connect an east face of polyomino $\mathcal{A}$ to a west face of 
 When $\mathcal{A}$ should be connected at a south face of $\mathcal{B}$, $\mathcal{A}$ can now walk into east or west direction towards $\mathcal{B}$, and $\mathcal{B}$ could again do the opposite.
 We call this the \textit{slide-in direction} $\vec{m} \in \{\vec{E}, \vec{W}\}$, which states that $\mathcal{B}$ is positioned in direction $\vec{m}$ of $\mathcal{A}$.
 Both slide-in directions can be achieved in any configuration with offset-aligning from \autoref{sec:align}.
-In \autoref{fig:aligning} b) shows what difference the slide-in directions can make.
+\autoref{fig:aligning} b) shows what difference the slide-in directions can make.
 In this example, establishing a connection by letting $\mathcal{A}$ move towards $\mathcal{B}$ in west direction (top) is possible, but by moving $\mathcal{A}$ in east direction towards $\mathcal{B}$ (bottom), other cubes of the polyominoes are blocking the way.
 We check if a slide-in direction is possible in a discrete local coordinate system of the polyominoes.
 More on that in \autoref{sec:plan}.
@@ -128,8 +131,9 @@ This will automatically adjust the alignment, but for even more precision we als
 \label{sec:plan}
 
 A plan is a sequence of actions $A = a_1, ... , a_k$ that, when applied to an initial configuration $g_\textit{init}$, leads to a goal configuration $g_\textit{goal}$.
-Two plans can be concatenated when the goal of the first plan matches with the initial configuration of the second.
+Two plans can be concatenated when $g_\textit{goal}$ of the first plan matches with $g_\textit{init}$ of the second.
 That way, multiple local plans can be connected to form a global plan.
+
 We define a metric to compare and evaluate plans based on the rotational cost of its actions.
 We only consider longitude magnetic field rotations, not latitude elevation.
 Let $a_i$ be a normal rotation of angle $\beta$, then $\text{cost}(a_i) = |\beta|$.
@@ -138,6 +142,7 @@ The cost for the plan is the sum of the costs of all its actions
 \begin{equation}
 \text{cost}(A) = \sum_{i=1}^{k} \text{cost}(a_i) \,.
 \end{equation}
+
 A local plan is successful if $g_\textit{goal}$ contains a polyomino with the desired connection of $c_\mathcal{A}$ and $c_\mathcal{B}$ at $(e_\mathcal{A}, e_\mathcal{B})$.
 The plan state $s$ describes if a plan is successful or not.
 There are several reasons why the local planner might fail to develop a plan:
@@ -167,18 +172,6 @@ When pre-checking this condition, we can state failure if both directions are no
 Otherwise, we can align with respect to the valid slide-in direction, or try out both, if both are possible.
 Again, this condition needs to be re-checked frequently, due to changing polyominoes.
 
-\paragraph{Polyominoes being Stuck}
-
-Polyominoes can get stuck in corners or on walls of the workspace.
-In this state it is not possible to decrease the distance of $\mathcal{A}$ and $\mathcal{B}$ by pivot walking.
-We can identify this state when the positions  of both $c_\mathcal{A}$ and $c_\mathcal{B}$ do not change after a certain amount of pivot walking motions.
-
-When stuck while trying to establish a north-south connection, a straight-align, instead of an offset-align, can resolve the situation.
-Success depends on the distance of the cubes after straight-aligning.
-If the distance is too big for magnetic forces to act, failure is reported.
-If the cubes are close enough, the local planner waits until magnetic attraction connects $e_\mathcal{A}$ and $e_\mathcal{B}$.
-
-
 \paragraph{Connecting in Caves}
 
 \begin{figure}
@@ -201,15 +194,20 @@ But even caves with depth $2 r_C$ are hard to handle.
 Inserting into a cave can be done by pivot walking, which only works for east-west caves, or by letting magnetic forces attract $e_\mathcal{A}$ and $e_\mathcal{B}$.
 Relying on magnetic forces alone seems promising, since it would work for both cave types, but in reality not only the forces of the connection-faces are present.
 All forces between other magnets prevent an easy insertion into the cave.
-In our simulator the connection-face will be more attracted or repelled by faces outside the cave, then the once inside.
+In our simulator the connection-face will be more attracted or repelled by faces outside the cave, then by the once inside.
 Pivot walking into east-west caves, even with small values for $\alpha$, also has a high failure rate because of other magnets.
 The local planner states failure immediately when polyominoes should be connected in any cave-type.
 
-\paragraph{Invalid Polyominoes}
+\paragraph{Polyominoes being Stuck}
 
-Because construction of invalid polyominoes (\autoref{sec:polys}) is hard to handle on a global scale, we already omit plans containing them in our local planner.
-Failure is stated if an invalid polyomino is created at any point during planning.
-We also pre-check (and frequently re-check) if the polyomino that will be created by establishing the connection would itself be invalid. 
+Polyominoes can get stuck in corners or on walls of the workspace.
+In this state it is not possible to decrease the distance of $\mathcal{A}$ and $\mathcal{B}$ by pivot walking.
+We can identify this state when the positions  of both $c_\mathcal{A}$ and $c_\mathcal{B}$ do not change after a certain amount of pivot walking motions.
+
+When stuck while trying to establish a north-south connection, a straight-align, instead of an offset-align, can resolve the situation.
+Success depends on the distance of the cubes after straight-aligning.
+If the distance is too big for magnetic forces to act, failure is reported.
+If the cubes are close enough, the local planner waits until magnetic attraction connects $e_\mathcal{A}$ and $e_\mathcal{B}$.
 
 \paragraph{Maximum Movement Capacity}
 
@@ -217,6 +215,13 @@ As a worst-case failure, we limit the amount of movement $\mathcal{A}$ and $\mat
 Whenever a pivot walking motion is done, we sum up the distances that $c_\mathcal{A}$ and $c_\mathcal{B}$ moved together.
 We define a maximum movement capacity of $2\cdot(\text{width} + \text{height})$ dependent on the size of the workspace.
 This capacity gives the polyominoes enough movement, so that both can move along a horizontal and vertical workspace boundary-wall, which should be sufficient to establish a connection.
+
+\paragraph{Invalid Polyominoes}
+
+Because construction of invalid polyominoes (\autoref{sec:polys}) is hard to handle on a global scale, we already omit plans containing them in our local planner.
+Failure is stated if an invalid polyomino is created at any point during planning.
+We also pre-check (and frequently re-check) if the polyomino that will be created by establishing the connection would itself be invalid. 
+
 
 \section{Local Planning Algorithm}
 \label{sec:local_algo}
@@ -226,11 +231,9 @@ This capacity gives the polyominoes enough movement, so that both can move along
 	\label{algo:local_algo}
 	\begin{algorithmic}[1]
 		\REQUIRE $c_\mathcal{A}$, $c_\mathcal{B}$, $e_\mathcal{A}$, $e_\mathcal{B}$, $\vec{w}$, $\vec{m}$, $g_\textit{init}$ 
-		\ENSURE $(s, g_\textit{goal}, A)$ \COMMENT{state $s$ and actions $A$ leading to configuration $g_\textit{goal}$}
-		\STATE $s \gets \text{undefined}$
-		\STATE $g_\textit{goal} \gets g_\textit{init}$
-		\STATE $A \gets \{\}$
-		\STATE $\text{wait} \gets$ \TRUE
+		\ENSURE $\{s, g_\textit{goal}, A\}$ \COMMENT{state $s$ and actions $A$ leading to configuration $g_\textit{goal}$}
+		\STATE $\{s, g_\textit{goal}, A\} \gets \{\text{undefined}, g_\textit{init}, \{\}\}$
+		\STATE $\textit{wait} \gets$ \TRUE
 		\LOOP
 			\IF[aligning straight or with offset]{$e_\mathcal{A} \in \{\vec{E},\vec{W}\}$}
 				\STATE $a \gets \text{\scshape Align-Straight}(c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A})$
@@ -241,14 +244,14 @@ This capacity gives the polyominoes enough movement, so that both can move along
 			\STATE $A \gets \text{\scshape Append}(A, a)$
 			\STATE $s \gets \text{\scshape Update-State}(g_\textit{goal}, c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A}, \vec{m})$
 			\IF[first time checking for failure or success]{$s \neq \text{undefined}$}
-				\RETURN $(s, g_\textit{goal}, A)$
+				\RETURN $\{s, g_\textit{goal}, A\}$
 			\ENDIF
-			\IF[wait or walk]{$\text{\scshape Critical-Distance}(c_\mathcal{A}, c_\mathcal{B})$ \AND wait}
+			\IF[wait or walk]{$\text{\scshape Critical-Distance}(c_\mathcal{A}, c_\mathcal{B})$ \AND \textit{wait}}
 				\STATE $a \gets \text{\scshape Wait}()$
-				\STATE $\text{wait} \gets$ \FALSE
+				\STATE $\textit{wait} \gets$ \FALSE
 			\ELSE
 				\STATE $a \gets \text{\scshape Walk}(c_\mathcal{A}, c_\mathcal{B}, \vec{w})$ \COMMENT{$a$ is $\frac{\#\textit{steps}}{2}$ actions (\autoref{sec:walk_wait})}
-				\STATE $\text{wait} \gets$ \TRUE
+				\STATE $\textit{wait} \gets$ \TRUE
 			\ENDIF
 			\STATE $g_\textit{goal} \gets \text{\scshape Simulate}(g_\textit{goal}, a)$
 			\STATE $A \gets \text{\scshape Append}(A, a)$
@@ -264,7 +267,7 @@ This capacity gives the polyominoes enough movement, so that both can move along
 			\ENDIF
 			\STATE $s \gets \text{\scshape Update-State}(g_\textit{goal}, c_\mathcal{A}, c_\mathcal{B}, e_\mathcal{A}, \vec{m})$
 			\IF[second time checking for failure or success]{$s \neq \text{undefined}$}
-				\RETURN $(s, g_\textit{goal}, A)$
+				\RETURN $\{s, g_\textit{goal}, A\}$
 			\ENDIF
 		\ENDLOOP 
 	\end{algorithmic}
@@ -290,12 +293,14 @@ A plan that ended due to polyominoes being stuck, or a reached maximum movement 
 Plans creating invalid polyominoes or polyominoes with caves are omitted by the global planner.
 
 The plans are developed in parallel and if one process finishes with a successful plan, the execution of all other processes can be canceled.
-This saves computation time, although we might not return the best plan, since the fastest computation does not automatically mean the lowest costs.
+This saves computation time, although we might not return the best plan, since the fastest computation does not automatically mean the lowest rotational cost.
 Generally speaking, a low computation time can be linked with low rotational cost, because the local planner spends the majority of time, about $98\%$, on simulating actions.
+
+\newpage
 
 \paragraph{Align-Walk-Realign}
 
-\autoref{algo:local_algo} takes the connection-cubes and edges $c_\mathcal{A}$, $c_\mathcal{B}$, $e_\mathcal{A}$, $e_\mathcal{B}$ along with $\vec{w}$, $\vec{m}$ and an initial configuration $g_\textit{init}$ as inputs and returns a plan-state $s$ along with the configuration $g_\textit{goal}$ the algorithm ended in after applying the sequence of actions $A$.
+\autoref{algo:local_algo} takes the connection-cubes and edges $c_\mathcal{A}$, $c_\mathcal{B}$, $e_\mathcal{A}$, $e_\mathcal{B}$ along with $\vec{w}$, $\vec{m}$ and an initial configuration $g_\textit{init}$ as inputs and returns a plan state $s$ along with the configuration $g_\textit{goal}$ the algorithm ended in after applying the sequence of actions $A$.
 
 The algorithm runs in a loop until $s$ changes to success or one of the failure conditions.
 The failure and success conditions are evaluated twice per iteration with {\scshape Update-State}.
@@ -307,10 +312,10 @@ We either perform a straight or an offset-align, depending on $e_\mathcal{A}$ an
 The offset-align is done with the direction of $\vec{m}$.
 After aligning we walk the estimated amount of pivot walking cycles (\autoref{sec:walk_wait}) in direction $\vec{w}$ with {\scshape Walk}, or we wait with {\scshape Wait}, if $c_\mathcal{A}$ and $c_\mathcal{B}$ are in close proximity, determined by {\scshape Critical-Distance}.
 If we waited in the previous iteration, we walk in the current one and if we walked previously, we wait in the current iteration.
-This behavior is toggled by the variable ``wait''.
+This behavior is toggled by the variable \textit{wait}.
 
 The stuck condition is evaluated with {\scshape Stuck} and does not state failure immediately, since a straight-align might be able to fix the situation.
-When the polyominoes are stuck, the algorithm performs a straight-align and waits as long as this changes the stuck condition.
+When the polyominoes are stuck, the algorithm performs a straight-align and waits as long as magnetic attraction changes the stuck condition.
 
 \subsection{Complexity}
 \label{sec:local_complex}
