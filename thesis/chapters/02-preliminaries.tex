@@ -33,7 +33,7 @@ In fact, this is the reason a distinct definition of front, back and side is eve
 Since the front is always pointing to the north pole of the magnetic field, we also call it the north face, or north edge in two dimensions.
 All the other faces can also be called by their corresponding cardinal direction.
 Each face is represented by a vector $e \in \{ \vec{N},\vec{E},\vec{S},\vec{W}\}$ with $\lVert e \rVert = 1$ pointing in the cardinal direction of the magnetic field.
-For simplification we refer to magnets by their outwards pointing pole.
+For simplification, we refer to magnets by their outwards pointing pole.
 
 Furthermore, two different cube types are defined:
 Either both side magnets point out their north pole, these cubes are called red cubes, or they point out their south pole, which is then called a blue cube.
@@ -115,7 +115,7 @@ The resulting polyomino in its grid representation has two east-west connections
 \begin{figure}
 	\centering
 	\includegraphics[width=0.90\textwidth]{figures/pivot_walking.pdf}
-	\caption[Illustration of the pivot walking motion]{Illustration of the pivot walking motion in detail. a) shows the six pivot walking steps for a single red cube. You can see the orientation of the magnetic field (bigger arrow indicates elevation, so in step 1 the south pole is lifted up). In b) an example polyomino with its pivot axis, edges and points is shown. c) illustrates the rotation of the pivot axis labeled with all the pivot walking parameters.}
+	\caption[Illustration of the pivot walking motion]{Illustration of the pivot walking motion in detail. a) shows the six pivot walking steps for a single red cube. You can see the orientation of the magnetic field (bigger arrow indicates elevation, so in step 1 the south pole is lifted). In b) an example polyomino with its pivot axis, edges and points is shown. c) illustrates the rotation of the pivot axis labeled with all the pivot walking parameters.}
 	\label{fig:pivot_walking}
 \end{figure}
 
@@ -129,15 +129,15 @@ Because rotation and pivot walking are sufficient to reach any position in the w
 
 \newpage
 
-When elevating the magnetic field orientation by lifting up the south pole slightly, all polyominoes will pivot on the north face bottom edges of their most north-placed cubes.
-Lifting up the north pole does the opposite. The polyominoes will pivot on the south face bottom edges of their most south-placed cubes.
+When elevating the magnetic field orientation by lifting the south pole slightly, all polyominoes will pivot on the north face bottom edges of their most north-placed cubes.
+Lifting the north pole does the opposite. The polyominoes will pivot on the south face bottom edges of their most south-placed cubes.
 The sum of all these cube edges is called the north or south pivot edge.
 By keeping the magnetic field elevated and rotating around the normal vector of the workspace plane, the polyominoes will rotate around the center point of their pivot edge.
 This point is called the north or south pivot point.
 All of these edges and points are illustrated in \autoref{fig:pivot_walking} b).
 
 
-\paragraph{pivot walking}
+\paragraph{Pivot Walking}
 
 \begin{figure}
 	\centering
@@ -163,7 +163,7 @@ The pivot walking steps are illustrated in \autoref{fig:pivot_walking} a) and it
 
 After one pivot walking cycle, the polyomino has moved by a displacement vector $\vec{d}$, so $\lVert \vec{d} \rVert$ is the pivot walking distance.
 The direction and length of $\vec{d}$ changes with the shape of a polyomino.
-The movement is always perpendicular to the pivot walking axis $\vec{a}$, which is a vector pointing from the north to  the south pivot point, visualized in \autoref{fig:pivot_walking} b).
+The movement is always perpendicular to the pivot walking axis $\vec{a}$, which is a vector pointing from the north to the south pivot point, visualized in \autoref{fig:pivot_walking} b).
 $\lVert \vec{d} \rVert$ can be calculated with
 \begin{equation}\label{eq:pwalk_dist}
 \lVert \vec{d} \rVert = 2 \cdot \sin\left(\frac{\alpha}{2} \right) \cdot \lVert \vec{a} \rVert \,.

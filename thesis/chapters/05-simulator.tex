@@ -18,7 +18,7 @@
 Our simulator modeling the behavior of magnetic modular cubes uses the 2D physics library Pymunk\footnote{Pymunk: \url{https://www.pymunk.org/}}.
 This library is built for the Python 3 and Python 2 environment based on the 2D physics library Chipmunk\footnote{Chipmunk: \url{http://chipmunk-physics.net/}}.
 We use Pymunk, because it can be easily integrated and customized in a Python implementation.
-Furthermore it is light-weight and capable of running headless, but also offers an interface for Pygame\footnote{Pygame: \url{https://www.pygame.org/}}, which we use to visualize developed motion plans and to allow user controls.
+Furthermore, it is light-weight and capable of running headless, but also offers an interface for Pygame\footnote{Pygame: \url{https://www.pygame.org/}}, which we use to visualize developed motion plans and to allow user controls.
 As a disadvantage of a 2D simulator, we can only approximate 3D movement, in particular pivot walking.
 This way we trade simulation accuracy for faster simulation time, which is necessary to develop global plans in a reasonable time.
 
@@ -31,7 +31,7 @@ Two other crucial functionalities are queuing in motions for simulation and noti
 After handling the motion control, further explained in \autoref{sec:motion_control}, the simulator enters the Pymunk-step.
 
 The Pymunk-step is a library function, responsible for updating the simulation environment by a certain time step.
-The duration of a time step is a parameter that allows a trade off between simulation accuracy and simulation time. 
+The duration of a time step is a parameter that allows a trade-off between simulation accuracy and simulation time. 
 Inside the Pymunk-step forces are applied to the cubes and collisions with workspace boundaries and between cubes are handled (\autoref{sec:coll_handling}).
 
 After the Pymunk-step, the magnetic forces between the cubes' permanent magnets are calculated (\autoref{sec:force_magnet}).
@@ -77,13 +77,13 @@ Polyominoes are stored in a custom data structure that functions both as a list 
 The data structure and the polyominoes themselves are hashable for fast equality and inclusion checks.
 
 Individual orientation and velocities of cubes are not used for planning, but they ensure a correct loading of a configuration that was saved while in motion or when cubes were not, or not yet, aligned with the magnetic field.
-The alignment can be prevented by walls or other cubes, even though we assume perfect alignment with the magnetic field during planning.
+The alignment can be prevented by boundary walls or other cubes, even though we assume perfect alignment with the magnetic field during planning.
 
 
 \section{Collision Handling}
 \label{sec:coll_handling}
 
-Collision is detected and resolved by Pymunk during the Pymunk-step.
+Collisions are detected and resolved by Pymunk during the Pymunk-step.
 For the collision detection Pymunk uses a bounding volume hierarchy of objects in the Pymunk-space.
 We make use of this efficient collision detection for determining cube pairs within critical-distance.
 For that, each cube is surrounded by a circular sensor with a radius of half the critical-distance.
@@ -95,9 +95,9 @@ More on the use of cube pairs within critical-distance in \autoref{sec:force_mag
 
 To model accurate behavior of magnetic modular cubes we calculate and apply the three most significant forces acting on cubes in the workspace:
 Forces between permanent magnets, forces from the global magnetic field and friction with the workspace plane.
-Friction with the workspace boundaries and between cubes is handled by Pymunk's collision detection.
+Friction with the workspace boundaries and between cubes is handled by Pymunk during the Pymunk-step.
 The reason forces are calculated after the Pymunk-step, where they are applied, is because of the cube pairs within critical-distance determined with the collision detection of Pymunk.
-Applying the calculated forces in the next iteration does not effect simulation accuracy.
+Applying the calculated forces in the next iteration does not affect simulation accuracy.
 
 \subsection{Magnet Forces}
 \label{sec:force_magnet}
@@ -120,7 +120,7 @@ Polyominoes in the workspace can be identified based on the marked connections.
 
 The majority of simulation time, about $75\%$, is spent on calculating magnet forces, as shown in \autoref{fig:timeuse}.
 Cubes not within critical-distance are too far away to significantly affect each other with the magnetic forces of their permanent magnets.
-The steep decline of magnetic force with increasing cube distance can be seen in \autoref{fig:magnet_force}.
+The steep decrease of magnetic force with increasing cube distance can be seen in \autoref{fig:magnet_force}.
 We only calculate magnet forces for cube pairs within critical-distance to speed up simulation.
 Because assembling large target structures is the goal of global planning, it is not uncommon that most cubes are within critical-distance.
 For a more efficient simulation we further determine which magnet pairs to consider.
@@ -187,7 +187,7 @@ To ensure a more stable simulator, we apply a nominal friction force
 F_\textit{nom} = -v_{p_\textit{fric}} \cdot m_C \cdot w_\textit{nom}
 \end{equation}
 to all cubes.
-This is is also the reason why $F_\textit{fric}$ is multiplied by $(1 - w_\textit{nom})$.
+This is also the reason why $F_\textit{fric}$ is multiplied by $(1 - w_\textit{nom})$.
 We control the fraction of this force by $w_\textit{nom} = 0.35$.
 
 

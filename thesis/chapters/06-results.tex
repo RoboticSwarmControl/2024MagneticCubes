@@ -71,7 +71,7 @@ The workspace has a size of $50 r_C \times 50 r_C$.
 
 \autoref{fig:AR} shows the distribution of planning time and plan cost for this experiment.
 The first thing to notice is that the global planner behaves non-deterministically.
-Although samples start at the same initial configuration and assemble the same target, multiple plans with varying plan cost and planning times are developed.
+Although samples start with the same initial configuration and assemble the same target, multiple plans with varying plan cost and planning times are developed.
 The amount of plans developed changes per seed-value.
 For seed $101$ when growing the largest and smallest component, or for seed $102$ with minimal distance and growing the smallest component, nearly all data-points are clustered at one spot for both the planning time and plan cost.
 For these seeds and sorting strategies the global planner is stable and develops the same plan for all samples, except for a few outliers.
@@ -174,7 +174,7 @@ For the fraction of timeouts, growing the largest component often exceeds the ot
 \end{figure}
 
 \autoref{fig:AFN_cost} shows the rotational cost of plans that successfully assembled the target.
-The cost increased slightly for bigger polyominoes, but the gradient seems to be flattening out for sizes $11$ and $12$.
+The cost increased slightly for larger polyominoes, but the gradient seems to be flattening out for sizes $11$ and $12$.
 Plan cost is generally in a range of $50$ to $150$ radians, which is the equivalent of $8$ to $24$ full longitude rotations of the magnetic field.
 The different option sorting strategies do not impact the cost of a plan.
 
@@ -259,7 +259,7 @@ In this experiment manually designed polyominoes are assembled from multiple ran
 $100$ samples were taken for each custom polyomino with a workspace size of $50 r_C \times 50 r_C$.
 
 In \autoref{sec:w/h_pattern} we focus on how rectangular polyominoes with varying width/height ratios influence planning time.
-Furthermore we experiment with two patterns of red and blue cubes for each polyomino.
+Furthermore, we experiment with two patterns of red and blue cubes for each polyomino.
 The \textit{switching-column pattern} switches between red and blue cubes column-wise and the \textit{checkerboard pattern} creates a checkerboard of single red and blue cubes.
 A list of these polyominoes can be found in \autoref{fig:AFTS_cb_shapes}.
 
@@ -299,7 +299,7 @@ In \autoref{sec:hard_shape} we analyze the polyomino attributes that are especia
 
 When comparing the planning time of the two cube patterns in \autoref{fig:AFTS_cb_time}, the checkerboard pattern performs worst for all types of rectangular polyominoes.
 It is not a huge difference, but still noticeable.
-For instance, the ``3x3'' polyomino is on average at $50$ seconds planning time, while the ``3x3 cb'' polyomino is at 75 seconds with a wider spread and worst outliers.
+For instance, the ``3x3'' polyomino is on average at $50$ seconds planning time, while the ``3x3 cb'' polyomino is at 75 seconds with a wider spread and worse outliers.
 
 Polyomino shapes with more height than width are faster to assemble.
 ``10x1'' is the best followed by ``5x2'', ``3x3'' and ``2x5''.
@@ -307,7 +307,7 @@ The same order persists for the checkerboard pattern.
 Surprisingly, the ``1x10'' polyomino breaks out of this order.
 Its planning time lays between the ``5x2'' and the ``3x3''.
 
-The ``2x5'' performs significantly worst than all other polyominoes.
+The ``2x5'' performs significantly worse than all other rectangular polyominoes.
 While the majority of instances for all other shapes can be solved in under $100$ seconds, the ``2x5'' exceeds this time with a spread reaching up to $600$ seconds.
 
 For the fraction of timed-out plans shown in \autoref{fig:AFTS_cb_timeout}, the ``2x5'' is the only shape with $10\%$ to $20\%$, depending on the option sorting strategy used.
@@ -348,7 +348,7 @@ The three thick shapes perform much worse with an average of $200$ seconds plann
 The instances have a wide spread in distribution of planning time and timeouts reach $20\%$ for ``I'' and ``H'', and even $30\%$ to $50\%$ for the ``Plus'' shape.
 Assembling the ``Plus'' polyomino holds the worst performance out of all custom and random polyominoes evaluated in this thesis.
 
-Caves and holes have no impact on the performance of the global planner.
+Caves and holes seem to have no impact on the performance of the global planner.
 The option sorting strategies do not show any recognizable pattern, but strong differences between them can be observed.
 Growing the smallest component, while assembling the ``Plus'' shape, reduces the fraction of timeouts by half, compared to the others.
 
@@ -368,7 +368,7 @@ The global planner becomes inefficient when connectivity and increasing width is
 The reason for this could be located within the local planner.
 North-south connections become problematic when the connection-cubes have to move above or below non-connection-cubes to get to their desired position.
 A small example of this can be seen in \autoref{fig:local_plans} where the local plans c) and d) failed because the polyominoes connected to the wrong cubes while trying to slide above them.
-With increasing width the effects become more dramatic.
+With increasing width, failures due to a wrong connection become more likely.
 
 Increasing the offset distance when aligning the connection cubes (\autoref{sec:align}) is not a solution, since a north-south connection cannot be established when magnetic attraction becomes to weak.
 Choosing the right option sorting strategy might make a difference, but it is hard to predict the best strategy for a specific polyomino.
@@ -379,13 +379,14 @@ Other option sorting strategies could be developed to take these problematic con
 \section{Assembly in different Workspaces}
 \label{sec:AFBS}
 
-In this experiment we tested the assembly of randomly generated polyominoes of size $n=9$ with random initial configurations in various rectangular workspaces.
+In this experiment we tested the assembly of randomly generated polyominoes with randomly generated initial configurations in various rectangular workspaces.
+All polyominoes are of size $n=9$ and with $n_\textit{red} = 4$.
 We chose three workspace sizes (S, M, L) in three different aspect ratios ($ 1:1 $, $ 2:1 $, $ 3:1 $) each.
 All aspect ratios for one size result in roughly the same area. The workspaces with their exact widths and heights are listed in \autoref{tab:workspaces}.
 A workspace with aspect ratio $ 1:x $ would produce similar results to one with aspect ratio $ x:1 $, since the magnetic field can be rotated freely.
 The maximum width or height of a polyomino with size $9$ is $18 r_C$.
 We ensured that such a polyomino could fit in all workspace variations while being able to rotate $360$ degrees without getting stuck.
-We analyze the affect of these workspace variations on planning time and rotational cost.
+We analyze the effect of these workspace variations on planning time and rotational cost.
 
 \begin{table}
 	\centering
@@ -421,12 +422,12 @@ We analyze the affect of these workspace variations on planning time and rotatio
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{figures/plots/AFBS_cost.pdf}
-	\caption[Plan cost for workspace variations]{Plan cost in radians of successful plans for different workspace variations with varying areas and aspect ratios. All option sorting strategies are compared with $100$ samples each and outliers are omitted.}
+	\caption[Plan cost for workspace variations]{Plan cost in radians of successful plans for different workspace variations listed in \autoref{tab:workspaces}. All option sorting strategies are compared with $100$ samples each and outliers are omitted.}
 	\label{fig:AFBS_cost}
 \end{figure}
 
 It is not surprising that the rotational cost, presented in \autoref{fig:AFBS_cost}, increases with bigger workspace areas.
-Cubes and walls are further apart, which results in more pivot walking cycles necessary to assemble polyominoes.
+Cubes and boundary walls are further apart, which results in more pivot walking cycles necessary to assemble polyominoes.
 Within a class of same size, increasing the aspect ratio results in slightly more rotational cost as well.
 
 \paragraph{Planning Time} 
@@ -466,7 +467,7 @@ With $n_\textit{red} = 0$, only north-south connections allow the creation of a 
 $n_\textit{red} = \lfloor \frac{n}{2}\rfloor$ holds the biggest variety of polyomino shapes \cite{Lu2021}.
 To exclude the influence of varying polyomino shapes on the experiment, the shape is set to a $10 \times 1$ polyomino.
 $\lfloor \frac{n}{2}\rfloor < n_\textit{red} \leq n$ is equal to $0 \leq n_\textit{blue} \leq \lfloor \frac{n}{2}\rfloor$.
-Conducting the experiment with $n_\textit{red}$ or $n_\textit{blue}$ in equivalent.
+Conducting the experiment with $n_\textit{red}$ or $n_\textit{blue}$ is equivalent.
 The patterns of red and blue cubes within the $10 \times 1$ polyomino and the initial configurations are randomly generated in a workspace of size $50 r_C \times 50 r_C$.
 For each number of red cubes $100$ samples were taken.
 
@@ -480,11 +481,11 @@ For each number of red cubes $100$ samples were taken.
 \end{figure}
 
 \autoref{fig:AFNR_time} shows the distribution of planning time for this experiment.
-By increasing $n_\textit{red}$ from $0$ to $1$ a clear increase in planning time is visible.
+By increasing $n_\textit{red}$ from $0$ to $1$, a clear increase in planning time is visible.
 With only blue cubes, every cube can be placed anywhere in the polyomino.
 By introducing one red cube, position becomes important.
 Further increasing the number of $n_\textit{red}$ does not affect planning time significantly.
-For these vertical straight line polyominoes growing the smallest component performs slightly worse than the other two option sorting strategies.
+For these vertical line polyominoes growing the smallest component performs slightly worse than the other two option sorting strategies.
 Nearly no instances timed out during planning. 
 
 

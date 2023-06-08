@@ -47,7 +47,7 @@ There are two approaches for alignment: Straight-aligning and offset-aligning.
 
 For straight aligning we define a vector $\overrightarrow{\mathcal{A}\mathcal{B}} = p_{c_\mathcal{B}} - p_{c_\mathcal{A}}$ pointing from $c_\mathcal{A}$ to $c_\mathcal{B}$.
 The alignment is done when $e_\mathcal{A}$ points in the same direction as $\overrightarrow{\mathcal{A}\mathcal{B}}$, so $\angle \left( e_\mathcal{A}, \overrightarrow{\mathcal{A}\mathcal{B}} \right) = 0$.
-Consequently $\angle \left( e_\mathcal{B}, \overrightarrow{\mathcal{A}\mathcal{B}} \right) = \pi$, since $e_\mathcal{A}$ and $e_\mathcal{B}$ have to be opposite edges for a connection.
+Consequently, $\angle \left( e_\mathcal{B}, \overrightarrow{\mathcal{A}\mathcal{B}} \right) = \pi$, since $e_\mathcal{A}$ and $e_\mathcal{B}$ have to be opposite edges for a connection.
 
 \autoref{fig:aligning} a) illustrates a straight-align for an east-west connection with all its parameters.
 The two polyominoes could now theoretically pivot walk together and connect at the desired edges.
@@ -106,17 +106,17 @@ In this example, establishing a connection by letting $\mathcal{A}$ move towards
 We check if a slide-in direction is possible in a discrete local coordinate system of the polyominoes.
 More on that in \autoref{sec:plan}.
 
-Since both polyominoes $\mathcal{A}$ and $\mathcal{B}$ perform pivot walking motions simultaneously due to global control, a connection will most likely happen when one polyomino walks into a boundary-wall.
+Since both polyominoes $\mathcal{A}$ and $\mathcal{B}$ perform pivot walking motions simultaneously due to global control, a connection will most likely happen when one polyomino walks into a boundary wall.
 A connection can only happen at arbitrary positions of the workspace when one polyomino is faster than the other, meaning it has a greater pivot walking distance $\lVert \vec{d} \rVert$.
 
 At first glance it seems easy to move polyominoes together, after the connection-cubes are aligned, but in reality it becomes more difficult.
 When a polyomino is continuously walking against a wall at any angle other than 90 degree, the polyomino will move alongside the wall.
-In \cite{schmidt2020} research is done on how friction with boundary-walls under global control forces can be used to calculate the necessary motions for reaching a desired goal configuration.
+In \cite{schmidt2020} research is done on how friction with boundary walls under global control forces can be used to calculate the necessary motions for reaching a desired goal configuration.
 The friction forces depend greatly on material choices and are stochastic.
 
 Another difficulty are different orientations of displacement vectors, since a pivot walking motion is actually performed in the direction of the displacement $\vec{d}$ and not directly in direction of $\vec{w}$.
 It is mathematically possible to calculate the right orientation of the magnetic field to result in a collision after a certain number of pivot walking cycles for both polyominoes with different displacement directions, even at desired edges, but it is not guaranteed that this collision-point is within the workspace boundaries.
-In that case the calculations of friction and displacement have to be combined together with other factors like polyominoes blocking each other or changing their shape due to self-assembly.
+In that case the calculations of friction and displacement have to be combined with other factors like polyominoes blocking each other or changing their shape due to self-assembly.
 
 This is fairly complex and recalculating would be necessary in many situations, so we choose a simpler dynamic approach.
 We estimate the pivot walking cycles necessary until $c_\mathcal{A}$ has moved to the original position of $c_\mathcal{B}$ with
@@ -150,9 +150,9 @@ There are several reasons why the local planner might fail to develop a plan:
 \paragraph{Impossible Connection}
 
 Most failures occur because it is not possible to connect the polyominoes.
-First of all, $e_\mathcal{A}$ and $e_\mathcal{B}$ must to be free, so no other cube is already connected to them.
+First of all, $e_\mathcal{A}$ and $e_\mathcal{B}$ must be free, so no other cube is already connected to them.
 Even if both edges are free, other cubes than $c_\mathcal{A}$ and $c_\mathcal{B}$ can prevent a connection.
-By connecting two polyominoes in one local discrete coordinate-system, for all cubes $c_1$, $c_2$ with coordinates $(x_1, y_1)$, $(x_2, y_2)$: $\left|x_1 - x_2\right| < 1$ and $\left|y_1 - y_2\right| < 1$ should only be true if $c_1 \equiv c_2$.
+By connecting two polyominoes in one local discrete coordinate-system, for all cubes $c_1$, $c_2$ with coordinates $(x_1, y_1)$, $(x_2, y_2)$: $\left|x_1 - x_2\right| < 1$ and $\left|y_1 - y_2\right| < 1$ should only be true if $c_1 = c_2$.
 If two positions of distinct cubes are equal, we call this an overlap that prevents the connection.
 A connection is never possible if $e_\mathcal{A}$ and $e_\mathcal{B}$ are part of the same polyomino and not already connected.
 
@@ -214,7 +214,7 @@ If the cubes are close enough, the local planner waits until magnetic attraction
 As a worst-case failure, we limit the amount of movement $\mathcal{A}$ and $\mathcal{B}$ are able to do.
 Whenever a pivot walking motion is done, we sum up the distances that $c_\mathcal{A}$ and $c_\mathcal{B}$ moved together.
 We define a maximum movement capacity of $2\cdot(\text{width} + \text{height})$ dependent on the size of the workspace.
-This capacity gives the polyominoes enough movement, so that both can move along a horizontal and vertical workspace boundary-wall, which should be sufficient to establish a connection.
+This capacity gives the polyominoes enough movement, so that both can move along a horizontal and vertical workspace boundary wall, which should be sufficient to establish a connection.
 
 \paragraph{Invalid Polyominoes}
 

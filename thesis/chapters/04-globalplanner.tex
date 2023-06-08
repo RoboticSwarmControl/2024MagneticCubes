@@ -20,8 +20,8 @@ However, this does not consider sub-assemblies, so all cubes that are not to be 
 
 It is hard to prevent sub-assemblies with magnetic cubes following the rules of the Tilt model \cite{Becker2014_SP}.
 Our approach uses an enumeration of ways to cut a polyomino into two parts (\autoref{sec:twocutting}), which will be used for generating a so-called two-cut-sub-assembly graph (\autoref{sec:tcsa}).
-This graph functions as a building instruction along side the exploration of the configuration-space.
-\autoref{sec:connect_options} provides a closer look on the use of this graph for decision making and \autoref{sec:local_in_global} further explains the usage of the local planner on a global scale. 
+This graph functions as a building instruction alongside the exploration of the configuration-space.
+\autoref{sec:connect_options} provides a closer look on the use of this graph for decision-making and \autoref{sec:local_in_global} further explains the usage of the local planner on a global scale. 
 Finally, \autoref{sec:global_algo} combines previous techniques to a global planning algorithm.
 For the algorithm the number of cubes in the workspace is limited to the size of $\mathcal{T}$.
 An explanation on why is this done and why the problem becomes more complex when working with extra cubes is provided in \autoref{sec:more_cubes}.
@@ -64,7 +64,7 @@ After the path ended, the connections at its edges are removed and the path is a
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{figures/tcsa.pdf}
-	\caption[Example of a two-cut-sub-assembly graph]{Example of a two-cut-sub-assembly graph for a four-cube L-shape. The polyomino sets are illustrated as ellipses. If the polyominoes of a set are not numbered, there is only one occurrence of this polyomino. Otherwise the number of occurrences is placed left of the polyomino. The sets are numbered as if the graph was produced by \autoref{algo:build_tcsa} starting from $S_\mathcal{T}$. The weights of edges are illustrated as rectangular boxes containing the polyominoes that need to be connected at specific edge path, marked in yellow.}
+	\caption[Example of a two-cut-sub-assembly graph]{Example of a two-cut-sub-assembly graph for a four-cube L-shape. The polyomino sets are illustrated as ellipses. If the polyominoes of a set are not numbered, there is only one occurrence of this polyomino. Otherwise the number of occurrences is placed left of the polyomino. The sets are numbered as if the graph was produced by \autoref{algo:build_tcsa} starting from $S_\mathcal{T}$. The weights of edges are illustrated as rectangular boxes containing the polyominoes that need to be connected at specific edge paths, marked in yellow.}
 	\label{fig:tcsa}
 \end{figure}
 
@@ -76,12 +76,13 @@ After the path ended, the connections at its edges are removed and the path is a
 \end{figure}
 
 The two-cut-sub-assembly graph, abbreviated as TCSA graph, functions as a building instruction for a specific target polyomino.
-For a target polyomino $\mathcal{T}$, we will call it $G_{\textit{TCSA}}(\mathcal{T}) = (V,E)$ represented by nodes $V$ and edges $E$.
+For a target polyomino $\mathcal{T}$, we will call it $G_{\textit{TCSA}}(\mathcal{T}) = \{V,E\}$ represented by nodes $V$ and edges $E$.
+
 The TCSA graph works with sets of polyominoes as nodes.
 While a configuration $g$ holds information about orientation and position of physically distinct polyominoes, the corresponding polyomino set $S(g)$ only enumerates the polyomino types present in $g$.
 If $g$ contains multiple polyominoes of the same type, $S(g)$ still stores the amount of the polyomino type, but does not distinguish between the actual polyominoes.
 
-Two nodes $S_0$ and $S_1$ of the TSCA graph are connected with an edge $\{S_0,t_c,S_1\}$ if $S_0$ can be transformed to $S_1$ by connecting two polyomino types contained in $S_0$.
+Two nodes $S_0$ and $S_1$ of the TSCA graph are connected with an edge $\{S_0,t_c,S_1\}$ if $S_0$ can be transformed to $S_1$ by connecting two polyominoes contained in $S_0$.
 The edge path specifying this connection is stored as the weight $t_c$.
 $S_0$ and $S_1$ can be connected by multiple edges, if there are different connections that produce the same outcome.
 The edges differ in their weights as shown in \autoref{fig:tcsa_multiedge}.
@@ -93,6 +94,31 @@ We will further explain the building process along with an example of a TCSA gra
 
 
 \paragraph{Building a TCSA Graph}
+
+\autoref{algo:build_tcsa} describes the process of building $G_{\textit{TCSA}}(\mathcal{T})$ for the target $\mathcal{T}$.
+The algorithm works through each newly added node in $V$ in a breadth-first-search manner.
+The first node added to $V$ is $S_\mathcal{T}$, which is a polyomino set only containing the target polyomino.
+
+New nodes and edges are determined by two-cutting every polyomino type $\mathcal{A}$ in the current set $S_i$ by every possible monotone two-cut of $\mathcal{A}$.
+This is done by enumerating the two-cuts with {\scshape Two-Cuts}, the way it is described in \autoref{sec:twocutting}.
+The cutting, done with {\scshape Cut-Polyomino}, results in the two sub-polyominoes $\mathcal{A}_1$ and $\mathcal{A}_2$.
+
+$S_\textit{new}$ contains the same polyominoes as $S_i$ with the exception that one occurrence of $\mathcal{A}$ is removed and replaced by one occurrence of $\mathcal{A}_1$ and $\mathcal{A}_2$.
+Each $S_\textit{new}$ is the result of cutting one polyomino of $S_i$ at a specific two-cut $t_c$.
+If $S_\textit{new}$ is not already contained in $V$, it can be added, which also queues it for future iterations of the breadth-first-search.
+
+No matter if $S_\textit{new}$ is contained in $V$ or not, an edge going from $S_\textit{new}$ to $S_i$ with $t_c$ as the weight is added to the edges $E$.
+This allows multiple edges, as seen in \autoref{fig:tcsa_multiedge}, and multiple outgoing edges to different nodes, which can be observed in \autoref{fig:tcsa}, where different connections in $S_4$ lead to $S_1$ or $S_2$.
+
+Each two-cut applied to a polyomino set increases its amount of polyominoes by one.
+Let $n$ be the size of $\mathcal{T}$, then $n-1$ two-cuts applied to $S_\mathcal{T}$ will produce a polyomino set $S_\textit{trivial}$ containing $n$ trivial polyominoes, as it is the case for $S_7$ in \autoref{fig:tcsa}.
+All $S_i$ will inevitably end up in this situation and the algorithm will return $\{V,E\}$, since trivial polyominoes cannot be cut anymore.
+
+This implies that no matter which edges are chosen along the way, $n-1$ edges need to be traversed to get from $S_\textit{trivial}$ to $S_\mathcal{T}$.
+We describe this attribute by giving the TCSA graph a depth of $n$.
+The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nodes matches the order they were added by \autoref{algo:build_tcsa}.
+
+\vspace{0.32em}
 
 \begin{algorithm}
 	\caption{$\text{\scshape Build-TCSA-Graph}$}
@@ -121,28 +147,6 @@ We will further explain the building process along with an example of a TCSA gra
 	\end{algorithmic}
 \end{algorithm}
 
-\autoref{algo:build_tcsa} describes the process of building $G_{\textit{TCSA}}(\mathcal{T})$ for the target $\mathcal{T}$.
-The algorithm works through each newly added node in $V$ in a breadth-first-search manner.
-The first node added to $V$ is $S_\mathcal{T}$, which is a polyomino set only containing the target shape.
-
-New nodes and edges are determined by two-cutting every polyomino type $\mathcal{A}$ in the current set $S_i$ by every possible monotone two-cut of $\mathcal{A}$.
-This is done by enumerating the two-cuts with {\scshape Two-Cuts}, the way it is described in \autoref{sec:twocutting}.
-The cutting, done with {\scshape Cut-Polyomino}, results in the two sub-polyominoes $\mathcal{A}_1$ and $\mathcal{A}_2$.
-
-$S_\textit{new}$ contains the same polyominoes as $S_i$ with the exception that one occurrence of $\mathcal{A}$ is removed and replaced by one occurrence of $\mathcal{A}_1$ and $\mathcal{A}_2$.
-Each $S_\textit{new}$ is the result of cutting one polyomino of $S_i$ at a specific two-cut $t_c$.
-If $S_\textit{new}$ is not already contained in $V$, it can be added, which also queues it for future iterations of the breadth-first-search.
-
-No matter if $S_\textit{new}$ is contained in $V$ or not, an edge going from $S_\textit{new}$ to $S_i$ with $t_c$ as the weight is added to the edges $E$.
-This allows multiple edges, as seen in \autoref{fig:tcsa_multiedge}, and multiple outgoing edges to different nodes, which can be observed in \autoref{fig:tcsa}, where different connections in $S_4$ lead to $S_1$ or $S_2$.
-
-Each two-cut applied to a polyomino set increases its amount of polyominoes by one.
-Let $n$ be the size of $\mathcal{T}$, then $n-1$ two-cuts applied to $S_\mathcal{T}$ will produce a polyomino set $S_\textit{trivial}$ containing $n$ trivial polyominoes, as it is the case for $S_7$ in \autoref{fig:tcsa}.
-All $S_i$ will inevitably end up in this situation and the algorithm will return $(V,E)$, since trivial polyominoes cannot be cut anymore.
-
-This implies that no matter which edges are chosen along the way, $n-1$ edges need to be traversed to get from $S_\textit{trivial}$ to $S_\mathcal{T}$.
-We describe this attribute by giving the TCSA graph a depth of $n$.
-The depth is also illustrated in \autoref{fig:tcsa} and the numbering of the nodes matches the order they were added by \autoref{algo:build_tcsa}.
 
 \begin{figure}
 	\centering
@@ -160,7 +164,7 @@ The Stirling numbers of second kind
 \end{equation}
 describe the possibilities of sorting a set with $n$ objects into $k$ partitions \cite{jelliss1991}.
 In our case, $n$ is the size of $\mathcal{T}$ and the number of partitions $k$ is the number of polyominoes the $n$ cubes belong to.
-Different layers of depth account for different $\bracenom{n}{k}$.´
+Different layers of depth account for different $\bracenom{n}{k}$.
 $S_\mathcal{T}$ is the only polyomino set with $k=1$, so $\bracenom{n}{1} = 1$.
 $S_\textit{trival}$ is the only set containing $k=n$ polyominoes, so $\bracenom{n}{n} = 1$.
 For the maximum number of nodes possible, all layers of the TCSA graph have to be summed up by
@@ -175,9 +179,9 @@ The growth of nodes and edges seems to be exponential, which is shown with fitte
 The mean-squared error of $0.9999$ for both functions was calculated with the python library scikit-learn\footnote{scikit-learn: \url{https://scikit-learn.org/}}.
 
 Our implementation of $G_{\textit{TCSA}}(\mathcal{T})$ stores nodes in a hash-table.
-Accessing nodes and connected edges, or checking if a polyomino set is contained in $G_{\textit{TCSA}}(\mathcal{T})$, can be done in  $\mathcal{O}(1)$.
-The creation of $G_{\textit{TCSA}}(\mathcal{T})$ becomes more complex for increasing numbers of $n$, but it provides an easily accessible building instruction that drastically cuts the number of unnecessary local plans that are simulated.
-Lowering simulation time makes a complex data-structure like the TCSA graph worth the extra effort.
+Accessing nodes and connected edges, or checking if a polyomino set is contained in $G_{\textit{TCSA}}(\mathcal{T})$, can be done very efficiently.
+The creation of $G_{\textit{TCSA}}(\mathcal{T})$ becomes more complex for increasing numbers of $n$, but it provides an easily accessible building instruction that drastically cuts the number of unnecessary local plans simulated.
+Lowering simulation time makes a complex data structure like the TCSA graph worth the extra effort.
 
 \newpage
 
@@ -187,7 +191,7 @@ Lowering simulation time makes a complex data-structure like the TCSA graph wort
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{figures/connect_options.pdf}
-	\caption[Example of connection options for one two-cut-sub-assembly edge]{All connection options when connecting a red cube at the west of a blue cube to get from $S_7$ to $S_4$. Developing local plans for different polyomino pairs leads to different goal configurations. $(\mathcal{A}_1,\mathcal{B}_1)$ and $(\mathcal{A}_2,\mathcal{B}_1)$ lead to configurations with the desired polyomino set $S_4$, but $(\mathcal{A}_2,\mathcal{B}_2)$ leads directly to $S_2$. All of these sets can be found in the TCSA graph of \autoref{fig:tcsa}. The goal configuration of $(\mathcal{A}_1, \mathcal{B}_2)$ holds the set $S_\text{x}$, which cannot be found in \autoref{fig:tcsa}. This set could not be used for further global planning. For better readability, we used normal instead of calligraphic letters for polyominoes in this figure ($\mathcal{A}_1 = \text{A1}$).}
+	\caption[Example of connection options for one two-cut-sub-assembly edge]{All connection options when connecting a red cube at the west edge of a blue cube to get from $S_7$ to $S_4$. Developing local plans for different polyomino pairs leads to different goal configurations. $(\mathcal{A}_1,\mathcal{B}_1)$ and $(\mathcal{A}_2,\mathcal{B}_1)$ lead to configurations with the desired polyomino set $S_4$, but $(\mathcal{A}_2,\mathcal{B}_2)$ leads directly to $S_2$. All of these sets can be found in the TCSA graph of \autoref{fig:tcsa}. The goal configuration of $(\mathcal{A}_1, \mathcal{B}_2)$ holds the set $S_\text{x}$, which cannot be found in \autoref{fig:tcsa}. This set could not be used for further global planning. For better readability, we used normal instead of calligraphic letters for polyominoes in this figure ($\mathcal{A}_1 = \text{A1}$).}
 	\label{fig:connect_options}
 \end{figure}
 
@@ -268,7 +272,7 @@ o_2 & \text{otherwise}
 \label{sec:local_in_global}
 
 The local planner develops plans for connections chosen from the different connection options presented in \autoref{sec:connect_options}.
-For that, it needs only one edge-pair out of the path of connections stored in the weight of a TSCA edge.´
+For that, it needs only one edge-pair out of the connections stored in the weight of a TSCA edge.
 Whenever a path consists of both north-south and east-west connections, a north-south connection is preferred.
 This is done to perform offset-aligning instead of straight-aligning (\autoref{sec:align}) for an easier slide-in.
 Besides that, the choice of connection is irrelevant, since all connections in the path lead to the same outcome.
@@ -373,7 +377,7 @@ If $P$ is empty, the current configuration is $g_\textit{init}$.
 This means that there is no previously visited configuration the algorithm can fall back to.
 In that case the algorithm states failure for assembling $\mathcal{T}$.
 
-Before calling \autoref{algo:global_algo} it is necessary to check if $\mathcal{T} \in S(g_\textit{init})$ to state early success.
+Before calling \autoref{algo:global_algo}, it is necessary to check if $\mathcal{T} \in S(g_\textit{init})$ to state early success.
 Furthermore, a timeout failure is added to \autoref{algo:global_algo} in case planning takes too long.
  
 \subsection{Complexity}
@@ -393,10 +397,10 @@ In the same manner as with optimality, the local planner prevents the completene
 Assuming completeness of the local planner, the global planner could be certain of the existence or non-existence of a solution for assembling $\mathcal{T}$.
 \autoref{algo:global_algo} will always return success or failure after simulating a finite amount of local plans.
 This is due to the finite number of connection options per configuration and the depth $n$ of the TCSA graph.
-Each local plan in the plan stack is certain to connect at least two polyominoes, even if it is a failure due to a wrong connections or an impossible slide-in.
+Each local plan in the plan stack is certain to connect at least two polyominoes, even if it is a failure due to a wrong connection or an impossible slide-in.
 After $n-1$ local plans the workspace contains only one $n$-size polyomino.
 This polyomino is not necessarily $\mathcal{T}$, but no further connections can be made, which makes the algorithm fall back to the last configuration.
-Together with the finite number of options per configuration, the algorithm will eventually explore all paths of connection options that are possible and can therefore verify the existence or non existence of a solution.
+Together with the finite number of options per configuration, the algorithm will eventually explore all paths of connection options that are possible and can therefore verify the existence or non-existence of a solution.
 Remember that this completeness is based purely on the strong assumption of a complete local planer, which is challenging to achieve in the special Euclidean group.
 
 \paragraph{Efficiency}
@@ -420,7 +424,7 @@ By taking the average number of connection options per TCSA node $o_\mu$, we can
 For $n = 10$ and $o_\mu = 20$ this results in $\#\textit{local}_\textit{worst} \approx 5 \cdot 10^{11}$.
 
 It is impossible to simulate that many local plans in a reasonable time.
-For that reason a timeout failure was added.
+For that reason the timeout failure was added.
 \autoref{chap:results} will provide experimental data on the number of $\#\textit{local}$ and what percentage of global plans time out.
 The number of configurations explored $\#\textit{config}$ is also examined in the experiments to better portray the number of dead ends during planning.
 
