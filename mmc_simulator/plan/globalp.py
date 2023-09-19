@@ -214,8 +214,8 @@ class TwoCutSubassemblyGraph:
         return string
 
 
-DEBUG = False
-PLAY_LOCALS = False
+DEBUG = True
+INCLUDE_ALL_LOCALS = True
 TIMEOUT = 600
 
 def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: OptionSorting=OptionSorting.MIN_DIST) -> GlobalPlan:
@@ -236,6 +236,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: Optio
     config_options = {}
     config = initial
     nlocalPlans = 0
+    allLocals = []
     t0 = time.monotonic()
     while True:
         if DEBUG: 
@@ -249,7 +250,11 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: Optio
         # Plan finished when we assembled the target
         if target in config.getPolyominoes():
             if DEBUG: print(f"Target successfully assembled with {len(planStack)} local plans!\n{len(config_options)} configs, {nlocalPlans} local plans in total.\n")
-            return GlobalPlan(target, initial, planStack, config, PlanState.SUCCESS, len(config_options),
+            if INCLUDE_ALL_LOCALS:
+                locals = allLocals
+            else:
+                locals = planStack
+            return GlobalPlan(target, initial, locals, config, PlanState.SUCCESS, len(config_options),
                               nlocalPlans, tcsaGraph.nodeCount())
         # get possible conection options for this config
         if config in config_options:
@@ -265,7 +270,7 @@ def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: Optio
             if DEBUG: print(f"{optPossible} connections possible. Starting local planner for {con}.")
             plan = local.planCubeConnect(config, con.cubeA, con.cubeB, con.edgeB, tcsaGraph.getAllCollections())
             nlocalPlans += 1
-            if PLAY_LOCALS: plan.execute()
+            allLocals.append(plan)
             if not plan.state in globalFails and plan.goal != None:
                 valid = True
                 config = plan.goal

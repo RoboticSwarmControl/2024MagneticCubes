@@ -9,7 +9,7 @@ from sklearn.metrics import r2_score
 from experiment import *
 from com.state import Cube
 
-FIGURE_DIR = "../thesis/figures/plots"
+FIGURE_DIR = "../thesis/figures/plots_compact"
 
 AXIS_LABELS = {
     "targetSize": "target polyomino size $n$",
@@ -367,7 +367,7 @@ def barplot_multipleSortings(expName, xaxis, yaxis, outFile=None):
         plt.show()
     else:
         figure = plt.gcf()
-        figure.set_size_inches(16*1.15 ,9*1.15)
+        figure.set_size_inches(16*1.1 ,3.5*1.1)
         plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
     plt.close()
 
@@ -401,7 +401,7 @@ def boxplot_multipleSortings(expName, xaxis, yaxis, outFile=None, showFliers=Tru
         plt.show()
     else:
         figure = plt.gcf()
-        figure.set_size_inches(16, 9)
+        figure.set_size_inches(16, 5)
         plt.savefig(os.path.join(FIGURE_DIR, outFile), bbox_inches='tight') 
     plt.close()
 
@@ -472,10 +472,10 @@ def scatterplot_multipleSortings(expName, xaxis, yaxis, outFile=None, onlySucces
 def createFigures():
     #TAFS
     boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", "AFN_time.pdf", onlySuccess=True)
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "cost", "AFN_cost.pdf", onlySuccess=True, showFliers=False)
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nlocal", "AFN_nlocal.pdf", onlySuccess=True, showFliers=False)
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nconfig", "AFN_nconfig.pdf", onlySuccess=True, showFliers=False)
-    boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "localsToGoal", "AFN_ltg.pdf", onlySuccess=True)
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "cost", "AFN_cost.pdf", onlySuccess=True, showFliers=False)
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nlocal", "AFN_nlocal.pdf", onlySuccess=True, showFliers=False)
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "nconfig", "AFN_nconfig.pdf", onlySuccess=True, showFliers=False)
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "localsToGoal", "AFN_ltg.pdf", onlySuccess=True)
     barplot_multipleSortings("TAFS-experiments-2", "targetSize", "timeout", "AFN_timeout.pdf")
     #AFTS
     boxplot_multipleSortings("AFTS-experiments-cb", "targetShape", "time", "AFTS_cb_time.pdf", onlySuccess=True)
@@ -483,15 +483,15 @@ def createFigures():
     boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "time", "AFTS_sp_time.pdf", onlySuccess=True)
     barplot_multipleSortings("AFTS-experiments-sp", "targetShape", "timeout", "AFTS_sp_timeout.pdf")
     #AFBS
-    boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", "AFBS_time.pdf", onlySuccess=True)  
-    barplot_multipleSortings("AFBS-experiments", "boardSize", "timeout", "AFBS_timeout.pdf")
-    boxplot_multipleSortings("AFBS-experiments", "boardSize", "cost", "AFBS_cost.pdf", onlySuccess=True, showFliers=False)
+    #boxplot_multipleSortings("AFBS-experiments", "boardSize", "time", "AFBS_time.pdf", onlySuccess=True)  
+    #barplot_multipleSortings("AFBS-experiments", "boardSize", "timeout", "AFBS_timeout.pdf")
+    #boxplot_multipleSortings("AFBS-experiments", "boardSize", "cost", "AFBS_cost.pdf", onlySuccess=True, showFliers=False)
     #AFNR
-    boxplot_multipleSortings("AFNR-experiments", "targetNred", "time", "AFNR_time.pdf", onlySuccess=True, showFliers=False)
-    barplot_multipleSortings("AFNR-experiments", "targetNred", "timeout", "AFNR_timeout.pdf")
+    #boxplot_multipleSortings("AFNR-experiments", "targetNred", "time", "AFNR_time.pdf", onlySuccess=True, showFliers=False)
+    #barplot_multipleSortings("AFNR-experiments", "targetNred", "timeout", "AFNR_timeout.pdf")
     #AR
-    stripplot_multipleSortings("AR-experiments", "seed", "time", "AR_time.pdf", onlySuccess=True)
-    stripplot_multipleSortings("AR-experiments", "seed", "cost", "AR_cost.pdf", onlySuccess=True)
+    #stripplot_multipleSortings("AR-experiments", "seed", "time", "AR_time.pdf", onlySuccess=True)
+    #stripplot_multipleSortings("AR-experiments", "seed", "cost", "AR_cost.pdf", onlySuccess=True)
 
 
 def main():
@@ -509,12 +509,12 @@ def main():
     #boxplot_multipleSortings("AFTS-experiments-sp", "targetShape", "cost", onlySuccess=True)
     #stripplot_multipleSortings("AR-sequential", "seed", "time", onlySuccess=True)
     #stripplot_multipleSortings("AR-sequential", "seed", "cost", onlySuccess=True)
-    boxplot_parSeqCompare()
+    #boxplot_multipleSortings("TAFS-experiments-2", "targetSize", "time", onlySuccess=False)
     #boxplot_multipleSortings("AR-experiments", "seed", "time", onlySuccess=True)
     #boxplot_multipleSortings("AR-experiments", "seed", "cost", onlySuccess=True)
     #scatterplot_multipleSortings("TAFS-experiments-2", "ntcsa", "cost", onlySuccess=True)
     #---Create Figures---
-    #createFigures()
+    createFigures()
 
 if __name__ == "__main__":
     main()
