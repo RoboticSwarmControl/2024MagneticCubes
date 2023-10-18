@@ -215,7 +215,7 @@ class TwoCutSubassemblyGraph:
 
 
 DEBUG = True
-INCLUDE_ALL_LOCALS = True
+INCLUDE_ALL_LOCALS = False
 TIMEOUT = 600
 
 def planTargetAssembly(initial: Configuration, target: Polyomino, sorting: OptionSorting=OptionSorting.MIN_DIST) -> GlobalPlan:
