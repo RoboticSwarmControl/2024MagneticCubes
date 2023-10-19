@@ -10,7 +10,6 @@ from com.motion import PivotWalk, Rotation
 from sim.simulation import Simulation
 
 def mmc_video():
-    sim = Simulation()
     # initial cubes
     cubes = {
             Cube(1): (17 *Cube.RAD, 1.3 * Cube.RAD),
@@ -27,8 +26,8 @@ def mmc_video():
         motions.append(PivotWalk(PivotWalk.LEFT, math.radians(15)))
     # sequence like video
     config = Configuration((22 * Cube.RAD, 22 * Cube.RAD), math.radians(90), cubes)
+    sim = Simulation()
     sim.loadConfig(config)
-    sim.start()
     for motion in motions:
         sim.executeMotion(motion)
 

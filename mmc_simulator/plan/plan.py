@@ -99,7 +99,7 @@ class LocalPlan(Plan):
         if self.connection != None:
             sim.renderer.markedCubes.add(self.connection.cubeA)
             sim.renderer.markedCubes.add(self.connection.cubeB)
-        executeMotions(sim, self.actions)
+        sim.executeMotions(self.actions)
         upd = sim.update
         time.sleep(1)
         sim.terminate()
@@ -114,7 +114,7 @@ class LocalPlan(Plan):
         else:
             sim = Simulation(False, False)
             sim.loadConfig(self.initial)
-            executeMotions(sim, self.actions)
+            sim.executeMotions(self.actions)
             save = sim.saveConfig()
         polyB = save.getPolyominoes().getForCube(self.connection.cubeB)
         return bool(polyB.getConnectedAt(self.connection.cubeB, self.connection.edgeB) != self.connection.cubeA) ^ bool(self.state == PlanState.SUCCESS)
@@ -143,7 +143,7 @@ class GlobalPlan(Plan):
             if plan.connection != None:
                 sim.renderer.markedCubes.add(plan.connection.cubeA)
                 sim.renderer.markedCubes.add(plan.connection.cubeB)
-            executeMotions(sim, plan.actions)
+            sim.executeMotions(plan.actions)
             if plan.connection != None:
                 sim.renderer.markedCubes.clear()
         upd = sim.update
@@ -167,21 +167,5 @@ def singleUpdate(config: Configuration) -> Configuration:
     """
     sim = Simulation(False, False)
     sim.loadConfig(config)
-    sim.start()
     sim.executeMotion(Idle(1))
     return sim.terminate()
-
-def executeMotions(sim: Simulation, motions: list):
-    """
-    Starts sim, executes motions and stops sim.
-    This happens in a way which tries to prevent any zero updates.
-    Nevertheless, while stating and stopping one zero update each can occur.
-    """
-    if len(motions) == 0:
-        return
-    last = motions[len(motions) - 1]
-    for i in range(len(motions)):
-        sim.executeMotion_nowait(motions[i])
-    sim.start()
-    last.executed.wait()
-    sim.stop()

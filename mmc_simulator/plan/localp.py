@@ -126,7 +126,7 @@ def __alignWalkRealign(data: tuple) -> LocalPlan:
     while True:
         # aligne the cubes.
         rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide)
-        executeMotions(sim, [rotation])
+        sim.executeMotion(rotation)
         if DEBUG: print(rotation)
         plan.actions.append(rotation)
         config = sim.saveConfig()
@@ -139,7 +139,7 @@ def __alignWalkRealign(data: tuple) -> LocalPlan:
         if distAB < CRITICAL_DISTANCE and wait:
             # if in critical distance wait short time
             idle = Idle(IDLE_AMOUNT)
-            executeMotions(sim, [idle])
+            sim.executeMotion(idle)
             if DEBUG: print(idle)
             plan.actions.append(idle)
             config = sim.saveConfig()
@@ -149,7 +149,7 @@ def __alignWalkRealign(data: tuple) -> LocalPlan:
             pA0 = config.getPosition(cubeA)
             pB0 = config.getPosition(cubeB)
             pWalks = __walkDynamic(config, cubeA, cubeB, direction)
-            executeMotions(sim, pWalks)
+            sim.executeMotions(pWalks)
             if DEBUG: print(f"{len(pWalks)} x {pWalks[0]}")
             plan.actions.extend(pWalks)
             config = sim.saveConfig()
@@ -169,7 +169,7 @@ def __alignWalkRealign(data: tuple) -> LocalPlan:
         if stuckTimes >= STUCK_TIMES_MAX:
             # force a straight align
             rotation = __alignCubes(config, cubeA, cubeB, edgeB, slide, True)
-            executeMotions(sim, [rotation])
+            sim.executeMotion(rotation)
             if DEBUG: print(rotation)
             plan.actions.append(rotation)
             config = sim.saveConfig()
@@ -177,7 +177,7 @@ def __alignWalkRealign(data: tuple) -> LocalPlan:
             distAB = config.getPosition(cubeA).get_distance(config.getPosition(cubeB))
             while True:
                 idle = Idle(IDLE_STUCK_AMOUNT)
-                executeMotions(sim, [idle])
+                sim.executeMotion(idle)
                 if DEBUG: print(f"{idle} because stuck.")
                 plan.actions.append(idle)
                 config = sim.saveConfig()

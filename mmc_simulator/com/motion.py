@@ -20,8 +20,8 @@ class Motion:
     Abstract super class. All motions have an executed event and a stepSequence.
     """
 
-    def __init__(self):
-        self.executed = Event()
+    def __init__(self) -> None:
+        pass
 
     def stepSequence(self, stepTime, longestChain):
         return [Step()]
@@ -31,12 +31,10 @@ class Motion:
     
     def __getstate__(self):
         state = self.__dict__.copy()
-        del state['executed']
         return state
     
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self.executed = Event()
 
 class PivotWalk(Motion):
     """
@@ -63,7 +61,7 @@ class PivotWalk(Motion):
         steps = []
         pivotRotationSeq = Rotation(self.direction * self.pivotAng).stepSequence(stepTime, longestChain)
         pivotRotationSeqInv = Rotation(-2 * self.direction * self.pivotAng).stepSequence(stepTime, longestChain)
-        #Assamble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
+        #Assemble step-sequence for pivot-walking-step zeros are added to let pymunk level of after rotation
         steps.append(Step(0, Tilt.SOUTH_DOWN))
         steps.extend(pivotRotationSeq)
         steps.append(Step(0, Tilt.NORTH_DOWN))
@@ -139,7 +137,7 @@ class Idle(Motion):
     """
 
     def __init__(self, updates):
-        self.executed = Event()
+        super().__init__()
         self.updates = updates
 
     def __str__(self):

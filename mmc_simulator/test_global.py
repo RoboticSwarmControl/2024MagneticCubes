@@ -32,5 +32,5 @@ def customTargetAssembly(seed, target: Polyomino, boardSize, sorting: OptionSort
         plan.execute()
 
 if __name__ == "__main__":
-    #customTargetAssembly(15, factory.threeByThreeCB(), (1000,1000), OptionSorting.MIN_DIST)
-    customTargetAssembly(44, factory.fourCube_LShape(), (400,400), OptionSorting.MIN_DIST)
+    customTargetAssembly(15, factory.threeByThreeCB(), (1000,1000), OptionSorting.MIN_DIST)
+    #customTargetAssembly(44, factory.fourCube_LShape(), (400,400), OptionSorting.MIN_DIST)
