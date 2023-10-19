@@ -1,6 +1,0 @@
-seed: 0 size: 4 others: 2:
-    wierd max_iter failure should be invalid_poly or connect failure
-    option for planner that prevents connection to related cubes polys
-
-seed: 8 size: 4 others: 2:
-    replay ends up with completely different polys... baaaad

@@ -1,3 +1,0 @@
-
-seed=17, samples=1, ncubes=10:
-    really bad examples for chasing around

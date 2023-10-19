@@ -1,9 +1,0 @@
-Fig 1. Runtime of the Breadth-first-search (BFS) solver on the set of small instances by number of tiles.
-a) Runtime distributions grouped by number of tiles as violin plots.
-b) Fraction of terminated instances by number of tiles.
-All experiments were conducted with a 600s timeout per instance.
-
-Figure 1 shows the runtime results and success rate for the naive breadth-first-search solver
-on instances with a small number of tiles. Note that the performance decreases sharply with an
-increased number of tiles. At 7 tiles almost all instances time out.
-Furthermore, a majority of the solved instances were solved long before the timeout.
