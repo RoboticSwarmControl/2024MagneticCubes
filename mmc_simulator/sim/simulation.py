@@ -17,6 +17,17 @@ from sim.rendering import Renderer
 
 DEBUG = False
 
+KEY_BINDINGS = {"pivotwalk right": "W",
+                "rotate counterclockwise": "A",
+                "pivotwalk left": "S",
+                "rotate clockwise": "D",
+                "change magnetic field elevation": "T",
+                "increase simulation speed": "X",
+                "decrease simulation speed": "Y",
+                "clear workspace": "C",
+                "place red cube": "MOUSE_LEFT",
+                "place blue cube": "MOUSE_RIGHT"
+                }
 
 class Simulation:
     """
