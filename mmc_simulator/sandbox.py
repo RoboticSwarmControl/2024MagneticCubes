@@ -1,7 +1,8 @@
 """
-Sandbox mode for mmc's..
+In the sandbox mode you can interact with mmc's via keyboard inputs.
+Keybindings will be printed in the console.
 
-@author: Aaron T Becker, Kjell Keune
+@author: Kjell Keune
 """
 import argparse
 from sim.simulation import Simulation, KEY_BINDINGS

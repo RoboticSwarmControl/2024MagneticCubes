@@ -1,3 +1,12 @@
+"""
+You can call a desired experiment with its parameters in the `main()` method.
+
+When executing this script you can define an output folder with `python3 experiment.py -o yourOutputFolder`
+The experiment data will be stored in `results/yourOutputFolder`.
+If the output folder already exists, new instances will be added and existing ones will be skipped. 
+
+@author: Kjell Keune
+"""
 import json
 import math
 import os
@@ -174,7 +183,12 @@ def randomTargetAssembly(path, seed, ncubes, nred, boardSize, sorting, lineVert 
         success = False
     writeData(path, PlanData(seed, success, dt, plan.cost(), plan.nconfig, plan.nlocal, plan.ntcsa, len(plan.actions)))
 
+
 def assemblyForTargetSize(path, startSeed, samplesPerSize, startSize, endSize, optionSortings: list):
+    """
+    Experiment for assembling random polyominoes with different target sizes.
+    `samplesPerSize` instances will be solved for each target size from `startSize` to `endSize` and each option sorting.
+    """
     boardSize = (1000,1000)
     assemblies = 0
     skipped = 0
@@ -200,6 +214,10 @@ def assemblyForTargetSize(path, startSeed, samplesPerSize, startSize, endSize, o
 
 
 def assemblyForTargetShape(path, startSeed, samplesPerSize, shapes: list, optionSortings: list):
+    """
+    Experiment for assembling specific target shapes.
+    `samplesPerSize` instances will be solved for each shape and each option sorting.
+    """
     boardSize = (1000,1000)
     assemblies = 0
     skipped = 0
@@ -227,6 +245,10 @@ def assemblyForTargetShape(path, startSeed, samplesPerSize, shapes: list, option
 
 
 def assemblyForBoardSize(path, startSeed, samplesPerSize, boardSizes: list, optionSortings: list):
+    """
+    Experiment for assembling random polyominoes in different workspace sizes.
+    `samplesPerSize` instances will be solved for each board size and each option sorting.
+    """
     ncubes = 9
     nred = math.floor(ncubes / 2)
     assemblies = 0
@@ -252,6 +274,10 @@ def assemblyForBoardSize(path, startSeed, samplesPerSize, boardSizes: list, opti
 
 
 def assemblyForNred(path, startSeed, samplesPerSize, startNred, endNred, optionSortings: list):
+    """
+    Experiment for assembling random vertical line-polyominoes with different numbers of red-cubes.
+    `samplesPerSize` instances will be solved for each number of red cubes from `startNred` to `endNred` and each option sorting.
+    """
     boardSize = (1000,1000)
     ncubes = 10
     assemblies = 0
@@ -276,7 +302,12 @@ def assemblyForNred(path, startSeed, samplesPerSize, startNred, endNred, optionS
     print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
 
 
-def assemblyReliability(path, seeds, samples, shape, optionSortings: list):
+def assemblyReliability(path, seeds: list, samples, shape, optionSortings: list):
+    """
+    Experiment to test reliability.
+    Each instance seed will be solved `samples` times for each option sorting.
+    The target shape stays the same for all instances.
+    """
     boardSize = (1000,1000)
     target = SHAPES[shape]
     ncubes = target.size()
@@ -300,7 +331,22 @@ def assemblyReliability(path, seeds, samples, shape, optionSortings: list):
     print(f"Submitted {assemblies - skipped}/{assemblies}.\nSkipped {skipped}.")
 
 
-def main():
+def main(path):
+    """
+    Call the experiment you want to execute here.
+    When working with slurminade, the work will be automatically distributed on the cluster.
+    Otherwise your local machine will do the calculations.
+    `path` is the folder where the experiment data is stored, which will be located in `../results`.
+    """
+    assemblyForTargetSize(path, 0, 2, 5, 8, OptionSorting.list())
+    #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
+    #assemblyForTargetShape(path, 100, 100, ["O", "I", "H", "Plus"], OptionSorting.list())
+    #assemblyForNred(path, 100, 100, 0, 5, OptionSorting.list())
+    #assemblyReliability(path, [100], 100, "3x3", OptionSorting.list())
+    #TCSA_analysis(path, 0, 200, 5, 12)
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", type=str, help="The name of the output directory. If not specified a new one is created.")
     args = parser.parse_args()
@@ -311,14 +357,4 @@ def main():
         path = os.path.join(RESULT_DIR, args.o)
     if not os.path.exists(path):
         os.mkdir(path)
-    # Put the experiments to execute here
-    #assemblyForTargetSize(path, 100, 150, 12, 12, OptionSorting.list())
-    #assemblyForBoardSize(path, 100, 100, BOARDSIZES, [OptionSorting.GROW_SMALLEST])
-    #assemblyForTargetShape(path, 100, 100, ["O", "I", "H", "Plus"], OptionSorting.list())
-    #assemblyForNred(path, 100, 100, 0, 5, OptionSorting.list())
-    assemblyReliability(path, [100], 100, "3x3", OptionSorting.list())
-    #TCSA_analysis(path, 0, 200, 5, 12)
-
-
-if __name__ == "__main__":
-    main()
+    main(path)

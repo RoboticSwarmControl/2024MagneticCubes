@@ -26,6 +26,17 @@ In the sandbox mode you can interact with mmc's via keyboard inputs.
 Keybindings will be printed in the console. You can also find them in _mmc_simulator/sim/simulation.py_
 For running on mac execute _python3 sandbox.py --mac_.
 
-### example_control.py
+### examples.py
 
-This file contains documented examples on how to use the framework to write your own control programs using local and global planner. For all the top-level interfaces you will find documentation in the code.
+This file contains documented examples on how to use the framework to write your own control programs using local and global planner. For all the top-level interfaces you will also find documentation in the code.
+
+Call the example you like to run in the _main()_ method.
+
+### experiment.py
+
+This file contains the experiments that were conducted with our global planner.
+You can call a desired experiment with its parameters in the _main()_ method.
+
+When executing this script you can define an output folder with _python3 experiment.py -o yourOutputFolder_.
+The experiment data will be stored in _results/yourOutputFolder_.
+If the output folder already exists, new instances will be added and existing ones will be skipped. 

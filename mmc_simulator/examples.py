@@ -1,3 +1,9 @@
+"""
+Here you can find documented examples on how to use the framework to write your own control programs
+using local and global planner.
+
+@author: Kjell Keune
+"""
 import math
 from com.state import Configuration, Cube
 from com.motion import PivotWalk, Rotation
@@ -23,11 +29,11 @@ def mmc_video():
     config = Configuration((22 * Cube.RAD, 22 * Cube.RAD), math.radians(90), cubes)
     sim.loadConfig(config)
     sim.start()
-    sim.stop()
-    input()
-    sim.start()
     for motion in motions:
         sim.executeMotion(motion)
 
-if __name__ == "__main__":
+def main():
     mmc_video()
+
+if __name__ == "__main__":
+    main()
