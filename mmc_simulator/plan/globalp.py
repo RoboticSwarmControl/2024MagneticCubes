@@ -214,7 +214,7 @@ class TwoCutSubassemblyGraph:
         return string
 
 
-DEBUG = True
+DEBUG = False
 INCLUDE_ALL_LOCALS = False
 TIMEOUT = 600
 

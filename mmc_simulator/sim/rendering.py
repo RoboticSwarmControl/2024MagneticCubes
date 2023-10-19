@@ -62,8 +62,8 @@ class Renderer:
             shape = self.__stateHandler.getCubeShape(cube)
             self.__drawCube(cube, shape.body.position, shape.body.angle)
             # draw friction points
-            # if shape in self.__stateHandler.frictionpoints:
-            #     pygame.draw.circle(self.__window, Renderer.PURPLE, self.__stateHandler.frictionpoints[shape], 3)
+            if shape in self.__stateHandler.frictionpoints:
+                pygame.draw.circle(self.__window, Renderer.PURPLE, self.__stateHandler.frictionpoints[shape], 3)
         # draw user points and lines
         for point in self.pointsToDraw:
             pygame.draw.circle(self.__window, point[0], point[1], point[2])

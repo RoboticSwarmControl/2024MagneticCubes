@@ -175,7 +175,7 @@ def executeMotions(sim: Simulation, motions: list):
     """
     Starts sim, executes motions and stops sim.
     This happens in a way which tries to prevent any zero updates.
-    Neitherless while stating and stopping one zero update each can occure.
+    Nevertheless, while stating and stopping one zero update each can occur.
     """
     if len(motions) == 0:
         return

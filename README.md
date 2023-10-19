@@ -15,8 +15,8 @@ The simulator can be found in _mmc_simulator/_.
 
 ### Requirements
 
-* Python 3.x
-* Pygame 2.1.2 
+* python 3.x
+* pygame 2.1.2 
 * pymunk 6.4.0
 
 
@@ -25,6 +25,7 @@ The simulator can be found in _mmc_simulator/_.
 In the sandbox mode you can interact with mmc's via keyboard inputs.
 Keybindings will be printed in the console. You can also find them in _mmc_simulator/sim/simulation.py_
 For running on mac execute:
+
 _python3 sandbox.py --mac_
 
 ### examples.py
@@ -39,6 +40,7 @@ This file contains the experiments that were conducted with our global planner.
 You can call a desired experiment with its parameters in the _main()_ method.
 
 When executing this script you can define an output folder with:
+
 _python3 experiment.py -o yourOutputFolder_
 
 The experiment data will be stored in _results/yourOutputFolder_.
