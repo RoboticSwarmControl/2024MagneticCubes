@@ -69,25 +69,24 @@ class StateHandler:
     def __init__(self):
         self.space: pymunk.Space = None
 
+        self.magAngle = 0
+        self.magElevation = 0
         self.boardSize = StateHandler.DEFAULT_BOARDSIZE
+
         self.bounds = []
         self.cube_shapes = {}
         self.sensor_cube = {}
         self.cube_force = {}
 
-        self.magAngle = 0
-        self.magElevation = 0
-
         self.criticalCubePairs = []
         self.magConnect = {}
         self.magConnect_pre = {}
-        self.polyominoes = PolyCollection()
-
-        self.configToLoad = StateHandler.DEFAULT_CONFIG
-        self.updateLock = Lock()
+        self.polyominoes = PolyCollection() 
 
         self.timer = Timer()
         self.frictionpoints = {}
+
+        self.loadConfig(StateHandler.DEFAULT_CONFIG)
         # JOINTS
         # self.connectJoints = []
 
@@ -104,12 +103,25 @@ class StateHandler:
         return self.bounds
 
     def loadConfig(self, newConfig: Configuration):
+        t0 = time.time()
+        self.magAngle = newConfig.magAngle
+        self.magElevation = newConfig.magElevation
         self.boardSize = newConfig.boardSize
         self.polyominoes = PolyCollection(newConfig.getPolyominoes().getAll())
-        self.configToLoad = newConfig
+        # JOINTS
+        # self.__removeConnectJoints__()
+        # clear space
+        self.__resetSpace()
+        # add new objects to space
+        self.__addBoundaries()
+        for cube in newConfig.getCubes():
+            pos = newConfig.getPosition(cube)
+            ang = newConfig.getAngle(cube)
+            vel = newConfig.getVelocity(cube)
+            self.__addCube(cube, pos, ang, vel)
+        self.timer.addToTask("Load Configuration", time.time() - t0)
 
     def saveConfig(self) -> Configuration:
-        self.updateLock.acquire()
         t0 = time.time()
         cube_pos = {}
         cube_meta = {}
@@ -117,7 +129,6 @@ class StateHandler:
             cube_pos[cube] = shapes[0].body.position
             cube_meta[cube] = (shapes[0].body.angle, shapes[0].body.velocity)
         config = Configuration(self.boardSize, self.magAngle, cube_pos, cube_meta, self.polyominoes.getAll(), self.magElevation)
-        self.updateLock.release()
         self.timer.addToTask("Save Configuration", time.time() - t0)
         return config
 
@@ -130,10 +141,6 @@ class StateHandler:
             angChange: angular change (in radians)
             elevChange: elevation change
         """
-        self.updateLock.acquire()
-        # load new config if present
-        if not self.configToLoad == None:
-            self.__loadConfig__()
         # let pymunk update the space this also creates the magnetic connections
         t0 = time.time()
         self.space.step(dt)
@@ -145,7 +152,7 @@ class StateHandler:
         # apply magnet forces for cubes in critical-distance
         t0 = time.time()
         for cubei, cubej in self.criticalCubePairs:
-            self.__applyForceMagnets__(cubei, cubej)
+            self.__applyForceMagnets(cubei, cubej)
         self.timer.addToTask("Force Calculation", time.time() - t0)
         self.criticalCubePairs.clear()
         # detect polyominos based on the magnetic connections
@@ -161,14 +168,13 @@ class StateHandler:
         t0 = time.time()
         for poly in self.polyominoes.getAll():
             for cube in poly.getCubes():
-                self.__applyForceField__(cube)
-                self.__applyForceFriction__(cube, poly)
+                self.__applyForceField(cube)
+                self.__applyForceFriction(cube, poly)
                 self.magConnect[cube] = [None] * 4
                 self.cube_force[cube] = Vec2d(0,0)
         self.timer.addToTask("Force Calculation", time.time() - t0)
-        self.updateLock.release()
 
-    def __applyForceField__(self, cube: Cube):
+    def __applyForceField(self, cube: Cube):
         t0 = time.time()
         shape = self.getCubeShape(cube)
         ang = shape.body.angle
@@ -182,21 +188,21 @@ class StateHandler:
         #self.cube_force[cube] += -force
         self.timer.addToTask("Calculate Magnetic Field Forces", time.time() - t0)
 
-    def __sensorCollision__(self, arbiter: pymunk.Arbiter, space, data): 
+    def __sensorCollision(self, arbiter: pymunk.Arbiter, space, data): 
             cubei = self.sensor_cube[arbiter.shapes[0]]
             cubej = self.sensor_cube[arbiter.shapes[1]]
             #self.criticalCubePairs.append((cubei, cubej))
-            self.__applyForceMagnets__(cubei, cubej)
+            self.__applyForceMagnets(cubei, cubej)
             return False
 
-    def __applyForceMagnets__(self, cubei: Cube, cubej: Cube):
+    def __applyForceMagnets(self, cubei: Cube, cubej: Cube):
         t0 = time.time()
         shapei = self.getCubeShape(cubei)
         shapej = self.getCubeShape(cubej)
         angi = shapei.body.angle
         angj = shapej.body.angle
         # determine which pairs to consider
-        pairs = self.__magPairsMinDist__(cubei, cubej)
+        pairs = self.__magPairsMinDist(cubei, cubej)
         # calc magnetic force for the determined magnet pairs
         for i, j in pairs:
             magPosi = shapei.body.local_to_world(cubei.magnetPos[i])
@@ -210,12 +216,12 @@ class StateHandler:
             shapej.body.apply_force_at_world_point(fionj, magPosj)
             # Determine magnet connections
             if fionj.length >= StateHandler.CONNECTION_FORCE_MIN:
-                self.__connectMagnets__(cubei, Direction(i), cubej, Direction(j))
+                self.__connectMagnets(cubei, Direction(i), cubej, Direction(j))
             #self.cube_force[cubei] += -fionj
             #self.cube_force[cubej] += fionj
         self.timer.addToTask("Calculate Magnet Forces", time.time() - t0)
 
-    def __magPairMinDist__(self, cubei: Cube, cubej: Cube) -> list:
+    def __magPairMinDist(self, cubei: Cube, cubej: Cube) -> list:
         # determine the magnetpair with the smallest distance. Only one pair is returned
         shapei = self.getCubeShape(cubei)
         shapej = self.getCubeShape(cubej)
@@ -231,7 +237,7 @@ class StateHandler:
                     pair = (i,j)
         return [pair]
 
-    def __magPairsMinDist__(self, cubei: Cube, cubej: Cube) -> list:
+    def __magPairsMinDist(self, cubei: Cube, cubej: Cube) -> list:
         # determine the magnetpairs with the smallest distance. In total 4 pairs are returned
         pairs = []
         shapei = self.getCubeShape(cubei)
@@ -249,7 +255,7 @@ class StateHandler:
             pairs.append(pair)
         return pairs
 
-    def __magPairsAll__(self, cubei: Cube, cubej: Cube) -> list:
+    def __magPairsAll(self, cubei: Cube, cubej: Cube) -> list:
         # returns all magnetpairs. 16 in total
         pairs = []
         for i in range(4):
@@ -257,7 +263,7 @@ class StateHandler:
                 pairs.append((i,j))
         return pairs
 
-    def __connectMagnets__(self, cubei: Cube, edgei: Direction, cubej: Cube, edgej: Direction):
+    def __connectMagnets(self, cubei: Cube, edgei: Direction, cubej: Cube, edgej: Direction):
         # check if there already is a connection
         if cubej in self.magConnect[cubei]:
             return
@@ -273,7 +279,7 @@ class StateHandler:
         # JOINTS
         # self.__addConnectionJoint__(cubei, edgei, cubej, edgej)
 
-    def __applyForceFriction__(self, cube: Cube, poly: Polyomino):
+    def __applyForceFriction(self, cube: Cube, poly: Polyomino):
         t0 = time.time()
         shape = self.getCubeShape(cube)
         # calculate friction force without velocity yet
@@ -306,27 +312,7 @@ class StateHandler:
         shape.body.angular_velocity *= StateHandler.ANG_VEL_DAMP
         self.timer.addToTask("Calculate Friction Forces", time.time() - t0)
 
-    def __loadConfig__(self):
-        t0 = time.time()
-        # JOINTS
-        # self.__removeConnectJoints__()
-        # clear space
-        self.__resetSpace__()
-        # grab values from configToLoad
-        self.magAngle = self.configToLoad.magAngle
-        self.magElevation = self.configToLoad.magElevation
-        # add new objects to space
-        self.__addBoundaries__()
-        for cube in self.configToLoad.getCubes():
-            pos = self.configToLoad.getPosition(cube)
-            ang = self.configToLoad.getAngle(cube)
-            vel = self.configToLoad.getVelocity(cube)
-            self.__addCube__(cube, pos, ang, vel)
-        # reset the loading flag
-        self.configToLoad = None
-        self.timer.addToTask("Load Configuration", time.time() - t0)
-
-    def __resetSpace__(self):
+    def __resetSpace(self):
         # delete space and all dicts
         del self.space
         self.bounds.clear()
@@ -342,9 +328,9 @@ class StateHandler:
         # A value of 0.9 means that each body will lose 10% of its velocity per second. Defaults to 1. Like gravity, it can be overridden on a per body basis.
         cHandler = self.space.add_collision_handler(
             StateHandler.SENSOR_CTYPE, StateHandler.SENSOR_CTYPE)
-        cHandler.pre_solve = self.__sensorCollision__
+        cHandler.pre_solve = self.__sensorCollision
 
-    def __addCube__(self, cube: Cube, pos, ang, vel):
+    def __addCube(self, cube: Cube, pos, ang, vel):
         if cube in self.cube_shapes:
             return
         # create the cube body
@@ -369,7 +355,7 @@ class StateHandler:
         self.cube_force[cube] = Vec2d(0,0)
         self.sensor_cube[magSensor] = cube
 
-    def __addBoundaries__(self):
+    def __addBoundaries(self):
         r = StateHandler.BOUNDARIE_RAD
         w = self.boardSize[0] - StateHandler.BOUNDARIE_RAD / 4
         h = self.boardSize[1] - StateHandler.BOUNDARIE_RAD / 4

@@ -23,10 +23,7 @@ The simulator can be found in _mmc_simulator/_.
 ### sandbox.py
 
 In the sandbox mode you can interact with mmc's via keyboard inputs.
-Keybindings will be printed in the console. You can also find them in _mmc_simulator/sim/simulation.py_
-For running on mac execute:
-
-_python3 sandbox.py --mac_
+Keybindings will be printed in the console. You can also find them in _mmc_simulator/sim/simulation.py_.
 
 ### examples.py
 
@@ -37,7 +34,7 @@ Call the example you like to run in the _main()_ method.
 ### experiment.py
 
 This file contains the experiments that were conducted with our global planner.
-You can call a desired experiment with its parameters in the _main()_ method.
+You can setup a desired experiment with its parameters in the _main()_ method.
 
 When executing this script you can define an output folder with:
 
