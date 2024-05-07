@@ -8,10 +8,14 @@ The simulator allows closed-loop control algorithms for planning the connection 
 These developed sequences of movements, called local plans, will be used on a global scale to plan the assembly of specified target structures in a rectangular workspace with no internal obstacles.
 The assembly is done by generating a building instruction graph for a target structure that we traverse in a depth-first-search approach by applying local plans to current states of the workspace.
 
-A video showcasing our work can be found at https://www.youtube.com/watch?v=eGwR_XM3KJw.
-
 Our ICRA 2024 conference paper can also be found in this repository.
 For the full thesis head to _thesis/_.
+
+A video showcasing our work can be found here.
+
+[![Assembly Planning for Magnetic Modular Cubes ICRA 2024](https://img.youtube.com/vi/eGwR_XM3KJw/0.jpg)](https://www.youtube.com/watch?v=eGwR_XM3KJw)
+
+
 
 ## MMC Simulator
 
